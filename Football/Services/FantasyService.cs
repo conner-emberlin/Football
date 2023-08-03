@@ -62,12 +62,6 @@ namespace Football.Services
             return fantasyRepository.InsertFantasyPoints(fantasyPoints);
         }
 
-        public int FantasyRefresh(int season, string position)
-        {
-            FantasyRepository fantasyRepository = new();
-
-        }
-
         public List<int> GetPlayerIdsByFantasySeason(int season)
         {
             FantasyRepository fantasyRepository = new();
