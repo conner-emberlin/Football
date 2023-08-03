@@ -10,7 +10,7 @@ namespace Football.Api.Controllers
     public class FantasyController : ControllerBase
     {
         //POST refresh all fantasy results
-        [HttpGet("fantasy/refresh/{season}/{pos}")]
+        [HttpPost("fantasy/refresh/{season}/{pos}")]
         [ProducesResponseType(typeof(double), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public ActionResult<(int,int)> RefreshFantasyPoints(int playerId, int season)
