@@ -84,5 +84,18 @@ namespace Football.Repository
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new {season}).ToList();
         }
+
+        public (int,int) RefreshFantasyResults(FantasyPoints fantasyPoints)
+        {
+            SqlQueryService sql = new();
+            var deleteQuery = sql.DeleteFantasyPoints();
+            using var con = new SqlConnection(connection);
+            int removed = 0;
+            int added = 0;
+            removed += con.Execute(deleteQuery, new { fantasyPoints.PlayerId, fantasyPoints.Season });
+            added += InsertFantasyPoints(fantasyPoints);
+
+            return (removed, added);
+        }
     }
 }

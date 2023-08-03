@@ -100,5 +100,11 @@ namespace Football.Services
         {
             return $@"SELECT [PlayerId] from [dbo].FantasyPoints WHERE [Season] = @season";
         }
+
+        public string DeleteFantasyPoints()
+        {
+            return $@"DELETE FROM dbo.FantasyPoints WHERE [PlayerId] = @playerId AND [Season] = @season";
+        }
+
     }
 }
