@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Football.Models;
 using Football.Services;
 using MathNet.Numerics.LinearAlgebra;
-
+using Football.Api.Helpers;
 
 namespace Football.Api.Controllers
 {
@@ -17,20 +17,8 @@ namespace Football.Api.Controllers
         public ActionResult<Vector<double>> GetRegressionNormal(int season, int pos)
         {
             PerformRegressionService performRegressionService = new();
-            string position;
-            switch (pos)
-            {
-                case 1:
-                    position = "QB";
-                    break;
-                case 2:
-                    position = "RB";
-                    break;
-                case 3:
-                    position = "WR/TE";
-                    break;
-                default: return BadRequest("Bad Request");
-            }
+            ServiceHelper serviceHelper = new();
+            string position = serviceHelper.TransformPosition(pos);           
             return Ok(performRegressionService.PerformRegression(season, position));
         }
 
@@ -42,22 +30,8 @@ namespace Football.Api.Controllers
             RegressionModelService regressionModelService = new();
             PerformRegressionService performRegressionService = new();
             MatrixService matrixService = new();
-
-            string position;
-            
-            switch (pos)
-            {
-                case 1:
-                    position = "QB";
-                    break;
-                case 2:
-                    position = "RB";
-                    break;
-                case 3:
-                    position = "WR/TE";
-                    break;
-                default: return BadRequest("Bad Request");
-            }
+            ServiceHelper serviceHelper = new();
+            string position = serviceHelper.TransformPosition(pos);
             var fantasyResults = regressionModelService.PopulateFantasyResults(season, position);
             var coefficients = performRegressionService.PerformRegression(season, position);
             var actual = matrixService.PopulateDependentVector(fantasyResults);
