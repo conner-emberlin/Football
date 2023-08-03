@@ -59,6 +59,6 @@ namespace Football.Services
         public Vector<double> CalculatError(Vector<double> actual, Vector<double> coefficients, Matrix<double> model)
         {
             return actual - model * coefficients;
-        }
+        }        
     }
 }

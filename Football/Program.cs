@@ -79,6 +79,9 @@ namespace DataUpload
             System.Console.WriteLine(performRegressionService.CalculatError(actual, coefficients, model));
             System.Console.WriteLine(coefficients);
             */
+
+            PredictionService pred = new();
+            pred.SeasonFantasyPointsPrediction(920, "QB");
             return 1;
         }
     }

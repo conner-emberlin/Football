@@ -97,5 +97,13 @@ namespace Football.Repository
 
             return (removed, added);
         }
+
+        public List<int> GetActiveSeasons(int playerId)
+        {
+            SqlQueryService sql = new();
+            var query = sql.GetSeasons();
+            using var con = new SqlConnection(connection);
+            return con.Query<int>(query, new {playerId}).ToList();
+        }
     }
 }

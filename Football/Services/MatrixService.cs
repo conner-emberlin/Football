@@ -86,6 +86,22 @@ namespace Football.Services
             }
             return vec;
         }
+
+        public Vector<double> TransformQbModel(RegressionModelQB model)
+        {
+            var columnCount = typeof(RegressionModelQB).GetProperties().Length - 1;
+            var vec = Vector<double>.Build.Dense(columnCount);
+            vec[0] = 1;
+            vec[1] = model.PassingAttemptsPerGame;
+            vec[2] = model.PassingYardsPerGame;
+            vec[3] = model.PassingTouchdownsPerGame;
+            vec[4] = model.RushingAttemptsPerGame;
+            vec[5] = model.RushingYardsPerGame;
+            vec[6] = model.RushingTouchdownsPerGame;
+            vec[7] = model.SacksPerGame;
+            vec[8] = model.SackYardsPerGame;
+            return vec;
+        }
         private Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount)
         {
             var matrix = Matrix<double>.Build.Dense(rowCount, columnCount);

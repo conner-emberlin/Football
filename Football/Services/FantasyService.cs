@@ -85,5 +85,11 @@ namespace Football.Services
             FantasyRepository fantasyRepository = new();
             return fantasyRepository.RefreshFantasyResults(fantasyPoints);
         }
+
+        public List<int> GetActiveSeasons(int playerId)
+        {
+            FantasyRepository fantasyRepository = new();
+            return fantasyRepository.GetActiveSeasons(playerId);
+        }
     }
 }

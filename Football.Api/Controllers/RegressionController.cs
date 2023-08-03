@@ -11,7 +11,7 @@ namespace Football.Api.Controllers
     [ApiController]
     public class RegressionController : ControllerBase
     {
-        [HttpGet("regression/{season}/{pos}")]
+        [HttpGet("{season}/{pos}")]
         [ProducesResponseType(typeof(Vector<double>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public ActionResult<Vector<double>> GetRegressionNormal(int season, int pos)
@@ -22,7 +22,7 @@ namespace Football.Api.Controllers
             return Ok(performRegressionService.PerformRegression(season, position));
         }
 
-        [HttpGet("regression/mse/{season}/{pos}")]
+        [HttpGet("mse/{season}/{pos}")]
         [ProducesResponseType(typeof(double), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public ActionResult<double> GetMSE(int season, int pos)
