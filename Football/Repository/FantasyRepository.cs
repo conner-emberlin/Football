@@ -113,5 +113,25 @@ namespace Football.Repository
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new {playerId}).ToList();
         }
+
+        public double GetAverageTotalGames(int playerId, string position)
+        {
+            SqlQueryService sql = new();
+            string query;
+            if(position == "QB")
+            {
+                query = sql.GetQbGames();
+            }
+            else if (position == "RB")
+            {
+                query = sql.GetRbGames();
+            }
+            else
+            {
+                query = sql.GetPcGames();
+            }
+            using var con = new SqlConnection(connection);
+            return con.Query<int>(query, new {playerId}).DefaultIfEmpty(0).Average();
+        }
     }
 }
