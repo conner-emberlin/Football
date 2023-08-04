@@ -133,5 +133,29 @@ namespace Football.Repository
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new {playerId}).DefaultIfEmpty(0).Average();
         }
+
+        public List<int> GetActivePassingSeasons(int playerId)
+        {
+            SqlQueryService sql = new();
+            var query = sql.GetActivePassingSeasons();
+            using var con = new SqlConnection(connection);
+            return con.Query<int>(query, new { playerId }).ToList();
+        }
+
+        public List<int> GetActiveRushingSeasons(int playerId)
+        {
+            SqlQueryService sql = new();
+            var query = sql.GetActiveRushingSeasons();
+            using var con = new SqlConnection(connection);
+            return con.Query<int>(query, new { playerId }).ToList();
+        }
+
+        public List<int> GetActiveReceivingSeasons(int playerId)
+        {
+            SqlQueryService sql = new();
+            var query = sql.GetActiveReceivingSeasons();
+            using var con = new SqlConnection(connection);
+            return con.Query<int>(query, new { playerId }).ToList();
+        }
     }
 }

@@ -71,9 +71,7 @@ namespace Football.Services
             vec[4] = model.RushingAttemptsPerGame;
             vec[5] = model.RushingYardsPerGame;
             vec[6] = model.RushingTouchdownsPerGame;
-            vec[7] = model.SacksPerGame;
-            vec[8] = model.SackYardsPerGame;
-            vec[9] = model.Age;
+            vec[7] = model.SackYardsPerGame;
             return vec;
         }
 
@@ -82,14 +80,13 @@ namespace Football.Services
             var columnCount = typeof(RegressionModelRB).GetProperties().Length - 1;
             var vec = Vector<double>.Build.Dense(columnCount);
             vec[0] = 1;
-            vec[1] = model.Age;
-            vec[2] = model.RushingAttemptsPerGame;
-            vec[3] = model.RushingYardsPerGame;
-            vec[4] = model.RushingYardsPerAttempt;
-            vec[5] = model.RushingTouchdownsPerGame;
-            vec[6] = model.ReceptionsPerGame;
-            vec[7] = model.ReceivingYardsPerGame;
-            vec[8] = model.ReceivingTouchdownsPerGame;
+            vec[1] = model.RushingAttemptsPerGame;
+            vec[2] = model.RushingYardsPerGame;
+            vec[3] = model.RushingYardsPerAttempt;
+            vec[4] = model.RushingTouchdownsPerGame;
+            vec[5] = model.ReceptionsPerGame;
+            vec[6] = model.ReceivingYardsPerGame;
+            vec[7] = model.ReceivingTouchdownsPerGame;
             return vec;
         }
 
@@ -102,7 +99,7 @@ namespace Football.Services
             vec[2] = model.ReceptionsPerGame;
             vec[3] = model.YardsPerGame;
             vec[4] = model.YardsPerReception;
-            vec[5] = model  .TouchdownsPerGame;
+            vec[5] = model.TouchdownsPerGame;
             return vec;
         }
         private Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount)

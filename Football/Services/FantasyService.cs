@@ -104,5 +104,23 @@ namespace Football.Services
             var position = GetPlayerPosition(playerId);
             return fantasyRepository.GetAverageTotalGames(playerId, position);
         }
+
+        public List<int> GetActivePassingSeasons(int playerId)
+        {
+            FantasyRepository fantasyRepository = new();
+            return fantasyRepository.GetActivePassingSeasons(playerId);             
+        }
+
+        public List<int> GetActiveRushingSeasons(int playerId)
+        {
+            FantasyRepository fantasyRepository = new();
+            return fantasyRepository.GetActiveRushingSeasons(playerId);
+        }
+
+        public List<int> GetActiveReceivingSeasons(int playerId)
+        {
+            FantasyRepository fantasyRepository = new();
+            return fantasyRepository.GetActiveReceivingSeasons(playerId);
+        }
     }
 }

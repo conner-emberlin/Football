@@ -116,6 +116,20 @@ namespace Football.Services
             return $@"SELECT [Season] FROM dbo.[FantasyPoints] WHERE [PlayerId] = @playerId GROUP BY [Season]";
         }
 
+        public string GetActivePassingSeasons()
+        {
+            return $@"SELECT [Season] FROM dbo.[Passing] WHERE [PlayerId] = @playerId GROUP BY [Season]";
+        }
+
+        public string GetActiveRushingSeasons()
+        {
+            return $@"SELECT [Season] FROM dbo.[Rushing] WHERE [PlayerId] = @playerId GROUP BY [Season]";
+        }
+
+        public string GetActiveReceivingSeasons()
+        {
+            return $@"SELECT [Season] FROM dbo.[Receiving] WHERE [PlayerId] = @playerId GROUP BY [Season]";
+        }
         public string GetQbGames()
         {
             return $@"SELECT [Games] FROM [dbo].Passing WHERE [PlayerId] = @playerId";

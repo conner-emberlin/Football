@@ -29,13 +29,18 @@ namespace DataUpload
             System.Console.WriteLine(count + " records uploaded");
             */
 
-            /* CALCULATE FANTASY POINTS
+            //CALCULATE FANTASY POINTS
+             /*
             FantasyService fcs = new();
-            List<int> playerIds = fr.GetPlayers();
+            List<int> playerIds = fcs.GetPlayersByPosition("QB");
+
             int season = 2018;
             int count = 0;
+
+
             foreach(var playerId in  playerIds)
             {
+
                 var fantasyPoints = fcs.GetFantasyPoints(playerId, season);
                 if (fantasyPoints.TotalPoints > 0)
                 {
@@ -44,7 +49,8 @@ namespace DataUpload
             }
 
             System.Console.WriteLine(count + " records added");
-            */
+             */
+            /*
 
             //PERFORM REGRESSION (use api)
             /*
@@ -93,6 +99,10 @@ namespace DataUpload
                 }
             }
             */
+
+            PredictionService ps = new();
+             System.Console.WriteLine(ps.PerformPredictedRegression("RB"));
+           
             return 1;
         }
     }

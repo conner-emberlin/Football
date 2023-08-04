@@ -22,14 +22,12 @@ namespace Football.Services
             {
                 PlayerId = playerId,
                 Season = season,
-                Age = dataP ? passingStat.Age : 0,
                 PassingAttemptsPerGame = dataP ? Math.Round((double)(passingStat.Attempts / passingStat.Games),4) : 0,
                 PassingYardsPerGame = dataP ? Math.Round((double)(passingStat.Yards / passingStat.Games),4) : 0,
                 PassingTouchdownsPerGame = dataP ? Math.Round((double)(passingStat.Touchdowns / passingStat.Games), 4) : 0,
                 RushingAttemptsPerGame = dataR ? Math.Round((double)(rushingStat.RushAttempts / rushingStat.Games),4) : 0,
                 RushingYardsPerGame = dataR ? Math.Round((double)(rushingStat.Yards / rushingStat.Games),4) : 0,
                 RushingTouchdownsPerGame = dataR ? Math.Round((double)(rushingStat.Touchdowns/rushingStat.Games), 4) : 0,
-                SacksPerGame = dataP ? Math.Round((double)(passingStat.Sacks/passingStat.Games),4) : 0,
                 SackYardsPerGame = dataP ? Math.Round((double)(passingStat.SackYards / passingStat.Games), 4) : 0
             };         
         }
@@ -44,7 +42,6 @@ namespace Football.Services
             {
                 PlayerId = playerId,
                 Season = season,
-                Age = dataRush ? rushingStat.Age : 0,
                 RushingAttemptsPerGame = dataRush ? Math.Round((double)(rushingStat.RushAttempts / rushingStat.Games),4) : 0,
                 RushingYardsPerGame = dataRush ? Math.Round((double)(rushingStat.Yards / rushingStat.Games),4) : 0,
                 RushingYardsPerAttempt = dataRush ? Math.Round((double)(rushingStat.Yards / rushingStat.RushAttempts),4) : 0,

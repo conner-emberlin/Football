@@ -15,21 +15,18 @@ namespace Football.Models
     {
         public int PlayerId { get; set; }
         public int Season { get; set; }
-        public double Age { get; set; }
         public double PassingAttemptsPerGame { get; set; }
         public double PassingYardsPerGame { get; set; }
         public double PassingTouchdownsPerGame { get; set; }
         public double RushingAttemptsPerGame { get; set; }
         public double RushingYardsPerGame { get; set; }
         public double RushingTouchdownsPerGame { get; set; }
-        public double SacksPerGame { get; set; }
         public double SackYardsPerGame { get;set; }
     }
     public class RegressionModelRB
     {
         public int PlayerId { get; set; }
         public int Season { get; set; }
-        public double Age { get; set; }
         public double RushingAttemptsPerGame { get; set; }
         public double RushingYardsPerGame { get; set; }
         public double RushingYardsPerAttempt { get; set; }
