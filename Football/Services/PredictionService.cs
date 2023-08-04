@@ -127,7 +127,7 @@ namespace Football.Services
             {
                 Name = receivingSeasonStats[0].Name,
                 Team = receivingSeasonStats[seasons.Count - 1].Team,
-                Age = receivingSeasonStats.[seasons.Count - 1].Age,
+                Age = receivingSeasonStats[seasons.Count - 1].Age,
                 Games = receivingSeasonStats.Select(x => x.Games).DefaultIfEmpty(0).Average(),
                 Targets = receivingSeasonStats.Select(x => x.Targets).DefaultIfEmpty(0).Average(),
                 Receptions = receivingSeasonStats.Select(x => x.Receptions).DefaultIfEmpty(0).Average(),
