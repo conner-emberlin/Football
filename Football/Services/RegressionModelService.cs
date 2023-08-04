@@ -23,6 +23,7 @@ namespace Football.Services
             {
                 PlayerId = playerId,
                 Season = season,
+                Age = dataP ? passingStat.Age : 0,
                 PassingAttemptsPerGame = dataP ? Math.Round((double)(passingStat.Attempts / passingStat.Games),4) : 0,
                 PassingYardsPerGame = dataP ? Math.Round((double)(passingStat.Yards / passingStat.Games),4) : 0,
                 PassingTouchdownsPerGame = dataP ? Math.Round((double)(passingStat.Touchdowns / passingStat.Games), 4) : 0,

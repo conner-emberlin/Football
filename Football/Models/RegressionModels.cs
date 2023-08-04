@@ -6,10 +6,16 @@ using System.Threading.Tasks;
 
 namespace Football.Models
 {
+    /* To add a new variable to the model, first add here, then in RegressionModelService Populate method and in 
+     * MatrixService TransformModel method
+     * The variable must be in the corresponding positional Statistic class (i.e. in the db)
+     */
+
     public class RegressionModelQB
     {
         public int PlayerId { get; set; }
         public int Season { get; set; }
+        public double Age { get; set; }
         public double PassingAttemptsPerGame { get; set; }
         public double PassingYardsPerGame { get; set; }
         public double PassingTouchdownsPerGame { get; set; }

@@ -73,6 +73,7 @@ namespace Football.Services
             vec[6] = model.RushingTouchdownsPerGame;
             vec[7] = model.SacksPerGame;
             vec[8] = model.SackYardsPerGame;
+            vec[9] = model.Age;
             return vec;
         }
 

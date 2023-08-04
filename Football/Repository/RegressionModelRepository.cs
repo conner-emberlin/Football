@@ -13,6 +13,7 @@ namespace Football.Repository
     public class RegressionModelRepository
     {
         private readonly string connection = "Data Source =(LocalDb)\\MSSQLLocalDB; Initial Catalog = Football; Integrated Security=true;";
+
         public PassingStatistic GetPassingStatistic(int playerId, int season)
         {
             SqlQueryService sql = new();

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Football": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "CONNECTION_STRING": " \"Data Source =(LocalDb)\\\\MSSQLLocalDB; Initial Catalog = Football; Integrated Security=true;\""
+      }
+    }
+  }
+}
