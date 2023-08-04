@@ -74,6 +74,12 @@ namespace Football.Services
             return fantasyRepository.GetPlayerPosition(playerId);
         }
 
+        public List<int> GetPlayersByPosition(string position)
+        {
+            FantasyRepository fantasyRepositoty = new();
+                return fantasyRepositoty.GetPlayersByPosition(position);
+        }
+
         public FantasyPoints GetFantasyResults(int playerId, int season)
         {
             FantasyRepository fantasyRepository = new();

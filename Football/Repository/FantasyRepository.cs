@@ -52,6 +52,14 @@ namespace Football.Repository
             return con.Query<string>(query, new {playerId}).ToList().FirstOrDefault();
         }
 
+        public List<int> GetPlayersByPosition(string position)
+        {
+            SqlQueryService sql = new();
+            var query = sql.GetPlayersByPosition();
+            using var con = new SqlConnection(connection);
+            return con.Query<int>(query, new {position}).ToList();
+        }
+
         public int InsertFantasyPoints(FantasyPoints fantasyPoints)
         {
             SqlQueryService sql = new();

@@ -61,7 +61,7 @@ namespace DataUpload
             */
 
             //Calculate MSE
-            /*
+            
             PerformRegressionService performRegressionService = new();
             MatrixService matrixService = new();
             RegressionModelService regressionModelService = new();
@@ -78,10 +78,21 @@ namespace DataUpload
             System.Console.WriteLine(performRegressionService.CalculateMSE(actual, coefficients, model));
             System.Console.WriteLine(performRegressionService.CalculatError(actual, coefficients, model));
             System.Console.WriteLine(coefficients);
-            */
+            
 
+            /*CHECK MODEL ERROR BY PLAYER
             PredictionService pred = new();
-            pred.SeasonFantasyPointsPrediction(920, "QB");
+            FantasyService fs = new();
+            var players = fs.GetPlayersByPosition("QB");
+            foreach (var player in players)
+            {
+                var test = pred.ModelErrorPerSeason(player, "QB");
+                foreach (var item in test)
+                {
+                    System.Console.WriteLine(item);
+                }
+            }
+            */
             return 1;
         }
     }

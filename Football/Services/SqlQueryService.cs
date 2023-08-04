@@ -72,6 +72,11 @@ namespace Football.Services
             return $@"SELECT [Position] from [dbo].Players WHERE [PlayerId] = @playerid";
         }
 
+        public string GetPlayersByPosition()
+        {
+            return $@"SELECT [PlayerId] from [dbo].Players WHERE [Position] = @position";
+        }
+
         public string GetPassingStatistic()
         {
             return $@"SELECT [Name], [Team], [Age], [Games], [Completions], [Attempts],
