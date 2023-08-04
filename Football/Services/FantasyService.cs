@@ -98,11 +98,11 @@ namespace Football.Services
             return fantasyRepository.GetActiveSeasons(playerId);
         }
 
-        public double GetTotalGames(int playerId)
+        public double GetAverageTotalGames(int playerId)
         {
             FantasyRepository fantasyRepository = new();
             var position = GetPlayerPosition(playerId);
-            return fantasyRepository.GetTotalGames(playerId, position);
+            return fantasyRepository.GetAverageTotalGames(playerId, position);
         }
     }
 }
