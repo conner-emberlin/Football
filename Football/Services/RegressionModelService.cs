@@ -14,9 +14,8 @@ namespace Football.Services
     {
         public RegressionModelQB PopulateRegressionModelQB(int playerId, int season)
         {
-            RegressionModelRepository regressionModelRepository = new();
-            PassingStatistic? passingStat = regressionModelRepository.GetPassingStatistic(playerId, season);
-            RushingStatistic? rushingStat = regressionModelRepository.GetRushingStatistic(playerId, season);
+            PassingStatistic? passingStat = GetPassingStatistic(playerId, season);
+            RushingStatistic? rushingStat = GetRushingStatistic(playerId, season);
             var dataP = passingStat != null;
             var dataR = rushingStat != null;
             return new RegressionModelQB
@@ -37,9 +36,8 @@ namespace Football.Services
 
         public RegressionModelRB PopulateRegressionModelRb(int playerId, int season)
         { 
-            RegressionModelRepository regressionModelRepository = new();
-            RushingStatistic? rushingStat = regressionModelRepository.GetRushingStatistic(playerId, season);
-            ReceivingStatistic? receivingStat = regressionModelRepository.GetReceivingStatistic(playerId, season);
+            RushingStatistic? rushingStat = GetRushingStatistic(playerId, season);
+            ReceivingStatistic? receivingStat = GetReceivingStatistic(playerId, season);
             var dataRush = rushingStat != null;
             var dataRec = receivingStat != null;
             return new RegressionModelRB
@@ -59,8 +57,7 @@ namespace Football.Services
 
         public RegressionModelPassCatchers PopulateRegressionModelPassCatchers(int playerId, int season)
         {
-            RegressionModelRepository regressionModelRepository = new();
-            ReceivingStatistic? receivingStat = regressionModelRepository.GetReceivingStatistic(playerId,season);
+            ReceivingStatistic? receivingStat = GetReceivingStatistic(playerId,season);
             var data = receivingStat != null;
             return new RegressionModelPassCatchers
             {
@@ -88,6 +85,24 @@ namespace Football.Services
                 }
             }
             return fantasyPoints;
+        }
+
+        public PassingStatistic GetPassingStatistic(int playerId, int season)
+        {
+            RegressionModelRepository regressionModelRepository = new();
+            return regressionModelRepository.GetPassingStatistic(playerId, season);
+        }
+
+        public RushingStatistic GetRushingStatistic(int playerId, int season)
+        {
+            RegressionModelRepository regressionModelRepository = new();
+            return regressionModelRepository.GetRushingStatistic(playerId, season);
+        }
+
+        public ReceivingStatistic GetReceivingStatistic(int playerId, int season)
+        {
+            RegressionModelRepository regressionModelRepository = new();
+            return regressionModelRepository.GetReceivingStatistic(playerId, season);
         }
     }
 }

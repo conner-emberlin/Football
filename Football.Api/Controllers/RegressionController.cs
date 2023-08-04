@@ -51,6 +51,6 @@ namespace Football.Api.Controllers
                     break;
                 default: throw new NotImplementedException();
             }         
-        }
+        }       
     }
 }
