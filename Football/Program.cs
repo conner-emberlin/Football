@@ -61,7 +61,7 @@ namespace DataUpload
             */
 
             //Calculate MSE
-            
+            /*
             PerformRegressionService performRegressionService = new();
             MatrixService matrixService = new();
             RegressionModelService regressionModelService = new();
@@ -78,7 +78,7 @@ namespace DataUpload
             System.Console.WriteLine(performRegressionService.CalculateMSE(actual, coefficients, model));
             System.Console.WriteLine(performRegressionService.CalculatError(actual, coefficients, model));
             System.Console.WriteLine(coefficients);
-            
+            */
 
             /*CHECK MODEL ERROR BY PLAYER
             PredictionService pred = new();
