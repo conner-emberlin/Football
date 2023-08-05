@@ -14,6 +14,12 @@ namespace Football.Services
     internal class DataUploadService : IDataUploadService
     {
         private readonly string connection = "Data Source =(LocalDb)\\MSSQLLocalDB; Initial Catalog = Football; Integrated Security=true;";
+        public readonly ISqlQueryService _sqlQueryService;
+
+        public DataUploadService(ISqlQueryService sqlQueryService) 
+        {
+            _sqlQueryService = sqlQueryService;
+        }
             public List<PassingStatistic> PassingStatFileUpload(string filepath)
         {
             var reader = new StreamReader(filepath);
@@ -36,9 +42,8 @@ namespace Football.Services
         }
         public int PassingStatInsert(List<PassingStatistic> statistics, int season)
         {
-            SqlQueryService sql = new();
             using var con = new SqlConnection(connection);
-            var query = sql.GetQueryString("passing");
+            var query = _sqlQueryService.GetQueryString("passing");
             
             int count = 0;
 
@@ -68,9 +73,8 @@ namespace Football.Services
 
         public int ReceivingStatInsert(List<ReceivingStatistic> statistics, int season)
         {
-            SqlQueryService sql = new();
             using var con = new SqlConnection(connection);
-            var query = sql.GetQueryString("receiving");
+            var query = _sqlQueryService.GetQueryString("receiving");
 
             int count = 0;
 
@@ -99,9 +103,8 @@ namespace Football.Services
 
         public int RushingStatInsert(List<RushingStatistic> statistics, int season)
         {
-            SqlQueryService sql = new();
             using var con = new SqlConnection(connection);
-            var query = sql.GetQueryString("rushing");
+            var query = _sqlQueryService.GetQueryString("rushing");
 
             int count = 0;
 

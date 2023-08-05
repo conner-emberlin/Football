@@ -17,28 +17,36 @@ namespace Football.Services
     {
         private readonly int currentSeason = 2023;
         private readonly List<int> pastSeasons = new List<int>{ 2018, 2019, 2020, 2021, 2022 };
+
+        public readonly IRegressionModelService _regressionModelService;
+        public readonly IPerformRegressionService _performRegressionService;
+        public readonly IFantasyService _fantasyService;
+        public readonly IMatrixService _matrixService;
+
+        public PredictionService(IRegressionModelService regressionModelService, IPerformRegressionService performRegressionService, IFantasyService fantasyService, IMatrixService matrixService)
+        {
+            _regressionModelService = regressionModelService;
+            _performRegressionService = performRegressionService;
+            _matrixService = matrixService;
+            _fantasyService = fantasyService;
+        }
         public List<double> ModelErrorPerSeason(int playerId, string position)
         {
-            RegressionModelService regressionModelService = new();
-            PerformRegressionService performRegressionService = new();
-            FantasyService fantasyService = new();
-            MatrixService matrixService = new();
-
             List<double> errors = new();          
             List<Vector<double>> regressions = new();
             List<double> actualPoints = new();
-            var seasons = fantasyService.GetActiveSeasons(playerId);
+            var seasons = _fantasyService.GetActiveSeasons(playerId);
             switch (position)
             {
                 case "QB":
                     List<RegressionModelQB> models = new();                    
                     foreach (var season in seasons)
                     {
-                        models.Add(regressionModelService.PopulateRegressionModelQB(playerId, season));                                                                    
-                        regressions.Add(performRegressionService.PerformRegression(season, position));
-                        actualPoints.Add(fantasyService.GetFantasyResults(playerId, season).TotalPoints);
+                        models.Add(_regressionModelService.PopulateRegressionModelQB(playerId, season));                                                                    
+                        regressions.Add(_performRegressionService.PerformRegression(season, position));
+                        actualPoints.Add(_fantasyService.GetFantasyResults(playerId, season).TotalPoints);
                     }
-                    var modelVectors = models.Select(m => matrixService.TransformQbModel(m));
+                    var modelVectors = models.Select(m => _matrixService.TransformQbModel(m));
                     for (int i = 0; i < seasons.Count - 1; i++)
                     {
                             errors.Add(modelVectors.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
@@ -49,11 +57,11 @@ namespace Football.Services
                     List<RegressionModelRB> modelsR = new();
                     foreach (var season in seasons)
                     {
-                        modelsR.Add(regressionModelService.PopulateRegressionModelRb(playerId, season));
-                        regressions.Add(performRegressionService.PerformRegression(season, position));
-                        actualPoints.Add(fantasyService.GetFantasyResults(playerId, season).TotalPoints);
+                        modelsR.Add(_regressionModelService.PopulateRegressionModelRb(playerId, season));
+                        regressions.Add(_performRegressionService.PerformRegression(season, position));
+                        actualPoints.Add(_fantasyService.GetFantasyResults(playerId, season).TotalPoints);
                     }
-                    var modelVectorsR = modelsR.Select(m => matrixService.TransformRbModel(m));
+                    var modelVectorsR = modelsR.Select(m => _matrixService.TransformRbModel(m));
                     for (int i = 0; i < seasons.Count - 1; i++)
                     {
                         errors.Add(modelVectorsR.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
@@ -64,27 +72,25 @@ namespace Football.Services
                     List<RegressionModelPassCatchers> modelsP = new();
                     foreach (var season in seasons)
                     {
-                        modelsP.Add(regressionModelService.PopulateRegressionModelPassCatchers(playerId, season));
-                        regressions.Add(performRegressionService.PerformRegression(season, position));
-                        actualPoints.Add(fantasyService.GetFantasyResults(playerId, season).TotalPoints);
+                        modelsP.Add(_regressionModelService.PopulateRegressionModelPassCatchers(playerId, season));
+                        regressions.Add(_performRegressionService.PerformRegression(season, position));
+                        actualPoints.Add(_fantasyService.GetFantasyResults(playerId, season).TotalPoints);
                     }
-                    var modelVectorsP = modelsP.Select(m => matrixService.TransformPassCatchersModel(m));
+                    var modelVectorsP = modelsP.Select(m => _matrixService.TransformPassCatchersModel(m));
                     for (int i = 0; i < seasons.Count - 1; i++)
                     {
                         errors.Add(modelVectorsP.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
                     }
                     return errors;
                     break;
-                default: return errors;
+                default: return null;
             }          
         }
 
         public PassingStatistic CalculateAveragePassingStats(int playerId)
         {
-            FantasyService fantasyService = new();
-            RegressionModelService regressionModelService = new();
-            var seasons = fantasyService.GetActivePassingSeasons(playerId);          
-            var passingSeasonsStats = seasons.Select(s => regressionModelService.GetPassingStatistic(playerId, s)).ToList();
+            var seasons = _fantasyService.GetActivePassingSeasons(playerId);          
+            var passingSeasonsStats = seasons.Select(s => _regressionModelService.GetPassingStatistic(playerId, s)).ToList();
             var averageGames = passingSeasonsStats.Select(x => x.Games).DefaultIfEmpty(0).Average();
             return new PassingStatistic
             {
@@ -106,10 +112,8 @@ namespace Football.Services
 
         public RushingStatistic CalculateAverageRushingStats(int playerId)
         {
-            FantasyService fantasyService = new();
-            RegressionModelService regressionModelService = new();
-            var seasons = fantasyService.GetActiveRushingSeasons(playerId);
-            var rushingSeasonsStats = seasons.Select(s => regressionModelService.GetRushingStatistic(playerId, s)).ToList();
+            var seasons = _fantasyService.GetActiveRushingSeasons(playerId);
+            var rushingSeasonsStats = seasons.Select(s => _regressionModelService.GetRushingStatistic(playerId, s)).ToList();
             var averageGames = rushingSeasonsStats.Select(x => x.Games).DefaultIfEmpty(0).Average();
             return new RushingStatistic
             {
@@ -128,10 +132,8 @@ namespace Football.Services
 
         public ReceivingStatistic CalculateAverageReceivingStats(int playerId)
         {
-            FantasyService fantasyService = new();
-            RegressionModelService regressionModelService = new();
-            var seasons = fantasyService.GetActiveReceivingSeasons(playerId);
-            var receivingSeasonStats = seasons.Select(seasons => regressionModelService.GetReceivingStatistic(playerId, seasons)).ToList();
+            var seasons = _fantasyService.GetActiveReceivingSeasons(playerId);
+            var receivingSeasonStats = seasons.Select(seasons => _regressionModelService.GetReceivingStatistic(playerId, seasons)).ToList();
             var averageGames = receivingSeasonStats.Select(x => x.Games).DefaultIfEmpty(0).Average();
             return  new ReceivingStatistic
             {
@@ -208,11 +210,10 @@ namespace Football.Services
 
         public FantasyPoints CalculateProjectedAverageFantasyPoints(int playerId)
         {
-            FantasyService fantasyService = new();
-            var activeSeasons = fantasyService.GetActiveSeasons(playerId);
-            var fantasyBySeason = activeSeasons.Select(s => fantasyService.GetFantasyPoints(playerId, s)).ToList();
+            var activeSeasons = _fantasyService.GetActiveSeasons(playerId);
+            var fantasyBySeason = activeSeasons.Select(s => _fantasyService.GetFantasyPoints(playerId, s)).ToList();
             var averageFp = fantasyBySeason.Select(x => x.TotalPoints).DefaultIfEmpty(0).Average();
-            var averageGames = fantasyService.GetAverageTotalGames(playerId);
+            var averageGames = _fantasyService.GetAverageTotalGames(playerId);
             return new FantasyPoints
             {
                 PlayerId = playerId,
@@ -222,59 +223,52 @@ namespace Football.Services
 
         public List<FantasyPoints> AverageProjectedFantasyByPosition(string position)
         {
-            FantasyService fantasyService = new();
-            var players = fantasyService.GetPlayersByPosition(position);
+            var players = _fantasyService.GetPlayersByPosition(position);
             return players.Select(x => CalculateProjectedAverageFantasyPoints(x)).ToList();
         }
 
         public List<RegressionModelQB> AverageProjectedModelQB()
         {
-            FantasyService fantasyService = new();
-            var players = fantasyService.GetPlayersByPosition("QB");
+            var players = _fantasyService.GetPlayersByPosition("QB");
             return players.Select(x => PopulateProjectedAverageModelQB(CalculateAveragePassingStats(x), CalculateAverageRushingStats(x), x)).ToList();           
         }
 
         public List<RegressionModelRB> AverageProjectedModelRB()
         {
-            FantasyService fantasyService = new();
-            var players = fantasyService.GetPlayersByPosition("RB");
+            var players = _fantasyService.GetPlayersByPosition("RB");
             return players.Select(x => PopulateProjectedAverageModelRB(CalculateAverageRushingStats(x), CalculateAverageReceivingStats(x), x)).ToList();
 
         }
 
         public List<RegressionModelPassCatchers> AverageProjectedModelPassCatchers()
         {
-            FantasyService fantasyService = new();
-            var players = fantasyService.GetPlayersByPosition("WR/TE");
+            var players = _fantasyService.GetPlayersByPosition("WR/TE");
             return players.Select(x => PopulateProjectedAverageModelPassCatchers(CalculateAverageReceivingStats(x), x)).ToList();
         }
 
         public Vector<double> PerformPredictedRegression(string position)
         {
-            MatrixService matrixService = new();
-            PerformRegressionService performRegressionService = new();
-            
             switch (position)
             {
                 case "QB":
                     var modelQB = AverageProjectedModelQB();
                     var modelQBFpts = AverageProjectedFantasyByPosition("QB");
-                    var regressorMatrix = matrixService.PopulateQbRegressorMatrix(modelQB);
-                    var dependentVector = matrixService.PopulateDependentVector(modelQBFpts);
-                    return performRegressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
+                    var regressorMatrix = _matrixService.PopulateQbRegressorMatrix(modelQB);
+                    var dependentVector = _matrixService.PopulateDependentVector(modelQBFpts);
+                    return _performRegressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
                     break;
                 case "RB":
                     var modelRB = AverageProjectedModelRB();
                     var modelRBFpts = AverageProjectedFantasyByPosition("RB");
-                    var regressorMatrixRB = matrixService.PopulateRbRegressorMatrix(modelRB);
-                    var dependentVectorRB = matrixService.PopulateDependentVector(modelRBFpts);
-                    return performRegressionService.CholeskyDecomposition(regressorMatrixRB, dependentVectorRB);
+                    var regressorMatrixRB = _matrixService.PopulateRbRegressorMatrix(modelRB);
+                    var dependentVectorRB = _matrixService.PopulateDependentVector(modelRBFpts);
+                    return _performRegressionService.CholeskyDecomposition(regressorMatrixRB, dependentVectorRB);
                 case "WR/TE":
                     var modelWR = AverageProjectedModelPassCatchers();
                     var modelWRFpts = AverageProjectedFantasyByPosition("WR/TE");
-                    var regressorMatrixWR = matrixService.PopulatePassCatchersRegressorMatrix(modelWR);
-                    var dependentVectorWR = matrixService.PopulateDependentVector(modelWRFpts);
-                    return performRegressionService.CholeskyDecomposition(regressorMatrixWR, dependentVectorWR);
+                    var regressorMatrixWR = _matrixService.PopulatePassCatchersRegressorMatrix(modelWR);
+                    var dependentVectorWR = _matrixService.PopulateDependentVector(modelWRFpts);
+                    return _performRegressionService.CholeskyDecomposition(regressorMatrixWR, dependentVectorWR);
                 default: return null;
             }
         }
@@ -286,26 +280,24 @@ namespace Football.Services
 
         public IEnumerable<ProjectionModel> GetProjections(string position)
         {
-            MatrixService matrixService = new();
-            FantasyService fantasyService = new();
             List<ProjectionModel> projection = new();
             switch (position)
             {
                 case "QB":
                     var qbs = AverageProjectedModelQB();
-                    var model = matrixService.PopulateQbRegressorMatrix(qbs);
+                    var model = _matrixService.PopulateQbRegressorMatrix(qbs);
                     var results = PerformPrediction(model, PerformPredictedRegression("QB")).ToList();
                     for (int i = 0; i < results.Count; i++)
                     {
                         var qb = qbs.ElementAt(i);
-                        if (fantasyService.IsPlayerActive(qb.PlayerId))
+                        if (_fantasyService.IsPlayerActive(qb.PlayerId))
                         {
                             projection.Add(new ProjectionModel
                             {
                                 PlayerId = qb.PlayerId,
-                                Name = fantasyService.GetPlayerName(qb.PlayerId),
-                                Team = fantasyService.GetPlayerTeam(qb.PlayerId),
-                                Position = fantasyService.GetPlayerPosition(qb.PlayerId),
+                                Name = _fantasyService.GetPlayerName(qb.PlayerId),
+                                Team = _fantasyService.GetPlayerTeam(qb.PlayerId),
+                                Position = _fantasyService.GetPlayerPosition(qb.PlayerId),
                                 ProjectedPoints = results[i]
                             });
                         }
@@ -314,19 +306,19 @@ namespace Football.Services
                     break;
                 case "RB":
                     var rbs = AverageProjectedModelRB();
-                    var modelRB = matrixService.PopulateRbRegressorMatrix(rbs);
+                    var modelRB = _matrixService.PopulateRbRegressorMatrix(rbs);
                     var resultsRB = PerformPrediction(modelRB, PerformPredictedRegression("RB")).ToList();
                     for (int i = 0; i < resultsRB.Count; i++)
                     {
                         var rb = rbs.ElementAt(i);
-                        if (fantasyService.IsPlayerActive(rb.PlayerId))
+                        if (_fantasyService.IsPlayerActive(rb.PlayerId))
                         {
                             projection.Add(new ProjectionModel
                             {
                                 PlayerId = rb.PlayerId,
-                                Name = fantasyService.GetPlayerName(rb.PlayerId),
-                                Team = fantasyService.GetPlayerTeam(rb.PlayerId),
-                                Position = fantasyService.GetPlayerPosition(rb.PlayerId),
+                                Name = _fantasyService.GetPlayerName(rb.PlayerId),
+                                Team = _fantasyService.GetPlayerTeam(rb.PlayerId),
+                                Position = _fantasyService.GetPlayerPosition(rb.PlayerId),
                                 ProjectedPoints = resultsRB[i]
                             });
                         }
@@ -335,19 +327,19 @@ namespace Football.Services
                     break;
                 case "WR/TE":
                     var pcs = AverageProjectedModelPassCatchers();
-                    var modelPC = matrixService.PopulatePassCatchersRegressorMatrix(pcs);
+                    var modelPC = _matrixService.PopulatePassCatchersRegressorMatrix(pcs);
                     var resultsPC = PerformPrediction(modelPC, PerformPredictedRegression("WR/TE")).ToList();
                     for (int i = 0; i < resultsPC.Count; i++)
                     {
                         var pc = pcs.ElementAt(i);
-                        if (fantasyService.IsPlayerActive(pc.PlayerId))
+                        if (_fantasyService.IsPlayerActive(pc.PlayerId))
                         {
                             projection.Add(new ProjectionModel
                             {
                                 PlayerId = pc.PlayerId,
-                                Name = fantasyService.GetPlayerName(pc.PlayerId),
-                                Team = fantasyService.GetPlayerTeam(pc.PlayerId),
-                                Position = fantasyService.GetPlayerPosition(pc.PlayerId),
+                                Name = _fantasyService.GetPlayerName(pc.PlayerId),
+                                Team = _fantasyService.GetPlayerTeam(pc.PlayerId),
+                                Position = _fantasyService.GetPlayerPosition(pc.PlayerId),
                                 ProjectedPoints = Math.Round((double)resultsPC[i],2)
                             });
                         }

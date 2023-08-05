@@ -7,63 +7,66 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
-namespace Football.Repository
+using Microsoft.Extensions.Configuration;
+using Football.Interfaces;
+
+namespace Football.Repository 
 {
-    public class FantasyRepository
+    public class FantasyRepository : IFantasyRepository
     {
         private readonly string connection = "Data Source =(LocalDb)\\MSSQLLocalDB; Initial Catalog = Football; Integrated Security=true;";
+        public readonly ISqlQueryService _sqlQueryService;
+
+        public FantasyRepository(ISqlQueryService sqlQueryService)
+        {
+            _sqlQueryService = sqlQueryService;
+        }
+
         public FantasyPassing GetFantasyPassing(int playerId, int season)
         {
-            SqlQueryService sql = new();
-            var query = sql.FantasyPassingQuery();
+            var query = _sqlQueryService.FantasyPassingQuery();
             using var con = new SqlConnection(connection);
             return con.Query<FantasyPassing>(query, new { playerId, season }).ToList().FirstOrDefault();        
         }
 
         public FantasyRushing GetFantasyRushing(int playerId, int season)
         {
-            SqlQueryService sql = new();
-            var query = sql.FantasyRushingQuery();
+            var query = _sqlQueryService.FantasyRushingQuery();
             using var con = new SqlConnection(connection);
             return con.Query<FantasyRushing>(query, new {playerId, season}).ToList().FirstOrDefault();
         }
 
         public FantasyReceiving  GetFantasyReceiving(int playerId, int season)
         {
-            SqlQueryService sql = new();
-            var query = sql.FantasyReceivingQuery();
+            var query = _sqlQueryService.FantasyReceivingQuery();
             using var con = new SqlConnection(connection);
             return con.Query<FantasyReceiving>(query, new { playerId, season }).ToList().FirstOrDefault();
         }
 
         public List<int> GetPlayers()
         {
-            SqlQueryService sql = new();
-            var query =sql.GetPlayerIds();
+            var query =_sqlQueryService.GetPlayerIds();
             using var con = new SqlConnection(connection);
             return con.Query<int>(query).ToList();
         }
 
         public string GetPlayerPosition(int playerId)
         {
-            SqlQueryService sql = new();
-            var query = sql.GetPlayerPosition();
+            var query = _sqlQueryService.GetPlayerPosition();
             using var con = new SqlConnection(connection);
             return con.Query<string>(query, new {playerId}).ToList().FirstOrDefault();
         }
 
         public List<int> GetPlayersByPosition(string position)
         {
-            SqlQueryService sql = new();
-            var query = sql.GetPlayersByPosition();
+            var query = _sqlQueryService.GetPlayersByPosition();
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new {position}).ToList();
         }
 
         public int InsertFantasyPoints(FantasyPoints fantasyPoints)
         {
-            SqlQueryService sql = new();
-            var query = sql.InsertFantasyData();
+            var query = _sqlQueryService.InsertFantasyData();
             int count = 0;
             using var con = new SqlConnection(connection);
             return count += con.Execute(query, new
@@ -79,24 +82,21 @@ namespace Football.Repository
 
         public FantasyPoints GetFantasyResults(int playerId, int season)
         {
-            SqlQueryService sql = new();
-            var query = sql.GetFantasyPoints();
+            var query = _sqlQueryService.GetFantasyPoints();
             using var con = new SqlConnection(connection);
             return con.Query<FantasyPoints>(query, new {playerId, season}).ToList().FirstOrDefault();
         }
 
         public List<int> GetPlayerIdsByFantasySeason(int season)
         {
-            SqlQueryService sql = new();
-            var query = sql.GetPlayerIdsByFantasySeason();
+            var query = _sqlQueryService.GetPlayerIdsByFantasySeason();
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new {season}).ToList();
         }
 
         public (int,int) RefreshFantasyResults(FantasyPoints fantasyPoints)
         {
-            SqlQueryService sql = new();
-            var deleteQuery = sql.DeleteFantasyPoints();
+            var deleteQuery = _sqlQueryService.DeleteFantasyPoints();
             using var con = new SqlConnection(connection);
             int removed = 0;
             int added = 0;
@@ -108,27 +108,25 @@ namespace Football.Repository
 
         public List<int> GetActiveSeasons(int playerId)
         {
-            SqlQueryService sql = new();
-            var query = sql.GetSeasons();
+            var query = _sqlQueryService.GetSeasons();
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new {playerId}).ToList();
         }
 
         public double GetAverageTotalGames(int playerId, string position)
         {
-            SqlQueryService sql = new();
             string query;
             if(position == "QB")
             {
-                query = sql.GetQbGames();
+                query = _sqlQueryService.GetQbGames();
             }
             else if (position == "RB")
             {
-                query = sql.GetRbGames();
+                query = _sqlQueryService.GetRbGames();
             }
             else
             {
-                query = sql.GetPcGames();
+                query = _sqlQueryService.GetPcGames();
             }
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new {playerId}).DefaultIfEmpty(0).Average();
@@ -136,48 +134,42 @@ namespace Football.Repository
 
         public List<int> GetActivePassingSeasons(int playerId)
         {
-            SqlQueryService sql = new();
-            var query = sql.GetActivePassingSeasons();
+            var query = _sqlQueryService.GetActivePassingSeasons();
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new { playerId }).ToList();
         }
 
         public List<int> GetActiveRushingSeasons(int playerId)
         {
-            SqlQueryService sql = new();
-            var query = sql.GetActiveRushingSeasons();
+            var query = _sqlQueryService.GetActiveRushingSeasons();
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new { playerId }).ToList();
         }
 
         public List<int> GetActiveReceivingSeasons(int playerId)
         {
-            SqlQueryService sql = new();
-            var query = sql.GetActiveReceivingSeasons();
+            var query = _sqlQueryService.GetActiveReceivingSeasons();
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new { playerId }).ToList();
         }
 
         public string GetPlayerName(int playerId)
         {
-            SqlQueryService sql = new();
-            var query = sql.GetPlayerName();
+            var query = _sqlQueryService.GetPlayerName();
             using var con = new SqlConnection(connection);
             return con.Query<string>(query, new { playerId }).FirstOrDefault().ToString();
         }
 
         public bool IsPlayerActive(int playerId)
         {
-            SqlQueryService sql = new();
-            var query = sql.IsPlayerActive();
+            var query = _sqlQueryService.IsPlayerActive();
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new {playerId}).FirstOrDefault() == 1;
         }
 
         public string GetPlayerTeam(int playerId)
         {
-            SqlQueryService sql = new();
-            var query = sql.GetPlayerTeam();
+            var query = _sqlQueryService.GetPlayerTeam();
             using var con = new SqlConnection(connection);
             return con.Query<string>(query, new {playerId}).FirstOrDefault().ToString();
         }

@@ -5,9 +5,9 @@ VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football", "Football\Football.csproj", "{2EA05673-9B2E-4E36-80CD-F9D6926F338D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.Api", "Football.Api\Football.Api.csproj", "{36421247-1F6B-4A8A-B7D9-0F4FE492178C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.Api", "Football.Api\Football.Api.csproj", "{36421247-1F6B-4A8A-B7D9-0F4FE492178C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.UI", "Football.UI\Football.UI.csproj", "{38A65E91-BBC6-44F6-8A00-B7A5A14F791C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.UI", "Football.UI\Football.UI.csproj", "{38A65E91-BBC6-44F6-8A00-B7A5A14F791C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Applications", "Applications", "{747EBABE-16B2-4497-9347-9DACC3FBCCE8}"
 EndProject

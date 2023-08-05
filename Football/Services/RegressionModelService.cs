@@ -12,6 +12,14 @@ namespace Football.Services
 {
     public class RegressionModelService : IRegressionModelService
     {
+        public readonly IFantasyService _fantasyService;
+        public readonly IRegressionModelRepository _regressionModelRepository;
+        public RegressionModelService(IFantasyService fantasyService, IRegressionModelRepository regressionModelRepository) 
+        {
+            _fantasyService = fantasyService;
+            _regressionModelRepository = regressionModelRepository;
+        } 
+        
         public RegressionModelQB PopulateRegressionModelQB(int playerId, int season)
         {
             PassingStatistic? passingStat = GetPassingStatistic(playerId, season);
@@ -70,12 +78,11 @@ namespace Football.Services
 
         public List<FantasyPoints> PopulateFantasyResults(int season, string position)
         {
-            FantasyService fantasyService = new();
             List<FantasyPoints> fantasyPoints = new();
-            List<int> playerIds = fantasyService.GetPlayerIdsByFantasySeason(season).Where(x => fantasyService.GetPlayerPosition(x) == position).ToList();
+            List<int> playerIds = _fantasyService.GetPlayerIdsByFantasySeason(season).Where(x => _fantasyService.GetPlayerPosition(x) == position).ToList();
             foreach (var p in playerIds)
             {
-                var pts = fantasyService.GetFantasyResults(p, season);
+                var pts = _fantasyService.GetFantasyResults(p, season);
                 if (pts != null)
                 {
                     fantasyPoints.Add(pts);
@@ -86,20 +93,17 @@ namespace Football.Services
 
         public PassingStatistic GetPassingStatistic(int playerId, int season)
         {
-            RegressionModelRepository regressionModelRepository = new();
-            return regressionModelRepository.GetPassingStatistic(playerId, season);
+            return _regressionModelRepository.GetPassingStatistic(playerId, season);
         }
 
         public RushingStatistic GetRushingStatistic(int playerId, int season)
         {
-            RegressionModelRepository regressionModelRepository = new();
-            return regressionModelRepository.GetRushingStatistic(playerId, season);
+            return _regressionModelRepository.GetRushingStatistic(playerId, season);
         }
 
         public ReceivingStatistic GetReceivingStatistic(int playerId, int season)
         {
-            RegressionModelRepository regressionModelRepository = new();
-            return regressionModelRepository.GetReceivingStatistic(playerId, season);
+            return _regressionModelRepository.GetReceivingStatistic(playerId, season);
         }
     }
 }

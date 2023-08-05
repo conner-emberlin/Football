@@ -31,27 +31,27 @@ namespace DataUpload
             */
 
             //CALCULATE FANTASY POINTS
-             /*
-            FantasyService fcs = new();
-            List<int> playerIds = fcs.GetPlayersByPosition("QB");
-
-            int season = 2018;
-            int count = 0;
-
-
-            foreach(var playerId in  playerIds)
-            {
-
-                var fantasyPoints = fcs.GetFantasyPoints(playerId, season);
-                if (fantasyPoints.TotalPoints > 0)
-                {
-                    count += fcs.InsertFantasyPoints(fantasyPoints);
-                }
-            }
-
-            System.Console.WriteLine(count + " records added");
-             */
             /*
+           FantasyService fcs = new();
+           List<int> playerIds = fcs.GetPlayersByPosition("WR/TE");
+
+           int season = 2018;
+           int count = 0;
+
+
+           foreach(var playerId in  playerIds)
+           {
+
+               var fantasyPoints = fcs.GetFantasyPoints(playerId, season);
+               if (fantasyPoints.TotalPoints > 0)
+               {
+                   count += fcs.InsertFantasyPoints(fantasyPoints);
+               }
+           }
+
+           System.Console.WriteLine(count + " records added");
+            */
+            
 
             //PERFORM REGRESSION (use api)
             /*
@@ -100,7 +100,7 @@ namespace DataUpload
                 }
             }
             */
-
+            /*
             PredictionService ps = new();
             MatrixService ms = new();
             FantasyService fs = new();
@@ -116,7 +116,11 @@ namespace DataUpload
                     System.Console.WriteLine("Name: " + name + " Projection " + results[i]);
                 }
             }
-           
+           */
+            /*
+            FantasyService service = new();
+            service.RefreshFantasyByPosition("RB");
+            */
             return 1;
         }
     }

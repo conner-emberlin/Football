@@ -12,6 +12,15 @@ namespace Football.Services
 {
     public  class PerformRegressionService : IPerformRegressionService
     {
+        public readonly IRegressionModelService _regressionModelService;
+        public readonly IFantasyService _fantasyService;
+        public readonly IMatrixService _matrixService;
+        public PerformRegressionService(IRegressionModelService regressionModelService, IFantasyService fantasyService, IMatrixService matrixService) 
+        { 
+            _regressionModelService = regressionModelService;
+            _fantasyService = fantasyService;
+            _matrixService = matrixService;
+        }
         public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents)
         {
             var vec = MultipleRegression.NormalEquations(regressors, dependents);
@@ -20,34 +29,30 @@ namespace Football.Services
 
         public Vector<double> PerformRegression(int season, string position)
         {
-            RegressionModelService regressionModelService = new();
-            FantasyService fantasyService = new();
-            MatrixService matrixService = new();
-
-            var fantasyPoints = regressionModelService.PopulateFantasyResults(season, position);
+            var fantasyPoints = _regressionModelService.PopulateFantasyResults(season, position);
             switch(position.ToUpper())
             {
                 case "QB":
                     List<RegressionModelQB> qbs = new();
                     foreach (var fp in fantasyPoints)
                     {
-                        qbs.Add(regressionModelService.PopulateRegressionModelQB(fp.PlayerId, season));
+                        qbs.Add(_regressionModelService.PopulateRegressionModelQB(fp.PlayerId, season));
                     }
-                    return CholeskyDecomposition(matrixService.PopulateQbRegressorMatrix(qbs), matrixService.PopulateDependentVector(fantasyPoints));
+                    return CholeskyDecomposition(_matrixService.PopulateQbRegressorMatrix(qbs), _matrixService.PopulateDependentVector(fantasyPoints));
                 case "RB":
                     List<RegressionModelRB> rbs = new();
                     foreach(var fp in fantasyPoints)
                     {
-                        rbs.Add(regressionModelService.PopulateRegressionModelRb(fp.PlayerId, season));
+                        rbs.Add(_regressionModelService.PopulateRegressionModelRb(fp.PlayerId, season));
                     }
-                    return CholeskyDecomposition(matrixService.PopulateRbRegressorMatrix(rbs), matrixService.PopulateDependentVector(fantasyPoints));
+                    return CholeskyDecomposition(_matrixService.PopulateRbRegressorMatrix(rbs), _matrixService.PopulateDependentVector(fantasyPoints));
                 case "WR/TE":
                     List<RegressionModelPassCatchers> passCatchers = new();
                     foreach (var fp in fantasyPoints)
                     {
-                        passCatchers.Add(regressionModelService.PopulateRegressionModelPassCatchers(fp.PlayerId, season));
+                        passCatchers.Add(_regressionModelService.PopulateRegressionModelPassCatchers(fp.PlayerId, season));
                     }
-                    return CholeskyDecomposition(matrixService.PopulatePassCatchersRegressorMatrix(passCatchers), matrixService.PopulateDependentVector(fantasyPoints));
+                    return CholeskyDecomposition(_matrixService.PopulatePassCatchersRegressorMatrix(passCatchers), _matrixService.PopulateDependentVector(fantasyPoints));
                 default: throw new NotImplementedException();
             }
         }

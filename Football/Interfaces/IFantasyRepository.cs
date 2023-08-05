@@ -1,29 +1,28 @@
-﻿using System;
+﻿using Football.Models;
+using Football.Services;
+using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Football.Models;
-using Football.Repository;
-using MathNet.Numerics.LinearAlgebra;
 
 namespace Football.Interfaces
 {
-    public interface IFantasyService
+    public interface IFantasyRepository
     {
-        public double CalculateTotalPoints(int playerId, int season);
-        public double CalculatePassingPoints(int playerId, int season);
-        public double CalculateRushingPoints(int playerId, int season);
-        public double CalculateReceivingPoints(int playerId, int season);
-        public FantasyPoints GetFantasyPoints(int playerId, int season);
-        public int InsertFantasyPoints(FantasyPoints fantasyPoints);
-        public List<int> GetPlayerIdsByFantasySeason(int season);
+        public FantasyPassing GetFantasyPassing(int playerId, int season);
+        public FantasyRushing GetFantasyRushing(int playerId, int season);
+        public FantasyReceiving GetFantasyReceiving(int playerId, int season);
+        public List<int> GetPlayers();
         public string GetPlayerPosition(int playerId);
         public List<int> GetPlayersByPosition(string position);
+        public int InsertFantasyPoints(FantasyPoints fantasyPoints);
         public FantasyPoints GetFantasyResults(int playerId, int season);
+        public List<int> GetPlayerIdsByFantasySeason(int season);
         public (int, int) RefreshFantasyResults(FantasyPoints fantasyPoints);
         public List<int> GetActiveSeasons(int playerId);
-        public double GetAverageTotalGames(int playerId);
+        public double GetAverageTotalGames(int playerId, string position);
         public List<int> GetActivePassingSeasons(int playerId);
         public List<int> GetActiveRushingSeasons(int playerId);
         public List<int> GetActiveReceivingSeasons(int playerId);

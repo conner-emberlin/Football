@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Server.IIS.Core;
 
 namespace Football.Api.Helpers
 {
-    public class ServiceHelper
+    public class ServiceHelper : IServiceHelper
     {
         public string TransformPosition(int pos)
         {
