@@ -145,5 +145,26 @@ namespace Football.Services
             return $@"SELECT [Games] FROM [dbo].Receiving WHERE [PlayerId] = @playerId";
         }
 
+        public string GetPlayerName()
+        {
+            return $@"SELECT [Name] FROM [dbo].Players WHERE [PlayerId] = @playerId";
+        }
+
+        public string IsPlayerActive()
+        {
+            return $@"SELECT [Active] FROM [dbo].Players WHERE [PlayerId] = @playerId";
+        }
+
+        public string GetPlayerTeam()
+        {
+            return $@"WITH allSeasons AS(
+                        SELECT [PlayerId], [Team], [Season] FROM [dbo].Passing
+                        UNION (SELECT [PlayerId], [Team], [Season] FROM [dbo].Receiving)
+                        UNION (SELECT [PlayerId], [Team], [Season] FROM [dbo].Rushing))
+                        SELECT [Team] FROM allSeasons a
+                        WHERE [Season] = (Select MAX(a1.Season) from allSeasons a1 where a.PlayerId = a1.playerId)
+                        and a.PlayerId = @playerId";
+        }
+
     }
 }

@@ -157,5 +157,29 @@ namespace Football.Repository
             using var con = new SqlConnection(connection);
             return con.Query<int>(query, new { playerId }).ToList();
         }
+
+        public string GetPlayerName(int playerId)
+        {
+            SqlQueryService sql = new();
+            var query = sql.GetPlayerName();
+            using var con = new SqlConnection(connection);
+            return con.Query<string>(query, new { playerId }).FirstOrDefault().ToString();
+        }
+
+        public bool IsPlayerActive(int playerId)
+        {
+            SqlQueryService sql = new();
+            var query = sql.IsPlayerActive();
+            using var con = new SqlConnection(connection);
+            return con.Query<int>(query, new {playerId}).FirstOrDefault() == 1;
+        }
+
+        public string GetPlayerTeam(int playerId)
+        {
+            SqlQueryService sql = new();
+            var query = sql.GetPlayerTeam();
+            using var con = new SqlConnection(connection);
+            return con.Query<string>(query, new {playerId}).FirstOrDefault().ToString();
+        }
     }
 }

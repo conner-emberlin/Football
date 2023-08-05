@@ -122,5 +122,23 @@ namespace Football.Services
             FantasyRepository fantasyRepository = new();
             return fantasyRepository.GetActiveReceivingSeasons(playerId);
         }
+
+        public string GetPlayerName(int playerId)
+        {
+            FantasyRepository fantasyRepository = new();
+            return fantasyRepository.GetPlayerName(playerId);
+        }
+
+        public bool IsPlayerActive(int playerId)
+        {
+            FantasyRepository fantasyRepository = new();
+            return fantasyRepository.IsPlayerActive(playerId);
+        }
+
+        public string GetPlayerTeam(int playerId)
+        {
+            FantasyRepository fantasyRepository = new();
+            return fantasyRepository.GetPlayerTeam(playerId);
+        }
     }
 }

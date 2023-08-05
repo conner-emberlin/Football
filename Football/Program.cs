@@ -2,6 +2,7 @@
 using Football.Models;
 using Football.Repository;
 using Football.Services;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace DataUpload
 {
@@ -101,7 +102,20 @@ namespace DataUpload
             */
 
             PredictionService ps = new();
-             System.Console.WriteLine(ps.PerformPredictedRegression("RB"));
+            MatrixService ms = new();
+            FantasyService fs = new();
+            var qbs = ps.AverageProjectedModelRB();
+            var model = ms.PopulateRbRegressorMatrix(qbs);
+            var results = ps.PerformPrediction(model, ps.PerformPredictedRegression("RB"));
+            for (int i = 0; i < results.Count; i++)
+            {
+                var qb = qbs.ElementAt(i);
+                if (fs.IsPlayerActive(qb.PlayerId)){
+                    var id = qb.PlayerId;
+                    var name = fs.GetPlayerName(id);
+                    System.Console.WriteLine("Name: " + name + " Projection " + results[i]);
+                }
+            }
            
             return 1;
         }
