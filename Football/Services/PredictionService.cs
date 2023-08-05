@@ -309,7 +309,7 @@ namespace Football.Services
                             });
                         }
                     }
-                    return projection.OrderByDescending(p => p.ProjectedPoints);
+                    return projection.OrderByDescending(p => p.ProjectedPoints).Take(24);
                     break;
                 case "RB":
                     var rbs = AverageProjectedModelRB();
@@ -330,7 +330,7 @@ namespace Football.Services
                             });
                         }
                     }
-                    return projection.OrderByDescending(p => p.ProjectedPoints);
+                    return projection.OrderByDescending(p => p.ProjectedPoints).Take(36);
                     break;
                 case "WR/TE":
                     var pcs = AverageProjectedModelPassCatchers();
@@ -351,7 +351,7 @@ namespace Football.Services
                             });
                         }
                     }
-                    return projection.OrderByDescending(p => p.ProjectedPoints);
+                    return projection.OrderByDescending(p => p.ProjectedPoints).Take(50);
                     break;
                 default: return null; ;
 
