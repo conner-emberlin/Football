@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using Football.Models;
+using Football.Interfaces;
 
 namespace Football.Services
 {
-    internal class DataUploadService
+    internal class DataUploadService : IDataUploadService
     {
         private readonly string connection = "Data Source =(LocalDb)\\MSSQLLocalDB; Initial Catalog = Football; Integrated Security=true;";
             public List<PassingStatistic> PassingStatFileUpload(string filepath)

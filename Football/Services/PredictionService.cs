@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Diagnostics.Contracts;
 using System.Reflection;
+using Football.Interfaces;
 
 
 namespace Football.Services
 {
-    public class PredictionService
+    public class PredictionService : IPredictionService
     {
         private readonly int currentSeason = 2023;
         private readonly List<int> pastSeasons = new List<int>{ 2018, 2019, 2020, 2021, 2022 };

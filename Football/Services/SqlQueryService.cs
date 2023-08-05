@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using Dapper;
 using System.Globalization;
+using Football.Interfaces;
 
 namespace Football.Services
 {
-    public class SqlQueryService
+    public class SqlQueryService : ISqlService
     {
         public string GetQueryString(string type)
         {

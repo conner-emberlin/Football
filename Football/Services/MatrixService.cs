@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using Football.Models;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Factorization;
+using Football.Interfaces;
 
 
 namespace Football.Services
 {
-    public class MatrixService
+    public class MatrixService : IMatrixService
     {
         public Matrix<double> PopulatePassCatchersRegressorMatrix(List<RegressionModelPassCatchers> model)
         {
@@ -102,7 +103,7 @@ namespace Football.Services
             vec[5] = model.TouchdownsPerGame;
             return vec;
         }
-        private Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount)
+        public Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount)
         {
             var matrix = Matrix<double>.Build.Dense(rowCount, columnCount);
             

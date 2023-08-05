@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Football.Interfaces;
 using Football.Models;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearRegression;
 
 namespace Football.Services
 {
-    public  class PerformRegressionService
+    public  class PerformRegressionService : IPerformRegressionService
     {
         public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents)
         {

@@ -6,11 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Football.Models;
 using Football.Repository;
-
+using Football.Interfaces;
 
 namespace Football.Services
 {
-    public class RegressionModelService
+    public class RegressionModelService : IRegressionModelService
     {
         public RegressionModelQB PopulateRegressionModelQB(int playerId, int season)
         {
