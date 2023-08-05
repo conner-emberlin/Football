@@ -8,7 +8,7 @@ using Football.Models;
 
 namespace Football.Interfaces
 {
-    public interface ISqlService
+    public interface ISqlQueryService
     {
         public string GetQueryString(string type);
 

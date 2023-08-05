@@ -11,7 +11,7 @@ using Football.Interfaces;
 
 namespace Football.Services
 {
-    public class SqlQueryService : ISqlService
+    public class SqlQueryService : ISqlQueryService
     {
         public string GetQueryString(string type)
         {
