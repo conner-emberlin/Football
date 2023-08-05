@@ -25,6 +25,8 @@ builder.Services.AddScoped<IRegressionModelService, RegressionModelService>();
 builder.Services.AddScoped<IServiceHelper, ServiceHelper>();
 builder.Services.AddScoped<IFantasyRepository, FantasyRepository>();
 builder.Services.AddScoped<IRegressionModelRepository, RegressionModelRepository>();
+builder.Services.AddScoped<IDataUploadService, DataUploadService>();
+builder.Services.AddScoped<IDataUploadRepository, DataUploadRepository>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 var app = builder.Build();
 
