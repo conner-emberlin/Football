@@ -8,6 +8,7 @@ using Football.Services;
 using System.Data.SqlClient;
 using Dapper;
 using Football.Interfaces;
+using System.Data;
 
 namespace Football.Repository
 {
@@ -15,30 +16,29 @@ namespace Football.Repository
     {
         private readonly string connection = "Data Source =(LocalDb)\\MSSQLLocalDB; Initial Catalog = Football; Integrated Security=true;";
         public readonly ISqlQueryService _sqlQueryService;
+        public readonly IDbConnection _dbConnection;
 
-        public RegressionModelRepository(ISqlQueryService sqlQueryService)
+        public RegressionModelRepository(ISqlQueryService sqlQueryService, IDbConnection dbConnection)
         {
             _sqlQueryService = sqlQueryService;
+            _dbConnection = dbConnection;
         }
         public PassingStatistic GetPassingStatistic(int playerId, int season)
         {
             var query = _sqlQueryService.GetPassingStatistic();
-            using var con = new SqlConnection(connection);
-            return con.Query<PassingStatistic>(query, new {season, playerId}).ToList().FirstOrDefault();
+            return _dbConnection.Query<PassingStatistic>(query, new {season, playerId}).ToList().FirstOrDefault();
         }
 
         public RushingStatistic GetRushingStatistic(int playerId, int season)
         {
             var query = _sqlQueryService.GetRushingStatistic();
-            using var con = new SqlConnection(connection);
-            return con.Query<RushingStatistic>(query, new { season, playerId }).ToList().FirstOrDefault();
+            return _dbConnection.Query<RushingStatistic>(query, new { season, playerId }).ToList().FirstOrDefault();
         }
 
         public ReceivingStatistic GetReceivingStatistic(int playerId, int season)
         {
             var query = _sqlQueryService.GetReceivingStatistic();
-            using var con = new SqlConnection(connection);
-            return con.Query<ReceivingStatistic>(query, new {season, playerId}).ToList().FirstOrDefault();
+            return _dbConnection.Query<ReceivingStatistic>(query, new {season, playerId}).ToList().FirstOrDefault();
         }
     }
 }
