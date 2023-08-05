@@ -6,17 +6,11 @@ using System.Runtime.CompilerServices;
 using System.Data;
 using System.Data.SqlClient;
 
-var allowedOrigins = "_allowedOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
 
 //inject connection string to controllers
 string dboFoootballConnectionString = builder.Configuration.GetConnectionString("dboFootballConnectionString");
-
-//allow redirects to UI url
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: allowedOrigins, policy => policy.WithOrigins("https://localhost:44480/"));
-});
 
 // Add services to the container.
 builder.Services.AddControllers();
