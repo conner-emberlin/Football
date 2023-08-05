@@ -13,10 +13,12 @@ namespace Football.Api.Controllers
     {
         public readonly IFantasyService _fantasyService;
         public readonly IPredictionService _predictionService;
-        public PredictionController(IFantasyService fantasyService, IPredictionService predictionService)
+        public readonly IServiceHelper _serviceHelper;
+        public PredictionController(IFantasyService fantasyService, IPredictionService predictionService, IServiceHelper serviceHelper)
         {
             _fantasyService = fantasyService;
             _predictionService = predictionService;
+            _serviceHelper = serviceHelper;
         }
         [HttpGet("model-error/{playerId}")]
         [ProducesResponseType(typeof(List<int>), 200)]
@@ -31,9 +33,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public ActionResult<IEnumerable<ProjectionModel>> GetProjection(int position)
         {
-            ServiceHelper help = new();
-            var pos = help.TransformPosition(position);
-            return Ok(_predictionService.GetProjections(pos));
+            return Ok(_predictionService.GetProjections(_serviceHelper.TransformPosition(position);));
         }
     }
 }

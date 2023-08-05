@@ -15,21 +15,21 @@ namespace Football.Api.Controllers
         public readonly IPerformRegressionService _performRegressionService;
         public readonly IRegressionModelService _regressionModelService;
         public readonly IMatrixService _matrixService;
+        public readonly IServiceHelper _serviceHelper;
         public RegressionController(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService,
-            IMatrixService matrixService)
+            IMatrixService matrixService, IServiceHelper serviceHelper)
         {
             _performRegressionService = performRegressionService;
             _regressionModelService = regressionModelService;
             _matrixService = matrixService;
+            _serviceHelper = serviceHelper;
         }
         [HttpGet("{season}/{pos}")]
         [ProducesResponseType(typeof(Vector<double>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public ActionResult<Vector<double>> GetRegressionNormal(int season, int pos)
-        {
-            ServiceHelper serviceHelper = new();
-            string position = serviceHelper.TransformPosition(pos);           
-            return Ok(_performRegressionService.PerformRegression(season, position));
+        {       
+            return Ok(_performRegressionService.PerformRegression(season, _serviceHelper.TransformPosition(pos)));
         }
 
         [HttpGet("mse/{season}/{pos}")]
@@ -37,8 +37,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public ActionResult<double> GetMSE(int season, int pos)
         {
-            ServiceHelper serviceHelper = new();
-            string position = serviceHelper.TransformPosition(pos);
+            string position = _serviceHelper.TransformPosition(pos);
             var fantasyResults = _regressionModelService.PopulateFantasyResults(season, position);
             var coefficients = _performRegressionService.PerformRegression(season, position);
             var actual = _matrixService.PopulateDependentVector(fantasyResults);

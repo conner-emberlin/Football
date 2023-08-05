@@ -12,9 +12,11 @@ namespace Football.Api.Controllers
     public class FantasyController : ControllerBase
     {
         public readonly IFantasyService _fantasyService;
-        public FantasyController(IFantasyService fantasyService)
+        public readonly IServiceHelper _serviceHelper;
+        public FantasyController(IFantasyService fantasyService, IServiceHelper serviceHelper)
         {
             _fantasyService = fantasyService;
+            _serviceHelper = serviceHelper;
         }
         //POST fantasy results for a season/position (delete existing ones for the season/position)
         [HttpPost("refresh/{playerId}/{season}")]
