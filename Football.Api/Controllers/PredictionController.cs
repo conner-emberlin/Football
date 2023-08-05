@@ -33,7 +33,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public ActionResult<IEnumerable<ProjectionModel>> GetProjection(int position)
         {
-            return Ok(_predictionService.GetProjections(_serviceHelper.TransformPosition(position);));
+            return Ok(_predictionService.GetProjections(_serviceHelper.TransformPosition(position)));
         }
     }
 }
