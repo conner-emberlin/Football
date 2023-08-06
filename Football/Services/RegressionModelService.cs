@@ -20,10 +20,10 @@ namespace Football.Services
             _regressionModelRepository = regressionModelRepository;
         } 
         
-        public RegressionModelQB PopulateRegressionModelQB(int playerId, int season)
+        public async Task<RegressionModelQB> PopulateRegressionModelQB(int playerId, int season)
         {
-            PassingStatistic? passingStat = GetPassingStatistic(playerId, season);
-            RushingStatistic? rushingStat = GetRushingStatistic(playerId, season);
+            PassingStatistic? passingStat = await GetPassingStatistic(playerId, season);
+            RushingStatistic? rushingStat = await GetRushingStatistic(playerId, season);
             var dataP = passingStat != null;
             var dataR = rushingStat != null;
             return new RegressionModelQB
@@ -40,10 +40,10 @@ namespace Football.Services
             };         
         }
 
-        public RegressionModelRB PopulateRegressionModelRb(int playerId, int season)
+        public async Task<RegressionModelRB> PopulateRegressionModelRb(int playerId, int season)
         { 
-            RushingStatistic? rushingStat = GetRushingStatistic(playerId, season);
-            ReceivingStatistic? receivingStat = GetReceivingStatistic(playerId, season);
+            RushingStatistic? rushingStat = await GetRushingStatistic(playerId, season);
+            ReceivingStatistic? receivingStat = await GetReceivingStatistic(playerId, season);
             var dataRush = rushingStat != null;
             var dataRec = receivingStat != null;
             return new RegressionModelRB
@@ -60,9 +60,9 @@ namespace Football.Services
             };
         }
 
-        public RegressionModelPassCatchers PopulateRegressionModelPassCatchers(int playerId, int season)
+        public async Task<RegressionModelPassCatchers> PopulateRegressionModelPassCatchers(int playerId, int season)
         {
-            ReceivingStatistic? receivingStat = GetReceivingStatistic(playerId,season);
+            ReceivingStatistic? receivingStat = await GetReceivingStatistic(playerId,season);
             var data = receivingStat != null;
             return new RegressionModelPassCatchers
             {
@@ -76,13 +76,22 @@ namespace Football.Services
             };
         }
 
-        public List<FantasyPoints> PopulateFantasyResults(int season, string position)
+        public async Task<List<FantasyPoints>> PopulateFantasyResults(int season, string position)
         {
             List<FantasyPoints> fantasyPoints = new();
-            List<int> playerIds = _fantasyService.GetPlayerIdsByFantasySeason(season).Where(x => _fantasyService.GetPlayerPosition(x) == position).ToList();
+            List<int> playerIds = new();
+            var players = await _fantasyService.GetPlayerIdsByFantasySeason(season);
+            foreach(var p in players)
+            {
+                var playerPosition = await _fantasyService.GetPlayerPosition(p);
+                if(playerPosition == position)
+                {
+                    playerIds.Add(p);
+                }
+            }
             foreach (var p in playerIds)
             {
-                var pts = _fantasyService.GetFantasyResults(p, season);
+                var pts = await _fantasyService.GetFantasyResults(p, season);
                 if (pts != null)
                 {
                     fantasyPoints.Add(pts);
@@ -91,19 +100,19 @@ namespace Football.Services
             return fantasyPoints;
         }
 
-        public PassingStatistic GetPassingStatistic(int playerId, int season)
+        public async Task<PassingStatistic> GetPassingStatistic(int playerId, int season)
         {
-            return _regressionModelRepository.GetPassingStatistic(playerId, season);
+            return await _regressionModelRepository.GetPassingStatistic(playerId, season);
         }
 
-        public RushingStatistic GetRushingStatistic(int playerId, int season)
+        public async Task<RushingStatistic> GetRushingStatistic(int playerId, int season)
         {
-            return _regressionModelRepository.GetRushingStatistic(playerId, season);
+            return await _regressionModelRepository.GetRushingStatistic(playerId, season);
         }
 
-        public ReceivingStatistic GetReceivingStatistic(int playerId, int season)
+        public async Task<ReceivingStatistic> GetReceivingStatistic(int playerId, int season)
         {
-            return _regressionModelRepository.GetReceivingStatistic(playerId, season);
+            return await _regressionModelRepository.GetReceivingStatistic(playerId, season);
         }
     }
 }

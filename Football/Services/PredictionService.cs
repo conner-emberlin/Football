@@ -30,90 +30,109 @@ namespace Football.Services
             _matrixService = matrixService;
             _fantasyService = fantasyService;
         }
-        public List<double> ModelErrorPerSeason(int playerId, string position)
+        public async Task<List<double>> ModelErrorPerSeason(int playerId, string position)
         {
             List<double> errors = new();          
             List<Vector<double>> regressions = new();
             List<double> actualPoints = new();
-            var seasons = _fantasyService.GetActiveSeasons(playerId);
+            var seasons = await _fantasyService.GetActiveSeasons(playerId);
             switch (position)
             {
                 case "QB":
                     List<RegressionModelQB> models = new();                    
                     foreach (var season in seasons)
                     {
-                        models.Add(_regressionModelService.PopulateRegressionModelQB(playerId, season));                                                                    
-                        regressions.Add(_performRegressionService.PerformRegression(season, position));
-                        actualPoints.Add(_fantasyService.GetFantasyResults(playerId, season).TotalPoints);
+                        models.Add(await _regressionModelService.PopulateRegressionModelQB(playerId, season));                                                                    
+                        regressions.Add(await _performRegressionService.PerformRegression(season, position));
+                        var results = await _fantasyService.GetFantasyResults(playerId, season);
+                        actualPoints.Add(results.TotalPoints);
                     }
                     var modelVectors = models.Select(m => _matrixService.TransformQbModel(m));
                     for (int i = 0; i < seasons.Count - 1; i++)
                     {
                             errors.Add(modelVectors.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
-                    }
-                    return errors;                                             
+                    }                                           
                     break;
                 case "RB":
                     List<RegressionModelRB> modelsR = new();
                     foreach (var season in seasons)
                     {
-                        modelsR.Add(_regressionModelService.PopulateRegressionModelRb(playerId, season));
-                        regressions.Add(_performRegressionService.PerformRegression(season, position));
-                        actualPoints.Add(_fantasyService.GetFantasyResults(playerId, season).TotalPoints);
+                        modelsR.Add(await _regressionModelService.PopulateRegressionModelRb(playerId, season));
+                        regressions.Add(await _performRegressionService.PerformRegression(season, position));
+                        var results = await _fantasyService.GetFantasyResults(playerId, season);
+                        actualPoints.Add(results.TotalPoints);
                     }
                     var modelVectorsR = modelsR.Select(m => _matrixService.TransformRbModel(m));
                     for (int i = 0; i < seasons.Count - 1; i++)
                     {
                         errors.Add(modelVectorsR.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
                     }
-                    return errors;
                     break;
                 case "WR/TE":
                     List<RegressionModelPassCatchers> modelsP = new();
                     foreach (var season in seasons)
                     {
-                        modelsP.Add(_regressionModelService.PopulateRegressionModelPassCatchers(playerId, season));
-                        regressions.Add(_performRegressionService.PerformRegression(season, position));
-                        actualPoints.Add(_fantasyService.GetFantasyResults(playerId, season).TotalPoints);
+                        modelsP.Add(await _regressionModelService.PopulateRegressionModelPassCatchers(playerId, season));
+                        regressions.Add(await _performRegressionService.PerformRegression(season, position));
+                        var results = await _fantasyService.GetFantasyResults(playerId, season);
+                        actualPoints.Add(results.TotalPoints);
                     }
                     var modelVectorsP = modelsP.Select(m => _matrixService.TransformPassCatchersModel(m));
                     for (int i = 0; i < seasons.Count - 1; i++)
                     {
                         errors.Add(modelVectorsP.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
                     }
-                    return errors;
                     break;
-                default: return null;
-            }          
+                default: 
+                    errors.Add(0);
+                    break;
+            }
+            return errors;
         }
 
-        public PassingStatistic CalculateAveragePassingStats(int playerId)
+        public async Task<PassingStatistic> CalculateAveragePassingStats(int playerId)
         {
-            var seasons = _fantasyService.GetActivePassingSeasons(playerId);          
-            var passingSeasonsStats = seasons.Select(s => _regressionModelService.GetPassingStatistic(playerId, s)).ToList();
-            var averageGames = passingSeasonsStats.Select(x => x.Games).DefaultIfEmpty(0).Average();
+            var seasons = await _fantasyService.GetActivePassingSeasons(playerId);
+            List<PassingStatistic> passingSeasonStats = new();
+            foreach(var s in seasons)
+            {
+                var stat = await _regressionModelService.GetPassingStatistic(playerId, s);
+                if (stat != null)
+                {
+                    passingSeasonStats.Add(stat);
+                }
+            }
+            var averageGames = passingSeasonStats.Select(x => x.Games).DefaultIfEmpty(0).Average();
             return new PassingStatistic
             {
-                Name = passingSeasonsStats[0].Name,
-                Team = passingSeasonsStats[seasons.Count-1].Team,
-                Age = passingSeasonsStats[seasons.Count - 1].Age,
+                Name = passingSeasonStats[0].Name,
+                Team = passingSeasonStats[seasons.Count-1].Team,
+                Age = passingSeasonStats[seasons.Count - 1].Age,
                 Games = averageGames,
-                Completions = ProjectStatToFullSeason(averageGames, passingSeasonsStats.Select(x => x.Completions).DefaultIfEmpty(0).Average()),
-                Attempts = ProjectStatToFullSeason(averageGames, passingSeasonsStats.Select(x => x.Attempts).DefaultIfEmpty(0).Average()),
-                Yards = ProjectStatToFullSeason(averageGames, passingSeasonsStats.Select(x => x.Yards).DefaultIfEmpty(0).Average()),
-                Touchdowns = ProjectStatToFullSeason(averageGames,passingSeasonsStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average()),
-                Interceptions = ProjectStatToFullSeason(averageGames,passingSeasonsStats.Select(x => x.Interceptions).DefaultIfEmpty(0).Average()),
-                FirstDowns = ProjectStatToFullSeason(averageGames,passingSeasonsStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average()),
-                Long = ProjectStatToFullSeason(averageGames,passingSeasonsStats.Select(x => x.Long).DefaultIfEmpty(0).Average()),
-                Sacks = ProjectStatToFullSeason(averageGames,passingSeasonsStats.Select(x => x.Sacks).DefaultIfEmpty(0).Average()),
-                SackYards = ProjectStatToFullSeason(averageGames,passingSeasonsStats.Select(x => x.SackYards).DefaultIfEmpty(0).Average())
+                Completions = ProjectStatToFullSeason(averageGames, passingSeasonStats.Select(x => x.Completions).DefaultIfEmpty(0).Average()),
+                Attempts = ProjectStatToFullSeason(averageGames, passingSeasonStats.Select(x => x.Attempts).DefaultIfEmpty(0).Average()),
+                Yards = ProjectStatToFullSeason(averageGames, passingSeasonStats.Select(x => x.Yards).DefaultIfEmpty(0).Average()),
+                Touchdowns = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average()),
+                Interceptions = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.Interceptions).DefaultIfEmpty(0).Average()),
+                FirstDowns = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average()),
+                Long = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.Long).DefaultIfEmpty(0).Average()),
+                Sacks = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.Sacks).DefaultIfEmpty(0).Average()),
+                SackYards = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.SackYards).DefaultIfEmpty(0).Average())
             };
         }
 
-        public RushingStatistic CalculateAverageRushingStats(int playerId)
+        public async Task<RushingStatistic> CalculateAverageRushingStats(int playerId)
         {
-            var seasons = _fantasyService.GetActiveRushingSeasons(playerId);
-            var rushingSeasonsStats = seasons.Select(s => _regressionModelService.GetRushingStatistic(playerId, s)).ToList();
+            var seasons = await _fantasyService.GetActiveRushingSeasons(playerId);
+            List<RushingStatistic> rushingSeasonsStats = new();
+            foreach (var s in seasons)
+            {
+                var stat = await _regressionModelService.GetRushingStatistic(playerId, s);
+                if (stat != null)
+                {
+                    rushingSeasonsStats.Add(stat);
+                }
+            }
             var averageGames = rushingSeasonsStats.Select(x => x.Games).DefaultIfEmpty(0).Average();
             return new RushingStatistic
             {
@@ -130,10 +149,18 @@ namespace Football.Services
             };
         }
 
-        public ReceivingStatistic CalculateAverageReceivingStats(int playerId)
+        public async Task<ReceivingStatistic> CalculateAverageReceivingStats(int playerId)
         {
-            var seasons = _fantasyService.GetActiveReceivingSeasons(playerId);
-            var receivingSeasonStats = seasons.Select(seasons => _regressionModelService.GetReceivingStatistic(playerId, seasons)).ToList();
+            var seasons = await _fantasyService.GetActiveReceivingSeasons(playerId);
+            List<ReceivingStatistic>  receivingSeasonStats = new();
+            foreach (var s in seasons)
+            {
+                var stat = await _regressionModelService.GetReceivingStatistic(playerId, s);
+                if (stat != null)
+                {
+                    receivingSeasonStats.Add(stat);
+                }
+            }
             var averageGames = receivingSeasonStats.Select(x => x.Games).DefaultIfEmpty(0).Average();
             return  new ReceivingStatistic
             {
@@ -208,12 +235,17 @@ namespace Football.Services
             };
         }
 
-        public FantasyPoints CalculateProjectedAverageFantasyPoints(int playerId)
+        public async Task<FantasyPoints> CalculateProjectedAverageFantasyPoints(int playerId)
         {
-            var activeSeasons = _fantasyService.GetActiveSeasons(playerId);
-            var fantasyBySeason = activeSeasons.Select(s => _fantasyService.GetFantasyPoints(playerId, s)).ToList();
+            var activeSeasons = await _fantasyService.GetActiveSeasons(playerId);
+            List<FantasyPoints> fantasyBySeason = new();
+            foreach(var s in activeSeasons)
+            {
+                var season = await _fantasyService.GetFantasyPoints(playerId, s);
+                fantasyBySeason.Add(season);
+            }
             var averageFp = fantasyBySeason.Select(x => x.TotalPoints).DefaultIfEmpty(0).Average();
-            var averageGames = _fantasyService.GetAverageTotalGames(playerId);
+            var averageGames = await _fantasyService.GetAverageTotalGames(playerId);
             return new FantasyPoints
             {
                 PlayerId = playerId,
@@ -221,55 +253,84 @@ namespace Football.Services
             };
         }
 
-        public List<FantasyPoints> AverageProjectedFantasyByPosition(string position)
+        public async Task<List<FantasyPoints>> AverageProjectedFantasyByPosition(string position)
         {
-            var players = _fantasyService.GetPlayersByPosition(position);
-            return players.Select(x => CalculateProjectedAverageFantasyPoints(x)).ToList();
+            var players = await _fantasyService.GetPlayersByPosition(position);
+            List<FantasyPoints> projectedAverage = new();
+            foreach(var p in players)
+            {
+                var projected = await CalculateProjectedAverageFantasyPoints(p);
+                projectedAverage.Add(projected);
+            }
+            return projectedAverage;
         }
 
-        public List<RegressionModelQB> AverageProjectedModelQB()
+        public async Task<List<RegressionModelQB>> AverageProjectedModelQB()
         {
-            var players = _fantasyService.GetPlayersByPosition("QB");
-            return players.Select(x => PopulateProjectedAverageModelQB(CalculateAveragePassingStats(x), CalculateAverageRushingStats(x), x)).ToList();           
+            var players = await _fantasyService.GetPlayersByPosition("QB");
+            List<RegressionModelQB> regressionModel = new();
+            foreach(var p in players)
+            {
+                var projectedAveragePassing = await CalculateAveragePassingStats(p);
+                var projectedAverageRushing = await CalculateAverageRushingStats(p);
+                var model = PopulateProjectedAverageModelQB(projectedAveragePassing, projectedAverageRushing, p);
+                regressionModel.Add(model);
+            }
+            return regressionModel;          
         }
 
-        public List<RegressionModelRB> AverageProjectedModelRB()
+        public async Task<List<RegressionModelRB>> AverageProjectedModelRB()
         {
-            var players = _fantasyService.GetPlayersByPosition("RB");
-            return players.Select(x => PopulateProjectedAverageModelRB(CalculateAverageRushingStats(x), CalculateAverageReceivingStats(x), x)).ToList();
-
+            var players = await _fantasyService.GetPlayersByPosition("RB");
+            List<RegressionModelRB> regressionModel = new();
+            foreach(var p in players)
+            {
+                var projectedAverageRushing = await CalculateAverageRushingStats(p);
+                var projectedAverageReceiving = await CalculateAverageReceivingStats(p);
+                var model = PopulateProjectedAverageModelRB(projectedAverageRushing,projectedAverageReceiving, p);
+                regressionModel.Add(model);
+            }
+            return regressionModel;
         }
 
-        public List<RegressionModelPassCatchers> AverageProjectedModelPassCatchers()
+        public async Task<List<RegressionModelPassCatchers>> AverageProjectedModelPassCatchers()
         {
-            var players = _fantasyService.GetPlayersByPosition("WR/TE");
-            return players.Select(x => PopulateProjectedAverageModelPassCatchers(CalculateAverageReceivingStats(x), x)).ToList();
+            var players = await _fantasyService.GetPlayersByPosition("WR/TE");
+            List<RegressionModelPassCatchers> regressionModel = new();
+            foreach(var p in players)
+            {
+                var projectedAverageReceiving = await CalculateAverageReceivingStats(p);
+                var model = PopulateProjectedAverageModelPassCatchers(projectedAverageReceiving, p);
+                regressionModel.Add(model);
+            }
+            return regressionModel;
         }
 
-        public Vector<double> PerformPredictedRegression(string position)
+        public async Task<Vector<double>> PerformPredictedRegression(string position)
         {
             switch (position)
             {
                 case "QB":
-                    var modelQB = AverageProjectedModelQB();
-                    var modelQBFpts = AverageProjectedFantasyByPosition("QB");
+                    var modelQB = await AverageProjectedModelQB();
+                    var modelQBFpts = await AverageProjectedFantasyByPosition("QB");
                     var regressorMatrix = _matrixService.PopulateQbRegressorMatrix(modelQB);
                     var dependentVector = _matrixService.PopulateDependentVector(modelQBFpts);
                     return _performRegressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
-                    break;
                 case "RB":
-                    var modelRB = AverageProjectedModelRB();
-                    var modelRBFpts = AverageProjectedFantasyByPosition("RB");
+                    var modelRB = await AverageProjectedModelRB();
+                    var modelRBFpts = await AverageProjectedFantasyByPosition("RB");
                     var regressorMatrixRB = _matrixService.PopulateRbRegressorMatrix(modelRB);
                     var dependentVectorRB = _matrixService.PopulateDependentVector(modelRBFpts);
                     return _performRegressionService.CholeskyDecomposition(regressorMatrixRB, dependentVectorRB);
                 case "WR/TE":
-                    var modelWR = AverageProjectedModelPassCatchers();
-                    var modelWRFpts = AverageProjectedFantasyByPosition("WR/TE");
+                    var modelWR = await AverageProjectedModelPassCatchers();
+                    var modelWRFpts = await AverageProjectedFantasyByPosition("WR/TE");
                     var regressorMatrixWR = _matrixService.PopulatePassCatchersRegressorMatrix(modelWR);
                     var dependentVectorWR = _matrixService.PopulateDependentVector(modelWRFpts);
                     return _performRegressionService.CholeskyDecomposition(regressorMatrixWR, dependentVectorWR);
-                default: return null;
+                default:
+                    Vector<double> m = Vector<double>.Build.Random(1);
+                    return m;
             }
         }
 
@@ -278,74 +339,71 @@ namespace Football.Services
             return model * coeff;
         }
 
-        public IEnumerable<ProjectionModel> GetProjections(string position)
+        public async Task<IEnumerable<ProjectionModel>> GetProjections(string position)
         {
             List<ProjectionModel> projection = new();
             switch (position)
             {
                 case "QB":
-                    var qbs = AverageProjectedModelQB();
+                    var qbs = await AverageProjectedModelQB();
                     var model = _matrixService.PopulateQbRegressorMatrix(qbs);
-                    var results = PerformPrediction(model, PerformPredictedRegression("QB")).ToList();
+                    var results = PerformPrediction(model, await PerformPredictedRegression("QB")).ToList();
                     for (int i = 0; i < results.Count; i++)
                     {
                         var qb = qbs.ElementAt(i);
-                        if (_fantasyService.IsPlayerActive(qb.PlayerId))
+                        if (await _fantasyService.IsPlayerActive(qb.PlayerId))
                         {
                             projection.Add(new ProjectionModel
                             {
                                 PlayerId = qb.PlayerId,
-                                Name = _fantasyService.GetPlayerName(qb.PlayerId),
-                                Team = _fantasyService.GetPlayerTeam(qb.PlayerId),
-                                Position = _fantasyService.GetPlayerPosition(qb.PlayerId),
+                                Name = await _fantasyService.GetPlayerName(qb.PlayerId),
+                                Team = await _fantasyService.GetPlayerTeam(qb.PlayerId),
+                                Position = await _fantasyService.GetPlayerPosition(qb.PlayerId),
                                 ProjectedPoints = results[i]
                             });
                         }
                     }
                     return projection.OrderByDescending(p => p.ProjectedPoints).Take(24);
-                    break;
                 case "RB":
-                    var rbs = AverageProjectedModelRB();
+                    var rbs = await AverageProjectedModelRB();
                     var modelRB = _matrixService.PopulateRbRegressorMatrix(rbs);
-                    var resultsRB = PerformPrediction(modelRB, PerformPredictedRegression("RB")).ToList();
+                    var resultsRB = PerformPrediction(modelRB, await PerformPredictedRegression("RB")).ToList();
                     for (int i = 0; i < resultsRB.Count; i++)
                     {
                         var rb = rbs.ElementAt(i);
-                        if (_fantasyService.IsPlayerActive(rb.PlayerId))
+                        if (await _fantasyService.IsPlayerActive(rb.PlayerId))
                         {
                             projection.Add(new ProjectionModel
                             {
                                 PlayerId = rb.PlayerId,
-                                Name = _fantasyService.GetPlayerName(rb.PlayerId),
-                                Team = _fantasyService.GetPlayerTeam(rb.PlayerId),
-                                Position = _fantasyService.GetPlayerPosition(rb.PlayerId),
+                                Name = await _fantasyService.GetPlayerName(rb.PlayerId),
+                                Team = await _fantasyService.GetPlayerTeam(rb.PlayerId),
+                                Position =await  _fantasyService.GetPlayerPosition(rb.PlayerId),
                                 ProjectedPoints = resultsRB[i]
                             });
                         }
                     }
                     return projection.OrderByDescending(p => p.ProjectedPoints).Take(36);
-                    break;
                 case "WR/TE":
-                    var pcs = AverageProjectedModelPassCatchers();
+                    var pcs = await AverageProjectedModelPassCatchers();
                     var modelPC = _matrixService.PopulatePassCatchersRegressorMatrix(pcs);
-                    var resultsPC = PerformPrediction(modelPC, PerformPredictedRegression("WR/TE")).ToList();
+                    var resultsPC = PerformPrediction(modelPC, await PerformPredictedRegression("WR/TE")).ToList();
                     for (int i = 0; i < resultsPC.Count; i++)
                     {
                         var pc = pcs.ElementAt(i);
-                        if (_fantasyService.IsPlayerActive(pc.PlayerId))
+                        if (await _fantasyService.IsPlayerActive(pc.PlayerId))
                         {
                             projection.Add(new ProjectionModel
                             {
                                 PlayerId = pc.PlayerId,
-                                Name = _fantasyService.GetPlayerName(pc.PlayerId),
-                                Team = _fantasyService.GetPlayerTeam(pc.PlayerId),
-                                Position = _fantasyService.GetPlayerPosition(pc.PlayerId),
+                                Name = await _fantasyService.GetPlayerName(pc.PlayerId),
+                                Team = await _fantasyService.GetPlayerTeam(pc.PlayerId),
+                                Position = await _fantasyService.GetPlayerPosition(pc.PlayerId),
                                 ProjectedPoints = Math.Round((double)resultsPC[i],2)
                             });
                         }
                     }
                     return projection.OrderByDescending(p => p.ProjectedPoints).Take(50);
-                    break;
                 default: return null; ;
 
             }

@@ -24,47 +24,49 @@ namespace Football.Repository
             _dbConnection = dbConnection;
         }
 
-        public FantasyPassing GetFantasyPassing(int playerId, int season)
+        public async Task<FantasyPassing> GetFantasyPassing(int playerId, int season)
         {
             var query = _sqlQueryService.FantasyPassingQuery();
-            return _dbConnection.Query<FantasyPassing>(query, new { playerId, season }).ToList().FirstOrDefault();        
+            return await _dbConnection.QueryFirstOrDefaultAsync<FantasyPassing>(query, new { playerId, season });        
         }
 
-        public FantasyRushing GetFantasyRushing(int playerId, int season)
+        public async Task<FantasyRushing> GetFantasyRushing(int playerId, int season)
         {
             var query = _sqlQueryService.FantasyRushingQuery();
-            return _dbConnection.Query<FantasyRushing>(query, new {playerId, season}).ToList().FirstOrDefault();
+            return await _dbConnection.QueryFirstOrDefaultAsync<FantasyRushing>(query, new { playerId, season });
         }
 
-        public FantasyReceiving  GetFantasyReceiving(int playerId, int season)
+        public async Task<FantasyReceiving>  GetFantasyReceiving(int playerId, int season)
         {
             var query = _sqlQueryService.FantasyReceivingQuery();
-            return _dbConnection.Query<FantasyReceiving>(query, new { playerId, season }).ToList().FirstOrDefault();
+            return await _dbConnection.QueryFirstOrDefaultAsync<FantasyReceiving>(query, new { playerId, season });
         }
 
-        public List<int> GetPlayers()
+        public async Task<List<int>> GetPlayers()
         {
             var query =_sqlQueryService.GetPlayerIds();
-            return _dbConnection.Query<int>(query).ToList();
+            var players = await _dbConnection.QueryAsync<int>(query);
+            return players.ToList();
         }
 
-        public string GetPlayerPosition(int playerId)
+        public async Task<string> GetPlayerPosition(int playerId)
         {
             var query = _sqlQueryService.GetPlayerPosition();
-            return _dbConnection.Query<string>(query, new {playerId}).ToList().FirstOrDefault();
+            return await _dbConnection.QueryFirstOrDefaultAsync<string>(query, new { playerId });
         }
 
-        public List<int> GetPlayersByPosition(string position)
+        public async Task<List<int>> GetPlayersByPosition(string position)
         {
             var query = _sqlQueryService.GetPlayersByPosition();
-            return _dbConnection.Query<int>(query, new {position}).ToList();
+            var players = await _dbConnection.QueryAsync<int>(query, new {position});
+            return players.ToList();
         }
 
-        public int InsertFantasyPoints(FantasyPoints fantasyPoints)
+        public async Task<int> InsertFantasyPoints(FantasyPoints fantasyPoints)
         {
             var query = _sqlQueryService.InsertFantasyData();
             int count = 0;
-            return count += _dbConnection.Execute(query, new
+            return count += await _dbConnection.ExecuteAsync(query, new
             {
                 fantasyPoints.Season,
                 fantasyPoints.PlayerId,
@@ -75,36 +77,38 @@ namespace Football.Repository
             });
         }
 
-        public FantasyPoints GetFantasyResults(int playerId, int season)
+        public async Task<FantasyPoints> GetFantasyResults(int playerId, int season)
         {
             var query = _sqlQueryService.GetFantasyPoints();
-            return _dbConnection.Query<FantasyPoints>(query, new {playerId, season}).ToList().FirstOrDefault();
+            return await _dbConnection.QueryFirstOrDefaultAsync<FantasyPoints>(query, new {playerId, season});
         }
 
-        public List<int> GetPlayerIdsByFantasySeason(int season)
+        public async Task<List<int>> GetPlayerIdsByFantasySeason(int season)
         {
             var query = _sqlQueryService.GetPlayerIdsByFantasySeason();
-            return _dbConnection.Query<int>(query, new {season}).ToList();
+            var players = await _dbConnection.QueryAsync<int>(query, new { season });
+            return players.ToList();
         }
 
-        public (int,int) RefreshFantasyResults(FantasyPoints fantasyPoints)
+        public async Task<(int,int)> RefreshFantasyResults(FantasyPoints fantasyPoints)
         {
             var deleteQuery = _sqlQueryService.DeleteFantasyPoints();
             int removed = 0;
             int added = 0;
-            removed += _dbConnection.Execute(deleteQuery, new { fantasyPoints.PlayerId, fantasyPoints.Season });
-            added += InsertFantasyPoints(fantasyPoints);
+            removed += await _dbConnection.ExecuteAsync(deleteQuery, new { fantasyPoints.PlayerId, fantasyPoints.Season });
+            added +=await  InsertFantasyPoints(fantasyPoints);
 
             return (removed, added);
         }
 
-        public List<int> GetActiveSeasons(int playerId)
+        public async Task<List<int>> GetActiveSeasons(int playerId)
         {
             var query = _sqlQueryService.GetSeasons();
-            return _dbConnection.Query<int>(query, new {playerId}).ToList();
+            var seasons = await _dbConnection.QueryAsync<int>(query, new {playerId});
+            return seasons.ToList();
         }
 
-        public double GetAverageTotalGames(int playerId, string position)
+        public async Task<double> GetAverageTotalGames(int playerId, string position)
         {
             string query;
             if(position == "QB")
@@ -119,43 +123,50 @@ namespace Football.Repository
             {
                 query = _sqlQueryService.GetPcGames();
             }
-            return _dbConnection.Query<int>(query, new {playerId}).DefaultIfEmpty(0).Average();
+            var nums = await _dbConnection.QueryAsync<int>(query, new { playerId });
+            return nums.DefaultIfEmpty(0).Average();
         }
 
-        public List<int> GetActivePassingSeasons(int playerId)
+        public async Task<List<int>> GetActivePassingSeasons(int playerId)
         {
             var query = _sqlQueryService.GetActivePassingSeasons();
-            return _dbConnection.Query<int>(query, new { playerId }).ToList();
+            var seasons = await _dbConnection.QueryAsync<int>(query, new { playerId });
+            return seasons.ToList();
         }
 
-        public List<int> GetActiveRushingSeasons(int playerId)
+        public async Task<List<int>> GetActiveRushingSeasons(int playerId)
         {
             var query = _sqlQueryService.GetActiveRushingSeasons();
-            return _dbConnection.Query<int>(query, new { playerId }).ToList();
+            var seasons = await _dbConnection.QueryAsync<int>(query, new { playerId });
+            return seasons.ToList();
         }
 
-        public List<int> GetActiveReceivingSeasons(int playerId)
+        public async Task<List<int>> GetActiveReceivingSeasons(int playerId)
         {
             var query = _sqlQueryService.GetActiveReceivingSeasons();
-            return _dbConnection.Query<int>(query, new { playerId }).ToList();
+            var seasons = await _dbConnection.QueryAsync<int>(query, new { playerId });
+            return seasons.ToList();
         }
 
-        public string GetPlayerName(int playerId)
+        public async Task<string> GetPlayerName(int playerId)
         {
             var query = _sqlQueryService.GetPlayerName();
-            return _dbConnection.Query<string>(query, new { playerId }).FirstOrDefault().ToString();
+            var players = await _dbConnection.QueryAsync<string>(query, new { playerId });
+            return players.FirstOrDefault().ToString();
         }
 
-        public bool IsPlayerActive(int playerId)
+        public async Task<bool> IsPlayerActive(int playerId)
         {
             var query = _sqlQueryService.IsPlayerActive();
-            return _dbConnection.Query<int>(query, new {playerId}).FirstOrDefault() == 1;
+            var truth = await _dbConnection.QueryAsync<int>(query, new { playerId });
+            return truth.FirstOrDefault() == 1;
         }
 
-        public string GetPlayerTeam(int playerId)
+        public async Task<string> GetPlayerTeam(int playerId)
         {
             var query = _sqlQueryService.GetPlayerTeam();
-            return _dbConnection.Query<string>(query, new {playerId}).FirstOrDefault().ToString();
+            var team = await _dbConnection.QueryAsync<string>(query, new { playerId });
+            return team.FirstOrDefault().ToString();
         }
     }
 }

@@ -18,14 +18,14 @@ namespace Football.Repository
             _sqlQueryService = sqlQueryService;
             _connection = dbCoonnection;
         }
-        public int PassingStatInsert(List<PassingStatistic> statistics, int season)
+        public async Task<int> PassingStatInsert(List<PassingStatistic> statistics, int season)
         {
             var query = _sqlQueryService.GetQueryString("passing");
             int count = 0;
 
             foreach (var stat in statistics)
             {
-                count += _connection.Execute(query, new
+                count += await _connection.ExecuteAsync(query, new
                 {
                     season,
                     stat.Name,
@@ -47,13 +47,13 @@ namespace Football.Repository
 
         }
 
-        public int ReceivingStatInsert(List<ReceivingStatistic> statistics, int season)
+        public async Task<int> ReceivingStatInsert(List<ReceivingStatistic> statistics, int season)
         {
             var query = _sqlQueryService.GetQueryString("receiving");
             int count = 0;
             foreach (var stat in statistics)
             {
-                count += _connection.Execute(query, new
+                count += await _connection.ExecuteAsync(query, new
                 {
                     season,
                     stat.Name,
@@ -73,13 +73,13 @@ namespace Football.Repository
             return count;
         }
 
-        public int RushingStatInsert(List<RushingStatistic> statistics, int season)
+        public async Task<int> RushingStatInsert(List<RushingStatistic> statistics, int season)
         {
             var query = _sqlQueryService.GetQueryString("rushing");
             int count = 0;
             foreach (var stat in statistics)
             {
-                count += _connection.Execute(query, new
+                count += await _connection.ExecuteAsync(query, new
                 {
                     season,
                     stat.Name,

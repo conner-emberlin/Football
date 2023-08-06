@@ -23,22 +23,22 @@ namespace Football.Repository
             _sqlQueryService = sqlQueryService;
             _dbConnection = dbConnection;
         }
-        public PassingStatistic GetPassingStatistic(int playerId, int season)
+        public async Task<PassingStatistic> GetPassingStatistic(int playerId, int season)
         {
             var query = _sqlQueryService.GetPassingStatistic();
-            return _dbConnection.Query<PassingStatistic>(query, new {season, playerId}).ToList().FirstOrDefault();
+            return await _dbConnection.QueryFirstOrDefaultAsync<PassingStatistic>(query, new {season, playerId});
         }
 
-        public RushingStatistic GetRushingStatistic(int playerId, int season)
+        public async Task<RushingStatistic> GetRushingStatistic(int playerId, int season)
         {
             var query = _sqlQueryService.GetRushingStatistic();
-            return _dbConnection.Query<RushingStatistic>(query, new { season, playerId }).ToList().FirstOrDefault();
+            return await _dbConnection.QueryFirstOrDefaultAsync<RushingStatistic>(query, new { season, playerId });
         }
 
-        public ReceivingStatistic GetReceivingStatistic(int playerId, int season)
+        public async Task<ReceivingStatistic> GetReceivingStatistic(int playerId, int season)
         {
             var query = _sqlQueryService.GetReceivingStatistic();
-            return _dbConnection.Query<ReceivingStatistic>(query, new {season, playerId}).ToList().FirstOrDefault();
+            return await _dbConnection.QueryFirstOrDefaultAsync<ReceivingStatistic>(query, new { season, playerId }); ;
         }
     }
 }

@@ -9,12 +9,11 @@ namespace Football.Interfaces
 {
     public interface IDataUploadService
     {
-        public List<PassingStatistic> PassingStatFileUpload(string file);
-        public List<ReceivingStatistic> ReceivingStatFileUpload(string file);
-        public List<RushingStatistic> RushingStatFileUpload(string file);
-        public int PassingStatInsert(List<PassingStatistic> list, int season);
-        public int ReceivingStatInsert(List<ReceivingStatistic> list, int season);
-        public int RushingStatInsert(List<RushingStatistic> list, int season);
-
+        public Task<List<PassingStatistic>> PassingStatFileUpload(string file);
+        public Task<List<ReceivingStatistic>> ReceivingStatFileUpload(string file);
+        public Task<List<RushingStatistic>> RushingStatFileUpload(string file);
+        public Task<int> PassingStatInsert(List<PassingStatistic> list, int season);
+        public Task<int> ReceivingStatInsert(List<ReceivingStatistic> list, int season);
+        public Task<int> RushingStatInsert(List<RushingStatistic> list, int season);
     }
 }

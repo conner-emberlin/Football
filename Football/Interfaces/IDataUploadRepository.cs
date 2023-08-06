@@ -10,8 +10,8 @@ namespace Football.Interfaces
 {
     public interface IDataUploadRepository
     {
-        public int PassingStatInsert(List<PassingStatistic> statistics, int season);
-        public int ReceivingStatInsert(List<ReceivingStatistic> statistics, int season);
-        public int RushingStatInsert(List<RushingStatistic> statistics, int season);
+        public Task<int> PassingStatInsert(List<PassingStatistic> statistics, int season);
+        public Task<int> ReceivingStatInsert(List<ReceivingStatistic> statistics, int season);
+        public Task<int> RushingStatInsert(List<RushingStatistic> statistics, int season);
     }
 }

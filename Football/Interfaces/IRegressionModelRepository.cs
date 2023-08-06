@@ -11,8 +11,8 @@ namespace Football.Interfaces
 {
     public interface IRegressionModelRepository
     {
-        public PassingStatistic GetPassingStatistic(int playerId, int season);
-        public RushingStatistic GetRushingStatistic(int playerId, int season);
-        public ReceivingStatistic GetReceivingStatistic(int playerId, int season);
+        public Task<PassingStatistic> GetPassingStatistic(int playerId, int season);
+        public Task<RushingStatistic> GetRushingStatistic(int playerId, int season);
+        public Task<ReceivingStatistic> GetReceivingStatistic(int playerId, int season);
     }
 }

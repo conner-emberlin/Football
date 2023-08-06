@@ -11,23 +11,23 @@ namespace Football.Interfaces
 {
     public interface IFantasyRepository
     {
-        public FantasyPassing GetFantasyPassing(int playerId, int season);
-        public FantasyRushing GetFantasyRushing(int playerId, int season);
-        public FantasyReceiving GetFantasyReceiving(int playerId, int season);
-        public List<int> GetPlayers();
-        public string GetPlayerPosition(int playerId);
-        public List<int> GetPlayersByPosition(string position);
-        public int InsertFantasyPoints(FantasyPoints fantasyPoints);
-        public FantasyPoints GetFantasyResults(int playerId, int season);
-        public List<int> GetPlayerIdsByFantasySeason(int season);
-        public (int, int) RefreshFantasyResults(FantasyPoints fantasyPoints);
-        public List<int> GetActiveSeasons(int playerId);
-        public double GetAverageTotalGames(int playerId, string position);
-        public List<int> GetActivePassingSeasons(int playerId);
-        public List<int> GetActiveRushingSeasons(int playerId);
-        public List<int> GetActiveReceivingSeasons(int playerId);
-        public string GetPlayerName(int playerId);
-        public bool IsPlayerActive(int playerId);
-        public string GetPlayerTeam(int playerId);
+        public Task<FantasyPassing> GetFantasyPassing(int playerId, int season);
+        public Task<FantasyRushing>GetFantasyRushing(int playerId, int season);
+        public Task<FantasyReceiving> GetFantasyReceiving(int playerId, int season);
+        public Task<List<int>> GetPlayers();
+        public Task<string> GetPlayerPosition(int playerId);
+        public Task<List<int>> GetPlayersByPosition(string position);
+        public Task<int> InsertFantasyPoints(FantasyPoints fantasyPoints);
+        public Task<FantasyPoints> GetFantasyResults(int playerId, int season);
+        public Task<List<int>> GetPlayerIdsByFantasySeason(int season);
+        public Task<(int, int)> RefreshFantasyResults(FantasyPoints fantasyPoints);
+        public Task<List<int>> GetActiveSeasons(int playerId);
+        public Task<double> GetAverageTotalGames(int playerId, string position);
+        public Task<List<int>> GetActivePassingSeasons(int playerId);
+        public Task<List<int>> GetActiveRushingSeasons(int playerId);
+        public Task<List<int>> GetActiveReceivingSeasons(int playerId);
+        public Task<string> GetPlayerName(int playerId);
+        public Task<bool> IsPlayerActive(int playerId);
+        public Task<string>GetPlayerTeam(int playerId);
     }
 }

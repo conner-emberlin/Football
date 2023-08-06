@@ -27,30 +27,30 @@ namespace Football.Services
             return vec;
         }
 
-        public Vector<double> PerformRegression(int season, string position)
+        public async Task<Vector<double>> PerformRegression(int season, string position)
         {
-            var fantasyPoints = _regressionModelService.PopulateFantasyResults(season, position);
+            var fantasyPoints = await _regressionModelService.PopulateFantasyResults(season, position);
             switch(position.ToUpper())
             {
                 case "QB":
                     List<RegressionModelQB> qbs = new();
                     foreach (var fp in fantasyPoints)
                     {
-                        qbs.Add(_regressionModelService.PopulateRegressionModelQB(fp.PlayerId, season));
+                        qbs.Add(await _regressionModelService.PopulateRegressionModelQB(fp.PlayerId, season));
                     }
                     return CholeskyDecomposition(_matrixService.PopulateQbRegressorMatrix(qbs), _matrixService.PopulateDependentVector(fantasyPoints));
                 case "RB":
                     List<RegressionModelRB> rbs = new();
                     foreach(var fp in fantasyPoints)
                     {
-                        rbs.Add(_regressionModelService.PopulateRegressionModelRb(fp.PlayerId, season));
+                        rbs.Add(await _regressionModelService.PopulateRegressionModelRb(fp.PlayerId, season));
                     }
                     return CholeskyDecomposition(_matrixService.PopulateRbRegressorMatrix(rbs), _matrixService.PopulateDependentVector(fantasyPoints));
                 case "WR/TE":
                     List<RegressionModelPassCatchers> passCatchers = new();
                     foreach (var fp in fantasyPoints)
                     {
-                        passCatchers.Add(_regressionModelService.PopulateRegressionModelPassCatchers(fp.PlayerId, season));
+                        passCatchers.Add(await _regressionModelService.PopulateRegressionModelPassCatchers(fp.PlayerId, season));
                     }
                     return CholeskyDecomposition(_matrixService.PopulatePassCatchersRegressorMatrix(passCatchers), _matrixService.PopulateDependentVector(fantasyPoints));
                 default: throw new NotImplementedException();

@@ -23,17 +23,17 @@ namespace Football.Api.Controllers
         [HttpGet("model-error/{playerId}")]
         [ProducesResponseType(typeof(List<int>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public ActionResult<List<double>> GetModelErrorByPlayer(int playerId)
+        public async Task<ActionResult<List<double>>> GetModelErrorByPlayer(int playerId)
         {
-            return _predictionService.ModelErrorPerSeason(playerId, _fantasyService.GetPlayerPosition(playerId));
+            return await _predictionService.ModelErrorPerSeason(playerId, await _fantasyService.GetPlayerPosition(playerId));
         }
 
         [HttpGet("{position}")]
         [ProducesResponseType(typeof(List<int>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public ActionResult<IEnumerable<ProjectionModel>> GetProjection(int position)
+        public async Task<ActionResult<IEnumerable<ProjectionModel>>> GetProjection(int position)
         {
-            return Ok(_predictionService.GetProjections(_serviceHelper.TransformPosition(position)));
+            return Ok(await _predictionService.GetProjections(_serviceHelper.TransformPosition(position)));
         }
     }
 }

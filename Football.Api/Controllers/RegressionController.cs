@@ -27,36 +27,58 @@ namespace Football.Api.Controllers
         [HttpGet("{season}/{pos}")]
         [ProducesResponseType(typeof(Vector<double>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public ActionResult<Vector<double>> GetRegressionNormal(int season, int pos)
+        public async Task<ActionResult<Vector<double>>> GetRegressionNormal(int season, int pos)
         {       
-            return Ok(_performRegressionService.PerformRegression(season, _serviceHelper.TransformPosition(pos)));
+            return Ok(await _performRegressionService.PerformRegression(season, _serviceHelper.TransformPosition(pos)));
         }
 
         [HttpGet("mse/{season}/{pos}")]
         [ProducesResponseType(typeof(double), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public ActionResult<double> GetMSE(int season, int pos)
+        public async Task<ActionResult<double>> GetMSE(int season, int pos)
         {
             string position = _serviceHelper.TransformPosition(pos);
-            var fantasyResults = _regressionModelService.PopulateFantasyResults(season, position);
-            var coefficients = _performRegressionService.PerformRegression(season, position);
+            var fantasyResults = await _regressionModelService.PopulateFantasyResults(season, position);
+            var coefficients = await _performRegressionService.PerformRegression(season, position);
             var actual = _matrixService.PopulateDependentVector(fantasyResults);
+            double mse;
             switch (pos)
             {
                 case 1:
-                    var model = _matrixService.PopulateQbRegressorMatrix(fantasyResults.Select(fr => _regressionModelService.PopulateRegressionModelQB(fr.PlayerId, fr.Season)).ToList());
-                    return Math.Round((double)_performRegressionService.CalculateMSE(actual, coefficients, model),2);
+                    List<RegressionModelQB> models = new();
+                    foreach (var fr in fantasyResults)
+                    {
+                        var model = await _regressionModelService.PopulateRegressionModelQB(fr.PlayerId, fr.Season);
+                        models.Add(model);
+                    }
+                    var regressorMatrix = _matrixService.PopulateQbRegressorMatrix(models);
+                    mse = Math.Round((double)_performRegressionService.CalculateMSE(actual, coefficients, regressorMatrix), 2);
                     break;
                 case 2:
-                    var modelR = _matrixService.PopulateRbRegressorMatrix(fantasyResults.Select(fr => _regressionModelService.PopulateRegressionModelRb(fr.PlayerId, fr.Season)).ToList());
-                    return Math.Round((double)_performRegressionService.CalculateMSE(actual, coefficients, modelR),2);
+                    List<RegressionModelRB> modelsR = new();
+                    foreach (var fr in fantasyResults)
+                    {
+                        var modelR = await _regressionModelService.PopulateRegressionModelRb(fr.PlayerId, fr.Season);
+                        modelsR.Add(modelR);
+                    }
+                    var regressorMatrixR = _matrixService.PopulateRbRegressorMatrix(modelsR);
+                    mse = Math.Round((double)_performRegressionService.CalculateMSE(actual, coefficients, regressorMatrixR), 2);
                     break;
                 case 3:
-                    var modelP = _matrixService.PopulatePassCatchersRegressorMatrix(fantasyResults.Select(fr => _regressionModelService.PopulateRegressionModelPassCatchers(fr.PlayerId, fr.Season)).ToList());
-                    return Math.Round((double)_performRegressionService.CalculateMSE(actual, coefficients, modelP),2);
+                    List<RegressionModelPassCatchers> modelsP = new();
+                    foreach (var fr in fantasyResults)
+                    {
+                        var modelP = await _regressionModelService.PopulateRegressionModelPassCatchers(fr.PlayerId, fr.Season);
+                        modelsP.Add(modelP);
+                    }
+                    var regressorMatrixP = _matrixService.PopulatePassCatchersRegressorMatrix(modelsP);
+                    mse = Math.Round((double)_performRegressionService.CalculateMSE(actual, coefficients, regressorMatrixP), 2);
                     break;
-                default: throw new NotImplementedException();
-            }         
+                default: 
+                    mse = 0;
+                    break;
+            }  
+            return mse;
         }       
     }
 }

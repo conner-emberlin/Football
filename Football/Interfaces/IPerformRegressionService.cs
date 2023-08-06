@@ -11,7 +11,7 @@ namespace Football.Interfaces
     public interface IPerformRegressionService
     {
         public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents);
-        public Vector<double> PerformRegression(int season, string position);
+        public Task<Vector<double>> PerformRegression(int season, string position);
         public double CalculateMSE(Vector<double> actual, Vector<double> coefficients, Matrix<double> model);
         public Vector<double> CalculatError(Vector<double> actual, Vector<double> coefficients, Matrix<double> model);
     }
