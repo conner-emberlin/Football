@@ -1,0 +1,59 @@
+﻿@page "/Predictions"
+<PageTitle>Predictions</PageTitle>
+<h1>Predictions</h1>
+
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Models;
+@inject IHttpClientFactory ClientFactory
+
+<h4>Select a position to view the projected 2023 rankings</h4>
+
+
+
+
+
+
+
+@if (badRequestError || players is null)
+{
+    <p>Unexpected Error. Please try again.</p>
+}
+else
+{
+    <ul>
+        @foreach (var player in players)
+        {
+            <li>@player.Name</li>
+        }
+    </ul>
+}
+
+
+
+@code {
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+    
+    private bool badRequestError;   
+    private List<ProjectionModel> players = new();
+
+    public async Task OnPlayerSelection()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Prediction/1");          
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            players = await JsonSerializer.DeserializeAsync<List<ProjectionModel>>(responseStream, options);               
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        shouldRender = true;
+    }
+}

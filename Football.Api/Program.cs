@@ -6,8 +6,16 @@ using System.Runtime.CompilerServices;
 using System.Data;
 using System.Data.SqlClient;
 
-
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("https://localhost:7176/");
+                      });
+});
 
 //inject connection string to controllers
 string dboFoootballConnectionString = builder.Configuration.GetConnectionString("dboFootballConnectionString");
@@ -28,6 +36,7 @@ builder.Services.AddScoped<IRegressionModelRepository, RegressionModelRepository
 builder.Services.AddScoped<IDataUploadService, DataUploadService>();
 builder.Services.AddScoped<IDataUploadRepository, DataUploadRepository>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
