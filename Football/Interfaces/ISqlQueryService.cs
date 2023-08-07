@@ -24,42 +24,25 @@ namespace Football.Interfaces
 
 
         public string GetPlayerPosition();
-
         public string GetPlayersByPosition();
-
         public string GetPassingStatistic();
-
-
+        public string GetPassingStatisticWithSeason();
         public string GetRushingStatistic();
-
+        public string GetRushingStatisticWithSeason();
         public string GetReceivingStatistic();
-
+        public string GetReceivingStatisticWithSeason();
         public string GetFantasyPoints();
-
         public string GetPlayerIdsByFantasySeason();
-
         public string DeleteFantasyPoints();
-
         public string GetSeasons();
-
         public string GetActivePassingSeasons();
-
         public string GetActiveRushingSeasons();
-
         public string GetActiveReceivingSeasons();
-
         public string GetQbGames();
-
         public string GetRbGames();
-
         public string GetPcGames();
-
         public string GetPlayerName();
-
-
         public string IsPlayerActive();
-
         public string GetPlayerTeam();
-
     }
 }

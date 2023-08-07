@@ -24,6 +24,11 @@ namespace Football.Models
 
     }
 
+    public class PassingStatisticWithSeason : PassingStatistic
+    {
+        public int Season { get; set; }
+    }
+
     public class ReceivingStatistic
     {
         public string Name { get; set; }
@@ -40,6 +45,10 @@ namespace Football.Models
         public double Fumbles { get; set; }
     }
 
+    public class ReceivingStatisticWithSeason : ReceivingStatistic
+    {
+        public int Season { get; set; }
+    }
     public class RushingStatistic
     {
         public string Name { get; set; }
@@ -52,5 +61,10 @@ namespace Football.Models
         public double FirstDowns { get; set; }
         public double Long { get; set; }
         public double Fumbles { get; set; }
+    }
+
+    public class RushingStatisticWithSeason : RushingStatistic
+    {
+        public int Season { get; set; }
     }
 }

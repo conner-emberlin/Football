@@ -85,15 +85,33 @@ namespace Football.Services
              FROM [dbo].Passing WHERE [Season] = @season AND [PlayerId] = @playerid";
         }
 
+        public string GetPassingStatisticWithSeason()
+        {
+            return $@"SELECT [Season], [Name], [Team], [Age], [Games], [Completions], [Attempts],
+                    [Yards], [Touchdowns], [Interceptions], [FirstDowns], [Long], [Sacks], [SackYards]
+             FROM [dbo].Passing WHERE [Season] = @season AND [PlayerId] = @playerid";
+        }
+
         public string GetRushingStatistic()
         {
             return $@"SELECT [Name], [Team], [Age], [Games], [RushAttempts], [Yards], [Touchdowns], [FirstDowns], [Long], [Fumbles]
+                FROM [dbo].Rushing WHERE [Season] = @season AND [PlayerId] = @playerId";
+        }
+        public string GetRushingStatisticWithSeason()
+        {
+            return $@"SELECT [Season], [Name], [Team], [Age], [Games], [RushAttempts], [Yards], [Touchdowns], [FirstDowns], [Long], [Fumbles]
                 FROM [dbo].Rushing WHERE [Season] = @season AND [PlayerId] = @playerId";
         }
 
         public string GetReceivingStatistic()
         { 
             return $@"SELECT [Name], [Team], [Age], [Games], [Targets], [Receptions], [Yards], [Touchdowns], [FirstDowns], [Long], [RpG], [Fumbles]
+                FROM [dbo].Receiving WHERE [Season] = @season AND [PlayerId] = @playerId";
+        }
+
+        public string GetReceivingStatisticWithSeason()
+        {
+            return $@"SELECT [Season], [Name], [Team], [Age], [Games], [Targets], [Receptions], [Yards], [Touchdowns], [FirstDowns], [Long], [RpG], [Fumbles]
                 FROM [dbo].Receiving WHERE [Season] = @season AND [PlayerId] = @playerId";
         }
 
