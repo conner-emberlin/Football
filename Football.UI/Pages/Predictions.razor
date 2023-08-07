@@ -18,9 +18,12 @@
         <label for="@position">@position</label>
     </div>
 }
+<br />
 <button @onclick = "CalculateProjections">
     Submit
 </button>
+<br/>
+<br/>
 @if (badRequestError || players is null)
 {
     <p>Unexpected Error. Please try again.</p>
