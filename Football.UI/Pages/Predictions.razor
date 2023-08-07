@@ -38,7 +38,7 @@ else
     private bool badRequestError;   
     private List<ProjectionModel> players = new();
 
-    public async Task OnPlayerSelection()
+    protected override async Task OnInitializedAsync()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Prediction/1");          
         request.Headers.Add("Accept", "application/json");
