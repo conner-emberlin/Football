@@ -109,15 +109,15 @@ namespace Football.Services
                 Team = passingSeasonStats[seasons.Count-1].Team,
                 Age = passingSeasonStats[seasons.Count - 1].Age,
                 Games = averageGames,
-                Completions = ProjectStatToFullSeason(averageGames, passingSeasonStats.Select(x => x.Completions).DefaultIfEmpty(0).Average()),
-                Attempts = ProjectStatToFullSeason(averageGames, passingSeasonStats.Select(x => x.Attempts).DefaultIfEmpty(0).Average()),
-                Yards = ProjectStatToFullSeason(averageGames, passingSeasonStats.Select(x => x.Yards).DefaultIfEmpty(0).Average()),
-                Touchdowns = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average()),
-                Interceptions = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.Interceptions).DefaultIfEmpty(0).Average()),
-                FirstDowns = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average()),
-                Long = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.Long).DefaultIfEmpty(0).Average()),
-                Sacks = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.Sacks).DefaultIfEmpty(0).Average()),
-                SackYards = ProjectStatToFullSeason(averageGames,passingSeasonStats.Select(x => x.SackYards).DefaultIfEmpty(0).Average())
+                Completions = passingSeasonStats.Select(x => x.Completions).DefaultIfEmpty(0).Average(),
+                Attempts = passingSeasonStats.Select(x => x.Attempts).DefaultIfEmpty(0).Average(),
+                Yards = passingSeasonStats.Select(x => x.Yards).DefaultIfEmpty(0).Average(),
+                Touchdowns = passingSeasonStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average(),
+                Interceptions = passingSeasonStats.Select(x => x.Interceptions).DefaultIfEmpty(0).Average(),
+                FirstDowns = passingSeasonStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average(),
+                Long = passingSeasonStats.Select(x => x.Long).DefaultIfEmpty(0).Average(),
+                Sacks = passingSeasonStats.Select(x => x.Sacks).DefaultIfEmpty(0).Average(),
+                SackYards = passingSeasonStats.Select(x => x.SackYards).DefaultIfEmpty(0).Average()
             };
         }
 
@@ -140,12 +140,12 @@ namespace Football.Services
                 Team = rushingSeasonsStats[seasons.Count - 1].Team,
                 Age = rushingSeasonsStats.Select(x => x.Games).DefaultIfEmpty(0).Average(),
                 Games = averageGames,
-                RushAttempts = ProjectStatToFullSeason(averageGames,rushingSeasonsStats.Select(x => x.RushAttempts).DefaultIfEmpty(0).Average()),
-                Yards = ProjectStatToFullSeason(averageGames, rushingSeasonsStats.Select(x => x.Yards).DefaultIfEmpty(0).Average()),
-                Touchdowns = ProjectStatToFullSeason(averageGames,rushingSeasonsStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average()),
-                FirstDowns = ProjectStatToFullSeason(averageGames,rushingSeasonsStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average()),
-                Long = ProjectStatToFullSeason(averageGames,rushingSeasonsStats.Select(x => x.Long).DefaultIfEmpty(0).Average()),
-                Fumbles = ProjectStatToFullSeason(averageGames,rushingSeasonsStats.Select(x => x.Fumbles).DefaultIfEmpty(0).Average())
+                RushAttempts = rushingSeasonsStats.Select(x => x.RushAttempts).DefaultIfEmpty(0).Average(),
+                Yards = rushingSeasonsStats.Select(x => x.Yards).DefaultIfEmpty(0).Average(),
+                Touchdowns = rushingSeasonsStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average(),
+                FirstDowns = rushingSeasonsStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average(),
+                Long = rushingSeasonsStats.Select(x => x.Long).DefaultIfEmpty(0).Average(),
+                Fumbles = rushingSeasonsStats.Select(x => x.Fumbles).DefaultIfEmpty(0).Average()
             };
         }
 
@@ -168,20 +168,15 @@ namespace Football.Services
                 Team = seasons.Count > 0 ? receivingSeasonStats[seasons.Count - 1].Team : "",
                 Age = seasons.Count > 0 ? receivingSeasonStats[seasons.Count - 1].Age : 0,
                 Games = averageGames,
-                Targets = ProjectStatToFullSeason(averageGames, receivingSeasonStats.Select(x => x.Targets).DefaultIfEmpty(0).Average()),
-                Receptions = ProjectStatToFullSeason(averageGames, receivingSeasonStats.Select(x => x.Receptions).DefaultIfEmpty(0).Average()),
-                Yards = ProjectStatToFullSeason(averageGames, receivingSeasonStats.Select(x => x.Yards).DefaultIfEmpty(0).Average()),
-                Touchdowns = ProjectStatToFullSeason(averageGames, receivingSeasonStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average()),
-                FirstDowns = ProjectStatToFullSeason(averageGames, receivingSeasonStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average()),
-                Long = ProjectStatToFullSeason(averageGames, receivingSeasonStats.Select(x => x.Long).DefaultIfEmpty(0).Average()),
-                RpG = ProjectStatToFullSeason(averageGames, receivingSeasonStats.Select(x => x.RpG).DefaultIfEmpty(0).Average()),
-                Fumbles = ProjectStatToFullSeason(averageGames, receivingSeasonStats.Select(x => x.Fumbles).DefaultIfEmpty(0).Average())
+                Targets = receivingSeasonStats.Select(x => x.Targets).DefaultIfEmpty(0).Average(),
+                Receptions = receivingSeasonStats.Select(x => x.Receptions).DefaultIfEmpty(0).Average(),
+                Yards = receivingSeasonStats.Select(x => x.Yards).DefaultIfEmpty(0).Average(),
+                Touchdowns = receivingSeasonStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average(),
+                FirstDowns = receivingSeasonStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average(),
+                Long = receivingSeasonStats.Select(x => x.Long).DefaultIfEmpty(0).Average(),
+                RpG = receivingSeasonStats.Select(x => x.RpG).DefaultIfEmpty(0).Average(),
+                Fumbles = receivingSeasonStats.Select(x => x.Fumbles).DefaultIfEmpty(0).Average()
             };
-        }
-
-        public double ProjectStatToFullSeason(double averageGames, double averageStat)
-        {   //tech debt
-            return averageStat;
         }
 
         public RegressionModelQB PopulateProjectedAverageModelQB(PassingStatistic passingStat, RushingStatistic rushingStat, int playerId)

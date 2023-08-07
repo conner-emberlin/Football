@@ -15,7 +15,6 @@ namespace Football.Interfaces
         public Task<PassingStatistic> CalculateAveragePassingStats(int playerId);
         public Task<RushingStatistic> CalculateAverageRushingStats(int playerId);
         public Task<ReceivingStatistic>  CalculateAverageReceivingStats(int playerId);
-        public double ProjectStatToFullSeason(double averageGames, double averageStat);
         public RegressionModelQB PopulateProjectedAverageModelQB(PassingStatistic passingStat, RushingStatistic rushingStat, int playerId);
         public RegressionModelRB PopulateProjectedAverageModelRB(RushingStatistic rushingStat, ReceivingStatistic receivingStat, int playerId);
         public RegressionModelPassCatchers PopulateProjectedAverageModelPassCatchers(ReceivingStatistic receivingStat, int playerId);
