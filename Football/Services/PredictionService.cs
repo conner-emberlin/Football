@@ -244,7 +244,7 @@ namespace Football.Services
             return new FantasyPoints
             {
                 PlayerId = playerId,
-                TotalPoints = ProjectStatToFullSeason(averageGames, averageFp)
+                TotalPoints = averageFp
             };
         }
 
