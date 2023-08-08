@@ -208,5 +208,14 @@ namespace Football.Services
                     Fumbles = averageFumbles
                 };           
         }
+
+        /*public async Task<FantasyPoints> FantasyWeightedAverage(int playerId, string position)
+        {
+            
+
+
+
+        }
+        */
     }
 }

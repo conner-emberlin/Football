@@ -12,5 +12,6 @@ namespace Football.Interfaces
         public Task<PassingStatistic> PassingWeightedAverage(int playerId);
         public Task<RushingStatistic> RushingWeightedAverage(int playerId);
         public Task<ReceivingStatistic> ReceivingWeightedAverage(int playerId);
+       // public Task<FantasyPoints> FantasyWeightedAversage(int playerId, string position);
     }
 }

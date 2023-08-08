@@ -150,6 +150,7 @@ namespace Football.Services
                 fantasyBySeason.Add(season);
             }
             var averageFp = fantasyBySeason.Select(x => x.TotalPoints).DefaultIfEmpty(0).Average();
+            //change this method to retrieve a list of fantasyseasongames
             var averageGames = await _fantasyService.GetAverageTotalGames(playerId);
             return new FantasyPoints
             {

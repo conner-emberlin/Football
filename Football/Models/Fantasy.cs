@@ -38,4 +38,10 @@ namespace Football.Models
         public double RushingPoints { get; set; }
         public double ReceivingPoints { get; set; }
     }
+
+    public class FantasySeasonGames
+    {
+        public int Season { get; set;}
+        public double Games { get; set;}
+    }
 }

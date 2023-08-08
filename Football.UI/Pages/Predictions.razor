@@ -33,6 +33,7 @@ else
     <table class = "table">
         <thead>
             <tr>
+                <th>Rank</th>
                 <th>Name</th>
                 <th>Team</th>
                 <th>Position</th>
@@ -40,13 +41,14 @@ else
             </tr>
         </thead>
         <tbody>
-        @foreach (var player in players)
+        @for (int i = 1; i <= players.Count; i ++)
         {
             <tr>
-            <td>@player.Name</td>
-            <td>@player.Team</td>
-            <td>@player.Position</td>
-            <td>@Math.Round((double)player.ProjectedPoints,2)</td>
+            <td>@i</td>
+            <td>@players.ElementAt(i-1).Name</td>
+            <td>@players.ElementAt(i-1).Team</td>
+            <td>@players.ElementAt(i-1).Position</td>
+            <td>@Math.Round((double)players.ElementAt(i-1).ProjectedPoints,2)</td>
             </tr>
         }
         </tbody>
