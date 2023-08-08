@@ -59,7 +59,7 @@ else
     protected override bool ShouldRender() => shouldRender;
     private bool badRequestError;   
     private List<ProjectionModel> players = new();
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Pass Catcher" };
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
 
@@ -76,13 +76,16 @@ else
             case "quarterback":
                 PositionEnum = "1";
                 break;
-                case "runningback":
+            case "runningback":
                 PositionEnum = "2";
                 break;
-                case "pass catcher":
+            case "wide receiver":
                 PositionEnum = "3";
                 break;
-                default: PositionEnum = "1"; break;
+            case "tight end":
+                PositionEnum = "4";
+                break;
+            default: PositionEnum = "1"; break;
         }
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Prediction/" + @PositionEnum);          
         request.Headers.Add("Accept", "application/json");

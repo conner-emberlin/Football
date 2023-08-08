@@ -168,5 +168,12 @@ namespace Football.Repository
             var team = await _dbConnection.QueryAsync<string>(query, new { playerId });
             return team.FirstOrDefault().ToString();
         }
+
+        public async Task<List<int>> GetTightEnds()
+        {
+            var query = _sqlQueryService.GetTightEnds();
+            var tightEnds = await _dbConnection.QueryAsync<int>(query);
+            return tightEnds.ToList();
+        }
     }
 }

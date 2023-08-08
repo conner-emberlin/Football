@@ -44,5 +44,6 @@ namespace Football.Interfaces
         public string GetPlayerName();
         public string IsPlayerActive();
         public string GetPlayerTeam();
+        public string GetTightEnds();
     }
 }

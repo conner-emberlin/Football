@@ -29,5 +29,7 @@ namespace Football.Interfaces
         public Task<string> GetPlayerName(int playerId);
         public Task<bool> IsPlayerActive(int playerId);
         public Task<string>GetPlayerTeam(int playerId);
+
+        public Task<List<int>> GetTightEnds();
     }
 }

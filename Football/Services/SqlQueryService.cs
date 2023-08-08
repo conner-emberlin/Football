@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using Dapper;
 using System.Globalization;
 using Football.Interfaces;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Football.Services
 {
@@ -184,6 +185,10 @@ namespace Football.Services
                         WHERE [Season] = (Select MAX(a1.Season) from allSeasons a1 where a.PlayerId = a1.playerId)
                         and a.PlayerId = @playerId";
         }
-
+        public string GetTightEnds()
+        {
+            return $@"SELECT [PlayerId] from [dbo].TightEnds";
+        }
+        
     }
 }
