@@ -270,7 +270,7 @@ namespace Football.Services
                             });
                         }
                     }
-                    return projection.OrderByDescending(p => p.ProjectedPoints).Take(36);
+                    return projection.OrderByDescending(p => p.ProjectedPoints).Take(24);
                 case "WR":
                 case "TE":
                     var pcs = await AverageProjectedModelPassCatchers();
