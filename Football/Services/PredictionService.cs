@@ -271,7 +271,8 @@ namespace Football.Services
                         }
                     }
                     return projection.OrderByDescending(p => p.ProjectedPoints).Take(36);
-                case "WR/TE":
+                case "WR":
+                case "TE":
                     var pcs = await AverageProjectedModelPassCatchers();
                     var modelPC = _matrixService.PopulatePassCatchersRegressorMatrix(pcs);
                     var resultsPC = PerformPrediction(modelPC, await PerformPredictedRegression("WR/TE")).ToList();
@@ -290,8 +291,30 @@ namespace Football.Services
                             });
                         }
                     }
-                    return projection.OrderByDescending(p => p.ProjectedPoints).Take(50);
-                default: return null; ;
+                    if (position == "WR") 
+                    { 
+                        foreach(var proj in projection)
+                        {
+                            proj.Position = "WR";
+                        }
+                        return projection.OrderByDescending(p => p.ProjectedPoints).Take(36); 
+                    }
+
+                    else
+                    {
+                        var tightEnds = await _fantasyService.GetTightEnds();
+                        List<ProjectionModel> tightEndsOnly = new();
+                        foreach(var proj in projection)
+                        {
+                            if (tightEnds.Contains(proj.PlayerId))
+                            {
+                                proj.Position = "TE";
+                                tightEndsOnly.Add(proj);
+                            }
+                        }
+                        return tightEndsOnly.OrderByDescending(p => p.ProjectedPoints).Take(12);
+                    }
+                        default: return null; ;
 
             }
         }

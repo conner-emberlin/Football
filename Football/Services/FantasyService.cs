@@ -131,5 +131,10 @@ namespace Football.Services
         {
             return await _fantasyRepository.GetPlayerTeam(playerId);
         }
+
+        public async Task<List<int>> GetTightEnds()
+        {
+            return await _fantasyRepository.GetTightEnds();
+        }
     }
 }
