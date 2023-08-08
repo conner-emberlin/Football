@@ -140,32 +140,13 @@ namespace Football.Services
             };
         }
 
-        public async Task<FantasyPoints> CalculateProjectedAverageFantasyPoints(int playerId)
-        {
-            var activeSeasons = await _fantasyService.GetActiveSeasons(playerId);
-            List<FantasyPoints> fantasyBySeason = new();
-            foreach(var s in activeSeasons)
-            {
-                var season = await _fantasyService.GetFantasyPoints(playerId, s);
-                fantasyBySeason.Add(season);
-            }
-            var averageFp = fantasyBySeason.Select(x => x.TotalPoints).DefaultIfEmpty(0).Average();
-            //change this method to retrieve a list of fantasyseasongames
-            var averageGames = await _fantasyService.GetAverageTotalGames(playerId);
-            return new FantasyPoints
-            {
-                PlayerId = playerId,
-                TotalPoints = averageFp
-            };
-        }
-
         public async Task<List<FantasyPoints>> AverageProjectedFantasyByPosition(string position)
         {
             var players = await _fantasyService.GetPlayersByPosition(position);
             List<FantasyPoints> projectedAverage = new();
             foreach(var p in players)
             {
-                var projected = await CalculateProjectedAverageFantasyPoints(p);
+                var projected = await _weightedAverageCalculator.FantasyWeightedAverage(p, position);
                 projectedAverage.Add(projected);
             }
             return projectedAverage;

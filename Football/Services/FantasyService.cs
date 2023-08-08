@@ -96,7 +96,7 @@ namespace Football.Services
             return await _fantasyRepository.GetActiveSeasons(playerId);
         }
 
-        public async Task<double> GetAverageTotalGames(int playerId)
+        public async Task<List<FantasySeasonGames>> GetAverageTotalGames(int playerId)
         {
             var position = await GetPlayerPosition(playerId);
             return await _fantasyRepository.GetAverageTotalGames(playerId, position);
