@@ -16,19 +16,19 @@ namespace Football.Services
     public class PredictionService : IPredictionService
     {
         private readonly int currentSeason = 2023;
-        private readonly List<int> pastSeasons = new List<int>{ 2018, 2019, 2020, 2021, 2022 };
-
         public readonly IRegressionModelService _regressionModelService;
         public readonly IPerformRegressionService _performRegressionService;
         public readonly IFantasyService _fantasyService;
         public readonly IMatrixService _matrixService;
+        public readonly IWeightedAverageCalculator _weightedAverageCalculator;
 
-        public PredictionService(IRegressionModelService regressionModelService, IPerformRegressionService performRegressionService, IFantasyService fantasyService, IMatrixService matrixService)
+        public PredictionService(IRegressionModelService regressionModelService, IPerformRegressionService performRegressionService, IFantasyService fantasyService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator)
         {
             _regressionModelService = regressionModelService;
             _performRegressionService = performRegressionService;
             _matrixService = matrixService;
             _fantasyService = fantasyService;
+            _weightedAverageCalculator = weightedAverageCalculator;
         }
         public async Task<List<double>> ModelErrorPerSeason(int playerId, string position)
         {
@@ -89,96 +89,6 @@ namespace Football.Services
             }
             return errors;
         }
-
-        public async Task<PassingStatistic> CalculateAveragePassingStats(int playerId)
-        {
-            var seasons = await _fantasyService.GetActivePassingSeasons(playerId);
-            List<PassingStatistic> passingSeasonStats = new();
-            foreach(var s in seasons)
-            {
-                var stat = await _regressionModelService.GetPassingStatistic(playerId, s);
-                if (stat != null)
-                {
-                    passingSeasonStats.Add(stat);
-                }
-            }
-            var averageGames = passingSeasonStats.Select(x => x.Games).DefaultIfEmpty(0).Average();
-            return new PassingStatistic
-            {
-                Name = passingSeasonStats[0].Name,
-                Team = passingSeasonStats[seasons.Count-1].Team,
-                Age = passingSeasonStats[seasons.Count - 1].Age,
-                Games = averageGames,
-                Completions = passingSeasonStats.Select(x => x.Completions).DefaultIfEmpty(0).Average(),
-                Attempts = passingSeasonStats.Select(x => x.Attempts).DefaultIfEmpty(0).Average(),
-                Yards = passingSeasonStats.Select(x => x.Yards).DefaultIfEmpty(0).Average(),
-                Touchdowns = passingSeasonStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average(),
-                Interceptions = passingSeasonStats.Select(x => x.Interceptions).DefaultIfEmpty(0).Average(),
-                FirstDowns = passingSeasonStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average(),
-                Long = passingSeasonStats.Select(x => x.Long).DefaultIfEmpty(0).Average(),
-                Sacks = passingSeasonStats.Select(x => x.Sacks).DefaultIfEmpty(0).Average(),
-                SackYards = passingSeasonStats.Select(x => x.SackYards).DefaultIfEmpty(0).Average()
-            };
-        }
-
-        public async Task<RushingStatistic> CalculateAverageRushingStats(int playerId)
-        {
-            var seasons = await _fantasyService.GetActiveRushingSeasons(playerId);
-            List<RushingStatistic> rushingSeasonsStats = new();
-            foreach (var s in seasons)
-            {
-                var stat = await _regressionModelService.GetRushingStatistic(playerId, s);
-                if (stat != null)
-                {
-                    rushingSeasonsStats.Add(stat);
-                }
-            }
-            var averageGames = rushingSeasonsStats.Select(x => x.Games).DefaultIfEmpty(0).Average();
-            return new RushingStatistic
-            {
-                Name = rushingSeasonsStats[0].Name,
-                Team = rushingSeasonsStats[seasons.Count - 1].Team,
-                Age = rushingSeasonsStats.Select(x => x.Games).DefaultIfEmpty(0).Average(),
-                Games = averageGames,
-                RushAttempts = rushingSeasonsStats.Select(x => x.RushAttempts).DefaultIfEmpty(0).Average(),
-                Yards = rushingSeasonsStats.Select(x => x.Yards).DefaultIfEmpty(0).Average(),
-                Touchdowns = rushingSeasonsStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average(),
-                FirstDowns = rushingSeasonsStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average(),
-                Long = rushingSeasonsStats.Select(x => x.Long).DefaultIfEmpty(0).Average(),
-                Fumbles = rushingSeasonsStats.Select(x => x.Fumbles).DefaultIfEmpty(0).Average()
-            };
-        }
-
-        public async Task<ReceivingStatistic> CalculateAverageReceivingStats(int playerId)
-        {
-            var seasons = await _fantasyService.GetActiveReceivingSeasons(playerId);
-            List<ReceivingStatistic>  receivingSeasonStats = new();
-            foreach (var s in seasons)
-            {
-                var stat = await _regressionModelService.GetReceivingStatistic(playerId, s);
-                if (stat != null)
-                {
-                    receivingSeasonStats.Add(stat);
-                }
-            }
-            var averageGames = receivingSeasonStats.Select(x => x.Games).DefaultIfEmpty(0).Average();
-            return  new ReceivingStatistic
-            {
-                Name = seasons.Count > 0 ? receivingSeasonStats[0].Name : "",
-                Team = seasons.Count > 0 ? receivingSeasonStats[seasons.Count - 1].Team : "",
-                Age = seasons.Count > 0 ? receivingSeasonStats[seasons.Count - 1].Age : 0,
-                Games = averageGames,
-                Targets = receivingSeasonStats.Select(x => x.Targets).DefaultIfEmpty(0).Average(),
-                Receptions = receivingSeasonStats.Select(x => x.Receptions).DefaultIfEmpty(0).Average(),
-                Yards = receivingSeasonStats.Select(x => x.Yards).DefaultIfEmpty(0).Average(),
-                Touchdowns = receivingSeasonStats.Select(x => x.Touchdowns).DefaultIfEmpty(0).Average(),
-                FirstDowns = receivingSeasonStats.Select(x => x.FirstDowns).DefaultIfEmpty(0).Average(),
-                Long = receivingSeasonStats.Select(x => x.Long).DefaultIfEmpty(0).Average(),
-                RpG = receivingSeasonStats.Select(x => x.RpG).DefaultIfEmpty(0).Average(),
-                Fumbles = receivingSeasonStats.Select(x => x.Fumbles).DefaultIfEmpty(0).Average()
-            };
-        }
-
         public RegressionModelQB PopulateProjectedAverageModelQB(PassingStatistic passingStat, RushingStatistic rushingStat, int playerId)
         {
             var dataP = passingStat != null;
@@ -266,8 +176,8 @@ namespace Football.Services
             List<RegressionModelQB> regressionModel = new();
             foreach(var p in players)
             {
-                var projectedAveragePassing = await CalculateAveragePassingStats(p);
-                var projectedAverageRushing = await CalculateAverageRushingStats(p);
+                var projectedAveragePassing = await _weightedAverageCalculator.PassingWeightedAverage(p);
+                var projectedAverageRushing = await _weightedAverageCalculator.RushingWeightedAverage(p);
                 var model = PopulateProjectedAverageModelQB(projectedAveragePassing, projectedAverageRushing, p);
                 regressionModel.Add(model);
             }
@@ -280,8 +190,8 @@ namespace Football.Services
             List<RegressionModelRB> regressionModel = new();
             foreach(var p in players)
             {
-                var projectedAverageRushing = await CalculateAverageRushingStats(p);
-                var projectedAverageReceiving = await CalculateAverageReceivingStats(p);
+                var projectedAverageRushing = await _weightedAverageCalculator.RushingWeightedAverage(p);
+                var projectedAverageReceiving = await _weightedAverageCalculator.ReceivingWeightedAverage(p);
                 var model = PopulateProjectedAverageModelRB(projectedAverageRushing,projectedAverageReceiving, p);
                 regressionModel.Add(model);
             }
@@ -294,7 +204,7 @@ namespace Football.Services
             List<RegressionModelPassCatchers> regressionModel = new();
             foreach(var p in players)
             {
-                var projectedAverageReceiving = await CalculateAverageReceivingStats(p);
+                var projectedAverageReceiving = await _weightedAverageCalculator.ReceivingWeightedAverage(p);
                 var model = PopulateProjectedAverageModelPassCatchers(projectedAverageReceiving, p);
                 regressionModel.Add(model);
             }

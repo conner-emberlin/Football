@@ -12,9 +12,6 @@ namespace Football.Interfaces
     public interface IPredictionService {
 
         public Task<List<double>> ModelErrorPerSeason(int playerId, string position);
-        public Task<PassingStatistic> CalculateAveragePassingStats(int playerId);
-        public Task<RushingStatistic> CalculateAverageRushingStats(int playerId);
-        public Task<ReceivingStatistic>  CalculateAverageReceivingStats(int playerId);
         public RegressionModelQB PopulateProjectedAverageModelQB(PassingStatistic passingStat, RushingStatistic rushingStat, int playerId);
         public RegressionModelRB PopulateProjectedAverageModelRB(RushingStatistic rushingStat, ReceivingStatistic receivingStat, int playerId);
         public RegressionModelPassCatchers PopulateProjectedAverageModelPassCatchers(ReceivingStatistic receivingStat, int playerId);

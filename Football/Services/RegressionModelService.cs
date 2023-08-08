@@ -105,14 +105,28 @@ namespace Football.Services
             return await _regressionModelRepository.GetPassingStatistic(playerId, season);
         }
 
+        public async Task<PassingStatisticWithSeason> GetPassingStatisticWithSeason(int playerId, int season)
+        {
+            return await _regressionModelRepository.GetPassingStatisticWithSeason(playerId, season);
+        }
+
         public async Task<RushingStatistic> GetRushingStatistic(int playerId, int season)
         {
             return await _regressionModelRepository.GetRushingStatistic(playerId, season);
         }
 
+        public async Task<RushingStatisticWithSeason> GetRushingStatisticWithSeason(int playerId, int season)
+        {
+            return await _regressionModelRepository.GetRushingStatisticWithSeason(playerId, season);
+        }
+
         public async Task<ReceivingStatistic> GetReceivingStatistic(int playerId, int season)
         {
             return await _regressionModelRepository.GetReceivingStatistic(playerId, season);
+        }
+        public async Task<ReceivingStatisticWithSeason> GetReceivingStatisticWithSeason(int playerId, int season)
+        {
+            return await _regressionModelRepository.GetReceivingStatisticWithSeason(playerId, season);
         }
     }
 }

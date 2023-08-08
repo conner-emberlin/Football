@@ -29,16 +29,34 @@ namespace Football.Repository
             return await _dbConnection.QueryFirstOrDefaultAsync<PassingStatistic>(query, new {season, playerId});
         }
 
+        public async Task<PassingStatisticWithSeason> GetPassingStatisticWithSeason(int playerId, int season)
+        {
+            var query = _sqlQueryService.GetPassingStatisticWithSeason();
+            return await _dbConnection.QueryFirstOrDefaultAsync<PassingStatisticWithSeason>(query, new {season, playerId});
+        }
+
         public async Task<RushingStatistic> GetRushingStatistic(int playerId, int season)
         {
             var query = _sqlQueryService.GetRushingStatistic();
             return await _dbConnection.QueryFirstOrDefaultAsync<RushingStatistic>(query, new { season, playerId });
         }
 
+        public async Task<RushingStatisticWithSeason> GetRushingStatisticWithSeason(int playerId, int season)
+        {
+            var query = _sqlQueryService.GetRushingStatisticWithSeason();
+            return await _dbConnection.QueryFirstOrDefaultAsync<RushingStatisticWithSeason>(query, new { season, playerId });
+        }
+
         public async Task<ReceivingStatistic> GetReceivingStatistic(int playerId, int season)
         {
             var query = _sqlQueryService.GetReceivingStatistic();
             return await _dbConnection.QueryFirstOrDefaultAsync<ReceivingStatistic>(query, new { season, playerId }); ;
+        }
+
+        public async Task<ReceivingStatisticWithSeason> GetReceivingStatisticWithSeason(int playerId, int season)
+        {
+            var query = _sqlQueryService.GetReceivingStatisticWithSeason();
+            return await _dbConnection.QueryFirstOrDefaultAsync<ReceivingStatisticWithSeason>(query, new { season, playerId });
         }
     }
 }
