@@ -108,7 +108,7 @@ namespace Football.Repository
             return seasons.ToList();
         }
 
-        public async Task<double> GetAverageTotalGames(int playerId, string position)
+        public async Task<List<FantasySeasonGames>> GetAverageTotalGames(int playerId, string position)
         {
             string query;
             if(position == "QB")
@@ -123,8 +123,8 @@ namespace Football.Repository
             {
                 query = _sqlQueryService.GetPcGames();
             }
-            var nums = await _dbConnection.QueryAsync<int>(query, new { playerId });
-            return nums.DefaultIfEmpty(0).Average();
+            var games = await _dbConnection.QueryAsync<FantasySeasonGames>(query, new { playerId });
+            return games.ToList();
         }
 
         public async Task<List<int>> GetActivePassingSeasons(int playerId)

@@ -209,13 +209,33 @@ namespace Football.Services
                 };           
         }
 
-        /*public async Task<FantasyPoints> FantasyWeightedAverage(int playerId, string position)
+        public async Task<FantasyPoints> FantasyWeightedAverage(int playerId, string position)
         {
+            //get fantasy seasons
+            var fantasySeasons = await _fantasyService.GetAverageTotalGames(playerId);
+            double averageTotalPoints = 0;
+            var maxSeason = fantasySeasons.OrderByDescending(f => f.Season).FirstOrDefault().Season;
+            double maxSeasonWeight = fantasySeasons.Count > 1 ? (double)2 / (double)3 : 1;
+            double previousSeasonCount = fantasySeasons.Count - 1;
+            double previousSeasonWeight = fantasySeasons.Count > 1 ? (((double)1 / (double)3) * ((double)1 / previousSeasonCount)) : 0;
             
+            foreach (var fs in fantasySeasons)
+            {
+                //get fantasy points for the season
+                var fantasyPoints = await _fantasyService.GetFantasyPoints(playerId, fs.Season);
+                if(fs.Games < 17)
+                {
+                    //get average and add it on
+                    fantasyPoints.TotalPoints += (fantasyPoints.TotalPoints / fs.Games) * (17 - fs.Games);
+                }
+                averageTotalPoints += fantasyPoints.Season == maxSeason ? maxSeasonWeight * fantasyPoints.TotalPoints : previousSeasonWeight * fantasyPoints.TotalPoints;
+            }
 
-
-
-        }
-        */
+            return new FantasyPoints
+            {
+                PlayerId = playerId,
+                TotalPoints = averageTotalPoints
+            };
+        }        
     }
 }
