@@ -21,5 +21,6 @@ namespace Football.Interfaces
         public Task<List<RegressionModelPassCatchers>> AverageProjectedModelPassCatchers();
         public Vector<double> PerformPrediction(Matrix<double> model, Vector<double> coeff);
         public Task<IEnumerable<ProjectionModel>> GetProjections(string position);
+        public Task<int> InsertFantasyProjections(string position);
     }
 }

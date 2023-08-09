@@ -34,6 +34,7 @@ namespace Football.Services
             }
         }
 
+
         public string FantasyPassingQuery()
         {
             return $@"SELECT [PlayerId], [Season], [Yards], [Touchdowns], [Interceptions] 
@@ -188,6 +189,11 @@ namespace Football.Services
         public string GetTightEnds()
         {
             return $@"SELECT [PlayerId] from [dbo].TightEnds";
+        }
+        public string InsertFantasyProjections()
+        {
+            return $@"INSERT INTO [dbo].FantasyProjections (Season, PlayerId, Name, Position, Rank, ProjectedPoints) VALUES
+                    (@season, @playerid, @name, @position, @rank, @projectedpoints)";
         }
         
     }

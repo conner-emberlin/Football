@@ -175,5 +175,20 @@ namespace Football.Repository
             var tightEnds = await _dbConnection.QueryAsync<int>(query);
             return tightEnds.ToList();
         }
+        public async Task<int> InsertFantasyProjections(int rank, ProjectionModel proj)
+        {            
+            var query = _sqlQueryService.InsertFantasyProjections();
+            int season = 2023;
+            return await _dbConnection.ExecuteAsync(query, new
+            {
+                season,
+                proj.PlayerId,
+                proj.Name,
+                proj.Position,
+                rank,
+                ProjectedPoints = Math.Round((double)proj.ProjectedPoints)
+            });
+        }
+
     }
 }
