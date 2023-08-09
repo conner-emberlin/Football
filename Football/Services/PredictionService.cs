@@ -276,6 +276,10 @@ namespace Football.Services
                     var pcs = await AverageProjectedModelPassCatchers();
                     var modelPC = _matrixService.PopulatePassCatchersRegressorMatrix(pcs);
                     var resultsPC = PerformPrediction(modelPC, await PerformPredictedRegression("WR/TE")).ToList();
+
+                    var tightEnds = await _fantasyService.GetTightEnds();
+                    List<ProjectionModel> tightEndsOnly = new();
+                    List<ProjectionModel> wideReceiversOnly = new();
                     for (int i = 0; i < resultsPC.Count; i++)
                     {
                         var pc = pcs.ElementAt(i);
@@ -295,15 +299,16 @@ namespace Football.Services
                     { 
                         foreach(var proj in projection)
                         {
-                            proj.Position = "WR";
+                            if (!tightEnds.Contains(proj.PlayerId))
+                            {
+                                proj.Position = "WR";
+                                wideReceiversOnly.Add(proj);
+                            }                            
                         }
-                        return projection.OrderByDescending(p => p.ProjectedPoints).Take(36); 
+                        return wideReceiversOnly.OrderByDescending(p => p.ProjectedPoints).Take(36); 
                     }
-
                     else
-                    {
-                        var tightEnds = await _fantasyService.GetTightEnds();
-                        List<ProjectionModel> tightEndsOnly = new();
+                    {                                                
                         foreach(var proj in projection)
                         {
                             if (tightEnds.Contains(proj.PlayerId))
@@ -315,7 +320,6 @@ namespace Football.Services
                         return tightEndsOnly.OrderByDescending(p => p.ProjectedPoints).Take(12);
                     }
                         default: return null; ;
-
             }
         }
     }
