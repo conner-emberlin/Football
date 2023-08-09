@@ -35,5 +35,14 @@ namespace Football.Api.Controllers
         {
             return Ok(await _predictionService.GetProjections(_serviceHelper.TransformPosition(position)));
         }
+
+        [HttpPost("upload/{position}")]
+        [ProducesResponseType(typeof(List<int>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> InsertFantasyProjections(int position)
+        {
+            return Ok(await _predictionService.InsertFantasyProjections(_serviceHelper.TransformPosition(position)));
+        }
+
     }
 }

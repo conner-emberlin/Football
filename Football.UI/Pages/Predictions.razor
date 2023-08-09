@@ -30,6 +30,14 @@
 }
 else
 {
+    <button @onclick="UploadProjections">
+        Upload
+    </button>
+    @if(count > 0)
+    {
+        <p>@count records added </p>
+    }
+    <br/>
     <table class = "table">
         <thead>
             <tr>
@@ -62,8 +70,22 @@ else
     private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
+    int count = 0;
 
+    public async Task UploadProjections()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Prediction/upload/" + @PositionEnum);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            count  = await JsonSerializer.DeserializeAsync<int>(responseStream, options);
 
+        }
+    }
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();

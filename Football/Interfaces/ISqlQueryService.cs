@@ -45,5 +45,6 @@ namespace Football.Interfaces
         public string IsPlayerActive();
         public string GetPlayerTeam();
         public string GetTightEnds();
+        public string InsertFantasyProjections();
     }
 }

@@ -31,5 +31,6 @@ namespace Football.Interfaces
         public Task<bool> IsPlayerActive(int playerId);
         public Task<string> GetPlayerTeam(int playerId);
         public Task<List<int>> GetTightEnds();
+        public Task<int> InsertFantasyProjections(int rank, ProjectionModel proj);
     }
 }

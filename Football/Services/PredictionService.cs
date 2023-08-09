@@ -322,5 +322,17 @@ namespace Football.Services
                         default: return null; ;
             }
         }
+        public async Task<int> InsertFantasyProjections(string position)
+        {
+            int rank = 1;
+            int count = 0;
+            var projections = await GetProjections(position);
+            foreach (var proj in projections)
+            {
+                count += await _fantasyService.InsertFantasyProjections(rank, proj);
+                rank++;
+            }
+            return count;
+        }
     }
 }

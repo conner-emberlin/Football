@@ -136,5 +136,9 @@ namespace Football.Services
         {
             return await _fantasyRepository.GetTightEnds();
         }
+        public async Task<int> InsertFantasyProjections(int rank, ProjectionModel proj)
+        {
+            return await _fantasyRepository.InsertFantasyProjections(rank, proj);
+        }
     }
 }
