@@ -27,6 +27,7 @@ namespace Football.Models
     {
         public int PlayerId { get; set; }
         public int Season { get; set; }
+        public double Age { get; set; }
         public double RushingAttemptsPerGame { get; set; }
         public double RushingYardsPerGame { get; set; }
         public double RushingYardsPerAttempt { get; set; }

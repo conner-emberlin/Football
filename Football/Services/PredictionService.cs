@@ -115,6 +115,7 @@ namespace Football.Services
             {
                 PlayerId = playerId,
                 Season = currentSeason,
+                Age = dataRush ? rushingStat.Age : 0,
                 RushingAttemptsPerGame = dataRush ? Math.Round((double)(rushingStat.RushAttempts / rushingStat.Games), 4) : 0,
                 RushingYardsPerGame = dataRush ? Math.Round((double)(rushingStat.Yards / rushingStat.Games), 4) : 0,
                 RushingYardsPerAttempt = dataRush ? Math.Round((double)(rushingStat.Yards / rushingStat.RushAttempts), 4) : 0,
