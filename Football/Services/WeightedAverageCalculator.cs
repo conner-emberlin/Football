@@ -69,7 +69,7 @@ namespace Football.Services
             {
                 Name = passingSeasonStats.ElementAt(passingSeasonStats.Count()-1).Name,
                 Team = passingSeasonStats.ElementAt(passingSeasonStats.Count()-1).Team,
-                Age = passingSeasonStats.ElementAt(passingSeasonStats.Count() - 1).Age,
+                Age = passingSeasonStats.ElementAt(passingSeasonStats.Count() - 1).Age + 1,
                 Games = 17,
                 Completions = averageCompletions,
                 Attempts = averageAttempts,
@@ -132,7 +132,7 @@ namespace Football.Services
             {
                 Name = rushingSeasonsStats.ElementAt(rushingSeasonsStats.Count() - 1).Name,
                 Team = rushingSeasonsStats.ElementAt(rushingSeasonsStats.Count() - 1).Team,
-                Age = rushingSeasonsStats.ElementAt(rushingSeasonsStats.Count() - 1).Age,
+                Age = rushingSeasonsStats.ElementAt(rushingSeasonsStats.Count() - 1).Age + 1,
                 Games = 17,
                 RushAttempts = averageRushAttempts,
                 Yards = averageYards,
@@ -196,7 +196,7 @@ namespace Football.Services
                 {
                     Name = receivingSeasonStats.ElementAt(receivingSeasonStats.Count() - 1).Name,
                     Team = receivingSeasonStats.ElementAt(receivingSeasonStats.Count() - 1).Team,
-                    Age = receivingSeasonStats.ElementAt(receivingSeasonStats.Count() - 1).Age,
+                    Age = receivingSeasonStats.ElementAt(receivingSeasonStats.Count() - 1).Age + 1,
                     Games = 17,
                     Targets = averageTargets,
                     Receptions = averageReceptions,
