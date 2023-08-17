@@ -9,6 +9,8 @@ using System.Data;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using Football.Interfaces;
+using Serilog.Sinks.File;
+using Serilog;
 
 
 namespace Football.Services
@@ -156,8 +158,12 @@ namespace Football.Services
         {
             var players = await _fantasyService.GetPlayersByPosition("QB");
             List<RegressionModelQB> regressionModel = new();
-            foreach(var p in players)
+            var logger = new LoggerConfiguration().WriteTo.File("LOG.txt", rollingInterval: RollingInterval.Infinite).CreateLogger();
+            foreach (var p in players)
             {
+                
+                logger.Information("Calculating passing weighted average for {playerid}\r\n", p);
+
                 var projectedAveragePassing = await _weightedAverageCalculator.PassingWeightedAverage(p);
                 var projectedAverageRushing = await _weightedAverageCalculator.RushingWeightedAverage(p);
                 var model = PopulateProjectedAverageModelQB(projectedAveragePassing, projectedAverageRushing, p);
