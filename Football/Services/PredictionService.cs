@@ -11,7 +11,7 @@ using System.Reflection;
 using Football.Interfaces;
 using Serilog.Sinks.File;
 using Serilog;
-
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Football.Services
 {
@@ -24,8 +24,9 @@ namespace Football.Services
         public readonly IMatrixService _matrixService;
         public readonly IWeightedAverageCalculator _weightedAverageCalculator;
         private readonly ILogger _logger;
+        private readonly IMemoryCache _cache;
 
-        public PredictionService(IRegressionModelService regressionModelService, IPerformRegressionService performRegressionService, IFantasyService fantasyService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, ILogger logger)
+        public PredictionService(IRegressionModelService regressionModelService, IPerformRegressionService performRegressionService, IFantasyService fantasyService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, ILogger logger, IMemoryCache cache)
         {
             _regressionModelService = regressionModelService;
             _performRegressionService = performRegressionService;
@@ -33,6 +34,7 @@ namespace Football.Services
             _fantasyService = fantasyService;
             _weightedAverageCalculator = weightedAverageCalculator;
             _logger = logger;
+            _cache = cache;
         }
         public async Task<List<double>> ModelErrorPerSeason(int playerId, string position)
         {
@@ -89,6 +91,7 @@ namespace Football.Services
                     break;
                 default: 
                     errors.Add(0);
+                    _logger.Error("Invalid position. Check data");
                     break;
             }
             return errors;
@@ -240,94 +243,138 @@ namespace Football.Services
             switch (position)
             {
                 case "QB":
-                    var qbs = await AverageProjectedModelQB();
-                    var model = _matrixService.PopulateQbRegressorMatrix(qbs);
-                    var results = PerformPrediction(model, await PerformPredictedRegression("QB")).ToList();
-                    for (int i = 0; i < results.Count; i++)
+                    _logger.Information("Getting QB Projections");
+                    if (_cache.TryGetValue("QbProjections", out IEnumerable<ProjectionModel> projectionModelQb))
                     {
-                        var qb = qbs.ElementAt(i);
-                        if (await _fantasyService.IsPlayerActive(qb.PlayerId))
-                        {
-                            projection.Add(new ProjectionModel
-                            {
-                                PlayerId = qb.PlayerId,
-                                Name = await _fantasyService.GetPlayerName(qb.PlayerId),
-                                Team = await _fantasyService.GetPlayerTeam(qb.PlayerId),
-                                Position = await _fantasyService.GetPlayerPosition(qb.PlayerId),
-                                ProjectedPoints = results[i]
-                            });
-                        }
-                    }
-                    return projection.OrderByDescending(p => p.ProjectedPoints).Take(24);
-                case "RB":
-                    var rbs = await AverageProjectedModelRB();
-                    var modelRB = _matrixService.PopulateRbRegressorMatrix(rbs);
-                    var resultsRB = PerformPrediction(modelRB, await PerformPredictedRegression("RB")).ToList();
-                    for (int i = 0; i < resultsRB.Count; i++)
-                    {
-                        var rb = rbs.ElementAt(i);
-                        if (await _fantasyService.IsPlayerActive(rb.PlayerId))
-                        {
-                            projection.Add(new ProjectionModel
-                            {
-                                PlayerId = rb.PlayerId,
-                                Name = await _fantasyService.GetPlayerName(rb.PlayerId),
-                                Team = await _fantasyService.GetPlayerTeam(rb.PlayerId),
-                                Position =await  _fantasyService.GetPlayerPosition(rb.PlayerId),
-                                ProjectedPoints = resultsRB[i]
-                            });
-                        }
-                    }
-                    return projection.OrderByDescending(p => p.ProjectedPoints).Take(24);
-                case "WR":
-                case "TE":
-                    var pcs = await AverageProjectedModelPassCatchers();
-                    var modelPC = _matrixService.PopulatePassCatchersRegressorMatrix(pcs);
-                    var resultsPC = PerformPrediction(modelPC, await PerformPredictedRegression("WR/TE")).ToList();
-
-                    var tightEnds = await _fantasyService.GetTightEnds();
-                    List<ProjectionModel> tightEndsOnly = new();
-                    List<ProjectionModel> wideReceiversOnly = new();
-                    for (int i = 0; i < resultsPC.Count; i++)
-                    {
-                        var pc = pcs.ElementAt(i);
-                        if (await _fantasyService.IsPlayerActive(pc.PlayerId))
-                        {
-                            projection.Add(new ProjectionModel
-                            {
-                                PlayerId = pc.PlayerId,
-                                Name = await _fantasyService.GetPlayerName(pc.PlayerId),
-                                Team = await _fantasyService.GetPlayerTeam(pc.PlayerId),
-                                Position = await _fantasyService.GetPlayerPosition(pc.PlayerId),
-                                ProjectedPoints = Math.Round((double)resultsPC[i],2)
-                            });
-                        }
-                    }
-                    if (position == "WR") 
-                    { 
-                        foreach(var proj in projection)
-                        {
-                            if (!tightEnds.Contains(proj.PlayerId))
-                            {
-                                proj.Position = "WR";
-                                wideReceiversOnly.Add(proj);
-                            }                            
-                        }
-                        return wideReceiversOnly.OrderByDescending(p => p.ProjectedPoints).Take(36); 
+                        _logger.Information("Retrieving projections from cache");
+                        return projectionModelQb;
                     }
                     else
-                    {                                                
-                        foreach(var proj in projection)
+                    {
+                        var qbs = await AverageProjectedModelQB();
+                        var model = _matrixService.PopulateQbRegressorMatrix(qbs);
+                        var results = PerformPrediction(model, await PerformPredictedRegression("QB")).ToList();
+                        for (int i = 0; i < results.Count; i++)
                         {
-                            if (tightEnds.Contains(proj.PlayerId))
+                            var qb = qbs.ElementAt(i);
+                            if (await _fantasyService.IsPlayerActive(qb.PlayerId))
                             {
-                                proj.Position = "TE";
-                                tightEndsOnly.Add(proj);
+                                projection.Add(new ProjectionModel
+                                {
+                                    PlayerId = qb.PlayerId,
+                                    Name = await _fantasyService.GetPlayerName(qb.PlayerId),
+                                    Team = await _fantasyService.GetPlayerTeam(qb.PlayerId),
+                                    Position = await _fantasyService.GetPlayerPosition(qb.PlayerId),
+                                    ProjectedPoints = results[i]
+                                });
                             }
                         }
-                        return tightEndsOnly.OrderByDescending(p => p.ProjectedPoints).Take(12);
+                        var projections = projection.OrderByDescending(p => p.ProjectedPoints).Take(24);
+                        _cache.Set("QbProjections", projections);
+                        return projections;
                     }
-                        default: return null; ;
+                case "RB":
+                    _logger.Information("Getting RB Projections");
+                    if (_cache.TryGetValue("RbProjections", out IEnumerable<ProjectionModel> projectionModelRb))
+                    {
+                        _logger.Information("Getting Rb projections from cache");
+                        return projectionModelRb;
+                    }
+                    else
+                    {
+                        var rbs = await AverageProjectedModelRB();
+                        var modelRB = _matrixService.PopulateRbRegressorMatrix(rbs);
+                        var resultsRB = PerformPrediction(modelRB, await PerformPredictedRegression("RB")).ToList();
+                        for (int i = 0; i < resultsRB.Count; i++)
+                        {
+                            var rb = rbs.ElementAt(i);
+                            if (await _fantasyService.IsPlayerActive(rb.PlayerId))
+                            {
+                                projection.Add(new ProjectionModel
+                                {
+                                    PlayerId = rb.PlayerId,
+                                    Name = await _fantasyService.GetPlayerName(rb.PlayerId),
+                                    Team = await _fantasyService.GetPlayerTeam(rb.PlayerId),
+                                    Position = await _fantasyService.GetPlayerPosition(rb.PlayerId),
+                                    ProjectedPoints = resultsRB[i]
+                                });
+                            }
+                        }
+                    }
+                    var projectionsRb = projection.OrderByDescending(p => p.ProjectedPoints).Take(24);
+                    _cache.Set("RbProjections", projectionsRb);
+                    return projectionsRb;
+                case "WR":
+                case "TE":
+                    _logger.Information("Getting Pass Catcher Projections");
+                    if (position == "WR" && _cache.TryGetValue("WrProjections", out IEnumerable<ProjectionModel> projectionModelWr))
+                    {
+                        _logger.Information("Retrieving WR projections from Cache");
+                        return projectionModelWr;
+                    }
+                    else if (position == "TE" && _cache.TryGetValue("TeProjections", out IEnumerable<ProjectionModel> projectionModelTe))
+                    {
+                        _logger.Information("Retrieving TE projections from Cache");
+                        return projectionModelTe;
+                    }
+                    else 
+                    {
+                        var pcs = await AverageProjectedModelPassCatchers();
+                        var modelPC = _matrixService.PopulatePassCatchersRegressorMatrix(pcs);
+                        var resultsPC = PerformPrediction(modelPC, await PerformPredictedRegression("WR/TE")).ToList();
+
+                        var tightEnds = await _fantasyService.GetTightEnds();
+                        List<ProjectionModel> tightEndsOnly = new();
+                        List<ProjectionModel> wideReceiversOnly = new();
+                        for (int i = 0; i < resultsPC.Count; i++)
+                        {
+                            var pc = pcs.ElementAt(i);
+                            if (await _fantasyService.IsPlayerActive(pc.PlayerId))
+                            {
+                                projection.Add(new ProjectionModel
+                                {
+                                    PlayerId = pc.PlayerId,
+                                    Name = await _fantasyService.GetPlayerName(pc.PlayerId),
+                                    Team = await _fantasyService.GetPlayerTeam(pc.PlayerId),
+                                    Position = await _fantasyService.GetPlayerPosition(pc.PlayerId),
+                                    ProjectedPoints = Math.Round((double)resultsPC[i], 2)
+                                });
+                            }
+                        }
+                        if (position == "WR")
+                        {
+                            foreach (var proj in projection)
+                            {
+                                if (!tightEnds.Contains(proj.PlayerId))
+                                {
+                                    proj.Position = "WR";
+                                    wideReceiversOnly.Add(proj);
+                                }
+                            }
+                            var projectionW = wideReceiversOnly.OrderByDescending(p => p.ProjectedPoints).Take(36);
+                            _cache.Set("WrProjections", projectionW);
+                            return projectionW;
+                        }
+                        else
+                        {
+                            foreach (var proj in projection)
+                            {
+                                if (tightEnds.Contains(proj.PlayerId))
+                                {
+                                    proj.Position = "TE";
+                                    tightEndsOnly.Add(proj);
+                                }
+                            }
+                            var projectionsT = tightEndsOnly.OrderByDescending(p => p.ProjectedPoints).Take(12);
+                            _cache.Set("TeProjections", projectionsT);
+                            return projectionsT;
+                        }
+
+                    }
+
+                default:
+                    _logger.Error("Bad position. Unable to get projections");
+                    return null;
             }
         }
         public async Task<int> InsertFantasyProjections(string position)

@@ -29,7 +29,7 @@ namespace Football.Api.Controllers
         }
 
         [HttpGet("{position}")]
-        [ProducesResponseType(typeof(List<int>), 200)]
+        [ProducesResponseType(typeof(List<ProjectionModel>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<IEnumerable<ProjectionModel>>> GetProjection(int position)
         {

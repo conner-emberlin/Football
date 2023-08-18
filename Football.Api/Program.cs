@@ -7,7 +7,7 @@ using System.Data;
 using System.Data.SqlClient;
 using Serilog;
 using Serilog.Sinks.Seq;
-
+using Microsoft.Extensions.Caching.Memory;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -28,10 +28,14 @@ string dboFoootballConnectionString = builder.Configuration.GetConnectionString(
 //inject Seq loggin
 using var log = new LoggerConfiguration().WriteTo.Seq("http://localhost:5341/").CreateLogger();
 
+//inject memory cache
+MemoryCacheEntryOptions cache = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(120)).SetAbsoluteExpiration(TimeSpan.FromSeconds(3600)).SetPriority(CacheItemPriority.Normal);
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ISqlQueryService, SqlQueryService>();
 builder.Services.AddScoped<IFantasyService, FantasyService>();
 builder.Services.AddScoped<IPredictionService, PredictionService>();
