@@ -10,7 +10,7 @@ namespace Football.Services
         private readonly IRegressionModelService _regressionModelService;
         private readonly ILogger _logger;
 
-        public WeightedAverageCalculator(IFantasyService fantasyService, IRegressionModelService regressionModelService, ILogger logger = null)
+        public WeightedAverageCalculator(IFantasyService fantasyService, IRegressionModelService regressionModelService, ILogger logger)
         {
             _fantasyService = fantasyService;
             _regressionModelService = regressionModelService;

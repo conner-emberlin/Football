@@ -1,15 +1,7 @@
 ﻿using Football.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using MathNet.Numerics.LinearAlgebra;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Diagnostics.Contracts;
-using System.Reflection;
 using Football.Interfaces;
-using Serilog.Sinks.File;
 using Serilog;
 using Microsoft.Extensions.Caching.Memory;
 

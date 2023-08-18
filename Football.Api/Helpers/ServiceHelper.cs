@@ -11,16 +11,12 @@ namespace Football.Api.Helpers
             {
                 case 1:
                     return "QB";
-                    break;
                 case 2:
                     return "RB";
-                    break;
                 case 3:
                     return "WR";
-                    break;
                 case 4:
                     return "TE";
-                    break;
                 default: return "QB";
             }
         }
