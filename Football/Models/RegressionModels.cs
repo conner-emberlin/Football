@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Football.Models
 {
     /* To add a new variable to the model, first add here, then in RegressionModelService Populate method and in 
-     * MatrixService TransformModel method
+     * MatrixService TransformModel method. Lastly in PredictionService populate projected method.
      * The variable must be in the corresponding positional Statistic class (i.e. in the db)
      */
 

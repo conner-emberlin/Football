@@ -159,7 +159,7 @@ namespace Football.Services
         {
             var players = await _fantasyService.GetPlayersByPosition("QB");
             List<RegressionModelQB> regressionModel = new();
-            var logger = new LoggerConfiguration().WriteTo.File("LOG.txt", rollingInterval: RollingInterval.Infinite).CreateLogger();
+            var logger = new LoggerConfiguration().WriteTo.Seq("http://localhost:5341/").CreateLogger();
             foreach (var p in players)
             {
                 

@@ -14,7 +14,6 @@ namespace Football.Repository
 {
     public class RegressionModelRepository : IRegressionModelRepository
     {
-        private readonly string connection = "Data Source =(LocalDb)\\MSSQLLocalDB; Initial Catalog = Football; Integrated Security=true;";
         public readonly ISqlQueryService _sqlQueryService;
         public readonly IDbConnection _dbConnection;
 

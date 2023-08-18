@@ -11,9 +11,7 @@ namespace Football.Services
 {
     public  class FantasyService : IFantasyService
     {
-        private readonly List<int> previousSeasons = new List<int>{ 2018, 2019, 2020, 2021 };
         public readonly IFantasyRepository _fantasyRepository;
-
         public FantasyService(IFantasyRepository fantasyRepository)
         {
             _fantasyRepository = fantasyRepository;
