@@ -9,6 +9,7 @@ namespace Football.Services
         private readonly IFantasyService _fantasyService;
         private readonly IRegressionModelService _regressionModelService;
         private readonly ILogger _logger;
+        private readonly double weight = (double)2 / (double)3;
 
         public WeightedAverageCalculator(IFantasyService fantasyService, IRegressionModelService regressionModelService, ILogger logger)
         {
@@ -41,9 +42,9 @@ namespace Football.Services
 
             var statSeasons = passingSeasonStats.Select(p => p.Season).ToList();
             var maxSeason = statSeasons.Max();
-            double maxSeasonWeight = statSeasons.Count > 1 ? (double)2 / (double)3 : 1;
+            double maxSeasonWeight = statSeasons.Count > 1 ? weight : 1;
             double previousSeasonCount = statSeasons.Count - 1;
-            double previousSeasonWeight = statSeasons.Count > 1 ? (((double)1 / (double)3) * ((double)1 / previousSeasonCount)) : 0;
+            double previousSeasonWeight = statSeasons.Count > 1 ? ((1-weight) * ((double)1 / previousSeasonCount)) : 0;
 
             foreach (var s in passingSeasonStats)
             {
@@ -103,9 +104,9 @@ namespace Football.Services
 
             var statSeasons = rushingSeasonsStats.Select(p => p.Season).ToList();
             var maxSeason = statSeasons.Max();
-            double maxSeasonWeight = statSeasons.Count > 1 ? (double)2 / (double)3 : 1;
+            double maxSeasonWeight = statSeasons.Count > 1 ? weight : 1;
             double previousSeasonCount = statSeasons.Count - 1;
-            double previousSeasonWeight = statSeasons.Count > 1 ? (((double)1 / (double)3) * ((double)1 / previousSeasonCount)) : 0;
+            double previousSeasonWeight = statSeasons.Count > 1 ? ((1-weight) * ((double)1 / previousSeasonCount)) : 0;
 
             double averageRushAttempts = 0;
             double averageYards = 0;
@@ -165,9 +166,9 @@ namespace Football.Services
 
                 var statSeasons = receivingSeasonStats.Select(p => p.Season).ToList();
                 var maxSeason = statSeasons.Max();
-                double maxSeasonWeight = statSeasons.Count > 1 ? (double)2 / (double)3 : 1;
+                double maxSeasonWeight = statSeasons.Count > 1 ? weight : 1;
                 double previousSeasonCount = statSeasons.Count - 1;
-                double previousSeasonWeight = statSeasons.Count > 1 ? (((double)1 / (double)3) * ((double)1 / previousSeasonCount)) : 0;
+                double previousSeasonWeight = statSeasons.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
 
                 double averageTargets = 0;
                 double averageReceptions = 0;
