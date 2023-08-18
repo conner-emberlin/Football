@@ -5,6 +5,9 @@ using Football.Repository;
 using System.Runtime.CompilerServices;
 using System.Data;
 using System.Data.SqlClient;
+using Serilog;
+using Serilog.Sinks.Seq;
+
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +22,9 @@ builder.Services.AddCors(options =>
 
 //inject connection string to controllers
 string dboFoootballConnectionString = builder.Configuration.GetConnectionString("dboFootballConnectionString");
+
+//inject Seq loggin
+using var log = new LoggerConfiguration().WriteTo.Seq("http://localhost:5341/").CreateLogger();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -38,6 +44,7 @@ builder.Services.AddScoped<IWeightedAverageCalculator, WeightedAverageCalculator
 builder.Services.AddScoped<IDataUploadRepository, DataUploadRepository>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
+builder.Services.AddSingleton<Serilog.ILogger>(log);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

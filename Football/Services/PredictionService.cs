@@ -23,14 +23,16 @@ namespace Football.Services
         public readonly IFantasyService _fantasyService;
         public readonly IMatrixService _matrixService;
         public readonly IWeightedAverageCalculator _weightedAverageCalculator;
+        private readonly ILogger _logger;
 
-        public PredictionService(IRegressionModelService regressionModelService, IPerformRegressionService performRegressionService, IFantasyService fantasyService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator)
+        public PredictionService(IRegressionModelService regressionModelService, IPerformRegressionService performRegressionService, IFantasyService fantasyService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, ILogger logger)
         {
             _regressionModelService = regressionModelService;
             _performRegressionService = performRegressionService;
             _matrixService = matrixService;
             _fantasyService = fantasyService;
             _weightedAverageCalculator = weightedAverageCalculator;
+            _logger = logger;
         }
         public async Task<List<double>> ModelErrorPerSeason(int playerId, string position)
         {
@@ -159,12 +161,9 @@ namespace Football.Services
         {
             var players = await _fantasyService.GetPlayersByPosition("QB");
             List<RegressionModelQB> regressionModel = new();
-            var logger = new LoggerConfiguration().WriteTo.Seq("http://localhost:5341/").CreateLogger();
             foreach (var p in players)
-            {
-                
-                logger.Information("Calculating passing weighted average for {playerid}\r\n", p);
-
+            {               
+                _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
                 var projectedAveragePassing = await _weightedAverageCalculator.PassingWeightedAverage(p);
                 var projectedAverageRushing = await _weightedAverageCalculator.RushingWeightedAverage(p);
                 var model = PopulateProjectedAverageModelQB(projectedAveragePassing, projectedAverageRushing, p);
@@ -179,6 +178,7 @@ namespace Football.Services
             List<RegressionModelRB> regressionModel = new();
             foreach(var p in players)
             {
+                _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
                 var projectedAverageRushing = await _weightedAverageCalculator.RushingWeightedAverage(p);
                 var projectedAverageReceiving = await _weightedAverageCalculator.ReceivingWeightedAverage(p);
                 var model = PopulateProjectedAverageModelRB(projectedAverageRushing,projectedAverageReceiving, p);
@@ -193,6 +193,7 @@ namespace Football.Services
             List<RegressionModelPassCatchers> regressionModel = new();
             foreach(var p in players)
             {
+                _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
                 var projectedAverageReceiving = await _weightedAverageCalculator.ReceivingWeightedAverage(p);
                 var model = PopulateProjectedAverageModelPassCatchers(projectedAverageReceiving, p);
                 regressionModel.Add(model);
