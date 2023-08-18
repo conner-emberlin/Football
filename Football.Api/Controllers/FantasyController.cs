@@ -38,8 +38,5 @@ namespace Football.Api.Controllers
           //  FantasyService fantasyService = new();
             return Ok(await _fantasyService.GetFantasyPoints(playerId, season));
         }
-
-        //POST complete fantasy refresh for a season
-        //Use to maintain week to week stats for current season
     }
 }

@@ -20,6 +20,7 @@ namespace Football.Api.Controllers
             _predictionService = predictionService;
             _serviceHelper = serviceHelper;
         }
+
         [HttpGet("model-error/{playerId}")]
         [ProducesResponseType(typeof(List<int>), 200)]
         [ProducesResponseType(typeof(string), 400)]
@@ -27,7 +28,7 @@ namespace Football.Api.Controllers
         {
             return await _predictionService.ModelErrorPerSeason(playerId, await _fantasyService.GetPlayerPosition(playerId));
         }
-
+        //calculate projections for a position
         [HttpGet("{position}")]
         [ProducesResponseType(typeof(List<ProjectionModel>), 200)]
         [ProducesResponseType(typeof(string), 400)]
@@ -35,7 +36,7 @@ namespace Football.Api.Controllers
         {
             return Ok(await _predictionService.GetProjections(_serviceHelper.TransformPosition(position)));
         }
-
+        //Upload projections for a position to the DB
         [HttpPost("upload/{position}")]
         [ProducesResponseType(typeof(List<int>), 200)]
         [ProducesResponseType(typeof(string), 400)]
