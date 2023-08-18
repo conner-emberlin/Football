@@ -151,42 +151,44 @@ namespace Football.Services
        public async Task<ReceivingStatistic> ReceivingWeightedAverage(int playerId)
         {
             var seasons = await _fantasyService.GetActiveReceivingSeasons(playerId);
-            List<ReceivingStatisticWithSeason> receivingSeasonStats = new();
-            foreach (var s in seasons)
+            if (seasons.Count > 0)
             {
-                var stat = await _regressionModelService.GetReceivingStatisticWithSeason(playerId, s);
-                if (stat != null)
+                List<ReceivingStatisticWithSeason> receivingSeasonStats = new();
+                foreach (var s in seasons)
                 {
-                    receivingSeasonStats.Add(stat);
+                    var stat = await _regressionModelService.GetReceivingStatisticWithSeason(playerId, s);
+                    if (stat != null)
+                    {
+                        receivingSeasonStats.Add(stat);
+                    }
                 }
-            }
 
-            var statSeasons = receivingSeasonStats.Select(p => p.Season).ToList();
-            var maxSeason = statSeasons.Max();
-            double maxSeasonWeight = statSeasons.Count > 1 ? (double)2 / (double)3 : 1;
-            double previousSeasonCount = statSeasons.Count - 1;
-            double previousSeasonWeight = statSeasons.Count > 1 ? (((double)1 / (double)3) * ((double)1 / previousSeasonCount)) : 0;
+                var statSeasons = receivingSeasonStats.Select(p => p.Season).ToList();
+                var maxSeason = statSeasons.Max();
+                double maxSeasonWeight = statSeasons.Count > 1 ? (double)2 / (double)3 : 1;
+                double previousSeasonCount = statSeasons.Count - 1;
+                double previousSeasonWeight = statSeasons.Count > 1 ? (((double)1 / (double)3) * ((double)1 / previousSeasonCount)) : 0;
 
-            double averageTargets = 0;
-            double averageReceptions = 0;
-            double averageYards = 0;
-            double averageTouchdowns = 0;
-            double averageFirstDowns = 0;
-            double averageLong = 0;
-            double averageRpG = 0;
-            double averageFumbles = 0;
+                double averageTargets = 0;
+                double averageReceptions = 0;
+                double averageYards = 0;
+                double averageTouchdowns = 0;
+                double averageFirstDowns = 0;
+                double averageLong = 0;
+                double averageRpG = 0;
+                double averageFumbles = 0;
 
-            foreach (var s in receivingSeasonStats)
-            {
-                if (s.Games < 17)
+                foreach (var s in receivingSeasonStats)
                 {
-                    s.Targets += (s.Targets / s.Games) * (17 - s.Games);
-                    s.Receptions += (s.Receptions / s.Games) * (17 - s.Games);
-                    s.Yards += (s.Yards / s.Games) * (17 - s.Games);
-                    s.Touchdowns += (s.Yards / s.Games) * (17 - s.Games);
-                    s.FirstDowns += (s.Yards / s.Games) * (17 - s.Games);
-                    s.Fumbles += (s.Fumbles / s.Games) * (17 - s.Games);
-                }
+                    if (s.Games < 17)
+                    {
+                        s.Targets += (s.Targets / s.Games) * (17 - s.Games);
+                        s.Receptions += (s.Receptions / s.Games) * (17 - s.Games);
+                        s.Yards += (s.Yards / s.Games) * (17 - s.Games);
+                        s.Touchdowns += (s.Yards / s.Games) * (17 - s.Games);
+                        s.FirstDowns += (s.Yards / s.Games) * (17 - s.Games);
+                        s.Fumbles += (s.Fumbles / s.Games) * (17 - s.Games);
+                    }
                     averageTargets += s.Season == maxSeason ? maxSeasonWeight * s.Targets : previousSeasonWeight * s.Targets;
                     averageReceptions += s.Season == maxSeason ? maxSeasonWeight * s.Receptions : previousSeasonWeight * s.Receptions;
                     averageYards += s.Season == maxSeason ? maxSeasonWeight * s.Yards : previousSeasonWeight * s.Yards;
@@ -195,9 +197,9 @@ namespace Football.Services
                     averageLong += s.Season == maxSeason ? maxSeasonWeight * s.Long : previousSeasonWeight * s.Long;
                     averageRpG += s.Season == maxSeason ? maxSeasonWeight * s.RpG : previousSeasonWeight * s.RpG;
                     averageFumbles += s.Season == maxSeason ? maxSeasonWeight * s.Fumbles : previousSeasonWeight * s.Fumbles;
-                
-            }
-               return new ReceivingStatistic
+
+                }
+                return new ReceivingStatistic
                 {
                     Name = receivingSeasonStats.ElementAt(receivingSeasonStats.Count() - 1).Name,
                     Team = receivingSeasonStats.ElementAt(receivingSeasonStats.Count() - 1).Team,
@@ -211,7 +213,9 @@ namespace Football.Services
                     Long = averageLong,
                     RpG = averageRpG,
                     Fumbles = averageFumbles
-                };           
+                };
+            }
+            else { return null; }
         }
 
         public async Task<FantasyPoints> FantasyWeightedAverage(int playerId, string position)

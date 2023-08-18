@@ -29,6 +29,30 @@ namespace Football.Api.Controllers
             return Ok(await _fantasyService.RefreshFantasyResults(fantasyPoints));
 
         }
+        //Use this for a complete refresh of a season. Truncate table first.
+        [HttpPost("{position}/{season}")]
+        [ProducesResponseType(typeof(double), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> PostFantasyPoints(string position, int season)
+        {
+            if (position == "WRTE")
+            {
+                position = "WR/TE";
+            }
+            var players = await _fantasyService.GetPlayersByPosition(position);
+            int count = 0;
+            foreach (var player in players)
+            {
+                var fantasyPoints = await _fantasyService.GetFantasyPoints(player, season);
+                if (fantasyPoints.TotalPoints > 0)
+                {
+                    count += await _fantasyService.InsertFantasyPoints(fantasyPoints);
+                }
+            }
+            return Ok(count);
+
+        }
+
         //GET fantasy results for playerId, season
         [HttpGet("points/{playerId}/{season}")]
         [ProducesResponseType(typeof(FantasyPoints), 200)]
