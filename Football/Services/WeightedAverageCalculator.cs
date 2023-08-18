@@ -1,5 +1,6 @@
 ﻿using Football.Models;
 using Football.Interfaces;
+using Serilog;
 
 namespace Football.Services
 {
@@ -7,9 +8,13 @@ namespace Football.Services
     {
         private readonly IFantasyService _fantasyService;
         private readonly IRegressionModelService _regressionModelService;
-        public WeightedAverageCalculator(IFantasyService fantasyService, IRegressionModelService regressionModelService) {
+        private readonly ILogger _logger;
+
+        public WeightedAverageCalculator(IFantasyService fantasyService, IRegressionModelService regressionModelService, ILogger logger = null)
+        {
             _fantasyService = fantasyService;
             _regressionModelService = regressionModelService;
+            _logger = logger;
         }
         public async Task<PassingStatistic> PassingWeightedAverage(int playerId)
         {

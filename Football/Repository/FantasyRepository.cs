@@ -17,6 +17,7 @@ namespace Football.Repository
     {
         public readonly ISqlQueryService _sqlQueryService;
         public readonly IDbConnection _dbConnection;
+        private readonly int _currentSeason = 2023;
 
         public FantasyRepository(ISqlQueryService sqlQueryService, IDbConnection dbConnection)
         {
@@ -178,7 +179,7 @@ namespace Football.Repository
         public async Task<int> InsertFantasyProjections(int rank, ProjectionModel proj)
         {            
             var query = _sqlQueryService.InsertFantasyProjections();
-            int season = 2023;
+            int season = _currentSeason;
             return await _dbConnection.ExecuteAsync(query, new
             {
                 season,
