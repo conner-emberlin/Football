@@ -11,7 +11,12 @@ namespace Football.Services
 {
     public  class FantasyService : IFantasyService
     {
-        public readonly IFantasyRepository _fantasyRepository;
+        private readonly IFantasyRepository _fantasyRepository;
+
+        private readonly int pointsPerReception = 1;
+        private readonly int pointsPerPassingTouchdown = 6;
+        private readonly int pointsPerInterception = 2;
+        private readonly int pointsPerFumble = 2;
         public FantasyService(IFantasyRepository fantasyRepository)
         {
             _fantasyRepository = fantasyRepository;
@@ -26,7 +31,7 @@ namespace Football.Services
         {
             var fantasyPassing = await _fantasyRepository.GetFantasyPassing(playerId, season);
             return fantasyPassing != null ?
-                fantasyPassing.Yards * 0.04 + fantasyPassing.Touchdowns * 6 - fantasyPassing.Interceptions * 2
+                fantasyPassing.Yards * 0.04 + fantasyPassing.Touchdowns * pointsPerPassingTouchdown - fantasyPassing.Interceptions * pointsPerInterception
                 : 0;
         }
 
@@ -34,7 +39,7 @@ namespace Football.Services
         {
             var fantasyRushing = await _fantasyRepository.GetFantasyRushing(playerId, season);
             return fantasyRushing != null ?
-                fantasyRushing.Yards * 0.1 + fantasyRushing.Touchdowns * 6 - fantasyRushing.Fumbles * 2
+                fantasyRushing.Yards * 0.1 + fantasyRushing.Touchdowns * 6 - fantasyRushing.Fumbles * pointsPerFumble
                 :0;
         }
 
@@ -42,7 +47,7 @@ namespace Football.Services
         {
             var fantasyReceiving = await _fantasyRepository.GetFantasyReceiving(playerId, season);
             return fantasyReceiving != null ?
-                fantasyReceiving.Yards * 0.1 + fantasyReceiving.Touchdowns * 6 + fantasyReceiving.Receptions
+                fantasyReceiving.Yards * 0.1 + fantasyReceiving.Touchdowns * 6 + fantasyReceiving.Receptions * pointsPerReception
                 :0;
         }
 
