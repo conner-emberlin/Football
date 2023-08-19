@@ -14,16 +14,18 @@ namespace Football.Services
         private readonly IPerformRegressionService _performRegressionService;
         private readonly IFantasyService _fantasyService;
         private readonly IMatrixService _matrixService;
+        private readonly IPlayerService _playerService;
         private readonly IWeightedAverageCalculator _weightedAverageCalculator;
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
 
-        public PredictionService(IRegressionModelService regressionModelService, IPerformRegressionService performRegressionService, IFantasyService fantasyService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, ILogger logger, IMemoryCache cache)
+        public PredictionService(IRegressionModelService regressionModelService, IPerformRegressionService performRegressionService, IFantasyService fantasyService, IPlayerService playerService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, ILogger logger, IMemoryCache cache)
         {
             _regressionModelService = regressionModelService;
             _performRegressionService = performRegressionService;
             _matrixService = matrixService;
             _fantasyService = fantasyService;
+            _playerService = playerService;
             _weightedAverageCalculator = weightedAverageCalculator;
             _logger = logger;
             _cache = cache;
@@ -83,7 +85,7 @@ namespace Football.Services
 
         public async Task<List<FantasyPoints>> AverageProjectedFantasyByPosition(string position)
         {
-            var players = await _fantasyService.GetPlayersByPosition(position);
+            var players = await _playerService.GetPlayersByPosition(position);
             List<FantasyPoints> projectedAverage = new();
             foreach(var p in players)
             {
@@ -95,7 +97,7 @@ namespace Football.Services
 
         public async Task<List<RegressionModelQB>> AverageProjectedModelQB()
         {
-            var players = await _fantasyService.GetPlayersByPosition("QB");
+            var players = await _playerService.GetPlayersByPosition("QB");
             List<RegressionModelQB> regressionModel = new();
             foreach (var p in players)
             {               
@@ -110,7 +112,7 @@ namespace Football.Services
 
         public async Task<List<RegressionModelRB>> AverageProjectedModelRB()
         {
-            var players = await _fantasyService.GetPlayersByPosition("RB");
+            var players = await _playerService.GetPlayersByPosition("RB");
             List<RegressionModelRB> regressionModel = new();
             foreach(var p in players)
             {
@@ -125,7 +127,7 @@ namespace Football.Services
 
         public async Task<List<RegressionModelPassCatchers>> AverageProjectedModelPassCatchers()
         {
-            var players = await _fantasyService.GetPlayersByPosition("WR/TE");
+            var players = await _playerService.GetPlayersByPosition("WR/TE");
             List<RegressionModelPassCatchers> regressionModel = new();
             foreach(var p in players)
             {
@@ -190,14 +192,14 @@ namespace Football.Services
                         for (int i = 0; i < results.Count; i++)
                         {
                             var qb = qbs.ElementAt(i);
-                            if (await _fantasyService.IsPlayerActive(qb.PlayerId))
+                            if (await _playerService.IsPlayerActive(qb.PlayerId))
                             {
                                 projection.Add(new ProjectionModel
                                 {
                                     PlayerId = qb.PlayerId,
-                                    Name = await _fantasyService.GetPlayerName(qb.PlayerId),
-                                    Team = await _fantasyService.GetPlayerTeam(qb.PlayerId),
-                                    Position = await _fantasyService.GetPlayerPosition(qb.PlayerId),
+                                    Name = await _playerService.GetPlayerName(qb.PlayerId),
+                                    Team = await _playerService.GetPlayerTeam(qb.PlayerId),
+                                    Position = await _playerService.GetPlayerPosition(qb.PlayerId),
                                     ProjectedPoints = results[i]
                                 });
                             }
@@ -221,14 +223,14 @@ namespace Football.Services
                         for (int i = 0; i < resultsRB.Count; i++)
                         {
                             var rb = rbs.ElementAt(i);
-                            if (await _fantasyService.IsPlayerActive(rb.PlayerId))
+                            if (await _playerService.IsPlayerActive(rb.PlayerId))
                             {
                                 projection.Add(new ProjectionModel
                                 {
                                     PlayerId = rb.PlayerId,
-                                    Name = await _fantasyService.GetPlayerName(rb.PlayerId),
-                                    Team = await _fantasyService.GetPlayerTeam(rb.PlayerId),
-                                    Position = await _fantasyService.GetPlayerPosition(rb.PlayerId),
+                                    Name = await _playerService.GetPlayerName(rb.PlayerId),
+                                    Team = await _playerService.GetPlayerTeam(rb.PlayerId),
+                                    Position = await _playerService.GetPlayerPosition(rb.PlayerId),
                                     ProjectedPoints = resultsRB[i]
                                 });
                             }
@@ -256,20 +258,20 @@ namespace Football.Services
                         var modelPC = _matrixService.PopulatePassCatchersRegressorMatrix(pcs);
                         var resultsPC = PerformPrediction(modelPC, await PerformPredictedRegression("WR/TE")).ToList();
 
-                        var tightEnds = await _fantasyService.GetTightEnds();
+                        var tightEnds = await _playerService.GetTightEnds();
                         List<ProjectionModel> tightEndsOnly = new();
                         List<ProjectionModel> wideReceiversOnly = new();
                         for (int i = 0; i < resultsPC.Count; i++)
                         {
                             var pc = pcs.ElementAt(i);
-                            if (await _fantasyService.IsPlayerActive(pc.PlayerId))
+                            if (await _playerService.IsPlayerActive(pc.PlayerId))
                             {
                                 projection.Add(new ProjectionModel
                                 {
                                     PlayerId = pc.PlayerId,
-                                    Name = await _fantasyService.GetPlayerName(pc.PlayerId),
-                                    Team = await _fantasyService.GetPlayerTeam(pc.PlayerId),
-                                    Position = await _fantasyService.GetPlayerPosition(pc.PlayerId),
+                                    Name = await _playerService.GetPlayerName(pc.PlayerId),
+                                    Team = await _playerService.GetPlayerTeam(pc.PlayerId),
+                                    Position = await _playerService.GetPlayerPosition(pc.PlayerId),
                                     ProjectedPoints = Math.Round((double)resultsPC[i], 2)
                                 });
                             }

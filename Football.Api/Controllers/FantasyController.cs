@@ -11,11 +11,13 @@ namespace Football.Api.Controllers
     [ApiController]
     public class FantasyController : ControllerBase
     {
-        public readonly IFantasyService _fantasyService;
+        private readonly IFantasyService _fantasyService;
+        private readonly IPlayerService _playerService;
         public readonly IServiceHelper _serviceHelper;
-        public FantasyController(IFantasyService fantasyService, IServiceHelper serviceHelper)
+        public FantasyController(IFantasyService fantasyService,IPlayerService playerService, IServiceHelper serviceHelper)
         {
             _fantasyService = fantasyService;
+            _playerService = playerService;
             _serviceHelper = serviceHelper;
         }
         //POST fantasy results for a season/position (delete existing ones for the season/position)
@@ -39,7 +41,7 @@ namespace Football.Api.Controllers
             {
                 position = "WR/TE";
             }
-            var players = await _fantasyService.GetPlayersByPosition(position);
+            var players = await _playerService.GetPlayersByPosition(position);
             int count = 0;
             foreach (var player in players)
             {

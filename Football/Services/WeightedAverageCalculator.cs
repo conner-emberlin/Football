@@ -9,21 +9,23 @@ namespace Football.Services
         private readonly IFantasyService _fantasyService;
         private readonly IRegressionModelService _regressionModelService;
         private readonly ILogger _logger;
+        private readonly IPlayerService _playerService;
         private readonly double weight = (double)2 / (double)3;
 
-        public WeightedAverageCalculator(IFantasyService fantasyService, IRegressionModelService regressionModelService, ILogger logger)
+        public WeightedAverageCalculator(IFantasyService fantasyService, IRegressionModelService regressionModelService,IPlayerService playerService, ILogger logger)
         {
             _fantasyService = fantasyService;
             _regressionModelService = regressionModelService;
+            _playerService = playerService;
             _logger = logger;
         }
         public async Task<PassingStatistic> PassingWeightedAverage(int playerId)
         {
-            var seasons = await _fantasyService.GetActivePassingSeasons(playerId);
+            var seasons = await _playerService.GetActivePassingSeasons(playerId);
             List<PassingStatisticWithSeason> passingSeasonStats = new();
             foreach (var s in seasons)
             {
-                var stat = await _regressionModelService.GetPassingStatisticWithSeason(playerId, s);
+                var stat = await _playerService.GetPassingStatisticWithSeason(playerId, s);
                 if (stat != null)
                 {
                     passingSeasonStats.Add(stat);
@@ -91,13 +93,13 @@ namespace Football.Services
 
         public async Task<RushingStatistic> RushingWeightedAverage(int playerId)
         {
-            var seasons = await _fantasyService.GetActiveRushingSeasons(playerId);
+            var seasons = await _playerService.GetActiveRushingSeasons(playerId);
             if (seasons.Count > 0)
             {
                 List<RushingStatisticWithSeason> rushingSeasonsStats = new();
                 foreach (var s in seasons)
                 {
-                    var stat = await _regressionModelService.GetRushingStatisticWithSeason(playerId, s);
+                    var stat = await _playerService.GetRushingStatisticWithSeason(playerId, s);
                     if (stat != null)
                     {
                         rushingSeasonsStats.Add(stat);
@@ -155,13 +157,13 @@ namespace Football.Services
 
        public async Task<ReceivingStatistic> ReceivingWeightedAverage(int playerId)
         {
-            var seasons = await _fantasyService.GetActiveReceivingSeasons(playerId);
+            var seasons = await _playerService.GetActiveReceivingSeasons(playerId);
             if (seasons.Count > 0)
             {
                 List<ReceivingStatisticWithSeason> receivingSeasonStats = new();
                 foreach (var s in seasons)
                 {
-                    var stat = await _regressionModelService.GetReceivingStatisticWithSeason(playerId, s);
+                    var stat = await _playerService.GetReceivingStatisticWithSeason(playerId, s);
                     if (stat != null)
                     {
                         receivingSeasonStats.Add(stat);
@@ -226,7 +228,7 @@ namespace Football.Services
         public async Task<FantasyPoints> FantasyWeightedAverage(int playerId, string position)
         {
             //get fantasy seasons
-            var fantasySeasons = await _fantasyService.GetAverageTotalGames(playerId);
+            var fantasySeasons = await _playerService.GetAverageTotalGames(playerId);
             double averageTotalPoints = 0;
             var maxSeason = fantasySeasons.OrderByDescending(f => f.Season).FirstOrDefault().Season;
             double maxSeasonWeight = fantasySeasons.Count > 1 ? (double)2 / (double)3 : 1;

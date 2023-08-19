@@ -15,13 +15,15 @@ namespace Football.Api.Controllers
         private readonly IPerformRegressionService _performRegressionService;
         private readonly IRegressionModelService _regressionModelService;
         private readonly IMatrixService _matrixService;
+        private readonly IPlayerService _playerService;
         private readonly IServiceHelper _serviceHelper;
         private readonly IFantasyService _fantasyService;
-        public RegressionController(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService,
+        public RegressionController(IPerformRegressionService performRegressionService,IPlayerService playerService, IRegressionModelService regressionModelService,
             IMatrixService matrixService, IServiceHelper serviceHelper, IFantasyService fantasyService)
         {
             _performRegressionService = performRegressionService;
             _regressionModelService = regressionModelService;
+            _playerService = playerService;
             _matrixService = matrixService;
             _serviceHelper = serviceHelper;
             _fantasyService = fantasyService;   
@@ -88,7 +90,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<double>>> GetModelErrorByPlayer(int playerId)
         {
-            return await _performRegressionService.ModelErrorPerSeason(playerId, await _fantasyService.GetPlayerPosition(playerId));
+            return await _performRegressionService.ModelErrorPerSeason(playerId, await _playerService.GetPlayerPosition(playerId));
         }
     }
 }
