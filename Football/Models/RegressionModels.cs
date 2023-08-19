@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Football.Models
+﻿namespace Football.Models
 {
     /* To add a new variable to the model, first add here, then in RegressionModelService Populate method and in 
      * MatrixService TransformModel method. Lastly in PredictionService populate projected method.

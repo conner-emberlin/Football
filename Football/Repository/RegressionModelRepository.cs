@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Football.Models;
-using Football.Services;
-using System.Data.SqlClient;
+﻿using Football.Models;
 using Dapper;
 using Football.Interfaces;
 using System.Data;
