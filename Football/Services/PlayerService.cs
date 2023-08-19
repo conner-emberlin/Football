@@ -27,6 +27,7 @@ namespace Football.Services
             player.RushingStats = await GetRushingStatisticsWithSeason(playerId);
             player.ReceivingStats = await GetReceivingStatisticsWithSeason(playerId);
             player.FantasyPoints = await _fantasyService.GetAllFantasyResults(playerId);
+            player.FantasySeasonGames = await GetAverageTotalGames(playerId);
             
             var tightends = await GetTightEnds();
             if (tightends.Contains(playerId))

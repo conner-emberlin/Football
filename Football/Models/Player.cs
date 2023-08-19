@@ -11,5 +11,6 @@
         public List<RushingStatisticWithSeason>? RushingStats { get; set; }
         public List<ReceivingStatisticWithSeason>? ReceivingStats { get; set; }
         public List<FantasyPoints>? FantasyPoints { get; set; }
+        public List<FantasySeasonGames>? FantasySeasonGames { get; set; }
     }
 }
