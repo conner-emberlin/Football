@@ -13,7 +13,7 @@ namespace Football.Services
         {
             _logger = logger;
         }
-        public PassingStatistic PassingWeightedAverage(Player player)
+        public PassingStatistic PassingWeightedAverage(List<PassingStatisticWithSeason> passing)
         {
             double averageCompletions = 0;
             double averageAttempts = 0;
@@ -25,16 +25,16 @@ namespace Football.Services
             double averageSackYards = 0;
             double averageLong = 0;
 
-            if (player.PassingStats.Count > 0)
+            if (passing.Count > 0)
             {
                 try
                 {
-                    var maxSeason = player.PassingStats.Select(ps => ps.Season).Max();
-                    double maxSeasonWeight = player.PassingStats.Count > 1 ? weight : 1;
-                    double previousSeasonCount = (double)player.PassingStats.Count - 1;
-                    double previousSeasonWeight = player.PassingStats?.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
+                    var maxSeason = passing.Select(ps => ps.Season).Max();
+                    double maxSeasonWeight = passing.Count > 1 ? weight : 1;
+                    double previousSeasonCount = (double)passing.Count - 1;
+                    double previousSeasonWeight = passing.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
 
-                    foreach (var s in player.PassingStats)
+                    foreach (var s in passing)
                     {
                         if (s.Games < 17)
                         {
@@ -61,9 +61,9 @@ namespace Football.Services
                     }
                     return new PassingStatistic
                     {
-                        Name = player.Name,
-                        Team = player.PassingStats.ElementAt(player.PassingStats.Count() - 1).Team,
-                        Age = player.PassingStats.ElementAt(player.PassingStats.Count() - 1).Age + 1,
+                        Name = passing.ElementAt(passing.Count-1).Name,
+                        Team = passing.ElementAt(passing.Count - 1).Team,
+                        Age = passing.ElementAt(passing.Count - 1).Age + 1,
                         Games = 17,
                         Completions = averageCompletions,
                         Attempts = averageAttempts,
@@ -88,16 +88,16 @@ namespace Football.Services
             }
         }
 
-        public RushingStatistic RushingWeightedAverage(Player player)
+        public RushingStatistic RushingWeightedAverage(List<RushingStatisticWithSeason> rushing)
         {
-            if (player.RushingStats.Count > 0)
+            if (rushing.Count > 0)
             {
                 try
                 {
-                    var maxSeason = player.RushingStats.Select(r => r.Season).Max();
-                    double maxSeasonWeight = player.RushingStats.Count > 1 ? weight : 1;
-                    double previousSeasonCount = (double)player.RushingStats.Count - 1;
-                    double previousSeasonWeight = player.RushingStats.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
+                    var maxSeason = rushing.Select(r => r.Season).Max();
+                    double maxSeasonWeight = rushing.Count > 1 ? weight : 1;
+                    double previousSeasonCount = (double)rushing.Count - 1;
+                    double previousSeasonWeight = rushing.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
 
                     double averageRushAttempts = 0;
                     double averageYards = 0;
@@ -106,7 +106,7 @@ namespace Football.Services
                     double averageLong = 0;
                     double averageFumbles = 0;
 
-                    foreach (var s in player.RushingStats)
+                    foreach (var s in rushing)
                     {
                         if (s.Games < 17)
                         {
@@ -127,9 +127,9 @@ namespace Football.Services
 
                     return new RushingStatistic
                     {
-                        Name = player.Name,
-                        Team = player.RushingStats.ElementAt(player.RushingStats.Count - 1).Team,
-                        Age = player.RushingStats.ElementAt(player.RushingStats.Count - 1).Age + 1,
+                        Name = rushing.ElementAt(rushing.Count - 1).Name,
+                        Team = rushing.ElementAt(rushing.Count - 1).Team,
+                        Age = rushing.ElementAt(rushing.Count - 1).Age + 1,
                         Games = 17,
                         RushAttempts = averageRushAttempts,
                         Yards = averageYards,
@@ -150,16 +150,16 @@ namespace Football.Services
             }
         }
 
-       public ReceivingStatistic ReceivingWeightedAverage(Player player)
+       public ReceivingStatistic ReceivingWeightedAverage(List<ReceivingStatisticWithSeason> receiving)
         {
-            if (player.ReceivingStats.Count > 0)
+            if (receiving.Count > 0)
             {
                 try
                 {
-                    var maxSeason = player.ReceivingStats.Select(r => r.Season).Max();
-                    double maxSeasonWeight = player.ReceivingStats.Count > 1 ? weight : 1;
-                    double previousSeasonCount = (double)player.ReceivingStats.Count - 1;
-                    double previousSeasonWeight = player.ReceivingStats.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
+                    var maxSeason = receiving.Select(r => r.Season).Max();
+                    double maxSeasonWeight = receiving.Count > 1 ? weight : 1;
+                    double previousSeasonCount = receiving.Count - 1;
+                    double previousSeasonWeight = receiving.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
 
                     double averageTargets = 0;
                     double averageReceptions = 0;
@@ -170,7 +170,7 @@ namespace Football.Services
                     double averageRpG = 0;
                     double averageFumbles = 0;
 
-                    foreach (var s in player.ReceivingStats)
+                    foreach (var s in receiving)
                     {
                         if (s.Games < 17)
                         {
@@ -193,9 +193,9 @@ namespace Football.Services
                     }
                     return new ReceivingStatistic
                     {
-                        Name = player.Name,
-                        Team = player.ReceivingStats.ElementAt(player.ReceivingStats.Count - 1).Team,
-                        Age = player.ReceivingStats.ElementAt(player.ReceivingStats.Count - 1).Age + 1,
+                        Name = receiving.ElementAt(receiving.Count - 1).Name,
+                        Team = receiving.ElementAt(receiving.Count - 1).Team,
+                        Age = receiving.ElementAt(receiving.Count - 1).Age + 1,
                         Games = 17,
                         Targets = averageTargets,
                         Receptions = averageReceptions,
