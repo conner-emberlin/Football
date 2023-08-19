@@ -21,13 +21,6 @@ namespace Football.Api.Controllers
             _serviceHelper = serviceHelper;
         }
 
-        [HttpGet("model-error/{playerId}")]
-        [ProducesResponseType(typeof(List<int>), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<double>>> GetModelErrorByPlayer(int playerId)
-        {
-            return await _predictionService.ModelErrorPerSeason(playerId, await _fantasyService.GetPlayerPosition(playerId));
-        }
         //calculate projections for a position
         [HttpGet("{position}")]
         [ProducesResponseType(typeof(List<ProjectionModel>), 200)]

@@ -7,19 +7,22 @@ using Football.Interfaces;
 using Football.Models;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearRegression;
+using Serilog;
 
 namespace Football.Services
 {
     public  class PerformRegressionService : IPerformRegressionService
     {
-        public readonly IRegressionModelService _regressionModelService;
-        public readonly IFantasyService _fantasyService;
-        public readonly IMatrixService _matrixService;
-        public PerformRegressionService(IRegressionModelService regressionModelService, IFantasyService fantasyService, IMatrixService matrixService) 
+        private readonly IRegressionModelService _regressionModelService;
+        private readonly IFantasyService _fantasyService;
+        private readonly IMatrixService _matrixService;
+        private readonly ILogger _logger;
+        public PerformRegressionService(IRegressionModelService regressionModelService, IFantasyService fantasyService, IMatrixService matrixService, ILogger logger) 
         { 
             _regressionModelService = regressionModelService;
             _fantasyService = fantasyService;
             _matrixService = matrixService;
+            _logger = logger;
         }
         public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents)
         {
@@ -65,6 +68,67 @@ namespace Football.Services
         public Vector<double> CalculatError(Vector<double> actual, Vector<double> coefficients, Matrix<double> model)
         {
             return actual - model * coefficients;
-        }        
+        }
+
+        public async Task<List<double>> ModelErrorPerSeason(int playerId, string position)
+        {
+            List<double> errors = new();
+            List<Vector<double>> regressions = new();
+            List<double> actualPoints = new();
+            var seasons = await _fantasyService.GetActiveSeasons(playerId);
+            switch (position)
+            {
+                case "QB":
+                    List<RegressionModelQB> models = new();
+                    foreach (var season in seasons)
+                    {
+                        models.Add(await _regressionModelService.PopulateRegressionModelQB(playerId, season));
+                        regressions.Add(await PerformRegression(season, position));
+                        var results = await _fantasyService.GetFantasyResults(playerId, season);
+                        actualPoints.Add(results.TotalPoints);
+                    }
+                    var modelVectors = models.Select(m => _matrixService.TransformQbModel(m));
+                    for (int i = 0; i < seasons.Count - 1; i++)
+                    {
+                        errors.Add(modelVectors.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
+                    }
+                    break;
+                case "RB":
+                    List<RegressionModelRB> modelsR = new();
+                    foreach (var season in seasons)
+                    {
+                        modelsR.Add(await _regressionModelService.PopulateRegressionModelRb(playerId, season));
+                        regressions.Add(await PerformRegression(season, position));
+                        var results = await _fantasyService.GetFantasyResults(playerId, season);
+                        actualPoints.Add(results.TotalPoints);
+                    }
+                    var modelVectorsR = modelsR.Select(m => _matrixService.TransformRbModel(m));
+                    for (int i = 0; i < seasons.Count - 1; i++)
+                    {
+                        errors.Add(modelVectorsR.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
+                    }
+                    break;
+                case "WR/TE":
+                    List<RegressionModelPassCatchers> modelsP = new();
+                    foreach (var season in seasons)
+                    {
+                        modelsP.Add(await _regressionModelService.PopulateRegressionModelPassCatchers(playerId, season));
+                        regressions.Add(await PerformRegression(season, position));
+                        var results = await _fantasyService.GetFantasyResults(playerId, season);
+                        actualPoints.Add(results.TotalPoints);
+                    }
+                    var modelVectorsP = modelsP.Select(m => _matrixService.TransformPassCatchersModel(m));
+                    for (int i = 0; i < seasons.Count - 1; i++)
+                    {
+                        errors.Add(modelVectorsP.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
+                    }
+                    break;
+                default:
+                    errors.Add(0);
+                    _logger.Error("Invalid position. Check data");
+                    break;
+            }
+            return errors;
+        }
     }
 }

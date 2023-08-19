@@ -14,5 +14,6 @@ namespace Football.Interfaces
         public Task<Vector<double>> PerformRegression(int season, string position);
         public double CalculateMSE(Vector<double> actual, Vector<double> coefficients, Matrix<double> model);
         public Vector<double> CalculatError(Vector<double> actual, Vector<double> coefficients, Matrix<double> model);
+        public Task<List<double>> ModelErrorPerSeason(int playerId, string position);
     }
 }

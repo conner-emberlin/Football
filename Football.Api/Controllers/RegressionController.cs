@@ -12,17 +12,19 @@ namespace Football.Api.Controllers
     [ApiController]
     public class RegressionController : ControllerBase
     {
-        public readonly IPerformRegressionService _performRegressionService;
-        public readonly IRegressionModelService _regressionModelService;
-        public readonly IMatrixService _matrixService;
-        public readonly IServiceHelper _serviceHelper;
+        private readonly IPerformRegressionService _performRegressionService;
+        private readonly IRegressionModelService _regressionModelService;
+        private readonly IMatrixService _matrixService;
+        private readonly IServiceHelper _serviceHelper;
+        private readonly IFantasyService _fantasyService;
         public RegressionController(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService,
-            IMatrixService matrixService, IServiceHelper serviceHelper)
+            IMatrixService matrixService, IServiceHelper serviceHelper, IFantasyService fantasyService)
         {
             _performRegressionService = performRegressionService;
             _regressionModelService = regressionModelService;
             _matrixService = matrixService;
             _serviceHelper = serviceHelper;
+            _fantasyService = fantasyService;   
         }
         [HttpGet("{season}/{pos}")]
         [ProducesResponseType(typeof(Vector<double>), 200)]
@@ -79,6 +81,14 @@ namespace Football.Api.Controllers
                     break;
             }  
             return mse;
-        }       
+        }
+
+        [HttpGet("model-error/{playerId}")]
+        [ProducesResponseType(typeof(List<int>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<double>>> GetModelErrorByPlayer(int playerId)
+        {
+            return await _performRegressionService.ModelErrorPerSeason(playerId, await _fantasyService.GetPlayerPosition(playerId));
+        }
     }
 }

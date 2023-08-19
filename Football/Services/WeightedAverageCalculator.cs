@@ -92,61 +92,65 @@ namespace Football.Services
         public async Task<RushingStatistic> RushingWeightedAverage(int playerId)
         {
             var seasons = await _fantasyService.GetActiveRushingSeasons(playerId);
-            List<RushingStatisticWithSeason> rushingSeasonsStats = new();
-            foreach (var s in seasons)
+            if (seasons.Count > 0)
             {
-                var stat = await _regressionModelService.GetRushingStatisticWithSeason(playerId, s);
-                if (stat != null)
+                List<RushingStatisticWithSeason> rushingSeasonsStats = new();
+                foreach (var s in seasons)
                 {
-                    rushingSeasonsStats.Add(stat);
-                }
-            }
-
-            var statSeasons = rushingSeasonsStats.Select(p => p.Season).ToList();
-            var maxSeason = statSeasons.Max();
-            double maxSeasonWeight = statSeasons.Count > 1 ? weight : 1;
-            double previousSeasonCount = statSeasons.Count - 1;
-            double previousSeasonWeight = statSeasons.Count > 1 ? ((1-weight) * ((double)1 / previousSeasonCount)) : 0;
-
-            double averageRushAttempts = 0;
-            double averageYards = 0;
-            double averageTouchdowns = 0;
-            double averageFirstDowns = 0;
-            double averageLong = 0;
-            double averageFumbles = 0;
-           
-            foreach(var s in rushingSeasonsStats)
-            {
-                if (s.Games < 17)
-                {
-                    s.RushAttempts += (s.RushAttempts / s.Games) * (17 - s.Games);
-                    s.Yards += (s.Yards / s.Games) * (17 - s.Games);
-                    s.Touchdowns += (s.Yards / s.Games) * (17 - s.Games);
-                    s.FirstDowns += (s.FirstDowns / s.Games) * (17 - s.Games);
-                    s.Fumbles += (s.Fumbles / s.Games) * (17 - s.Games);
+                    var stat = await _regressionModelService.GetRushingStatisticWithSeason(playerId, s);
+                    if (stat != null)
+                    {
+                        rushingSeasonsStats.Add(stat);
+                    }
                 }
 
-                averageRushAttempts += s.Season == maxSeason ? maxSeasonWeight * s.RushAttempts : previousSeasonWeight * s.RushAttempts;
-                averageYards += s.Season == maxSeason ? maxSeasonWeight * s.Yards : previousSeasonWeight * s.Yards;
-                averageTouchdowns += s.Season == maxSeason ? maxSeasonWeight * s.Touchdowns : previousSeasonWeight * s.Touchdowns;
-                averageFirstDowns += s.Season == maxSeason ? maxSeasonWeight * s.FirstDowns : previousSeasonWeight * s.FirstDowns;
-                averageLong += s.Season == maxSeason ? maxSeasonWeight * s.Long : previousSeasonWeight * s.Long;
-                averageFumbles += s.Season == maxSeason ? maxSeasonWeight * s.Fumbles : previousSeasonWeight * s.Fumbles;
-            }
+                var statSeasons = rushingSeasonsStats.Select(p => p.Season).ToList();
+                var maxSeason = statSeasons.Max();
+                double maxSeasonWeight = statSeasons.Count > 1 ? weight : 1;
+                double previousSeasonCount = statSeasons.Count - 1;
+                double previousSeasonWeight = statSeasons.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
 
-            return new RushingStatistic
-            {
-                Name = rushingSeasonsStats.ElementAt(rushingSeasonsStats.Count() - 1).Name,
-                Team = rushingSeasonsStats.ElementAt(rushingSeasonsStats.Count() - 1).Team,
-                Age = rushingSeasonsStats.ElementAt(rushingSeasonsStats.Count() - 1).Age + 1,
-                Games = 17,
-                RushAttempts = averageRushAttempts,
-                Yards = averageYards,
-                Touchdowns = averageTouchdowns,
-                FirstDowns = averageFirstDowns,
-                Long = averageLong,
-                Fumbles = averageFumbles
-            };
+                double averageRushAttempts = 0;
+                double averageYards = 0;
+                double averageTouchdowns = 0;
+                double averageFirstDowns = 0;
+                double averageLong = 0;
+                double averageFumbles = 0;
+
+                foreach (var s in rushingSeasonsStats)
+                {
+                    if (s.Games < 17)
+                    {
+                        s.RushAttempts += (s.RushAttempts / s.Games) * (17 - s.Games);
+                        s.Yards += (s.Yards / s.Games) * (17 - s.Games);
+                        s.Touchdowns += (s.Yards / s.Games) * (17 - s.Games);
+                        s.FirstDowns += (s.FirstDowns / s.Games) * (17 - s.Games);
+                        s.Fumbles += (s.Fumbles / s.Games) * (17 - s.Games);
+                    }
+
+                    averageRushAttempts += s.Season == maxSeason ? maxSeasonWeight * s.RushAttempts : previousSeasonWeight * s.RushAttempts;
+                    averageYards += s.Season == maxSeason ? maxSeasonWeight * s.Yards : previousSeasonWeight * s.Yards;
+                    averageTouchdowns += s.Season == maxSeason ? maxSeasonWeight * s.Touchdowns : previousSeasonWeight * s.Touchdowns;
+                    averageFirstDowns += s.Season == maxSeason ? maxSeasonWeight * s.FirstDowns : previousSeasonWeight * s.FirstDowns;
+                    averageLong += s.Season == maxSeason ? maxSeasonWeight * s.Long : previousSeasonWeight * s.Long;
+                    averageFumbles += s.Season == maxSeason ? maxSeasonWeight * s.Fumbles : previousSeasonWeight * s.Fumbles;
+                }
+
+                return new RushingStatistic
+                {
+                    Name = rushingSeasonsStats.ElementAt(rushingSeasonsStats.Count() - 1).Name,
+                    Team = rushingSeasonsStats.ElementAt(rushingSeasonsStats.Count() - 1).Team,
+                    Age = rushingSeasonsStats.ElementAt(rushingSeasonsStats.Count() - 1).Age + 1,
+                    Games = 17,
+                    RushAttempts = averageRushAttempts,
+                    Yards = averageYards,
+                    Touchdowns = averageTouchdowns,
+                    FirstDowns = averageFirstDowns,
+                    Long = averageLong,
+                    Fumbles = averageFumbles
+                };
+            }
+            else { return null; }
         }
 
        public async Task<ReceivingStatistic> ReceivingWeightedAverage(int playerId)

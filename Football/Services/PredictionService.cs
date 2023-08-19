@@ -28,66 +28,7 @@ namespace Football.Services
             _logger = logger;
             _cache = cache;
         }
-        public async Task<List<double>> ModelErrorPerSeason(int playerId, string position)
-        {
-            List<double> errors = new();          
-            List<Vector<double>> regressions = new();
-            List<double> actualPoints = new();
-            var seasons = await _fantasyService.GetActiveSeasons(playerId);
-            switch (position)
-            {
-                case "QB":
-                    List<RegressionModelQB> models = new();                    
-                    foreach (var season in seasons)
-                    {
-                        models.Add(await _regressionModelService.PopulateRegressionModelQB(playerId, season));                                                                    
-                        regressions.Add(await _performRegressionService.PerformRegression(season, position));
-                        var results = await _fantasyService.GetFantasyResults(playerId, season);
-                        actualPoints.Add(results.TotalPoints);
-                    }
-                    var modelVectors = models.Select(m => _matrixService.TransformQbModel(m));
-                    for (int i = 0; i < seasons.Count - 1; i++)
-                    {
-                            errors.Add(modelVectors.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
-                    }                                           
-                    break;
-                case "RB":
-                    List<RegressionModelRB> modelsR = new();
-                    foreach (var season in seasons)
-                    {
-                        modelsR.Add(await _regressionModelService.PopulateRegressionModelRb(playerId, season));
-                        regressions.Add(await _performRegressionService.PerformRegression(season, position));
-                        var results = await _fantasyService.GetFantasyResults(playerId, season);
-                        actualPoints.Add(results.TotalPoints);
-                    }
-                    var modelVectorsR = modelsR.Select(m => _matrixService.TransformRbModel(m));
-                    for (int i = 0; i < seasons.Count - 1; i++)
-                    {
-                        errors.Add(modelVectorsR.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
-                    }
-                    break;
-                case "WR/TE":
-                    List<RegressionModelPassCatchers> modelsP = new();
-                    foreach (var season in seasons)
-                    {
-                        modelsP.Add(await _regressionModelService.PopulateRegressionModelPassCatchers(playerId, season));
-                        regressions.Add(await _performRegressionService.PerformRegression(season, position));
-                        var results = await _fantasyService.GetFantasyResults(playerId, season);
-                        actualPoints.Add(results.TotalPoints);
-                    }
-                    var modelVectorsP = modelsP.Select(m => _matrixService.TransformPassCatchersModel(m));
-                    for (int i = 0; i < seasons.Count - 1; i++)
-                    {
-                        errors.Add(modelVectorsP.ElementAt(i) * regressions.ElementAt(i) - actualPoints.ElementAt(i));
-                    }
-                    break;
-                default: 
-                    errors.Add(0);
-                    _logger.Error("Invalid position. Check data");
-                    break;
-            }
-            return errors;
-        }
+ 
         public RegressionModelQB PopulateProjectedAverageModelQB(PassingStatistic passingStat, RushingStatistic rushingStat, int playerId)
         {
             var dataP = passingStat != null;
