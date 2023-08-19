@@ -10,11 +10,11 @@ namespace Football.Services
     public class PredictionService : IPredictionService
     {
         private readonly int currentSeason = 2023;
-        public readonly IRegressionModelService _regressionModelService;
-        public readonly IPerformRegressionService _performRegressionService;
-        public readonly IFantasyService _fantasyService;
-        public readonly IMatrixService _matrixService;
-        public readonly IWeightedAverageCalculator _weightedAverageCalculator;
+        private readonly IRegressionModelService _regressionModelService;
+        private readonly IPerformRegressionService _performRegressionService;
+        private readonly IFantasyService _fantasyService;
+        private readonly IMatrixService _matrixService;
+        private readonly IWeightedAverageCalculator _weightedAverageCalculator;
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
 

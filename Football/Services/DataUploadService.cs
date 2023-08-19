@@ -6,12 +6,10 @@ namespace Football.Services
 {
     public class DataUploadService : IDataUploadService
     {
-        public readonly ISqlQueryService _sqlQueryService;
-        public readonly IDataUploadRepository _dataUploadRespository;
+        private readonly IDataUploadRepository _dataUploadRespository;
 
-        public DataUploadService(ISqlQueryService sqlQueryService, IDataUploadRepository dataUploadRepository) 
+        public DataUploadService(IDataUploadRepository dataUploadRepository) 
         {
-            _sqlQueryService = sqlQueryService;
             _dataUploadRespository = dataUploadRepository;
         }
             public async Task<List<PassingStatistic>> PassingStatFileUpload(string filepath)

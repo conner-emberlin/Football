@@ -5,8 +5,8 @@ namespace Football.Services
 {
     public class RegressionModelService : IRegressionModelService
     {
-        public readonly IFantasyService _fantasyService;
-        public readonly IRegressionModelRepository _regressionModelRepository;
+        private readonly IFantasyService _fantasyService;
+        private readonly IRegressionModelRepository _regressionModelRepository;
         public RegressionModelService(IFantasyService fantasyService, IRegressionModelRepository regressionModelRepository)
         {
             _fantasyService = fantasyService;
