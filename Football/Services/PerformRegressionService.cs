@@ -11,12 +11,14 @@ namespace Football.Services
         private readonly IRegressionModelService _regressionModelService;
         private readonly IFantasyService _fantasyService;
         private readonly IMatrixService _matrixService;
+        private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
-        public PerformRegressionService(IRegressionModelService regressionModelService, IFantasyService fantasyService, IMatrixService matrixService, ILogger logger) 
+        public PerformRegressionService(IRegressionModelService regressionModelService, IFantasyService fantasyService,IPlayerService playerService, IMatrixService matrixService, ILogger logger) 
         { 
             _regressionModelService = regressionModelService;
             _fantasyService = fantasyService;
             _matrixService = matrixService;
+            _playerService = playerService;
             _logger = logger;
         }
         public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents)
@@ -70,7 +72,7 @@ namespace Football.Services
             List<double> errors = new();
             List<Vector<double>> regressions = new();
             List<double> actualPoints = new();
-            var seasons = await _fantasyService.GetActiveSeasons(playerId);
+            var seasons = await _playerService.GetActiveSeasons(playerId);
             switch (position)
             {
                 case "QB":
