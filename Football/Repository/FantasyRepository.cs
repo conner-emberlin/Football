@@ -57,6 +57,12 @@ namespace Football.Repository
             var query = _sqlQueryService.GetFantasyPoints();
             return await _dbConnection.QueryFirstOrDefaultAsync<FantasyPoints>(query, new {playerId, season});
         }
+        public async Task<List<FantasyPoints>> GetAllFantasyResults(int playerId)
+        {
+            var query = _sqlQueryService.GetAllFantasyResults();
+            var results = await _dbConnection.QueryAsync<FantasyPoints>(query, new { playerId });
+            return results.ToList();
+        }
         public async Task<(int, int)> RefreshFantasyResults(FantasyPoints fantasyPoints)
         {
             var deleteQuery = _sqlQueryService.DeleteFantasyPoints();

@@ -185,6 +185,34 @@ namespace Football.Services
             return $@"INSERT INTO [dbo].FantasyProjections (Season, PlayerId, Name, Position, Rank, ProjectedPoints) VALUES
                     (@season, @playerid, @name, @position, @rank, @projectedpoints)";
         }
-        
+
+        public string GetPlayerInfo()
+        {
+            return $@"SELECT [PlayerId], [Name], [Position], [Active]
+                    FROM [dbo].Players
+                    WHERE [Playerid] = @playerId";
+        }
+
+        public string GetPassingStatisticsWithSeason()
+        {
+            return $@"SELECT [Season], [Name], [Team], [Age], [Games], [Completions], [Attempts],
+                    [Yards], [Touchdowns], [Interceptions], [FirstDowns], [Long], [Sacks], [SackYards], [PlayerId]
+             FROM [dbo].Passing WHERE  [PlayerId] = @playerid";
+        }
+        public string GetRushingStatisticsWithSeason()
+        {
+            return $@"SELECT [Season], [Name], [Team], [Age], [Games], [RushAttempts], [Yards], [Touchdowns], [FirstDowns], [Long], [Fumbles], [PlayerId]
+                FROM [dbo].Rushing WHERE [PlayerId] = @playerId";
+        }
+        public string GetReceivingStatisticsWithSeason()
+        {
+            return $@"SELECT [Season], [Name], [Team], [Age], [Games], [Targets], [Receptions], [Yards], [Touchdowns], [FirstDowns], [Long], [RpG], [Fumbles], [PlayerId]
+                FROM [dbo].Receiving WHERE [PlayerId] = @playerId";
+        }
+        public string GetAllFantasyResults()
+        {
+            return $@"SELECT [Season], [PlayerId], [TotalPoints], [PassingPoints], [RushingPoints], [ReceivingPoints]
+                    FROM [dbo].FantasyPoints WHERE [PlayerId] = @playerId";
+        }
     }
 }

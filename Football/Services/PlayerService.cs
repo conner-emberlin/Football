@@ -12,10 +12,33 @@ namespace Football.Services
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepository _playerRepository;
+        private readonly IFantasyService _fantasyService;
 
-        public PlayerService(IPlayerRepository playerRepository)
+        public PlayerService(IPlayerRepository playerRepository, IFantasyService fantasyService)
         {
             _playerRepository = playerRepository;
+            _fantasyService = fantasyService;   
+        }
+
+        public async Task<Player> GetPlayer(int playerId)
+        {
+            var player = await GetPlayerInfo(playerId);
+            player.PassingStats = await GetPassingStatisticsWithSeason(playerId);
+            player.RushingStats = await GetRushingStatisticsWithSeason(playerId);
+            player.ReceivingStats = await GetReceivingStatisticsWithSeason(playerId);
+            player.FantasyPoints = await _fantasyService.GetAllFantasyResults(playerId);
+            
+            var tightends = await GetTightEnds();
+            if (tightends.Contains(playerId))
+            {
+                player.IsTightEnd = true;
+            }
+            else { 
+                player.IsTightEnd = false; 
+            }
+            
+            return player;
+
         }
         public async Task<PassingStatistic> GetPassingStatistic(int playerId, int season)
         {
@@ -108,5 +131,25 @@ namespace Football.Services
             return await _playerRepository.GetTightEnds();
         }
 
+        #region Private Methods
+        private async Task<Player> GetPlayerInfo(int playerId)
+        {
+            return await _playerRepository.GetPlayerInfo(playerId);
+        }
+        private async Task<List<PassingStatisticWithSeason>> GetPassingStatisticsWithSeason(int playerId)
+        {
+            return await _playerRepository.GetPassingStatisticsWithSeason(playerId);
+        }
+        private async Task<List<RushingStatisticWithSeason>> GetRushingStatisticsWithSeason(int playerId)
+        {
+            return await _playerRepository.GetRushingStatisticsWithSeason(playerId);
+        }
+        private async Task<List<ReceivingStatisticWithSeason>> GetReceivingStatisticsWithSeason(int playerId)
+        {
+            return await _playerRepository.GetReceivingStatisticsWithSeason(playerId);
+        }
+
+
+        #endregion
     }
 }

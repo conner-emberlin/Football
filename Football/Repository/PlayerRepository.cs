@@ -28,6 +28,12 @@ namespace Football.Repository
             var query = _sqlQueryService.GetPassingStatisticWithSeason();
             return await _dbConnection.QueryFirstOrDefaultAsync<PassingStatisticWithSeason>(query, new { season, playerId });
         }
+        public async Task<List<PassingStatisticWithSeason>> GetPassingStatisticsWithSeason(int playerId)
+        {
+            var query = _sqlQueryService.GetPassingStatisticsWithSeason();
+            var stats = await _dbConnection.QueryAsync<PassingStatisticWithSeason>(query, new { playerId });
+            return stats.ToList();             
+        }
 
         public async Task<RushingStatistic> GetRushingStatistic(int playerId, int season)
         {
@@ -40,7 +46,12 @@ namespace Football.Repository
             var query = _sqlQueryService.GetRushingStatisticWithSeason();
             return await _dbConnection.QueryFirstOrDefaultAsync<RushingStatisticWithSeason>(query, new { season, playerId });
         }
-
+        public async Task<List<RushingStatisticWithSeason>> GetRushingStatisticsWithSeason(int playerId)
+        {
+            var query = _sqlQueryService.GetRushingStatisticsWithSeason();
+            var stats =  await _dbConnection.QueryAsync<RushingStatisticWithSeason>(query, new { playerId });
+            return stats.ToList();
+        }
         public async Task<ReceivingStatistic> GetReceivingStatistic(int playerId, int season)
         {
             var query = _sqlQueryService.GetReceivingStatistic();
@@ -51,6 +62,12 @@ namespace Football.Repository
         {
             var query = _sqlQueryService.GetReceivingStatisticWithSeason();
             return await _dbConnection.QueryFirstOrDefaultAsync<ReceivingStatisticWithSeason>(query, new { season, playerId });
+        }
+        public async Task<List<ReceivingStatisticWithSeason>> GetReceivingStatisticsWithSeason(int playerId)
+        {
+            var query = _sqlQueryService.GetReceivingStatisticsWithSeason();
+            var stats = await _dbConnection.QueryAsync<ReceivingStatisticWithSeason>(query, new { playerId });
+            return stats.ToList();
         }
         public async Task<string> GetPlayerPosition(int playerId)
         {
@@ -144,6 +161,13 @@ namespace Football.Repository
             var query = _sqlQueryService.GetTightEnds();
             var tightEnds = await _dbConnection.QueryAsync<int>(query);
             return tightEnds.ToList();
+        }
+
+        public async Task<Player> GetPlayerInfo(int playerId)
+        {
+            var query = _sqlQueryService.GetPlayerInfo();
+            var player = await _dbConnection.QueryAsync<Player>(query, new { playerId });
+            return player.FirstOrDefault();
         }
     }
 }

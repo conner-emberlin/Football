@@ -11,10 +11,13 @@ namespace Football.Interfaces
     {
         public Task<PassingStatistic> GetPassingStatistic(int playerId, int season);
         public Task<PassingStatisticWithSeason> GetPassingStatisticWithSeason(int playerId, int season);
+        public Task<List<PassingStatisticWithSeason>> GetPassingStatisticsWithSeason(int playerId);
         public Task<RushingStatistic> GetRushingStatistic(int playerId, int season);
         public Task<RushingStatisticWithSeason> GetRushingStatisticWithSeason(int playerId, int season);
+        public Task<List<RushingStatisticWithSeason>> GetRushingStatisticsWithSeason(int playerId);
         public Task<ReceivingStatistic> GetReceivingStatistic(int playerId, int season);
         public Task<ReceivingStatisticWithSeason> GetReceivingStatisticWithSeason(int playerId, int season);
+        public Task<List<ReceivingStatisticWithSeason>> GetReceivingStatisticsWithSeason(int playerId);
         public Task<string> GetPlayerPosition(int playerId);
         public Task<List<int>> GetPlayersByPosition(string position);
         public Task<List<int>> GetPlayerIdsByFantasySeason(int season);
@@ -27,5 +30,6 @@ namespace Football.Interfaces
         public Task<bool> IsPlayerActive(int playerId);
         public Task<string> GetPlayerTeam(int playerId);
         public Task<List<int>> GetTightEnds();
+        public Task<Player> GetPlayerInfo(int playerId);
     }
 }

@@ -63,6 +63,10 @@ namespace Football.Services
         {
             return await _fantasyRepository.GetFantasyResults(playerId, season);
         }
+        public async Task<List<FantasyPoints>> GetAllFantasyResults(int playerId)
+        {
+            return await _fantasyRepository.GetAllFantasyResults(playerId);
+        }
         public async Task<int> InsertFantasyPoints(FantasyPoints fantasyPoints)
         {
             return await _fantasyRepository.InsertFantasyPoints(fantasyPoints);

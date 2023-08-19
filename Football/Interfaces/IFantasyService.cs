@@ -9,6 +9,7 @@ namespace Football.Interfaces
         public Task<double> CalculateRushingPoints(int playerId, int season);
         public Task<double> CalculateReceivingPoints(int playerId, int season);
         public Task<FantasyPoints> GetFantasyPoints(int playerId, int season);
+        public Task<List<FantasyPoints>> GetAllFantasyResults(int playerId);
         public Task<FantasyPoints> GetFantasyResults(int playerId, int season);
         public Task<int> InsertFantasyPoints(FantasyPoints fantasyPoints);
         public Task<(int, int)> RefreshFantasyResults(FantasyPoints fantasyPoints);

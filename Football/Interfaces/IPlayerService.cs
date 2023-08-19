@@ -9,6 +9,7 @@ namespace Football.Interfaces
 {
     public interface IPlayerService
     {
+        public Task<Player> GetPlayer(int playerId);
         public Task<PassingStatistic> GetPassingStatistic(int playerId, int season);
         public Task<PassingStatisticWithSeason> GetPassingStatisticWithSeason(int playerId, int season);
         public Task<RushingStatistic> GetRushingStatistic(int playerId, int season);
