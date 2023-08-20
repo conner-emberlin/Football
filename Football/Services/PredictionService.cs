@@ -9,8 +9,8 @@ namespace Football.Services
 {
     public class PredictionService : IPredictionService
     {
-        private readonly int currentSeason = 2023;
         private readonly IPerformRegressionService _performRegressionService;
+        private readonly IRegressionModelService _regressionModelService;
         private readonly IFantasyService _fantasyService;
         private readonly IMatrixService _matrixService;
         private readonly IPlayerService _playerService;
@@ -18,69 +18,18 @@ namespace Football.Services
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
 
-        public PredictionService(IPerformRegressionService performRegressionService, IFantasyService fantasyService, IPlayerService playerService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, ILogger logger, IMemoryCache cache)
+        public PredictionService(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService, IFantasyService fantasyService, IPlayerService playerService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, ILogger logger, IMemoryCache cache)
         {
             _performRegressionService = performRegressionService;
             _matrixService = matrixService;
             _fantasyService = fantasyService;
             _playerService = playerService;
             _weightedAverageCalculator = weightedAverageCalculator;
+            _regressionModelService = regressionModelService;
             _logger = logger;
             _cache = cache;
         }
  
-        public RegressionModelQB PopulateProjectedAverageModelQB(PassingStatistic passingStat, RushingStatistic rushingStat, int playerId)
-        {
-            var dataP = passingStat != null;
-            var dataR = passingStat != null;
-            return new RegressionModelQB
-            {
-                PlayerId = playerId,
-                Season = currentSeason,
-                PassingAttemptsPerGame = dataP ? Math.Round((double)(passingStat.Attempts / passingStat.Games), 4) : 0,
-                PassingYardsPerGame = dataP ? Math.Round((double)(passingStat.Yards / passingStat.Games), 4) : 0,
-                PassingTouchdownsPerGame = dataP ? Math.Round((double)(passingStat.Touchdowns / passingStat.Games), 4) : 0,
-                RushingAttemptsPerGame = dataR ? Math.Round((double)(rushingStat.RushAttempts / rushingStat.Games), 4) : 0,
-                RushingYardsPerGame = dataR ? Math.Round((double)(rushingStat.Yards / rushingStat.Games), 4) : 0,
-                RushingTouchdownsPerGame = dataR ? Math.Round((double)(rushingStat.Touchdowns / rushingStat.Games), 4) : 0,
-                SackYardsPerGame = dataP ? Math.Round((double)(passingStat.SackYards / passingStat.Games), 4) : 0
-            };
-        }
-
-        public RegressionModelRB PopulateProjectedAverageModelRB(RushingStatistic rushingStat, ReceivingStatistic receivingStat, int playerId)
-        {
-            var dataRush = rushingStat != null;
-            var dataRec = receivingStat != null;
-            return new RegressionModelRB
-            {
-                PlayerId = playerId,
-                Season = currentSeason,
-                Age = dataRush ? rushingStat.Age : 0,
-                RushingAttemptsPerGame = dataRush ? Math.Round((double)(rushingStat.RushAttempts / rushingStat.Games), 4) : 0,
-                RushingYardsPerGame = dataRush ? Math.Round((double)(rushingStat.Yards / rushingStat.Games), 4) : 0,
-                RushingYardsPerAttempt = dataRush ? Math.Round((double)(rushingStat.Yards / rushingStat.RushAttempts), 4) : 0,
-                RushingTouchdownsPerGame = dataRush ? Math.Round((double)(rushingStat.Touchdowns / rushingStat.Games), 4) : 0,
-                ReceivingTouchdownsPerGame = dataRec ? Math.Round((double)(receivingStat.Touchdowns / receivingStat.Games), 4) : 0,
-                ReceivingYardsPerGame = dataRec ? Math.Round((double)(receivingStat.Yards / receivingStat.Games), 4) : 0,
-                ReceptionsPerGame = dataRec ? Math.Round((double)(receivingStat.Receptions / receivingStat.Games), 4) : 0
-            };
-        }
-
-        public RegressionModelPassCatchers PopulateProjectedAverageModelPassCatchers(ReceivingStatistic receivingStat, int playerId)
-        {
-            var data = receivingStat != null;
-            return new RegressionModelPassCatchers
-            {
-                PlayerId = playerId,
-                Season = currentSeason,
-                TargetsPerGame = data ? Math.Round((double)(receivingStat.Targets / receivingStat.Games), 4) : 0,
-                ReceptionsPerGame = data ? Math.Round((double)(receivingStat.Receptions / receivingStat.Games), 4) : 0,
-                YardsPerGame = data ? Math.Round((double)(receivingStat.Yards / receivingStat.Games), 4) : 0,
-                YardsPerReception = data ? Math.Round((double)receivingStat.Yards / receivingStat.Receptions, 4) : 0,
-                TouchdownsPerGame = data ? Math.Round((double)(receivingStat.Touchdowns / receivingStat.Games), 4) : 0
-            };
-        }
-
         public async Task<List<FantasyPoints>> AverageProjectedFantasyByPosition(string position)
         {
             var players = await _playerService.GetPlayersByPosition(position);
@@ -104,7 +53,7 @@ namespace Football.Services
                 var player = await _playerService.GetPlayer(p);
                 var projectedAveragePassing = _weightedAverageCalculator.WeightedAverage(player.PassingStats);
                 var projectedAverageRushing = _weightedAverageCalculator.WeightedAverage(player.RushingStats);
-                var model = PopulateProjectedAverageModelQB(projectedAveragePassing, projectedAverageRushing, p);
+                var model = _regressionModelService.PopulateProjectedAverageModelQB(projectedAveragePassing, projectedAverageRushing, p);
                 regressionModel.Add(model);
             }
             return regressionModel;          
@@ -120,7 +69,7 @@ namespace Football.Services
                 var player = await _playerService.GetPlayer(p);
                 var projectedAverageRushing =  _weightedAverageCalculator.WeightedAverage(player.RushingStats);
                 var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
-                var model = PopulateProjectedAverageModelRB(projectedAverageRushing,projectedAverageReceiving, p);
+                var model = _regressionModelService.PopulateProjectedAverageModelRB(projectedAverageRushing,projectedAverageReceiving, p);
                 regressionModel.Add(model);
             }
             return regressionModel;
@@ -135,7 +84,7 @@ namespace Football.Services
                 _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
                 var player = await _playerService.GetPlayer(p);
                 var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
-                var model = PopulateProjectedAverageModelPassCatchers(projectedAverageReceiving, p);
+                var model = _regressionModelService.PopulateProjectedAverageModelPassCatchers(projectedAverageReceiving, p);
                 regressionModel.Add(model);
             }
             return regressionModel;
