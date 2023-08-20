@@ -102,8 +102,8 @@ namespace Football.Services
             {               
                 _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
                 var player = await _playerService.GetPlayer(p);
-                var projectedAveragePassing = _weightedAverageCalculator.PassingWeightedAverage(player.PassingStats);
-                var projectedAverageRushing = _weightedAverageCalculator.RushingWeightedAverage(player.RushingStats);
+                var projectedAveragePassing = _weightedAverageCalculator.WeightedAverage(player.PassingStats);
+                var projectedAverageRushing = _weightedAverageCalculator.WeightedAverage(player.RushingStats);
                 var model = PopulateProjectedAverageModelQB(projectedAveragePassing, projectedAverageRushing, p);
                 regressionModel.Add(model);
             }
@@ -118,8 +118,8 @@ namespace Football.Services
             {
                 _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
                 var player = await _playerService.GetPlayer(p);
-                var projectedAverageRushing =  _weightedAverageCalculator.RushingWeightedAverage(player.RushingStats);
-                var projectedAverageReceiving = _weightedAverageCalculator.ReceivingWeightedAverage(player.ReceivingStats);
+                var projectedAverageRushing =  _weightedAverageCalculator.WeightedAverage(player.RushingStats);
+                var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
                 var model = PopulateProjectedAverageModelRB(projectedAverageRushing,projectedAverageReceiving, p);
                 regressionModel.Add(model);
             }
@@ -134,7 +134,7 @@ namespace Football.Services
             {
                 _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
                 var player = await _playerService.GetPlayer(p);
-                var projectedAverageReceiving = _weightedAverageCalculator.ReceivingWeightedAverage(player.ReceivingStats);
+                var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
                 var model = PopulateProjectedAverageModelPassCatchers(projectedAverageReceiving, p);
                 regressionModel.Add(model);
             }

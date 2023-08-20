@@ -4,9 +4,10 @@ namespace Football.Interfaces
 {
     public interface IWeightedAverageCalculator
     {
-        public PassingStatistic PassingWeightedAverage(List<PassingStatisticWithSeason> passing);
-        public RushingStatistic RushingWeightedAverage(List<RushingStatisticWithSeason> rushing);
-        public ReceivingStatistic ReceivingWeightedAverage(List<ReceivingStatisticWithSeason> receving);
+        public PassingStatistic WeightedAverage(List<PassingStatisticWithSeason> passing);
+        public RushingStatistic WeightedAverage(List<RushingStatisticWithSeason> rushing);
+        public ReceivingStatistic WeightedAverage(List<ReceivingStatisticWithSeason> receving);
         public FantasyPoints FantasyWeightedAverage(Player player);
+        
     }
 }

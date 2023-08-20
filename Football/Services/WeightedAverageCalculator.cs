@@ -13,7 +13,7 @@ namespace Football.Services
         {
             _logger = logger;
         }
-        public PassingStatistic PassingWeightedAverage(List<PassingStatisticWithSeason> passing)
+        public PassingStatistic WeightedAverage(List<PassingStatisticWithSeason> passing)
         {
             double averageCompletions = 0;
             double averageAttempts = 0;
@@ -88,7 +88,7 @@ namespace Football.Services
             }
         }
 
-        public RushingStatistic RushingWeightedAverage(List<RushingStatisticWithSeason> rushing)
+        public RushingStatistic WeightedAverage(List<RushingStatisticWithSeason> rushing)
         {
             if (rushing.Count > 0)
             {
@@ -150,7 +150,7 @@ namespace Football.Services
             }
         }
 
-       public ReceivingStatistic ReceivingWeightedAverage(List<ReceivingStatisticWithSeason> receiving)
+       public ReceivingStatistic WeightedAverage(List<ReceivingStatisticWithSeason> receiving)
         {
             if (receiving.Count > 0)
             {
