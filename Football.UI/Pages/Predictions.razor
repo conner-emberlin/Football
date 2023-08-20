@@ -67,7 +67,7 @@ else
     protected override bool ShouldRender() => shouldRender;
     private bool badRequestError;   
     private List<ProjectionModel> players = new();
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "Flex" };
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
     int count = 0;
@@ -107,6 +107,9 @@ else
                 break;
             case "tight end":
                 PositionEnum = "4";
+                break;
+            case "flex":
+                PositionEnum = "5";
                 break;
             default: PositionEnum = "1"; break;
         }

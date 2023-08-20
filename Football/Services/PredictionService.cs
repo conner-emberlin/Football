@@ -53,7 +53,7 @@ namespace Football.Services
                 var player = await _playerService.GetPlayer(p);
                 var projectedAveragePassing = _weightedAverageCalculator.WeightedAverage(player.PassingStats);
                 var projectedAverageRushing = _weightedAverageCalculator.WeightedAverage(player.RushingStats);
-                var model = _regressionModelService.PopulateProjectedAverageModelQB(projectedAveragePassing, projectedAverageRushing, p);
+                var model = _regressionModelService.RegressionModelQB(projectedAveragePassing, projectedAverageRushing, p);
                 regressionModel.Add(model);
             }
             return regressionModel;          
@@ -69,7 +69,7 @@ namespace Football.Services
                 var player = await _playerService.GetPlayer(p);
                 var projectedAverageRushing =  _weightedAverageCalculator.WeightedAverage(player.RushingStats);
                 var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
-                var model = _regressionModelService.PopulateProjectedAverageModelRB(projectedAverageRushing,projectedAverageReceiving, p);
+                var model = _regressionModelService.RegressionModelRB(projectedAverageRushing,projectedAverageReceiving, p);
                 regressionModel.Add(model);
             }
             return regressionModel;
@@ -84,7 +84,7 @@ namespace Football.Services
                 _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
                 var player = await _playerService.GetPlayer(p);
                 var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
-                var model = _regressionModelService.PopulateProjectedAverageModelPassCatchers(projectedAverageReceiving, p);
+                var model = _regressionModelService.RegressionModelPC(projectedAverageReceiving, p);
                 regressionModel.Add(model);
             }
             return regressionModel;
@@ -274,6 +274,69 @@ namespace Football.Services
                 rank++;
             }
             return count;
+        }
+
+        public async Task<List<FlexProjectionModel>> FlexRankings()
+        {
+            List<FlexProjectionModel> flexRankings = new();
+            var qbProjections = await GetProjections("QB");
+            var replacementPoints = qbProjections.ElementAt(qbProjections.Count() - 1).ProjectedPoints;
+            foreach(var proj in qbProjections)
+            {
+                flexRankings.Add(new FlexProjectionModel
+                {
+                    PlayerId = proj.PlayerId,
+                    Name = proj.Name,
+                    Team = proj.Team,
+                    Position = proj.Position,
+                    ProjectedPoints = proj.ProjectedPoints,
+                    VORP = proj.ProjectedPoints - replacementPoints
+                });
+            }
+            var rbProjections = await GetProjections("RB");
+            var rbReplacementPoints = rbProjections.ElementAt(rbProjections.Count() - 1).ProjectedPoints;
+            foreach(var proj in rbProjections)
+            {
+                flexRankings.Add(new FlexProjectionModel
+                {
+                    PlayerId = proj.PlayerId,
+                    Name = proj.Name,
+                    Team = proj.Team,
+                    Position = proj.Position,
+                    ProjectedPoints = proj.ProjectedPoints,
+                    VORP = proj.ProjectedPoints - rbReplacementPoints
+                });
+            }
+            var wrProjections = await GetProjections("WR");
+            var wrReplacementPoints = wrProjections.ElementAt(wrProjections.Count() - 1).ProjectedPoints;
+            foreach (var proj in wrProjections)
+            {
+                flexRankings.Add(new FlexProjectionModel
+                {
+                    PlayerId = proj.PlayerId,
+                    Name = proj.Name,
+                    Team = proj.Team,
+                    Position = proj.Position,
+                    ProjectedPoints = proj.ProjectedPoints,
+                    VORP = proj.ProjectedPoints - wrReplacementPoints
+                });
+            }
+            var teProjections = await GetProjections("TE");
+            var teReplacementPoints = teProjections.ElementAt(teProjections.Count() - 1).ProjectedPoints;
+            foreach (var proj in teProjections)
+            {
+                flexRankings.Add(new FlexProjectionModel
+                {
+                    PlayerId = proj.PlayerId,
+                    Name = proj.Name,
+                    Team = proj.Team,
+                    Position = proj.Position,
+                    ProjectedPoints = proj.ProjectedPoints,
+                    VORP = proj.ProjectedPoints - teReplacementPoints
+                });
+            }
+
+            return flexRankings.OrderByDescending(f => f.VORP).ToList();
         }
     }
 }

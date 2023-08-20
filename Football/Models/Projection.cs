@@ -8,4 +8,9 @@
         public string Position { get; set; }
         public double ProjectedPoints { get; set; }
     }
+
+    public class FlexProjectionModel : ProjectionModel
+    {
+        public double VORP { get; set;}
+    }
 }

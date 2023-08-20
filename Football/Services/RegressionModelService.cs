@@ -70,7 +70,7 @@ namespace Football.Services
                 TouchdownsPerGame = data ? Math.Round((double)(receivingStat.Touchdowns / receivingStat.Games), 4) : 0
             };
         }
-        public RegressionModelQB PopulateProjectedAverageModelQB(PassingStatistic passingStat, RushingStatistic rushingStat, int playerId)
+        public RegressionModelQB RegressionModelQB(PassingStatistic passingStat, RushingStatistic rushingStat, int playerId)
         {
             var dataP = passingStat != null;
             var dataR = passingStat != null;
@@ -88,7 +88,7 @@ namespace Football.Services
             };
         }
 
-        public RegressionModelRB PopulateProjectedAverageModelRB(RushingStatistic rushingStat, ReceivingStatistic receivingStat, int playerId)
+        public RegressionModelRB RegressionModelRB(RushingStatistic rushingStat, ReceivingStatistic receivingStat, int playerId)
         {
             var dataRush = rushingStat != null;
             var dataRec = receivingStat != null;
@@ -107,7 +107,7 @@ namespace Football.Services
             };
         }
 
-        public RegressionModelPassCatchers PopulateProjectedAverageModelPassCatchers(ReceivingStatistic receivingStat, int playerId)
+        public RegressionModelPassCatchers RegressionModelPC(ReceivingStatistic receivingStat, int playerId)
         {
             var data = receivingStat != null;
             return new RegressionModelPassCatchers

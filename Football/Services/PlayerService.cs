@@ -41,35 +41,6 @@ namespace Football.Services
             return player;
 
         }
-        public async Task<PassingStatistic> GetPassingStatistic(int playerId, int season)
-        {
-            return await _playerRepository.GetPassingStatistic(playerId, season);
-        }
-
-        public async Task<PassingStatisticWithSeason> GetPassingStatisticWithSeason(int playerId, int season)
-        {
-            return await _playerRepository.GetPassingStatisticWithSeason(playerId, season);
-        }
-
-        public async Task<RushingStatistic> GetRushingStatistic(int playerId, int season)
-        {
-            return await _playerRepository.GetRushingStatistic(playerId, season);
-        }
-
-        public async Task<RushingStatisticWithSeason> GetRushingStatisticWithSeason(int playerId, int season)
-        {
-            return await _playerRepository.GetRushingStatisticWithSeason(playerId, season);
-        }
-
-        public async Task<ReceivingStatistic> GetReceivingStatistic(int playerId, int season)
-        {
-            return await _playerRepository.GetReceivingStatistic(playerId, season);
-        }
-        public async Task<ReceivingStatisticWithSeason> GetReceivingStatisticWithSeason(int playerId, int season)
-        {
-            return await _playerRepository.GetReceivingStatisticWithSeason(playerId, season);
-        }
-
         public async Task<List<int>> GetPlayerIdsByFantasySeason(int season)
         {
             return await _playerRepository.GetPlayerIdsByFantasySeason(season);
@@ -85,7 +56,6 @@ namespace Football.Services
             return await _playerRepository.GetPlayersByPosition(position);
         }
 
-
         public async Task<List<int>> GetActiveSeasons(int playerId)
         {
             return await _playerRepository.GetActiveSeasons(playerId);
@@ -95,21 +65,6 @@ namespace Football.Services
         {
             var position = await GetPlayerPosition(playerId);
             return await _playerRepository.GetAverageTotalGames(playerId, position);
-        }
-
-        public async Task<List<int>> GetActivePassingSeasons(int playerId)
-        {
-            return await _playerRepository.GetActivePassingSeasons(playerId);
-        }
-
-        public async Task<List<int>> GetActiveRushingSeasons(int playerId)
-        {
-            return await _playerRepository.GetActiveRushingSeasons(playerId);
-        }
-
-        public async Task<List<int>> GetActiveReceivingSeasons(int playerId)
-        {
-            return await _playerRepository.GetActiveReceivingSeasons(playerId);
         }
 
         public async Task<string> GetPlayerName(int playerId)

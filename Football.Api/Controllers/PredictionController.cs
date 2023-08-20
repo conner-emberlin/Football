@@ -27,7 +27,22 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<IEnumerable<ProjectionModel>>> GetProjection(int position)
         {
-            return Ok(await _predictionService.GetProjections(_serviceHelper.TransformPosition(position)));
+            if (position == 5)
+            {
+                return Ok(await _predictionService.FlexRankings());
+            }
+            else
+            {
+                return Ok(await _predictionService.GetProjections(_serviceHelper.TransformPosition(position)));
+            }
+        }
+        //calculate projections for a position
+        [HttpGet("flex-rankings")]
+        [ProducesResponseType(typeof(List<FlexProjectionModel>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<FlexProjectionModel>>> GetFlexRankings()
+        {
+            return Ok(await _predictionService.FlexRankings());
         }
         //Upload projections for a position to the DB
         [HttpPost("upload/{position}")]

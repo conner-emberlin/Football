@@ -9,7 +9,7 @@ namespace Football.Services
     {
         public Matrix<double> PopulatePassCatchersRegressorMatrix(List<RegressionModelPassCatchers> model)
         {
-            var rowCount = model.Count - 1;
+            var rowCount = model.Count;
             var columnCount = typeof(RegressionModelPassCatchers).GetProperties().Length - 1;            
             var rows = new List<Vector<double>>();
             foreach (var m in model)
@@ -21,7 +21,7 @@ namespace Football.Services
 
         public Matrix<double> PopulateQbRegressorMatrix(List<RegressionModelQB> model)
         {
-            var rowCount = model.Count - 1;
+            var rowCount = model.Count;
             var columnCount = typeof(RegressionModelQB).GetProperties().Length - 1;
             var rows = new List<Vector<double>>();
             foreach (var m in model)
@@ -33,7 +33,7 @@ namespace Football.Services
 
         public Matrix<double> PopulateRbRegressorMatrix(List<RegressionModelRB> model)
         {
-            var rowCount = model.Count - 1;
+            var rowCount = model.Count;
             var columnCount = typeof(RegressionModelRB).GetProperties().Length - 1;
             var rows = new List<Vector<double>>();
             foreach(var m in model)
@@ -45,7 +45,7 @@ namespace Football.Services
 
         public Vector<double> PopulateDependentVector(List<FantasyPoints> totalPoints)
         {
-            var len = totalPoints.Count - 1;
+            var len = totalPoints.Count;
             var vec = Vector<double>.Build.Dense(len);
             for (int i = 0; i < len; i++)
             {
