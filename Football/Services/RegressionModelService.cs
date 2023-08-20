@@ -14,15 +14,15 @@ namespace Football.Services
             _playerService = playerService;
         }
 
-        public async Task<RegressionModelQB> PopulateRegressionModelQB(int playerId, int season)
+        public RegressionModelQB RegressionModelQB(Player player, int season)
         {
-            PassingStatistic? passingStat = await _playerService.GetPassingStatistic(playerId, season);
-            RushingStatistic? rushingStat = await _playerService.GetRushingStatistic(playerId, season);
+            var passingStat = player.PassingStats.Where(p => p.Season == season).FirstOrDefault();
+            var rushingStat = player.RushingStats.Where(p => p.Season == season).FirstOrDefault();
             var dataP = passingStat != null;
             var dataR = rushingStat != null;
             return new RegressionModelQB
             {
-                PlayerId = playerId,
+                PlayerId = player.PlayerId,
                 Season = season,
                 PassingAttemptsPerGame = dataP ? Math.Round((double)(passingStat.Attempts / passingStat.Games), 4) : 0,
                 PassingYardsPerGame = dataP ? Math.Round((double)(passingStat.Yards / passingStat.Games), 4) : 0,
@@ -34,15 +34,15 @@ namespace Football.Services
             };
         }
 
-        public async Task<RegressionModelRB> PopulateRegressionModelRb(int playerId, int season)
+        public RegressionModelRB RegressionModelRB(Player player, int season)
         {
-            RushingStatistic? rushingStat = await _playerService.GetRushingStatistic(playerId, season);
-            ReceivingStatistic? receivingStat = await _playerService.GetReceivingStatistic(playerId, season);
+            var rushingStat = player.RushingStats.Where(p => p.Season == season).FirstOrDefault();
+            var receivingStat = player.ReceivingStats.Where(p => p.Season == season).FirstOrDefault();
             var dataRush = rushingStat != null;
             var dataRec = receivingStat != null;
             return new RegressionModelRB
             {
-                PlayerId = playerId,
+                PlayerId = player.PlayerId,
                 Season = season,
                 Age = dataRush ? rushingStat.Age : 0,
                 RushingAttemptsPerGame = dataRush ? Math.Round((double)(rushingStat.RushAttempts / rushingStat.Games), 4) : 0,
@@ -55,13 +55,13 @@ namespace Football.Services
             };
         }
 
-        public async Task<RegressionModelPassCatchers> PopulateRegressionModelPassCatchers(int playerId, int season)
+        public RegressionModelPassCatchers RegressionModelPC(Player player, int season)
         {
-            ReceivingStatistic? receivingStat = await _playerService.GetReceivingStatistic(playerId, season);
+            var receivingStat = player.ReceivingStats.Where(p => p.Season == season).FirstOrDefault();
             var data = receivingStat != null;
             return new RegressionModelPassCatchers
             {
-                PlayerId = playerId,
+                PlayerId = player.PlayerId,
                 Season = season,
                 TargetsPerGame = data ? Math.Round((double)(receivingStat.Targets / receivingStat.Games), 4) : 0,
                 ReceptionsPerGame = data ? Math.Round((double)(receivingStat.Receptions / receivingStat.Games), 4) : 0,

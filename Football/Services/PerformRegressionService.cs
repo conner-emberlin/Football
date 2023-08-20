@@ -36,21 +36,24 @@ namespace Football.Services
                     List<RegressionModelQB> qbs = new();
                     foreach (var fp in fantasyPoints)
                     {
-                        qbs.Add(await _regressionModelService.PopulateRegressionModelQB(fp.PlayerId, season));
+                        var qb = await _playerService.GetPlayer(fp.PlayerId);
+                        qbs.Add(_regressionModelService.RegressionModelQB(qb, season));
                     }
                     return CholeskyDecomposition(_matrixService.PopulateQbRegressorMatrix(qbs), _matrixService.PopulateDependentVector(fantasyPoints));
                 case "RB":
                     List<RegressionModelRB> rbs = new();
                     foreach(var fp in fantasyPoints)
                     {
-                        rbs.Add(await _regressionModelService.PopulateRegressionModelRb(fp.PlayerId, season));
+                        var rb = await _playerService.GetPlayer(fp.PlayerId);
+                        rbs.Add(_regressionModelService.RegressionModelRB(rb, season));
                     }
                     return CholeskyDecomposition(_matrixService.PopulateRbRegressorMatrix(rbs), _matrixService.PopulateDependentVector(fantasyPoints));
                 case "WR/TE":
                     List<RegressionModelPassCatchers> passCatchers = new();
                     foreach (var fp in fantasyPoints)
                     {
-                        passCatchers.Add(await _regressionModelService.PopulateRegressionModelPassCatchers(fp.PlayerId, season));
+                        var pc = await _playerService.GetPlayer(fp.PlayerId);
+                        passCatchers.Add(_regressionModelService.RegressionModelPC(pc, season));
                     }
                     return CholeskyDecomposition(_matrixService.PopulatePassCatchersRegressorMatrix(passCatchers), _matrixService.PopulateDependentVector(fantasyPoints));
                 default: throw new NotImplementedException();
@@ -79,7 +82,7 @@ namespace Football.Services
                     List<RegressionModelQB> models = new();
                     foreach (var season in seasons)
                     {
-                        models.Add(await _regressionModelService.PopulateRegressionModelQB(playerId, season));
+                        models.Add(_regressionModelService.RegressionModelQB(await _playerService.GetPlayer(playerId), season));
                         regressions.Add(await PerformRegression(season, position));
                         var results = await _fantasyService.GetFantasyResults(playerId, season);
                         actualPoints.Add(results.TotalPoints);
@@ -94,7 +97,7 @@ namespace Football.Services
                     List<RegressionModelRB> modelsR = new();
                     foreach (var season in seasons)
                     {
-                        modelsR.Add(await _regressionModelService.PopulateRegressionModelRb(playerId, season));
+                        modelsR.Add(_regressionModelService.RegressionModelRB(await _playerService.GetPlayer(playerId), season));
                         regressions.Add(await PerformRegression(season, position));
                         var results = await _fantasyService.GetFantasyResults(playerId, season);
                         actualPoints.Add(results.TotalPoints);
@@ -109,7 +112,7 @@ namespace Football.Services
                     List<RegressionModelPassCatchers> modelsP = new();
                     foreach (var season in seasons)
                     {
-                        modelsP.Add(await _regressionModelService.PopulateRegressionModelPassCatchers(playerId, season));
+                        modelsP.Add(_regressionModelService.RegressionModelPC(await _playerService.GetPlayer(playerId), season));
                         regressions.Add(await PerformRegression(season, position));
                         var results = await _fantasyService.GetFantasyResults(playerId, season);
                         actualPoints.Add(results.TotalPoints);

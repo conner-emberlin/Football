@@ -52,7 +52,7 @@ namespace Football.Api.Controllers
                     List<RegressionModelQB> models = new();
                     foreach (var fr in fantasyResults)
                     {
-                        var model = await _regressionModelService.PopulateRegressionModelQB(fr.PlayerId, fr.Season);
+                        var model = _regressionModelService.RegressionModelQB(await _playerService.GetPlayer(fr.PlayerId), fr.Season);
                         models.Add(model);
                     }
                     var regressorMatrix = _matrixService.PopulateQbRegressorMatrix(models);
@@ -62,7 +62,7 @@ namespace Football.Api.Controllers
                     List<RegressionModelRB> modelsR = new();
                     foreach (var fr in fantasyResults)
                     {
-                        var modelR = await _regressionModelService.PopulateRegressionModelRb(fr.PlayerId, fr.Season);
+                        var modelR = _regressionModelService.RegressionModelRB(await _playerService.GetPlayer(fr.PlayerId), fr.Season);
                         modelsR.Add(modelR);
                     }
                     var regressorMatrixR = _matrixService.PopulateRbRegressorMatrix(modelsR);
@@ -72,7 +72,7 @@ namespace Football.Api.Controllers
                     List<RegressionModelPassCatchers> modelsP = new();
                     foreach (var fr in fantasyResults)
                     {
-                        var modelP = await _regressionModelService.PopulateRegressionModelPassCatchers(fr.PlayerId, fr.Season);
+                        var modelP = _regressionModelService.RegressionModelPC(await _playerService.GetPlayer(fr.PlayerId), fr.Season);
                         modelsP.Add(modelP);
                     }
                     var regressorMatrixP = _matrixService.PopulatePassCatchersRegressorMatrix(modelsP);
