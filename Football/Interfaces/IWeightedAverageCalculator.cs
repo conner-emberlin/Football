@@ -7,7 +7,7 @@ namespace Football.Interfaces
         public PassingStatistic WeightedAverage(List<PassingStatisticWithSeason> passing);
         public RushingStatistic WeightedAverage(List<RushingStatisticWithSeason> rushing);
         public ReceivingStatistic WeightedAverage(List<ReceivingStatisticWithSeason> receving);
-        public FantasyPoints FantasyWeightedAverage(Player player);
+        public FantasyPoints WeightedAverage(Player player);
         
     }
 }

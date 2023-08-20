@@ -216,7 +216,7 @@ namespace Football.Services
             else { return null; }
         }
 
-        public FantasyPoints FantasyWeightedAverage(Player player)
+        public FantasyPoints WeightedAverage(Player player)
         {
 
             if (player.FantasySeasonGames.Count > 0)

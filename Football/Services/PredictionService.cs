@@ -88,7 +88,7 @@ namespace Football.Services
             foreach(var p in players)
             {
                 var player = await _playerService.GetPlayer(p);
-                var projected = _weightedAverageCalculator.FantasyWeightedAverage(player);
+                var projected = _weightedAverageCalculator.WeightedAverage(player);
                 projectedAverage.Add(projected);
             }
             return projectedAverage;
