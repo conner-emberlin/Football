@@ -169,5 +169,12 @@ namespace Football.Repository
             var player = await _dbConnection.QueryAsync<Player>(query, new { playerId });
             return player.FirstOrDefault();
         }
+
+        public async Task<int> GetPlayerId(string name)
+        {
+            var query = _sqlQueryService.GetPlayerId();
+            var id = await _dbConnection.QueryFirstOrDefaultAsync<int>(query, new { name });
+            return id;
+        }
     }
 }

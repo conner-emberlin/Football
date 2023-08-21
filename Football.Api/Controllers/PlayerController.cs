@@ -21,12 +21,19 @@ namespace Football.Api.Controllers
             _serviceHelper = serviceHelper;
         }
 
-        [HttpGet("{playerId}")]
+        [HttpGet("{name}")]
         [ProducesResponseType(typeof(Player), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<Player>> GetPlayer(int playerId)
+        public async Task<ActionResult<Player>> GetPlayer(string name)
         {
-            return Ok(await _playerService.GetPlayer(playerId));
+            var playerId = await _playerService.GetPlayerId(name);
+            if(playerId != 0){
+                return Ok(await _playerService.GetPlayer(playerId));
+            }
+            else
+            {
+                return BadRequest("No player with that name");
+            }
         }
     }
 }

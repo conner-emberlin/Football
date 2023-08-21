@@ -41,11 +41,11 @@ namespace Football.Interfaces
         public string GetTightEnds();
         public string InsertFantasyProjections();
         public string GetPlayerInfo();
-
         public string GetPassingStatisticsWithSeason();
         public string GetRushingStatisticsWithSeason();
         public string GetReceivingStatisticsWithSeason();
         public string GetAllFantasyResults();
+        public string GetPlayerId();
 
     }
 }

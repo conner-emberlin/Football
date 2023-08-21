@@ -1,0 +1,212 @@
+﻿@page "/Players"
+<PageTitle>Players</PageTitle>
+<h1>Players</h1>
+
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Models;
+@inject IHttpClientFactory ClientFactory
+
+<EditForm Model="player" OnValidSubmit="GetPlayers">
+    <TextBox @bind-Value="this.Value" />
+</EditForm>
+<br />
+@if(player.Name != null && !badRequestError){
+<div>
+<b>Name</b> @player.Name <b>Position</b> @Position <b>Active</b> @Active
+</div>
+    <br />
+    @if(player.PassingStats.Count > 0)
+    {
+        <div style="color:darkorange">Passing Statistics</div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Season</th>
+                    <th>Team</th>
+                    <th>Age</th>
+                    <th>Games</th>
+                    <th>Comps</th>
+                    <th>Atts</th>
+                    <th>Yds</th>
+                    <th>Tds</th>
+                    <th>Ints</th>
+                    <th>Fds</th>
+                    <th>Lng</th>
+                    <th>Scks</th>
+                    <th>SckYds</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var stat in player.PassingStats)
+                {
+                    <tr>
+                        <td>@stat.Season</td>
+                        <td>@stat.Team</td>
+                        <td>@stat.Age</td>
+                        <td>@stat.Games</td>
+                        <td>@stat.Completions</td>
+                        <td>@stat.Attempts</td>
+                        <td>@stat.Yards</td>
+                        <td>@stat.Touchdowns</td>
+                        <td>@stat.Interceptions</td>
+                        <td>@stat.FirstDowns</td>
+                        <td>@stat.Long</td>
+                        <td>@stat.Sacks</td>
+                        <td>@stat.SackYards</td>
+                    </tr>
+                }
+            </tbody>
+        </table>       
+    }
+    <br />
+    @if (player.RushingStats.Count > 0)
+    {
+        <div style="color:darkorange">Rushing Statistics</div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Season</th>
+                    <th>Team</th>
+                    <th>Age</th>
+                    <th>Games</th>
+                    <th>Atts</th>
+                    <th>Yds</th>
+                    <th>Tds</th>
+                    <th>Fds</th>
+                    <th>Lng</th>
+                    <th>Fmbls</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var stat in player.RushingStats)
+                {
+                    <tr>
+                        <td>@stat.Season</td>
+                        <td>@stat.Team</td>
+                        <td>@stat.Age</td>
+                        <td>@stat.Games</td>
+                        <td>@stat.RushAttempts</td>
+                        <td>@stat.Yards</td>
+                        <td>@stat.Touchdowns</td>
+                        <td>@stat.FirstDowns</td>
+                        <td>@stat.Long</td>
+                        <td>@stat.Fumbles</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    <br />
+    @if (player.ReceivingStats.Count > 0)
+    {
+        <div style="color:darkorange">Receiving Statistics</div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Season</th>
+                    <th>Team</th>
+                    <th>Age</th>
+                    <th>Games</th>
+                    <th>Tgts</th>
+                    <th>Rec</th>
+                    <th>Yds</th>
+                    <th>Tds</th>
+                    <th>Fds</th>
+                    <th>Lng</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var stat in player.ReceivingStats)
+                {
+                    <tr>
+                        <td>@stat.Season</td>
+                        <td>@stat.Team</td>
+                        <td>@stat.Age</td>
+                        <td>@stat.Games</td>
+                        <td>@stat.Targets</td>
+                        <td>@stat.Receptions</td>
+                        <td>@stat.Yards</td>
+                        <td>@stat.Touchdowns</td>
+                        <td>@stat.FirstDowns</td>
+                        <td>@stat.Long</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+}
+
+else if(badRequestError)
+{
+    <div>
+        <p style="color:red">No players with that name</p>
+    </div>
+}
+else
+{
+    <p>Enter a player name to search.</p>
+}
+
+
+
+
+@code{
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+    private bool badRequestError;
+
+    private string Value { get; set; } = "";
+    private Player player = new();
+    private string Active = "";
+    private string Position = "";
+
+    public async Task GetPlayers()
+    {
+        var name = this.Value;
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/" + name);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            badRequestError = false;
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            player = await JsonSerializer.DeserializeAsync<Player>(responseStream, options);
+
+            if(player.Active == 1)
+            {
+                Active = "Yes";
+            }
+            else
+            {
+                Active = "No";
+            }
+
+            if(player.Position == "WR/TE" && !player.IsTightEnd)
+            {
+                Position = "WR";
+            }
+            else if(player.Position == "WR/TE" && player.IsTightEnd)
+            {
+                Position = "TE";
+            }
+            else
+            {
+                Position = player.Position;
+            }
+
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        shouldRender = true;
+
+    }
+
+
+}
+

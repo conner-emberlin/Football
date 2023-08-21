@@ -214,5 +214,10 @@ namespace Football.Services
             return $@"SELECT [Season], [PlayerId], [TotalPoints], [PassingPoints], [RushingPoints], [ReceivingPoints]
                     FROM [dbo].FantasyPoints WHERE [PlayerId] = @playerId";
         }
+
+        public string GetPlayerId()
+        {
+            return $@"SELECT [PlayerId] FROM [dbo].Players WHERE [Name] LIKE '%' + @name + '%'";
+        }
     }
 }

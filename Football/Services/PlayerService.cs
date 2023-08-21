@@ -87,6 +87,11 @@ namespace Football.Services
             return await _playerRepository.GetTightEnds();
         }
 
+        public async Task<int> GetPlayerId(string name)
+        {
+            return await _playerRepository.GetPlayerId(name);
+        }
+
         #region Private Methods
         private async Task<Player> GetPlayerInfo(int playerId)
         {

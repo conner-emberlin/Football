@@ -1,0 +1,24 @@
+﻿<style> .textbox-parameters{background: lightblue;
+       }
+</style>
+@if (!string.IsNullOrWhiteSpace(Label))
+{
+    <label for="@Id">
+        @Label
+    </label>
+}
+<div class="input-group mb-3 ">
+    <input type="text" class="form-control textbox-parameters" id="@Id" value="@Value" @onchange="this.OnChange">
+</div>
+
+@code {
+    [Parameter] public String Value { get; set; } = " ";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Id { get; set; }
+
+    private void OnChange(ChangeEventArgs e)
+    {
+        ValueChanged.InvokeAsync(e.Value.ToString());
+    }
+}

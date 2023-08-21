@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.Api", "Football.Ap
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Applications", "Applications", "{747EBABE-16B2-4497-9347-9DACC3FBCCE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.UI", "Football.UI\Football.UI.csproj", "{402E91B2-E01B-4026-9B20-50176A01A324}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.UI", "Football.UI\Football.UI.csproj", "{402E91B2-E01B-4026-9B20-50176A01A324}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
