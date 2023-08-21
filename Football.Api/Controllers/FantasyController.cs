@@ -61,7 +61,6 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<FantasyPoints>> GetFantasyPoints(int playerId, int season)
         {
-          //  FantasyService fantasyService = new();
             return Ok(await _fantasyService.GetFantasyPoints(playerId, season));
         }
     }

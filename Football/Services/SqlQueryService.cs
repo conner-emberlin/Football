@@ -217,7 +217,8 @@ namespace Football.Services
 
         public string GetPlayerId()
         {
-            return $@"SELECT [PlayerId] FROM [dbo].Players WHERE [Name] LIKE '%' + @name + '%'";
+            return $@"SELECT [PlayerId] FROM [dbo].Players WHERE [Name] LIKE '%' + @name + '%'
+                ORDER BY [Active] DESC";
         }
     }
 }
