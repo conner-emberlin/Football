@@ -8,7 +8,7 @@
 @inject IHttpClientFactory ClientFactory
 
 <EditForm Model="player" OnValidSubmit="GetPlayers">
-    <TextBox @bind-Value="this.Value" />
+    <TextBoxName @bind-Value="this.Value" />
 </EditForm>
 <br />
 @if(player.Name != null && !badRequestError){
@@ -18,7 +18,7 @@
     <br />
     @if(player.PassingStats.Count > 0)
     {
-        <div style="color:darkorange">Passing Statistics</div>
+        <div style="color:#e66460">Passing Statistics</div>
         <table class="table">
             <thead>
                 <tr>
@@ -62,7 +62,7 @@
     <br />
     @if (player.RushingStats.Count > 0)
     {
-        <div style="color:darkorange">Rushing Statistics</div>
+        <div style="color:#e66460">Rushing Statistics</div>
         <table class="table">
             <thead>
                 <tr>
@@ -100,7 +100,7 @@
     <br />
     @if (player.ReceivingStats.Count > 0)
     {
-        <div style="color:darkorange">Receiving Statistics</div>
+        <div style="color:#e66460">Receiving Statistics</div>
         <table class="table">
             <thead>
                 <tr>
@@ -144,13 +144,6 @@ else if(badRequestError)
         <p style="color:red">No players with that name</p>
     </div>
 }
-else
-{
-    <p>Enter a player name to search.</p>
-}
-
-
-
 
 @code{
     private bool shouldRender;

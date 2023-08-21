@@ -1,14 +1,11 @@
-﻿<style> .textbox-parameters{background: lightblue;
-       }
-</style>
-@if (!string.IsNullOrWhiteSpace(Label))
+﻿@if (!string.IsNullOrWhiteSpace(Label))
 {
     <label for="@Id">
         @Label
     </label>
 }
 <div class="input-group mb-3 ">
-    <input type="text" class="form-control textbox-parameters" id="@Id" value="@Value" @onchange="this.OnChange">
+    <input type="text" class="form-control" placeholder="Name..." id="@Id" value="@Value" @onchange="this.OnChange">
 </div>
 
 @code {
@@ -16,6 +13,7 @@
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
     [Parameter] public string? Label { get; set; }
     [Parameter] public string? Id { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
 
     private void OnChange(ChangeEventArgs e)
     {
