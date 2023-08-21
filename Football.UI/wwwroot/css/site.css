@@ -12,6 +12,48 @@ a, .btn-link {
     color: #0071c1;
 }
 
+
+/* CSS */
+.button-40 {
+    background-color: #111827;
+    border: 1px solid transparent;
+    border-radius: .75rem;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    cursor: pointer;
+    flex: 0 0 auto;
+    font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.5rem;
+    padding: .75rem 1.2rem;
+    text-align: center;
+    text-decoration: none #6B7280 solid;
+    text-decoration-thickness: auto;
+    transition-duration: .2s;
+    transition-property: background-color,border-color,color,fill,stroke;
+    transition-timing-function: cubic-bezier(.4, 0, 0.2, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width: auto;
+}
+
+.button-40:hover {
+    background-color: #374151;
+}
+
+.button-40:focus {
+    box-shadow: none;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+    .button-40 {
+        padding: .75rem 1.5rem;
+    }
+}
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;
@@ -62,3 +104,104 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+
+.button-22 {
+    align-items: center;
+    appearance: button;
+    background-color: #0276FF;
+    border-radius: 8px;
+    border-style: none;
+    box-shadow: rgba(255, 255, 255, 0.26) 0 1px 2px inset;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    font-family: "RM Neue",sans-serif;
+    font-size: 100%;
+    line-height: 1.15;
+    margin: 0;
+    padding: 10px 21px;
+    text-align: center;
+    text-transform: none;
+    transition: color .13s ease-in-out,background .13s ease-in-out,opacity .13s ease-in-out,box-shadow .13s ease-in-out;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.button-22:active {
+    background-color: #006AE8;
+}
+
+.button-22:hover {
+    background-color: #1C84FF;
+}
+
+table.boostrap4_table_head_dark_striped_rounded_with_shadow {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    text-align: left;
+    box-sizing: border-box;
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: transparent;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border-radius: 10px;
+}
+
+    table.boostrap4_table_head_dark_striped_rounded_with_shadow thead th {
+        font-size: 1rem;
+        line-height: 1.5;
+        border-collapse: collapse;
+        box-sizing: border-box;
+        text-align: inherit;
+        padding: .75rem;
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+        color: #fff;
+        background-color: #e66460;
+        border-color: #32383e;
+    }
+
+table.boostrap4_table_head_dark_striped_rounded_with_shadow td {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    text-align: left;
+    border-collapse: collapse;
+    box-sizing: border-box;
+    padding: .75rem;
+    vertical-align: top;
+}
+
+table.boostrap4_table_head_dark_striped_rounded_with_shadow tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, .05);
+}
+
+table.boostrap4_table_head_dark_striped_rounded_with_shadow th:first-of-type {
+    border-top-left-radius: 10px;
+}
+
+table.boostrap4_table_head_dark_striped_rounded_with_shadow th:last-of-type {
+    border-top-right-radius: 10px;
+}
+
+table.boostrap4_table_head_dark_striped_rounded_with_shadow tr:last-of-type td:first-of-type {
+    border-bottom-left-radius: 10px;
+}
+
+table.boostrap4_table_head_dark_striped_rounded_with_shadow tr:last-of-type td:last-of-type {
+    border-bottom-right-radius: 10px;
+}
+
+input[type="radio"] {
+    margin: 0 10px 0 10px;
+    margin-right: 0;
+}

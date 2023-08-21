@@ -1,43 +1,57 @@
 ﻿@page "/"
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using News.Models;
+@inject IHttpClientFactory ClientFactory
 
 <PageTitle>Index</PageTitle>
+<h3>NFL News</h3>
 
-<h1>Football.UI</h1>
+@if (!badRequestError && articles!= null)
+{
+    foreach(var article in articles)
+    {
+        <div>
+        <a href="@article.links.web.href"> @article.headline</a>
+        <p>@article.description</p>
+            @if (article.images.FirstOrDefault() != null){
+            <img src="@article.images.FirstOrDefault().url" height="200" />
+            }
+        <hr style="width:75%;text-align:left;margin-left:0">
+        </div>
+        <br/>
+    }
+}
 
-<p>Fantasy Football Projected Rankings based on a linear regression model.</p>
-<br/>
-<p>Current QB regression model</p>
-<ul>
-    <li>Passing Attempts per Game</li>
-    <li>Passing Yards per Game</li>
-    <li>Passing Touchdowns per Game</li>
-    <li>Rushing Attempts per Game</li>
-    <li>Rushing Yards per Game</li>
-    <li>Rushing Touchdowns per Game</li>
-    <li>Sack Yards per Game</li>
-</ul>
-<br/>
-<br/>
-<p>Current RB regresion model</p>
-<ul>
-    <li>Rushing Attempts per Game</li>
-    <li>Rushing Yards per Game</li>
-    <li>Rushing Yards per Attempt</li>
-    <li>Rushing Touchdowns per Game</li>
-    <li>Receptions per Game</li>
-    <li>Receiving Yards per Game</li>
-    <li>Receiving Touchdowns per Game</li>
-    <li>Age</li>
-</ul>
-<br/>
-<br/>
-<p>Current Pass Catchers regression Model</p>
-<ul>
-    <li>Targets per Game</li>
-    <li>Receptions per Game</li>
-    <li>Yards per Game</li>
-    <li>Yards per Reception</li>
-    <li>Touchdowns per Game</li>
-</ul>
-<br/>
-<br/>
+@code{
+
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+    private bool badRequestError;
+
+    private Root root = new();
+    private List<Article> articles = new();
+    protected override async Task OnInitializedAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/News/espn");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            root = await JsonSerializer.DeserializeAsync<Root>(responseStream, options);
+            articles = root.articles;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        shouldRender = true;
+    }
+
+
+
+
+}

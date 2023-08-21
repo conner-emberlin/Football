@@ -6,37 +6,41 @@
 @inject IHttpClientFactory ClientFactory
 
 <h4>Select a position to view the projected 2023 rankings</h4>
+<div>
 @foreach(var position in Positions)
 {
-    <div>
+    
         <input type="radio" name="players" id=" @position" value="@position" 
             @onchange= "SetPosition" 
             checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase))
         />
-        <label for="@position">@position</label>
-    </div>
+        <label for="@position ">@position</label>
+    
 }
-<br />
-<button @onclick = "CalculateProjections">
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="CalculateProjections"> 
     Submit
-</button>
-<br/>
-<br/>
+    </button>
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
 @if (badRequestError || players is null)
 {
     <p>Unexpected Error. Please try again.</p>
 }
-else
+else if(players.Count > 0)
 {
-    <button @onclick="UploadProjections">
+    <button class="button-22" role = "button" @onclick="UploadProjections">
         Upload
     </button>
     @if(count > 0)
     {
         <p>@count records added </p>
     }
-    <br/>
-    <table class = "table">
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
         <thead>
             <tr>
                 <th>Rank</th>
@@ -59,6 +63,7 @@ else
         }
         </tbody>
     </table>
+    </div>
 }
 @code {
     private bool shouldRender;

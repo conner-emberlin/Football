@@ -8,7 +8,7 @@ namespace News.Services
     {
         public async Task<Root> GetEspnNews()
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://site.api.espn.com/apis/site/v2/sports/football/nfl/news");
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limt=25");
             request.Headers.Add("Accept", "application/json");
             var client = new HttpClient();
             var response = await client.SendAsync(request);

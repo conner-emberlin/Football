@@ -10,16 +10,17 @@
 <EditForm Model="player" OnValidSubmit="GetPlayers">
     <TextBoxName @bind-Value="this.Value" />
 </EditForm>
-<br />
+<div style="height:10px;font-size:1px;">&nbsp;</div>
 @if(player.Name != null && !badRequestError){
 <div>
 <b>Name</b> @player.Name <b>Position</b> @Position <b>Active</b> @Active
 </div>
-    <br />
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if(player.PassingStats.Count > 0)
     {
-        <div style="color:#e66460">Passing Statistics</div>
-        <table class="table">
+        <div><b>Passing Statistics</b></div>
+        <div class="table_container"> 
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
                     <th>Season</th>
@@ -57,13 +58,15 @@
                     </tr>
                 }
             </tbody>
-        </table>       
+        </table>
+        </div>
     }
-    <br />
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if (player.RushingStats.Count > 0)
     {
-        <div style="color:#e66460">Rushing Statistics</div>
-        <table class="table">
+        <div><b>Rushing Statistics</b></div>
+        <div class="table_container"> 
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
                     <th>Season</th>
@@ -96,12 +99,14 @@
                 }
             </tbody>
         </table>
+        </div>
     }
-    <br />
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if (player.ReceivingStats.Count > 0)
     {
-        <div style="color:#e66460">Receiving Statistics</div>
-        <table class="table">
+        <div><b>Receiving Statistics</b></div>
+        <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
                     <th>Season</th>
@@ -134,6 +139,7 @@
                 }
             </tbody>
         </table>
+        </div>
     }
 
 }
