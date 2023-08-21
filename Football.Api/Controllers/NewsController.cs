@@ -15,8 +15,8 @@ namespace Football.Api.Controllers
         {
             _newsService = newsService;
         }
-        //POST fantasy results for a season/position (delete existing ones for the season/position)
-        [HttpPost("headlines")]
+
+        [HttpPost("espn-headlines")]
         [ProducesResponseType(typeof(Root), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<Root>> GetEspnNews()
