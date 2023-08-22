@@ -151,7 +151,6 @@ table.boostrap4_table_head_dark_striped_rounded_with_shadow {
     width: 100%;
     margin-bottom: 1rem;
     background-color: transparent;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     border-radius: 10px;
 }
 
@@ -164,8 +163,8 @@ table.boostrap4_table_head_dark_striped_rounded_with_shadow {
         padding: .75rem;
         vertical-align: bottom;
         border-bottom: 2px solid #dee2e6;
-        color: #fff;
-        background-color: #e66460;
+        color: black;
+        background-color: rgba(247,188,173,0.25);        
         border-color: #32383e;
     }
 

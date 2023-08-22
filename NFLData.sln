@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Applications", "Application
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.UI", "Football.UI\Football.UI.csproj", "{402E91B2-E01B-4026-9B20-50176A01A324}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "News", "Football.News\News.csproj", "{A2571303-0E07-44F2-BFF4-DA36486FDE94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "News", "Football.News\News.csproj", "{A2571303-0E07-44F2-BFF4-DA36486FDE94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

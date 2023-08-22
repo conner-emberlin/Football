@@ -1,7 +1,4 @@
-﻿using News.Models;
-using News.Services;
-
-namespace News
+﻿namespace News
 {
     public partial class Program
     {
