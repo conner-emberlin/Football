@@ -12,9 +12,13 @@
 </EditForm>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 @if(player.Name != null && !badRequestError){
-<div>
+    var photoPath = "https://localhost:7176/PlayerPhotos/" + player.PlayerId + ".png";
+ <div>
 <b>Name</b> @player.Name <b>Position</b> @Position <b>Active</b> @Active
 </div>
+        <div>
+        <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/PlayerPhotos/gen.png'">
+        </div>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if(player.PassingStats.Count > 0)
     {
