@@ -1,20 +1,23 @@
 ﻿using Football.Interfaces;
 using Football.Models;
 using Football.Repository;
+using Serilog;
 
 namespace Football.Services
 {
     public  class FantasyService : IFantasyService
     {
         private readonly IFantasyRepository _fantasyRepository;
+        private readonly ILogger _logger;
 
         private readonly int pointsPerReception = 1;
         private readonly int pointsPerPassingTouchdown = 6;
         private readonly int pointsPerInterception = 2;
         private readonly int pointsPerFumble = 2;
-        public FantasyService(IFantasyRepository fantasyRepository)
+        public FantasyService(IFantasyRepository fantasyRepository, ILogger logger)
         {
             _fantasyRepository = fantasyRepository;
+            _logger = logger;
         }
         public async Task<double> CalculateTotalPoints(int playerId, int season)
         {
@@ -24,26 +27,50 @@ namespace Football.Services
 
         public async Task<double> CalculatePassingPoints(int playerId, int season)
         {
-            var fantasyPassing = await _fantasyRepository.GetFantasyPassing(playerId, season);
-            return fantasyPassing != null ?
-                fantasyPassing.Yards * 0.04 + fantasyPassing.Touchdowns * pointsPerPassingTouchdown - fantasyPassing.Interceptions * pointsPerInterception
-                : 0;
+            try
+            {
+                var fantasyPassing = await _fantasyRepository.GetFantasyPassing(playerId, season);
+                return fantasyPassing != null ?
+                    fantasyPassing.Yards * 0.04 + fantasyPassing.Touchdowns * pointsPerPassingTouchdown - fantasyPassing.Interceptions * pointsPerInterception
+                    : 0;
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                throw;
+            }
         }
 
         public async Task<double> CalculateRushingPoints(int playerId, int season)
         {
-            var fantasyRushing = await _fantasyRepository.GetFantasyRushing(playerId, season);
-            return fantasyRushing != null ?
-                fantasyRushing.Yards * 0.1 + fantasyRushing.Touchdowns * 6 - fantasyRushing.Fumbles * pointsPerFumble
-                :0;
+            try
+            {
+                var fantasyRushing = await _fantasyRepository.GetFantasyRushing(playerId, season);
+                return fantasyRushing != null ?
+                    fantasyRushing.Yards * 0.1 + fantasyRushing.Touchdowns * 6 - fantasyRushing.Fumbles * pointsPerFumble
+                    : 0;
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                throw;
+            }
         }
 
         public async Task<double> CalculateReceivingPoints(int playerId, int season)
         {
-            var fantasyReceiving = await _fantasyRepository.GetFantasyReceiving(playerId, season);
-            return fantasyReceiving != null ?
-                fantasyReceiving.Yards * 0.1 + fantasyReceiving.Touchdowns * 6 + fantasyReceiving.Receptions * pointsPerReception
-                :0;
+            try
+            {
+                var fantasyReceiving = await _fantasyRepository.GetFantasyReceiving(playerId, season);
+                return fantasyReceiving != null ?
+                    fantasyReceiving.Yards * 0.1 + fantasyReceiving.Touchdowns * 6 + fantasyReceiving.Receptions * pointsPerReception
+                    : 0;
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                throw;
+            }
         }
 
         public async Task<FantasyPoints> GetFantasyPoints(int playerId, int season)
@@ -72,7 +99,7 @@ namespace Football.Services
             return await _fantasyRepository.InsertFantasyPoints(fantasyPoints);
         }
 
-        public async Task<(int, int)> RefreshFantasyResults(FantasyPoints fantasyPoints)
+        public async Task<int> RefreshFantasyResults(FantasyPoints fantasyPoints)
         {
             return await _fantasyRepository.RefreshFantasyResults(fantasyPoints);
         }

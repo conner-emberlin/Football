@@ -12,6 +12,5 @@ namespace Football.Interfaces
         public Vector<double> TransformQbModel(RegressionModelQB model);
         public Vector<double> TransformRbModel(RegressionModelRB model);
         public Vector<double> TransformPassCatchersModel(RegressionModelPassCatchers model);
-        public Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount);
     }
 }

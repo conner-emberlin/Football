@@ -24,14 +24,13 @@ namespace Football.Api.Controllers
         [HttpPost("refresh/{playerId}/{season}")]
         [ProducesResponseType(typeof(double), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<(int,int)>> RefreshFantasyPoints(int playerId, int season)
+        public async Task<ActionResult<int>> RefreshFantasyPoints(int playerId, int season)
         { 
-            //FantasyService fantasyService = new();
             var fantasyPoints = await _fantasyService.GetFantasyPoints(playerId, season);
             return Ok(await _fantasyService.RefreshFantasyResults(fantasyPoints));
 
         }
-        //Use this for a complete refresh of a season. Truncate table first.
+        //Use this for a complete refresh of a season. Delete season from table first.
         [HttpPost("{position}/{season}")]
         [ProducesResponseType(typeof(double), 200)]
         [ProducesResponseType(typeof(string), 400)]
@@ -56,12 +55,42 @@ namespace Football.Api.Controllers
         }
 
         //GET fantasy results for playerId, season
-        [HttpGet("points/{playerId}/{season}")]
-        [ProducesResponseType(typeof(FantasyPoints), 200)]
+        [HttpGet("points/{name}/{season}")]
+        [ProducesResponseType(typeof(List<FantasyPoints>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<FantasyPoints>> GetFantasyPoints(int playerId, int season)
+        public async Task<ActionResult<List<FantasyPointsWithName>>> GetFantasyPoints(string name, int season)
         {
-            return Ok(await _fantasyService.GetFantasyPoints(playerId, season));
+            var playerId = await _playerService.GetPlayerId(name);
+            List<FantasyPointsWithName> points = new();
+            if(playerId != 0)
+            {
+                var player = await _playerService.GetPlayer(playerId);
+                foreach(var point in player.FantasyPoints)
+                {
+                    points.Add(new FantasyPointsWithName
+                    {
+                        Season = point.Season,
+                        PlayerId = point.PlayerId,
+                        TotalPoints = point.TotalPoints,
+                        PassingPoints = point.PassingPoints,
+                        RushingPoints = point.RushingPoints,
+                        ReceivingPoints = point.ReceivingPoints,
+                        Name = player.Name
+                    });
+                }
+                if (season == 0)
+                {
+                    return Ok(points.OrderBy(p => p.Season));
+                }
+                else
+                {
+                    return Ok(points.Where(p => p.Season == season));
+                }
+            }
+            else
+            {
+                return BadRequest("Player Name cannot be empty/could not be found.");                
+            }
         }
     }
 }

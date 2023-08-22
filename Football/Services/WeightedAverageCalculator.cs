@@ -1,6 +1,7 @@
 ﻿using Football.Models;
 using Football.Interfaces;
 using Serilog;
+using System.Numerics;
 
 namespace Football.Services
 {
@@ -84,6 +85,7 @@ namespace Football.Services
             }
             else
             {
+                _logger.Information("Nothin' to see here...");
                 return null;
             }
         }
@@ -145,7 +147,9 @@ namespace Football.Services
                     throw;
                 }
             }
-            else { 
+            else 
+            {
+                _logger.Information("Nothin' to see here...");
                 return null; 
             }
         }
@@ -213,7 +217,11 @@ namespace Football.Services
                     throw;
                 }
             }
-            else { return null; }
+            else 
+            {
+                _logger.Information("Nothin' to see here...");
+                return null; 
+            }
         }
 
         public FantasyPoints WeightedAverage(Player player)
@@ -252,7 +260,11 @@ namespace Football.Services
                     throw;
                 }
             }
-            else { return null; }
+            else 
+            {
+                _logger.Information("Player Id" + player.PlayerId + "returned null Fantasy Points");
+                return null; 
+            }
         }        
     }
 }

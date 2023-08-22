@@ -12,7 +12,7 @@ namespace Football.Interfaces
         public Task<List<FantasyPoints>> GetAllFantasyResults(int playerId);
         public Task<FantasyPoints> GetFantasyResults(int playerId, int season);
         public Task<int> InsertFantasyPoints(FantasyPoints fantasyPoints);
-        public Task<(int, int)> RefreshFantasyResults(FantasyPoints fantasyPoints);
+        public Task<int> RefreshFantasyResults(FantasyPoints fantasyPoints);
         public Task<int> InsertFantasyProjections(int rank, ProjectionModel proj);
     }
 }

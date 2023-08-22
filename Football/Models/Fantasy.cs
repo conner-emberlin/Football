@@ -33,6 +33,11 @@
         public double ReceivingPoints { get; set; }
     }
 
+    public class FantasyPointsWithName : FantasyPoints
+    {
+        public string Name { get; set; }
+    }
+
     public class FantasySeasonGames
     {
         public int Season { get; set;}

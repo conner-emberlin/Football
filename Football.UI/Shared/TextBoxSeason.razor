@@ -5,18 +5,18 @@
     </label>
 }
 <div class="input-group mb-3 ">
-    <input type="text" class="form-control" placeholder="Season..." id="@Id" value="@Value" @onchange="this.OnChange">
+    <input type="text" class="form-control" placeholder="Season..." id="@Id" value="@Season" @onchange="this.OnChange">
 </div>
 
 @code {
-    [Parameter] public String Value { get; set; } = " ";
-    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public String Season { get; set; } = " ";
+    [Parameter] public EventCallback<string> SeasonChanged { get; set; }
     [Parameter] public string? Label { get; set; }
     [Parameter] public string? Id { get; set; }
     [Parameter] public string? Placeholder { get; set; }
 
     private void OnChange(ChangeEventArgs e)
     {
-        ValueChanged.InvokeAsync(e.Value.ToString());
+        SeasonChanged.InvokeAsync(e.Value.ToString());
     }
 }

@@ -63,7 +63,7 @@ namespace Football.Repository
             var results = await _dbConnection.QueryAsync<FantasyPoints>(query, new { playerId });
             return results.ToList();
         }
-        public async Task<(int, int)> RefreshFantasyResults(FantasyPoints fantasyPoints)
+        public async Task<int> RefreshFantasyResults(FantasyPoints fantasyPoints)
         {
             var deleteQuery = _sqlQueryService.DeleteFantasyPoints();
             int removed = 0;
@@ -71,7 +71,7 @@ namespace Football.Repository
             removed += await _dbConnection.ExecuteAsync(deleteQuery, new { fantasyPoints.PlayerId, fantasyPoints.Season });
             added += await InsertFantasyPoints(fantasyPoints);
 
-            return (removed, added);
+            return added - removed;
         }
         public async Task<int> InsertFantasyProjections(int rank, ProjectionModel proj)
         {
