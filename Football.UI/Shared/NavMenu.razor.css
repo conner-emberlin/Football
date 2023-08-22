@@ -40,13 +40,13 @@
         line-height: 3rem;
     }
 
-.nav-item ::deep a.active {
-    background-color: rgba(247,188,173,0.25);
-    color: black;
-}
+        .nav-item ::deep a.active {
+            background-color: #A6F4CC;
+            color: black;
+        }
 
         .nav-item ::deep a:hover {
-            background-color: rgba(247,188,173,0.25);
+            background-color: #A6F4CC;
             color: black;
         }
 
