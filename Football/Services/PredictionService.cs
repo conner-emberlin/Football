@@ -54,7 +54,7 @@ namespace Football.Services
             List<RegressionModelQB> regressionModel = new();
             foreach (var p in players)
             {               
-                _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
+                _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
                 var projectedAveragePassing = _weightedAverageCalculator.WeightedAverage(player.PassingStats);
                 var projectedAverageRushing = _weightedAverageCalculator.WeightedAverage(player.RushingStats);
@@ -70,7 +70,7 @@ namespace Football.Services
             List<RegressionModelRB> regressionModel = new();
             foreach(var p in players)
             {
-                _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
+                _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
                 var projectedAverageRushing =  _weightedAverageCalculator.WeightedAverage(player.RushingStats);
                 var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
@@ -86,7 +86,7 @@ namespace Football.Services
             List<RegressionModelPassCatchers> regressionModel = new();
             foreach(var p in players)
             {
-                _logger.Information("Calculating weighted averages for playerId: {playerid}\r\n", p);
+                _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
                 var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
                 var model = _regressionModelService.RegressionModelPC(projectedAverageReceiving, p);
@@ -137,7 +137,7 @@ namespace Football.Services
                     _logger.Information("Getting QB Projections");
                     if (_cache.TryGetValue("QbProjections", out IEnumerable<ProjectionModel> projectionModelQb))
                     {
-                        _logger.Information("Retrieving projections from cache");
+                        _logger.Information("Retrieving QB projections from cache");
                         return projectionModelQb;
                     }
                     else
@@ -168,7 +168,7 @@ namespace Football.Services
                     _logger.Information("Getting RB Projections");
                     if (_cache.TryGetValue("RbProjections", out IEnumerable<ProjectionModel> projectionModelRb))
                     {
-                        _logger.Information("Getting Rb projections from cache");
+                        _logger.Information("Retrieving RB projections from cache");
                         return projectionModelRb;
                     }
                     else
@@ -264,7 +264,7 @@ namespace Football.Services
                     }
 
                 default:
-                    _logger.Error("Bad position. Unable to get projections");
+                    _logger.Error("Bad position ({position}). Unable to get projections", position);
                     return null;
             }
         }
