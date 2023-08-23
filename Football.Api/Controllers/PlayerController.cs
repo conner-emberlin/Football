@@ -1,9 +1,8 @@
 ﻿using Football.Api.Helpers;
 using Football.Interfaces;
 using Football.Models;
-using Football.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace Football.Api.Controllers
 {
@@ -11,12 +10,10 @@ namespace Football.Api.Controllers
     [ApiController]
     public class PlayerController : ControllerBase
     {
-        private readonly IFantasyService _fantasyService;
         private readonly IPlayerService _playerService;
-        public readonly IServiceHelper _serviceHelper;
-        public PlayerController(IFantasyService fantasyService, IPlayerService playerService, IServiceHelper serviceHelper)
+        private readonly IServiceHelper _serviceHelper;
+        public PlayerController(IPlayerService playerService, IServiceHelper serviceHelper)
         {
-            _fantasyService = fantasyService;
             _playerService = playerService;
             _serviceHelper = serviceHelper;
         }
@@ -34,6 +31,14 @@ namespace Football.Api.Controllers
             {
                 return BadRequest("No player with that name");
             }
+        }
+        [HttpGet("games/{playerId}/{season}")]
+        [ProducesResponseType(typeof(FantasySeasonGames), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<FantasySeasonGames>> GetFantasySeasonGames(int playerId, int season)
+        {
+            var all = await _playerService.GetFantasySeasonGames(playerId);
+            return Ok(all.Where(f => f.Season == season).FirstOrDefault());
         }
     }
 }

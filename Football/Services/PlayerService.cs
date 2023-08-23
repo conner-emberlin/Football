@@ -1,12 +1,6 @@
 ﻿using Football.Interfaces;
 using Football.Models;
-using Football.Repository;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Football.Services
 {
@@ -32,7 +26,7 @@ namespace Football.Services
                 player.RushingStats = await GetRushingStatisticsWithSeason(playerId);
                 player.ReceivingStats = await GetReceivingStatisticsWithSeason(playerId);
                 player.FantasyPoints = await _fantasyService.GetAllFantasyResults(playerId);
-                player.FantasySeasonGames = await GetAverageTotalGames(playerId);
+                player.FantasySeasonGames = await GetFantasySeasonGames(playerId);
 
                 var tightends = await GetTightEnds();
                 if (tightends.Contains(playerId))
@@ -97,8 +91,12 @@ namespace Football.Services
         {
             return await _playerRepository.GetPlayerId(name);
         }
+        public async Task<List<FantasySeasonGames>> GetFantasySeasonGames(int playerId)
+        {
+            var position = await GetPlayerPosition(playerId);
+            return await _playerRepository.GetFantasySeasonGames(playerId, position);
+        }
 
-        #region Private Methods
         private async Task<Player> GetPlayerInfo(int playerId)
         {
             return await _playerRepository.GetPlayerInfo(playerId);
@@ -115,13 +113,6 @@ namespace Football.Services
         {
             return await _playerRepository.GetReceivingStatisticsWithSeason(playerId);
         }
-        private async Task<List<FantasySeasonGames>> GetAverageTotalGames(int playerId)
-        {
-            var position = await GetPlayerPosition(playerId);
-            return await _playerRepository.GetAverageTotalGames(playerId, position);
-        }
 
-
-        #endregion
     }
 }

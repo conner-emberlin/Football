@@ -1,6 +1,5 @@
 ﻿using Football.Interfaces;
 using Football.Models;
-using Football.Services;
 using System.Data;
 using Dapper;
 
@@ -95,7 +94,7 @@ namespace Football.Repository
             return seasons.ToList();
         }
 
-        public async Task<List<FantasySeasonGames>> GetAverageTotalGames(int playerId, string position)
+        public async Task<List<FantasySeasonGames>> GetFantasySeasonGames(int playerId, string position)
         {
             string query;
             if (position == "QB")
