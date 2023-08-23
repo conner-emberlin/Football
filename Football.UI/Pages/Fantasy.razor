@@ -14,8 +14,19 @@
 </EditForm>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 
-@if(!badRequestError && fantasy!= null && fantasy.Count > 0)
+@if(!badRequestError && youTried)
 {
+    <div>
+    <button class="button-22" role="button" @onclick="RefreshFantasy">
+        Refresh
+    </button>
+        @if (refreshed)
+        {
+            <p>Records refreshed</p>
+        }
+    </div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
         <div class="table_container"> 
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
@@ -45,15 +56,25 @@
 
 else if (badRequestError)
 {
-    <p color="red">Error. Please try again.</p>
+    <p> No player found. Please try again.</p>
+}
+
+else if(!badRequestError && !fantasy.Any() && youTried)
+{
+    <p>No results found</p>
 }
 
 @code {
     private string Value { get; set; } = "";
     private string Season { get; set; } = "";
-    private bool badRequestError;
     private Search search = new();
+
+    private bool badRequestError;
+    private bool youTried = false;
+
     private List<FantasyPointsWithName> fantasy = new();
+    private bool refreshed = false;
+
     private async Task GetFantasy()
     {
         var season = Season;
@@ -75,6 +96,33 @@ else if (badRequestError)
         else
         {
             badRequestError = true;
+        }
+        youTried = true;
+    }
+
+    private async Task RefreshFantasy()
+    {
+        if (fantasy.Any())
+        {
+            foreach(var f in fantasy)
+            {
+                var season = f.Season;
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Fantasy/refresh/" + @f.Name + "/" + f.Season);
+                request.Headers.Add("Accept", "application/json");
+                var client = ClientFactory.CreateClient();
+                var response = await client.SendAsync(request);
+            }
+            refreshed = true;
+        }
+        else if(youTried && !fantasy.Any())
+        {
+            var season = Season;
+            var name = Value;
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Fantasy/refresh/" + @name + "/" + @season);
+            request.Headers.Add("Accept", "application/json");
+            var client = ClientFactory.CreateClient();
+            var response = await client.SendAsync(request);
+            refreshed = true;
         }
     }
 

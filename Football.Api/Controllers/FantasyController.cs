@@ -21,11 +21,12 @@ namespace Football.Api.Controllers
             _serviceHelper = serviceHelper;
         }
         //POST fantasy results for a season/position (delete existing ones for the season/position)
-        [HttpPost("refresh/{playerId}/{season}")]
+        [HttpPost("refresh/{name}/{season}")]
         [ProducesResponseType(typeof(double), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> RefreshFantasyPoints(int playerId, int season)
-        { 
+        public async Task<ActionResult<int>> RefreshFantasyPoints(string name, int season)
+        {
+            var playerId = await _playerService.GetPlayerId(name);
             var fantasyPoints = await _fantasyService.GetFantasyPoints(playerId, season);
             return Ok(await _fantasyService.RefreshFantasyResults(fantasyPoints));
 
