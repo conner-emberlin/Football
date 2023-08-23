@@ -18,6 +18,11 @@ namespace Football.Services
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
 
+        private readonly int QBProjections = 24;
+        private readonly int RBProjections = 24;
+        private readonly int WRProjections = 36;
+        private readonly int TEProjections = 12;
+
         public PredictionService(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService, IFantasyService fantasyService, IPlayerService playerService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, ILogger logger, IMemoryCache cache)
         {
             _performRegressionService = performRegressionService;
@@ -155,7 +160,7 @@ namespace Football.Services
                                 });
                             }
                         }
-                        var projections = projection.OrderByDescending(p => p.ProjectedPoints).Take(24);
+                        var projections = projection.OrderByDescending(p => p.ProjectedPoints).Take(QBProjections);
                         _cache.Set("QbProjections", projections);
                         return projections;
                     }
@@ -187,7 +192,7 @@ namespace Football.Services
                             }
                         }
                     }
-                    var projectionsRb = projection.OrderByDescending(p => p.ProjectedPoints).Take(24);
+                    var projectionsRb = projection.OrderByDescending(p => p.ProjectedPoints).Take(RBProjections);
                     _cache.Set("RbProjections", projectionsRb);
                     return projectionsRb;
                 case "WR":
@@ -237,7 +242,7 @@ namespace Football.Services
                                     wideReceiversOnly.Add(proj);
                                 }
                             }
-                            var projectionW = wideReceiversOnly.OrderByDescending(p => p.ProjectedPoints).Take(36);
+                            var projectionW = wideReceiversOnly.OrderByDescending(p => p.ProjectedPoints).Take(WRProjections);
                             _cache.Set("WrProjections", projectionW);
                             return projectionW;
                         }
@@ -251,7 +256,7 @@ namespace Football.Services
                                     tightEndsOnly.Add(proj);
                                 }
                             }
-                            var projectionsT = tightEndsOnly.OrderByDescending(p => p.ProjectedPoints).Take(12);
+                            var projectionsT = tightEndsOnly.OrderByDescending(p => p.ProjectedPoints).Take(TEProjections);
                             _cache.Set("TeProjections", projectionsT);
                             return projectionsT;
                         }

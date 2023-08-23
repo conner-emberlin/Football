@@ -158,9 +158,7 @@ namespace Football.Services
                 throw;
             }
         }
-
-        #region private methods
-        private Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount)
+        private static Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount)
         {
             var matrix = Matrix<double>.Build.Dense(rowCount, columnCount);
             
@@ -174,6 +172,5 @@ namespace Football.Services
             }
             return matrix;
         }
-        #endregion
     }
 }

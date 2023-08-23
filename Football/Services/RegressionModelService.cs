@@ -10,6 +10,7 @@ namespace Football.Services
         private readonly IFantasyService _fantasyService;
         private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
+
         private readonly int currentSeason = 2023;
         public RegressionModelService(IFantasyService fantasyService, IPlayerService playerService, ILogger logger)
         {
