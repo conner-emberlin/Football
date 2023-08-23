@@ -134,19 +134,20 @@ else if(!badRequestError && !fantasy.Any() && youTried)
 
     private async Task RefreshFantasy()
     {
-        if (fantasy.Any())
+        if (fantasyTable.Any())
         {
-            foreach(var f in fantasy)
+            foreach(var f in fantasyTable)
             {
                 var season = f.Season;
-                var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Fantasy/refresh/" + @f.Name + "/" + f.Season);
+                var name = f.Name;
+                var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Fantasy/refresh/" + @name + "/" + @season);
                 request.Headers.Add("Accept", "application/json");
                 var client = ClientFactory.CreateClient();
                 var response = await client.SendAsync(request);
             }
             refreshed = true;
         }
-        else if(youTried && !fantasy.Any())
+        else if(youTried && !fantasyTable.Any())
         {
             var season = Season;
             var name = Value;

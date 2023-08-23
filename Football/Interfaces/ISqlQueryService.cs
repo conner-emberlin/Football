@@ -1,22 +1,13 @@
-﻿using Football.Models;
-
-namespace Football.Interfaces
+﻿namespace Football.Interfaces
 {
     public interface ISqlQueryService
     {
         public string GetQueryString(string type);
-
         public string FantasyPassingQuery();
-
         public string FantasyRushingQuery();
-
         public string FantasyReceivingQuery();
-
         public string GetPlayerIds();
-
         public string InsertFantasyData();
-
-
         public string GetPlayerPosition();
         public string GetPlayersByPosition();
         public string GetPassingStatistic();
@@ -32,9 +23,7 @@ namespace Football.Interfaces
         public string GetActivePassingSeasons();
         public string GetActiveRushingSeasons();
         public string GetActiveReceivingSeasons();
-        public string GetQbGames();
-        public string GetRbGames();
-        public string GetPcGames();
+        public string GetFantasyGames();
         public string GetPlayerName();
         public string IsPlayerActive();
         public string GetPlayerTeam();

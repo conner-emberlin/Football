@@ -94,21 +94,9 @@ namespace Football.Repository
             return seasons.ToList();
         }
 
-        public async Task<List<FantasySeasonGames>> GetFantasySeasonGames(int playerId, string position)
+        public async Task<List<FantasySeasonGames>> GetFantasySeasonGames(int playerId)
         {
-            string query;
-            if (position == "QB")
-            {
-                query = _sqlQueryService.GetQbGames();
-            }
-            else if (position == "RB")
-            {
-                query = _sqlQueryService.GetRbGames();
-            }
-            else
-            {
-                query = _sqlQueryService.GetPcGames();
-            }
+            var query = _sqlQueryService.GetFantasyGames();
             var games = await _dbConnection.QueryAsync<FantasySeasonGames>(query, new { playerId });
             return games.ToList();
         }

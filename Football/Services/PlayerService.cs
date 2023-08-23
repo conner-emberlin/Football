@@ -93,8 +93,8 @@ namespace Football.Services
         }
         public async Task<List<FantasySeasonGames>> GetFantasySeasonGames(int playerId)
         {
-            var position = await GetPlayerPosition(playerId);
-            return await _playerRepository.GetFantasySeasonGames(playerId, position);
+            var games = await _playerRepository.GetFantasySeasonGames(playerId);
+            return games.OrderBy(s => s.Season).ToList();
         }
 
         private async Task<Player> GetPlayerInfo(int playerId)
@@ -103,15 +103,18 @@ namespace Football.Services
         }
         private async Task<List<PassingStatisticWithSeason>> GetPassingStatisticsWithSeason(int playerId)
         {
-            return await _playerRepository.GetPassingStatisticsWithSeason(playerId);
+            var stats = await _playerRepository.GetPassingStatisticsWithSeason(playerId);
+            return stats.OrderBy(s => s.Season).ToList();
         }
         private async Task<List<RushingStatisticWithSeason>> GetRushingStatisticsWithSeason(int playerId)
         {
-            return await _playerRepository.GetRushingStatisticsWithSeason(playerId);
+            var stats = await _playerRepository.GetRushingStatisticsWithSeason(playerId);
+            return stats.OrderBy(s => s.Season).ToList();
         }
         private async Task<List<ReceivingStatisticWithSeason>> GetReceivingStatisticsWithSeason(int playerId)
         {
-            return await _playerRepository.GetReceivingStatisticsWithSeason(playerId);
+            var stats = await _playerRepository.GetReceivingStatisticsWithSeason(playerId);
+            return stats.OrderBy(s => s.Season).ToList();
         }
 
     }

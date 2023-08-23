@@ -22,7 +22,7 @@ namespace Football.Interfaces
         public Task<List<int>> GetPlayersByPosition(string position);
         public Task<List<int>> GetPlayerIdsByFantasySeason(int season);
         public Task<List<int>> GetActiveSeasons(int playerId);
-        public Task<List<FantasySeasonGames>> GetFantasySeasonGames(int playerId, string position);
+        public Task<List<FantasySeasonGames>> GetFantasySeasonGames(int playerId);
         public Task<List<int>> GetActivePassingSeasons(int playerId);
         public Task<List<int>> GetActiveRushingSeasons(int playerId);
         public Task<List<int>> GetActiveReceivingSeasons(int playerId);

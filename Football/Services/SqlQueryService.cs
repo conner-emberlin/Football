@@ -141,19 +141,21 @@ namespace Football.Services
         {
             return $@"SELECT [Season] FROM dbo.[Receiving] WHERE [PlayerId] = @playerId GROUP BY [Season]";
         }
-        public string GetQbGames()
+        public string GetFantasyGames()
         {
-            return $@"SELECT [Season], [Games] FROM [dbo].Passing WHERE [PlayerId] = @playerId";
-        }
-
-        public string GetRbGames()
-        {
-            return $@"SELECT [Season], [Games] FROM [dbo].Rushing WHERE [PlayerId] = @playerId";
-        }
-
-        public string GetPcGames()
-        {
-            return $@"SELECT [Season], [Games] FROM [dbo].Receiving WHERE [PlayerId] = @playerId";
+            return $@"
+                    SELECT [Season], [Games]
+                    FROM [dbo].Passing p
+                    WHERE p.[PlayerId] = @playerId
+                    UNION
+                    SELECT [Season], [Games]
+                    FROM [dbo].Rushing r
+                    WHERE r.[PlayerId] = @playerId
+                    UNION
+                    SELECT [Season], [Games]
+                    FROM [dbo].Receiving re
+                    WHERE re.[PlayerId] = @playerId
+                    ";
         }
 
         public string GetPlayerName()
