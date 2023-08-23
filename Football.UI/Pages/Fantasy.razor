@@ -35,18 +35,22 @@
                 <tr>
                     <th>Name</th>
                     <th>Season</th>
+                    <th>Games</th>
+                    <th>FPPG</th>
                     <th>Total</th>
                     <th>Passing</th>
                     <th>Rushing</th>
                     <th>Receiving</th>
                 </tr>
             </thead>
-            @foreach(var fp in fantasy)
+            @foreach(var fp in fantasyTable)
             {
                 <tr>
                     <td>@fp.Name</td>
                     <td>@fp.Season</td>
-                    <td>@fp.TotalPoints</td>
+                    <td>@fp.Games</td>
+                    <td>@fp.FPPG</td>
+                    <td>@fp.TotalPoints</td>                   
                     <td>@fp.PassingPoints</td>
                     <td>@fp.RushingPoints</td>
                     <td>@fp.ReceivingPoints</td>
@@ -75,6 +79,7 @@ else if(!badRequestError && !fantasy.Any() && youTried)
     private bool youTried = false;
 
     private List<FantasyPointsWithName> fantasy = new();
+    private List<FantasyPointsTable> fantasyTable = new();
     private bool refreshed = false;
 
     private async Task GetFantasy()
@@ -93,14 +98,38 @@ else if(!badRequestError && !fantasy.Any() && youTried)
             badRequestError = false;
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            fantasy = await JsonSerializer.DeserializeAsync<List<FantasyPointsWithName>>(responseStream, options);
-            //foreach season in fantasy, get fantasyseasongames
+            fantasyTable = await JsonSerializer.DeserializeAsync<List<FantasyPointsTable>>(responseStream, options);
+            foreach(var ft in fantasyTable)
+            {
+                ft.Games = await GetFantasyGames(ft.PlayerId, ft.Season);
+                ft.FPPG = Math.Round(ft.TotalPoints/ft.Games,2);
+            }
         }
         else
         {
             badRequestError = true;
         }
         youTried = true;
+    }
+
+    private async Task<double> GetFantasyGames(int playerId, int season)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/games/" + @playerId + "/" + @season);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            var games = await JsonSerializer.DeserializeAsync<FantasySeasonGames>(responseStream, options);
+            return games.Games;
+        }
+        else
+        {
+            throw new NotImplementedException("Bad data plz fix");
+        }
+
     }
 
     private async Task RefreshFantasy()
@@ -133,6 +162,12 @@ else if(!badRequestError && !fantasy.Any() && youTried)
     {
         public string Value { get; set; } = "";
         public string Season { get; set; } = "";
+    }
+
+    public class FantasyPointsTable : FantasyPointsWithName
+    {
+        public double Games{ get; set; }
+        public double FPPG { get; set; }
     }
 
 }
