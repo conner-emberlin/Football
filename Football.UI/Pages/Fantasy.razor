@@ -12,6 +12,7 @@
     <TextBoxSeason @bind-Season="this.Season" />
     <button class="button-22" type="submit">Submit</button>
 </EditForm>
+
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 
 @if(!badRequestError && youTried)
@@ -23,6 +24,7 @@
         @if (refreshed)
         {
             <p>Records refreshed</p>
+            refreshed = false;
         }
     </div>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -92,6 +94,7 @@ else if(!badRequestError && !fantasy.Any() && youTried)
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             fantasy = await JsonSerializer.DeserializeAsync<List<FantasyPointsWithName>>(responseStream, options);
+            //foreach season in fantasy, get fantasyseasongames
         }
         else
         {
