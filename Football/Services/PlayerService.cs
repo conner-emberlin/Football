@@ -96,6 +96,11 @@ namespace Football.Services
             var games = await _playerRepository.GetFantasySeasonGames(playerId);
             return games.OrderBy(s => s.Season).ToList();
         }
+        public async Task<int> AddPassingStat(PassingStatisticWithSeason pass)
+        {
+            var playerId = await _playerRepository.GetPlayerId(pass.Name);
+            return await _playerRepository.AddPassingStat(pass, playerId);
+        }
 
         private async Task<Player> GetPlayerInfo(int playerId)
         {
@@ -116,6 +121,12 @@ namespace Football.Services
             var stats = await _playerRepository.GetReceivingStatisticsWithSeason(playerId);
             return stats.OrderBy(s => s.Season).ToList();
         }
+
+        public async Task<int> DeletePassingStats(int playerId)
+        {
+            return await _playerRepository.DeletePassingStats(playerId);
+        }
+
 
     }
 }

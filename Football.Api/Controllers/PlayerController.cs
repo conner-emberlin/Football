@@ -2,7 +2,6 @@
 using Football.Interfaces;
 using Football.Models;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
 
 namespace Football.Api.Controllers
 {
@@ -11,19 +10,16 @@ namespace Football.Api.Controllers
     public class PlayerController : ControllerBase
     {
         private readonly IPlayerService _playerService;
-        private readonly IServiceHelper _serviceHelper;
-        public PlayerController(IPlayerService playerService, IServiceHelper serviceHelper)
+        public PlayerController(IPlayerService playerService)
         {
             _playerService = playerService;
-            _serviceHelper = serviceHelper;
         }
 
-        [HttpGet("{name}")]
+        [HttpGet("{playerId}")]
         [ProducesResponseType(typeof(Player), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<Player>> GetPlayer(string name)
+        public async Task<ActionResult<Player>> GetPlayer(int playerId)
         {
-            var playerId = await _playerService.GetPlayerId(name);
             if(playerId != 0){
                 return Ok(await _playerService.GetPlayer(playerId));
             }
@@ -32,6 +28,14 @@ namespace Football.Api.Controllers
                 return BadRequest("No player with that name");
             }
         }
+        [HttpGet("name/{name}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> GetPlayerId(string name)
+        {
+            return Ok(await _playerService.GetPlayerId(name));
+        }
+
         [HttpGet("games/{playerId}/{season}")]
         [ProducesResponseType(typeof(FantasySeasonGames), 200)]
         [ProducesResponseType(typeof(string), 400)]
@@ -39,6 +43,29 @@ namespace Football.Api.Controllers
         {
             var all = await _playerService.GetFantasySeasonGames(playerId);
             return Ok(all.Where(f => f.Season == season).FirstOrDefault());
+        }
+
+        [HttpPost("stats/add/")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> AddPassingStat([FromBody]PassingStatisticWithSeason pass)
+        {
+            return (Ok(await _playerService.AddPassingStat(pass)));
+        }
+
+        [HttpPost("stats/update/")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UpdatePassingStats([FromBody] List<PassingStatisticWithSeason> passes)
+        {
+            var playerId = await _playerService.GetPlayerId(passes.First().Name);
+            await _playerService.DeletePassingStats(playerId);
+            int count = 0;
+            foreach(var pass in passes)
+            {                              
+                count += await _playerService.AddPassingStat(pass);
+            }
+            return Ok(count);
         }
     }
 }

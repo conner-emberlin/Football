@@ -222,5 +222,14 @@ namespace Football.Services
             return $@"SELECT [PlayerId] FROM [dbo].Players WHERE [Name] LIKE '%' + @name + '%'
                 ORDER BY [Active] DESC";
         }
+        public string AddPassingStat()
+        {
+            return $@"INSERT INTO [dbo].Passing (Season, Name, Team, Age, Games, Completions, Attempts, Yards, Touchdowns, Interceptions, FirstDowns, Long, Sacks, SackYards, PlayerId) 
+                        VALUES(@season, @name, @team, @age, @games, @completions, @attempts, @yards, @touchdowns, @interceptions, @firstdowns, @long, @sacks, @sackyards, @playerid)";
+        }
+        public string DeletePassingStats()
+        {
+            return $@"DELETE FROM [dbo].Passing WHERE [PlayerId] = @playerid";
+        }
     }
 }

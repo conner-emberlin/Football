@@ -35,6 +35,8 @@
         public string GetReceivingStatisticsWithSeason();
         public string GetAllFantasyResults();
         public string GetPlayerId();
+        public string AddPassingStat();
+        public string DeletePassingStats();
 
     }
 }

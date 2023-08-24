@@ -20,5 +20,7 @@ namespace Football.Interfaces
         public Task<List<int>> GetTightEnds();
         public Task<int> GetPlayerId(string name);
         public Task<List<FantasySeasonGames>> GetFantasySeasonGames(int playerId);
+        public Task<int> AddPassingStat(PassingStatisticWithSeason pass);
+        public Task<int> DeletePassingStats(int playerId);
     }
 }

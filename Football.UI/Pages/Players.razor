@@ -174,8 +174,8 @@ else if(badRequestError)
 
     public async Task GetPlayers()
     {
-        var name = this.Value;
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/" + name);
+        var id  = await GetPlayerId(this.Value);
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/" + id);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -215,6 +215,23 @@ else if(badRequestError)
         }
         shouldRender = true;
 
+    }
+    private async Task<int> GetPlayerId(string name)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/name/" + name);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            return await JsonSerializer.DeserializeAsync<int>(responseStream, options);
+        }
+        else
+        {
+            return 0;
+        }
     }
 
 
