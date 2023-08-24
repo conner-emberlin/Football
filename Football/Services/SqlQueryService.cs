@@ -231,5 +231,14 @@ namespace Football.Services
         {
             return $@"DELETE FROM [dbo].Passing WHERE [PlayerId] = @playerid";
         }
+        public string AddRushingStat()
+        {
+            return $@"INSERT INTO [dbo].Rushing (Season, Name, Team, Age, Games, RushAttempts, Yards, Touchdowns, FirstDowns, Long, Fumbles, PlayerId)
+                            VALUES(@season, @name, @team, @age, @games, @rushattempts, @yards, @touchdowns, @firstdowns, @long, @fumbles, @playerid)";
+        }
+        public string DeleteRushingStats()
+        {
+            return $@"DELETE FROM [dbo].Rushing WHERE [PlayerId] = @playerid";
+        }
     }
 }

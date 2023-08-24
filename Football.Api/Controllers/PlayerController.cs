@@ -45,7 +45,7 @@ namespace Football.Api.Controllers
             return Ok(all.Where(f => f.Season == season).FirstOrDefault());
         }
 
-        [HttpPost("stats/add/")]
+        [HttpPost("stats/pass/add/")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> AddPassingStat([FromBody]PassingStatisticWithSeason pass)
@@ -53,7 +53,7 @@ namespace Football.Api.Controllers
             return (Ok(await _playerService.AddPassingStat(pass)));
         }
 
-        [HttpPost("stats/update/")]
+        [HttpPost("stats/pass/update/")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UpdatePassingStats([FromBody] List<PassingStatisticWithSeason> passes)
@@ -64,6 +64,28 @@ namespace Football.Api.Controllers
             foreach(var pass in passes)
             {                              
                 count += await _playerService.AddPassingStat(pass);
+            }
+            return Ok(count);
+        }
+        [HttpPost("stats/rush/add/")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> AddRushingStat([FromBody] RushingStatisticWithSeason rush)
+        {
+            return (Ok(await _playerService.AddRushingStat(rush)));
+        }
+
+        [HttpPost("stats/rush/update/")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UpdateRushingStats([FromBody] List<RushingStatisticWithSeason> rushes)
+        {
+            var playerId = await _playerService.GetPlayerId(rushes.First().Name);
+            await _playerService.DeleteRushingStats(playerId);
+            int count = 0;
+            foreach (var rush in rushes)
+            {
+                count += await _playerService.AddRushingStat(rush);
             }
             return Ok(count);
         }

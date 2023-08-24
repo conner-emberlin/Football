@@ -37,6 +37,7 @@
         public string GetPlayerId();
         public string AddPassingStat();
         public string DeletePassingStats();
-
+        public string AddRushingStat();
+        public string DeleteRushingStats();
     }
 }

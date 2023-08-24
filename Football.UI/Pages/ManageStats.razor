@@ -191,21 +191,120 @@ else if (Type == "rushing" && !badRequestError && player != null)
                 @foreach (var stat in player.RushingStats)
                 {
                     <tr>
-                        <td>@stat.Season</td>
-                        <td>@stat.Team</td>
-                        <td>@stat.Age</td>
-                        <td>@stat.Games</td>
-                        <td>@stat.RushAttempts</td>
-                        <td>@stat.Yards</td>
-                        <td>@stat.Touchdowns</td>
-                        <td>@stat.FirstDowns</td>
-                        <td>@stat.Long</td>
-                        <td>@stat.Fumbles</td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.Season" />
+                            </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.Team" />
+                            </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.Age" />
+                            </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.Games" />
+                            </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.RushAttempts" />
+                            </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.Yards" />
+                            </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.Touchdowns" />
+                            </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.FirstDowns" />
+                            </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.Long" />
+                            </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.Fumbles" />
+                            </td>
                     </tr>
                 }
             </tbody>
         </table>
         </div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <button class="button-22" role="button" @onclick="SubmitRushingChanges">
+        Submit Changes
+    </button>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div>
+        <button class="button-22" role="button" @onclick="AddRecord">
+            Add Record
+        </button>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+    </div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    @if (add)
+    {
+        <div class="table_container">
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th>Season</th>
+                        <th>Team</th>
+                        <th>Age</th>
+                        <th>Games</th>
+                        <th>Atts</th>
+                        <th>Yds</th>
+                        <th>Tds</th>
+                        <th>Fds</th>
+                        <th>Lng</th>
+                        <th>Fmbls</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushSeason" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="3" class="form-control" @bind="@rushTeam" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="2" class="form-control" @bind="@rushAge" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="2" class="form-control" @bind="@rushGames" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushAttempts" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushYds" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushYds" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushFds" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushLng" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushFmb" />
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <button class="button-22" role="button" @onclick="AddNewRushing">
+            Submit
+        </button>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <button class="button-22" role="button" @onclick="CancelAdd">
+            Cancel
+        </button>
+
+    }
+
 }
 else if (Type == "receiving" && !badRequestError && player != null)
 {
@@ -278,6 +377,20 @@ else
     public int passesAdded{ get; set; }
     public bool passesUpdated{ get; set; }
 
+    public string? rushName { get; set; } = "";
+    public string? rushTeam { get; set; } = "";
+    public int rushSeason { get; set; }
+    public double rushAge { get; set; }
+    public double rushGames { get; set; }
+    public double rushAttempts{ get; set; }
+    public double rushYds { get; set; }
+    public double rushTds{ get; set; }
+    public double rushFds{ get; set; }
+    public double rushLng { get; set; }
+    public double rushFmb { get; set; }
+    public int rushesAdded { get; set; }
+    public bool rushesUpdated { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
 
@@ -327,7 +440,7 @@ else
         var passesUpdated = false;
         var serializedPassList = JsonSerializer.Serialize(player.PassingStats);
         var content = new StringContent(serializedPassList, System.Text.Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/update");
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/pass/update");
         request.Content = content;
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
@@ -363,7 +476,7 @@ else
         var serializedPass = JsonSerializer.Serialize(newPass);
         //pass newPass to a controller to add              
         var content = new StringContent(serializedPass, System.Text.Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/add");
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/pass/add");
         request.Content = content;
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
@@ -374,6 +487,57 @@ else
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             passesAdded = JsonSerializer.Deserialize<int>(responseStream, options);
+        }
+    }
+    private async Task SubmitRushingChanges()
+    {
+        var rushesUpdated = false;
+        var serializedRushList = JsonSerializer.Serialize(player.RushingStats);
+        var content = new StringContent(serializedRushList, System.Text.Encoding.UTF8, "application/json");
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/rush/update");
+        request.Content = content;
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            rushesUpdated = true;
+        }
+    }
+
+    private async Task AddNewRushing()
+    {
+        rushesAdded = 0;
+        RushingStatisticWithSeason newRush = new();
+        newRush.Name = player.Name;
+        newRush.Season = rushSeason;
+        newRush.Team = rushTeam;
+        newRush.Age = rushAge;
+        newRush.Games = rushGames;
+        newRush.RushAttempts = rushAttempts;
+        newRush.Yards = rushYds;
+        newRush.Touchdowns = rushTds;
+        newRush.FirstDowns = rushFds;
+        newRush.Long = rushLng;
+        newRush.Fumbles = rushFmb;
+
+        var serializedRush = JsonSerializer.Serialize(newRush);
+        //pass newPass to a controller to add
+        var content = new StringContent(serializedRush, System.Text.Encoding.UTF8, "application/json");
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/rush/add");
+        request.Content = content;
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            rushesAdded = JsonSerializer.Deserialize<int>(responseStream, options);
         }
     }
 }

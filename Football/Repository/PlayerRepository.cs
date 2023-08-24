@@ -195,5 +195,34 @@ namespace Football.Repository
                 playerId,               
             });
         }
+        public async Task<int> AddRushingStat(RushingStatisticWithSeason rush, int playerId)
+        {
+            var query = _sqlQueryService.AddRushingStat();
+            int count = 0;
+            return count += await _dbConnection.ExecuteAsync(query, new
+            {
+                rush.Season,
+                rush.Name,
+                rush.Team,
+                rush.Age,
+                rush.Games,
+                rush.RushAttempts,
+                rush.Yards,
+                rush.Touchdowns,
+                rush.FirstDowns,
+                rush.Long,
+                rush.Fumbles,
+                playerId
+            });
+        }
+        public async Task<int> DeleteRushingStats(int playerId)
+        {
+            var query = _sqlQueryService.DeleteRushingStats();
+            var count = 0;
+            return count += await _dbConnection.ExecuteAsync(query, new
+            {
+                playerId,
+            });
+        }
     }
 }
