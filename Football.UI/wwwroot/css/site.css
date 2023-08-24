@@ -204,3 +204,12 @@ input[type="radio"] {
     margin: 0 10px 0 10px;
     margin-right: 0;
 }
+
+
+a.editstats {
+    background-color: red;
+    color: white;
+    padding: 1em 1.5em;
+    text-decoration: none;
+    text-transform: uppercase;
+}

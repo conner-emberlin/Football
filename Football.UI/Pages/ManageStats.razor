@@ -1,0 +1,30 @@
+﻿@page "/ManageStats/{Type}/{PlayerId}"
+
+<h3>ManageStats</h3>
+@if(Type == "passing")
+{
+    <p>This is a passing stat for @PlayerId</p>
+}
+else if(Type == "rushing")
+{
+    <p>
+        This is a rushing stat for @PlayerId </p>
+}
+else if(Type == "receiving")
+{
+    <p>This is a receiving stat for @PlayerId </p>
+}
+else
+{
+    <p>Bad Requst</p>
+}
+
+@code {
+    [Parameter]
+    public string Type { get; set; }
+    [Parameter]
+    public string PlayerId{ get; set; }
+
+
+  
+}

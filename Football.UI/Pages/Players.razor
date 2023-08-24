@@ -22,7 +22,10 @@
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if(player.PassingStats.Count > 0)
     {
-        <div><b>Passing Statistics</b></div>
+        <div>
+            <b>Passing Statistics</b>
+            <a href="/ManageStats/passing/@player.PlayerId">&#9998</a>
+        </div>
         <div class="table_container"> 
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
@@ -68,7 +71,9 @@
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if (player.RushingStats.Count > 0)
     {
-        <div><b>Rushing Statistics</b></div>
+        <div><b>Rushing Statistics</b>
+            <a href="/ManageStats/rushing/@player.PlayerId">&#9998</a>
+        </div>
         <div class="table_container"> 
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
@@ -108,7 +113,9 @@
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if (player.ReceivingStats.Count > 0)
     {
-        <div><b>Receiving Statistics</b></div>
+        <div><b>Receiving Statistics</b>
+            <a href="/ManageStats/receiving/@player.PlayerId">&#9998</a>
+        </div>
         <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
