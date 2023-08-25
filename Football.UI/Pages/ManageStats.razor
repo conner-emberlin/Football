@@ -635,7 +635,7 @@ else
 
     private async Task AddNewPassing()
     {
-        passesAdded = 0;
+
         PassingStatisticWithSeason newPass = new();
         newPass.Name = player.Name;
         newPass.Season = passSeason;
@@ -666,11 +666,15 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             passesAdded = JsonSerializer.Deserialize<int>(responseStream, options);
         }
+        else
+        {
+            passesAdded = 0;
+        }
         youTriedToAdd = true;
     }
     private async Task SubmitRushingChanges()
     {
-        rushesUpdated = false;
+
         var serializedRushList = JsonSerializer.Serialize(player.RushingStats);
         var content = new StringContent(serializedRushList, System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/rush/update");
@@ -685,12 +689,16 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             rushesUpdated = true;
         }
+        else
+        {
+            rushesUpdated = false;
+        }
         youTriedToUpdate = true;
     }
 
     private async Task AddNewRushing()
     {
-        rushesAdded = 0;
+
         RushingStatisticWithSeason newRush = new();
         newRush.Name = player.Name;
         newRush.Season = rushSeason;
@@ -718,12 +726,16 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             rushesAdded = JsonSerializer.Deserialize<int>(responseStream, options);
         }
+        else
+        {
+            rushesAdded = 0;
+        }
         youTriedToAdd = true;
     }
 
     private async Task SubmitReceivingChanges()
     {
-        recsUpdated = false;
+
         var serializedRecList = JsonSerializer.Serialize(player.ReceivingStats);
         var content = new StringContent(serializedRecList, System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/rec/update");
@@ -738,12 +750,15 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             recsUpdated = true;
         }
+        else
+        {
+            recsUpdated = false;
+        }
         youTriedToUpdate = true;
     }
 
     private async Task AddNewReceiving()
     {
-        recsAdded = 0;
         ReceivingStatisticWithSeason newRec = new();
         newRec.Name = player.Name;
         newRec.Season = rushSeason;
@@ -772,6 +787,10 @@ else
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             recsAdded = JsonSerializer.Deserialize<int>(responseStream, options);
+        }
+        else
+        {
+            recsAdded = 0;            
         }
         youTriedToAdd = true;
     }
