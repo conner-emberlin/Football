@@ -11,17 +11,18 @@ namespace Football.Api.Controllers
     [ApiController]
     public class PredictionController : ControllerBase
     {
-        public readonly IFantasyService _fantasyService;
-        public readonly IPredictionService _predictionService;
-        public readonly IServiceHelper _serviceHelper;
-        public PredictionController(IFantasyService fantasyService, IPredictionService predictionService, IServiceHelper serviceHelper)
+        private readonly IFantasyService _fantasyService;
+        private readonly IPredictionService _predictionService;
+        private readonly IPlayerService _playerService;
+        private readonly IServiceHelper _serviceHelper;
+        public PredictionController(IFantasyService fantasyService, IPredictionService predictionService, IPlayerService playerService, IServiceHelper serviceHelper)
         {
             _fantasyService = fantasyService;
             _predictionService = predictionService;
+            _playerService = playerService;
             _serviceHelper = serviceHelper;
         }
 
-        //calculate projections for a position
         [HttpGet("{position}")]
         [ProducesResponseType(typeof(List<ProjectionModel>), 200)]
         [ProducesResponseType(typeof(string), 400)]
@@ -36,7 +37,7 @@ namespace Football.Api.Controllers
                 return Ok(await _predictionService.GetProjections(_serviceHelper.TransformPosition(position)));
             }
         }
-        //calculate projections for a position
+
         [HttpGet("flex-rankings")]
         [ProducesResponseType(typeof(List<FlexProjectionModel>), 200)]
         [ProducesResponseType(typeof(string), 400)]
@@ -44,7 +45,7 @@ namespace Football.Api.Controllers
         {
             return Ok(await _predictionService.FlexRankings());
         }
-        //Upload projections for a position to the DB
+
         [HttpPost("upload/{position}")]
         [ProducesResponseType(typeof(List<int>), 200)]
         [ProducesResponseType(typeof(string), 400)]

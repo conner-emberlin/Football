@@ -39,7 +39,6 @@ namespace Football.Services
                     {
                         if (s.Games < 17)
                         {
-                            //get average of each stat and project forward to 17 games
                             s.Completions += (s.Completions / s.Games) * (17 - s.Games);
                             s.Attempts += (s.Attempts / s.Games) * (17 - s.Games);
                             s.Yards += (s.Yards / s.Games) * (17 - s.Games);
@@ -242,7 +241,6 @@ namespace Football.Services
                         var fantasyPoints = player.FantasyPoints.Where(f => f.Season == fs.Season).FirstOrDefault();
                         if (fs.Games < 17)
                         {
-                            //get average and add it on
                             fantasyPoints.TotalPoints += (fantasyPoints.TotalPoints / fs.Games) * (17 - fs.Games);
                         }
                         averageTotalPoints += fantasyPoints.Season == maxSeason ? maxSeasonWeight * fantasyPoints.TotalPoints : previousSeasonWeight * fantasyPoints.TotalPoints;
