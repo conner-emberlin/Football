@@ -249,5 +249,10 @@ namespace Football.Services
         {
             return $@"DELETE FROM [dbo].Receiving WHERE [PlayerId] = @playerid";
         }
+
+        public string GetGamesSuspended()
+        {
+            return $@"SELECT [Length] FROM [dbo].Suspensions WHERE [PlayerId] = @playerid AND [Season] = @season";
+        }
     }
 }

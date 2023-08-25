@@ -8,7 +8,7 @@ namespace Football.Services
     public class WeightedAverageCalculator : IWeightedAverageCalculator
     {
         private readonly ILogger _logger;
-        private readonly double weight = (double)2 / (double)3.5;
+        private readonly double weight = (double)5 / (double)8;
 
         public WeightedAverageCalculator(ILogger logger)
         {

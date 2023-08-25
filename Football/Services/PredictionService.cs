@@ -15,6 +15,7 @@ namespace Football.Services
         private readonly IMatrixService _matrixService;
         private readonly IPlayerService _playerService;
         private readonly IWeightedAverageCalculator _weightedAverageCalculator;
+        private readonly IAdjustmentCalculator _adjustmentCalculator;
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
 
@@ -23,13 +24,19 @@ namespace Football.Services
         private readonly int WRProjections = 36;
         private readonly int TEProjections = 12;
 
-        public PredictionService(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService, IFantasyService fantasyService, IPlayerService playerService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, ILogger logger, IMemoryCache cache)
+        private readonly int QBStarters = 20;
+        private readonly int RBStarters = 24;
+        private readonly int WRStarters = 24;
+        private readonly int TEStarters = 12;
+
+        public PredictionService(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService, IFantasyService fantasyService, IPlayerService playerService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, IAdjustmentCalculator adjustmentCalculator, ILogger logger, IMemoryCache cache)
         {
             _performRegressionService = performRegressionService;
             _matrixService = matrixService;
             _fantasyService = fantasyService;
             _playerService = playerService;
             _weightedAverageCalculator = weightedAverageCalculator;
+            _adjustmentCalculator = adjustmentCalculator;
             _regressionModelService = regressionModelService;
             _logger = logger;
             _cache = cache;
@@ -160,9 +167,10 @@ namespace Football.Services
                                 });
                             }
                         }
+                        
                         var projections = projection.OrderByDescending(p => p.ProjectedPoints).Take(QBProjections);
                         _cache.Set("QbProjections", projections);
-                        return projections;
+                        return await _adjustmentCalculator.SuspensionAdjustment(projections);
                     }
                 case "RB":
                     _logger.Information("Getting RB Projections");
@@ -194,7 +202,7 @@ namespace Football.Services
                     }
                     var projectionsRb = projection.OrderByDescending(p => p.ProjectedPoints).Take(RBProjections);
                     _cache.Set("RbProjections", projectionsRb);
-                    return projectionsRb;
+                    return await _adjustmentCalculator.SuspensionAdjustment(projectionsRb);
                 case "WR":
                 case "TE":
                     _logger.Information("Getting Pass Catcher Projections");
@@ -244,7 +252,7 @@ namespace Football.Services
                             }
                             var projectionW = wideReceiversOnly.OrderByDescending(p => p.ProjectedPoints).Take(WRProjections);
                             _cache.Set("WrProjections", projectionW);
-                            return projectionW;
+                            return await _adjustmentCalculator.SuspensionAdjustment(projectionW);
                         }
                         else
                         {
@@ -258,7 +266,7 @@ namespace Football.Services
                             }
                             var projectionsT = tightEndsOnly.OrderByDescending(p => p.ProjectedPoints).Take(TEProjections);
                             _cache.Set("TeProjections", projectionsT);
-                            return projectionsT;
+                            return await _adjustmentCalculator.SuspensionAdjustment(projectionsT);
                         }
 
                     }
@@ -285,7 +293,7 @@ namespace Football.Services
         {
             List<FlexProjectionModel> flexRankings = new();
             var qbProjections = await GetProjections("QB");
-            var replacementPoints = qbProjections.ElementAt(qbProjections.Count() - 1).ProjectedPoints;
+            var replacementPoints = qbProjections.ElementAt(QBStarters - 1).ProjectedPoints;
             foreach(var proj in qbProjections)
             {
                 flexRankings.Add(new FlexProjectionModel
@@ -299,7 +307,7 @@ namespace Football.Services
                 });
             }
             var rbProjections = await GetProjections("RB");
-            var rbReplacementPoints = rbProjections.ElementAt(rbProjections.Count() - 1).ProjectedPoints;
+            var rbReplacementPoints = rbProjections.ElementAt(RBStarters- 1).ProjectedPoints;
             foreach(var proj in rbProjections)
             {
                 flexRankings.Add(new FlexProjectionModel
@@ -313,7 +321,7 @@ namespace Football.Services
                 });
             }
             var wrProjections = await GetProjections("WR");
-            var wrReplacementPoints = wrProjections.ElementAt(wrProjections.Count() - 1).ProjectedPoints;
+            var wrReplacementPoints = wrProjections.ElementAt(WRStarters - 1).ProjectedPoints;
             foreach (var proj in wrProjections)
             {
                 flexRankings.Add(new FlexProjectionModel
@@ -327,7 +335,7 @@ namespace Football.Services
                 });
             }
             var teProjections = await GetProjections("TE");
-            var teReplacementPoints = teProjections.ElementAt(teProjections.Count() - 1).ProjectedPoints;
+            var teReplacementPoints = teProjections.ElementAt(TEStarters - 1).ProjectedPoints;
             foreach (var proj in teProjections)
             {
                 flexRankings.Add(new FlexProjectionModel

@@ -41,5 +41,6 @@
         public string DeleteRushingStats();
         public string AddReceivingStat();
         public string DeleteReceivingStats();
+        public string GetGamesSuspended();
     }
 }
