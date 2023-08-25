@@ -79,11 +79,13 @@
             </tbody>
         </table>
     </div>
-
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <button class="button-22" role="button" @onclick="SubmitPassingChanges">
+    @if (player.PassingStats.Any())
+    {
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <button class="button-22" role="button" @onclick="SubmitPassingChanges">
         Submit Changes
     </button>
+    }
     @if(youTriedToUpdate && passesUpdated)
     {
         <text>Records Updated</text>
@@ -98,14 +100,7 @@
     <button class="button-22" role="button" @onclick= "AddRecord">
         Add Record
     </button>
-        @if(youTriedToAdd && passesAdded > 0)
-        {
-            <text>Record Added</text>
-        }
-        else if(youTriedToAdd && passesAdded == 0)
-        {
-            <text>Something Went Wrong</text>
-        }
+
         <div style="height:10px;font-size:1px;">&nbsp;</div>
     </div>
 
@@ -180,6 +175,14 @@
         <button class="button-22" role="button" @onclick="AddNewPassing">
             Submit
         </button>
+        @if(youTriedToAdd && passesAdded > 0)
+        {
+            <text>Record Added</text>
+        }
+        else if(youTriedToAdd && passesAdded == 0)
+        {
+            <text>Something Went Wrong</text>
+        }
         <div style="height:10px;font-size:1px;">&nbsp;</div>
             <button class="button-22" role="button" @onclick="CancelAdd">
                 Cancel
@@ -244,10 +247,13 @@ else if (Type == "rushing" && !badRequestError && player != null)
             </tbody>
         </table>
         </div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <button class="button-22" role="button" @onclick="SubmitRushingChanges">
-        Submit Changes
-    </button>
+    @if (player.RushingStats.Any())
+    {
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <button class="button-22" role="button" @onclick="SubmitRushingChanges">
+            Submit Changes
+        </button>
+    }
     @if(youTriedToUpdate && rushesUpdated)
     {
         <p>Records Updated</p>
@@ -261,14 +267,7 @@ else if (Type == "rushing" && !badRequestError && player != null)
         <button class="button-22" role="button" @onclick="AddRecord">
             Add Record
         </button>
-        @if(youTriedToAdd && rushesAdded > 0)
-        {
-            <text>Record Added</text>
-        }
-        else if(youTriedToAdd && rushesAdded == 0)
-        {
-            <text>Something Went Wrong</text>
-        }
+
         <div style="height:10px;font-size:1px;">&nbsp;</div>
 
     </div>
@@ -312,7 +311,7 @@ else if (Type == "rushing" && !badRequestError && player != null)
                             <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushYds" />
                         </td>
                         <td>
-                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushYds" />
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushTds" />
                         </td>
                         <td>
                             <input type="text" size="1" maxlength="4" class="form-control" @bind="@rushFds" />
@@ -332,6 +331,14 @@ else if (Type == "rushing" && !badRequestError && player != null)
         <button class="button-22" role="button" @onclick="AddNewRushing">
             Submit
         </button>
+        @if(youTriedToAdd && rushesAdded > 0)
+        {
+            <text>Record Added</text>
+        }
+        else if(youTriedToAdd && rushesAdded == 0)
+        {
+            <text>Something Went Wrong</text>
+        }
         <div style="height:10px;font-size:1px;">&nbsp;</div>
         <button class="button-22" role="button" @onclick="CancelAdd">
             Cancel
@@ -397,10 +404,13 @@ else if (Type == "receiving" && !badRequestError && player != null)
             </tbody>
         </table>
         </div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <button class="button-22" role="button" @onclick="SubmitReceivingChanges">
-        Submit Changes
-    </button>
+    @if (player.ReceivingStats.Any())
+    {
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <button class="button-22" role="button" @onclick="SubmitReceivingChanges">
+            Submit Changes
+        </button>
+    }
     @if(youTriedToUpdate && recsUpdated)
     {
         <text>Records Updated</text>
@@ -414,14 +424,7 @@ else if (Type == "receiving" && !badRequestError && player != null)
         <button class="button-22" role="button" @onclick="AddRecord">
             Add Record
         </button>
-        @if(youTriedToAdd && recsAdded > 0)
-        {
-            <text>Record Added</text>
-        }
-        else if(youTriedToAdd && recsAdded == 0)
-        {
-            <text>Something Went Wrong</text>
-        }
+
         <div style="height:10px;font-size:1px;">&nbsp;</div>
 
     </div>
@@ -492,6 +495,14 @@ else if (Type == "receiving" && !badRequestError && player != null)
         <button class="button-22" role="button" @onclick="AddNewReceiving">
             Submit
         </button>
+         @if(youTriedToAdd && recsAdded > 0)
+        {
+            <text>Record Added</text>
+        }
+        else if(youTriedToAdd && recsAdded == 0)
+        {
+            <text>Something Went Wrong</text>
+        }
         <div style="height:10px;font-size:1px;">&nbsp;</div>
         <button class="button-22" role="button" @onclick="CancelAdd">
             Cancel

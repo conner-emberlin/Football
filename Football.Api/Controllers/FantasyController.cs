@@ -13,7 +13,8 @@ namespace Football.Api.Controllers
     {
         private readonly IFantasyService _fantasyService;
         private readonly IPlayerService _playerService;
-        public readonly IServiceHelper _serviceHelper;
+        private readonly IServiceHelper _serviceHelper;
+
         public FantasyController(IFantasyService fantasyService,IPlayerService playerService, IServiceHelper serviceHelper)
         {
             _fantasyService = fantasyService;
@@ -29,6 +30,7 @@ namespace Football.Api.Controllers
             var playerId = await _playerService.GetPlayerId(name);
             var fantasyPoints = await _fantasyService.GetFantasyPoints(playerId, season);
             return Ok(await _fantasyService.RefreshFantasyResults(fantasyPoints));
+
 
         }
         //Use this for a complete refresh of a season. Delete season from table first.

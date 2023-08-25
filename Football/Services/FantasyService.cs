@@ -1,6 +1,7 @@
 ﻿using Football.Interfaces;
 using Football.Models;
 using Football.Repository;
+using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
 namespace Football.Services
@@ -9,15 +10,17 @@ namespace Football.Services
     {
         private readonly IFantasyRepository _fantasyRepository;
         private readonly ILogger _logger;
+        private readonly IMemoryCache _cache;
 
         private readonly int pointsPerReception = 1;
         private readonly int pointsPerPassingTouchdown = 6;
         private readonly int pointsPerInterception = 2;
         private readonly int pointsPerFumble = 2;
-        public FantasyService(IFantasyRepository fantasyRepository, ILogger logger)
+        public FantasyService(IFantasyRepository fantasyRepository, ILogger logger, IMemoryCache cache)
         {
             _fantasyRepository = fantasyRepository;
             _logger = logger;
+            _cache = cache;
         }
         public async Task<double> CalculateTotalPoints(int playerId, int season)
         {
@@ -101,6 +104,11 @@ namespace Football.Services
 
         public async Task<int> RefreshFantasyResults(FantasyPoints fantasyPoints)
         {
+            _cache.Remove("QbProjections");
+            _cache.Remove("RbProjections");
+            _cache.Remove("WrProjections");
+            _cache.Remove("TeProjections");
+
             return await _fantasyRepository.RefreshFantasyResults(fantasyPoints);
         }
 

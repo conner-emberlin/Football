@@ -20,12 +20,15 @@
         <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/PlayerPhotos/gen.png'">
         </div>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
-    @if(player.PassingStats.Count > 0)
+    @if (player.Position == "QB")
     {
         <div>
             <b>Passing Statistics</b>
             <a href="/ManageStats/passing/@player.PlayerId">&#9998</a>
         </div>
+    }
+    @if(player.PassingStats.Count > 0)
+    {
         <div class="table_container"> 
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
@@ -69,11 +72,15 @@
         </div>
     }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
-    @if (player.RushingStats.Count > 0)
+    @if (player.Position == "QB" || player.Position == "RB")
     {
-        <div><b>Rushing Statistics</b>
+        <div>
+            <b>Rushing Statistics</b>
             <a href="/ManageStats/rushing/@player.PlayerId">&#9998</a>
         </div>
+    }
+    @if (player.RushingStats.Count > 0)
+    {
         <div class="table_container"> 
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
@@ -110,12 +117,17 @@
         </table>
         </div>
     }
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>  
+        @if(player.Position == "RB" || player.Position == "WR/TE")
+        {
+        <div>
+        <b>Receiving Statistics</b>
+        <a href="/ManageStats/receiving/@player.PlayerId">&#9998</a>
+        </div>
+        }
     @if (player.ReceivingStats.Count > 0)
     {
-        <div><b>Receiving Statistics</b>
-            <a href="/ManageStats/receiving/@player.PlayerId">&#9998</a>
-        </div>
+
         <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>

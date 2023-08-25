@@ -104,7 +104,7 @@ namespace Football.Services
         public RegressionModelQB RegressionModelQB(PassingStatistic passingStat, RushingStatistic rushingStat, int playerId)
         {
             var dataP = passingStat != null;
-            var dataR = passingStat != null;
+            var dataR = rushingStat != null;
             try
             {
                 return new RegressionModelQB
