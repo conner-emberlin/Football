@@ -224,5 +224,36 @@ namespace Football.Repository
                 playerId,
             });
         }
+        public async Task<int> AddReceivingStat(ReceivingStatisticWithSeason rec, int playerId)
+        {
+            var query = _sqlQueryService.AddReceivingStat();
+            int count = 0;
+            return count += await _dbConnection.ExecuteAsync(query, new
+            {
+                rec.Season,
+                rec.Name,
+                rec.Team,
+                rec.Age,
+                rec.Games,
+                rec.Targets,
+                rec.Receptions,
+                rec.Yards,
+                rec.Touchdowns,
+                rec.FirstDowns,
+                rec.Long,
+                rec.RpG,
+                rec.Fumbles,
+                playerId
+            });
+        }
+        public async Task<int> DeleteReceivingStats(int playerId)
+        {
+            var query = _sqlQueryService.DeleteReceivingStats();
+            var count = 0;
+            return count += await _dbConnection.ExecuteAsync(query, new
+            {
+                playerId,
+            });
+        }
     }
 }

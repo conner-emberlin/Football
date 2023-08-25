@@ -89,5 +89,27 @@ namespace Football.Api.Controllers
             }
             return Ok(count);
         }
+        [HttpPost("stats/rec/add/")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> AddReceivingStat([FromBody] ReceivingStatisticWithSeason rec)
+        {
+            return (Ok(await _playerService.AddReceivingStat(rec)));
+        }
+
+        [HttpPost("stats/rec/update/")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UpdateReceivingStats([FromBody] List<ReceivingStatisticWithSeason> recs)
+        {
+            var playerId = await _playerService.GetPlayerId(recs.First().Name);
+            await _playerService.DeleteReceivingStats(playerId);
+            int count = 0;
+            foreach (var rec in recs)
+            {
+                count += await _playerService.AddReceivingStat(rec);
+            }
+            return Ok(count);
+        }
     }
 }

@@ -39,5 +39,7 @@
         public string DeletePassingStats();
         public string AddRushingStat();
         public string DeleteRushingStats();
+        public string AddReceivingStat();
+        public string DeleteReceivingStats();
     }
 }

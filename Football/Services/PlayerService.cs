@@ -106,6 +106,11 @@ namespace Football.Services
             var playerId = await _playerRepository.GetPlayerId(rush.Name);
             return await _playerRepository.AddRushingStat(rush, playerId);
         }
+        public async Task<int> AddReceivingStat(ReceivingStatisticWithSeason rec)
+        {
+            var playerId = await _playerRepository.GetPlayerId(rec.Name);
+            return await _playerRepository.AddReceivingStat(rec, playerId);
+        }
 
         private async Task<Player> GetPlayerInfo(int playerId)
         {
@@ -135,6 +140,10 @@ namespace Football.Services
         public async Task<int> DeleteRushingStats(int playerId)
         {
             return await _playerRepository.DeleteRushingStats(playerId);
+        }
+        public async Task<int> DeleteReceivingStats(int playerId)
+        {
+            return await _playerRepository.DeleteReceivingStats(playerId);
         }
 
     }

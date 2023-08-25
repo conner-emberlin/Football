@@ -240,5 +240,14 @@ namespace Football.Services
         {
             return $@"DELETE FROM [dbo].Rushing WHERE [PlayerId] = @playerid";
         }
+        public string AddReceivingStat()
+        {
+            return $@"INSERT INTO [dbo].Receiving (Season, Name, Team, Age, Games, Targets, Receptions, Yards, Touchdowns, FirstDowns, Long, RpG, Fumbles, PlayerId)
+                            VALUES(@season, @name, @team, @age, @games, @targets, @receptions, @yards, @touchdowns, @firstdowns, @long, @rpg, @fumbles, @playerid)";
+        }
+        public string DeleteReceivingStats()
+        {
+            return $@"DELETE FROM [dbo].Receiving WHERE [PlayerId] = @playerid";
+        }
     }
 }
