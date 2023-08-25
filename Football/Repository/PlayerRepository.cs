@@ -163,5 +163,97 @@ namespace Football.Repository
             var id = await _dbConnection.QueryFirstOrDefaultAsync<int>(query, new { name });
             return id;
         }
+        public async Task<int> AddPassingStat(PassingStatisticWithSeason pass, int playerId)
+        {
+            var query = _sqlQueryService.AddPassingStat();
+            int count = 0;
+            return count += await _dbConnection.ExecuteAsync(query, new
+            {
+                pass.Season,
+                pass.Name,
+                pass.Team,
+                pass.Age,
+                pass.Games,
+                pass.Completions,
+                pass.Attempts,
+                pass.Yards,
+                pass.Touchdowns,
+                pass.Interceptions,
+                pass.FirstDowns,
+                pass.Long,
+                pass.Sacks,
+                pass.SackYards,
+                playerId
+            });
+        }
+        public async Task<int> DeletePassingStats(int playerId)
+        {
+            var query = _sqlQueryService.DeletePassingStats();
+            var count = 0;
+            return count += await _dbConnection.ExecuteAsync(query, new
+            {
+                playerId,               
+            });
+        }
+        public async Task<int> AddRushingStat(RushingStatisticWithSeason rush, int playerId)
+        {
+            var query = _sqlQueryService.AddRushingStat();
+            int count = 0;
+            return count += await _dbConnection.ExecuteAsync(query, new
+            {
+                rush.Season,
+                rush.Name,
+                rush.Team,
+                rush.Age,
+                rush.Games,
+                rush.RushAttempts,
+                rush.Yards,
+                rush.Touchdowns,
+                rush.FirstDowns,
+                rush.Long,
+                rush.Fumbles,
+                playerId
+            });
+        }
+        public async Task<int> DeleteRushingStats(int playerId)
+        {
+            var query = _sqlQueryService.DeleteRushingStats();
+            var count = 0;
+            return count += await _dbConnection.ExecuteAsync(query, new
+            {
+                playerId,
+            });
+        }
+        public async Task<int> AddReceivingStat(ReceivingStatisticWithSeason rec, int playerId)
+        {
+            var query = _sqlQueryService.AddReceivingStat();
+            int count = 0;
+            return count += await _dbConnection.ExecuteAsync(query, new
+            {
+                rec.Season,
+                rec.Name,
+                rec.Team,
+                rec.Age,
+                rec.Games,
+                rec.Targets,
+                rec.Receptions,
+                rec.Yards,
+                rec.Touchdowns,
+                rec.FirstDowns,
+                rec.Long,
+                rec.RpG,
+                rec.Fumbles,
+                playerId
+            });
+        }
+        public async Task<int> DeleteReceivingStats(int playerId)
+        {
+            var query = _sqlQueryService.DeleteReceivingStats();
+            var count = 0;
+            return count += await _dbConnection.ExecuteAsync(query, new
+            {
+                playerId,
+            });
+        }
     }
 }

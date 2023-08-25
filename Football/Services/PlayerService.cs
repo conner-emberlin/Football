@@ -96,6 +96,21 @@ namespace Football.Services
             var games = await _playerRepository.GetFantasySeasonGames(playerId);
             return games.OrderBy(s => s.Season).ToList();
         }
+        public async Task<int> AddPassingStat(PassingStatisticWithSeason pass)
+        {
+            var playerId = await _playerRepository.GetPlayerId(pass.Name);
+            return await _playerRepository.AddPassingStat(pass, playerId);
+        }
+        public async Task<int> AddRushingStat(RushingStatisticWithSeason rush)
+        {
+            var playerId = await _playerRepository.GetPlayerId(rush.Name);
+            return await _playerRepository.AddRushingStat(rush, playerId);
+        }
+        public async Task<int> AddReceivingStat(ReceivingStatisticWithSeason rec)
+        {
+            var playerId = await _playerRepository.GetPlayerId(rec.Name);
+            return await _playerRepository.AddReceivingStat(rec, playerId);
+        }
 
         private async Task<Player> GetPlayerInfo(int playerId)
         {
@@ -115,6 +130,20 @@ namespace Football.Services
         {
             var stats = await _playerRepository.GetReceivingStatisticsWithSeason(playerId);
             return stats.OrderBy(s => s.Season).ToList();
+        }
+
+        public async Task<int> DeletePassingStats(int playerId)
+        {
+            return await _playerRepository.DeletePassingStats(playerId);
+        }
+
+        public async Task<int> DeleteRushingStats(int playerId)
+        {
+            return await _playerRepository.DeleteRushingStats(playerId);
+        }
+        public async Task<int> DeleteReceivingStats(int playerId)
+        {
+            return await _playerRepository.DeleteReceivingStats(playerId);
         }
 
     }
