@@ -79,18 +79,36 @@
             </tbody>
         </table>
     </div>
+
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <button class="button-22" role="button" @onclick="SubmitPassingChanges">
         Submit Changes
     </button>
+    @if(youTriedToUpdate && passesUpdated)
+    {
+        <text>Records Updated</text>
+    }
+    else if(youTriedToUpdate && !passesUpdated)
+    {
+        <text>Something Went Wrong</text>
+    }
+
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div>
     <button class="button-22" role="button" @onclick= "AddRecord">
         Add Record
     </button>
+        @if(youTriedToAdd && passesAdded > 0)
+        {
+            <text>Record Added</text>
+        }
+        else if(youTriedToAdd && passesAdded == 0)
+        {
+            <text>Something Went Wrong</text>
+        }
         <div style="height:10px;font-size:1px;">&nbsp;</div>
-
     </div>
+
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if (add)
     {
@@ -230,11 +248,27 @@ else if (Type == "rushing" && !badRequestError && player != null)
     <button class="button-22" role="button" @onclick="SubmitRushingChanges">
         Submit Changes
     </button>
+    @if(youTriedToUpdate && rushesUpdated)
+    {
+        <p>Records Updated</p>
+    }
+    else if(youTriedToUpdate && !rushesUpdated)
+    {
+        <p>Something Went Wrong</p>
+    }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div>
         <button class="button-22" role="button" @onclick="AddRecord">
             Add Record
         </button>
+        @if(youTriedToAdd && rushesAdded > 0)
+        {
+            <text>Record Added</text>
+        }
+        else if(youTriedToAdd && rushesAdded == 0)
+        {
+            <text>Something Went Wrong</text>
+        }
         <div style="height:10px;font-size:1px;">&nbsp;</div>
 
     </div>
@@ -367,11 +401,27 @@ else if (Type == "receiving" && !badRequestError && player != null)
     <button class="button-22" role="button" @onclick="SubmitReceivingChanges">
         Submit Changes
     </button>
+    @if(youTriedToUpdate && recsUpdated)
+    {
+        <text>Records Updated</text>
+    }
+    else if(youTriedToUpdate && !recsUpdated)
+    {
+        <text>Something Went Wrong</text>
+    }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div>
         <button class="button-22" role="button" @onclick="AddRecord">
             Add Record
         </button>
+        @if(youTriedToAdd && recsAdded > 0)
+        {
+            <text>Record Added</text>
+        }
+        else if(youTriedToAdd && recsAdded == 0)
+        {
+            <text>Something Went Wrong</text>
+        }
         <div style="height:10px;font-size:1px;">&nbsp;</div>
 
     </div>
@@ -464,6 +514,8 @@ else
     public Player? player { get; set; }
     private bool badRequestError;
     private bool add;
+    private bool youTriedToAdd = false;
+    private bool youTriedToUpdate = false;
 
     public string? passName { get; set; } = "";
     public string? passTeam { get; set; } = "";
@@ -559,7 +611,7 @@ else
 
     private async Task SubmitPassingChanges()
     {
-        var passesUpdated = false;
+
         var serializedPassList = JsonSerializer.Serialize(player.PassingStats);
         var content = new StringContent(serializedPassList, System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/pass/update");
@@ -574,6 +626,11 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             passesUpdated = true;
         }
+        else
+        {
+            passesUpdated = false;
+        }
+        youTriedToUpdate = true;
     }  
 
     private async Task AddNewPassing()
@@ -595,8 +652,7 @@ else
         newPass.Sacks = passScks;
         newPass.SackYards = passSYds;
 
-        var serializedPass = JsonSerializer.Serialize(newPass);
-        //pass newPass to a controller to add              
+        var serializedPass = JsonSerializer.Serialize(newPass);            
         var content = new StringContent(serializedPass, System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/pass/add");
         request.Content = content;
@@ -610,10 +666,11 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             passesAdded = JsonSerializer.Deserialize<int>(responseStream, options);
         }
+        youTriedToAdd = true;
     }
     private async Task SubmitRushingChanges()
     {
-        var rushesUpdated = false;
+        rushesUpdated = false;
         var serializedRushList = JsonSerializer.Serialize(player.RushingStats);
         var content = new StringContent(serializedRushList, System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/rush/update");
@@ -628,6 +685,7 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             rushesUpdated = true;
         }
+        youTriedToUpdate = true;
     }
 
     private async Task AddNewRushing()
@@ -647,7 +705,6 @@ else
         newRush.Fumbles = rushFmb;
 
         var serializedRush = JsonSerializer.Serialize(newRush);
-        //pass newPass to a controller to add
         var content = new StringContent(serializedRush, System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/rush/add");
         request.Content = content;
@@ -661,11 +718,12 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             rushesAdded = JsonSerializer.Deserialize<int>(responseStream, options);
         }
+        youTriedToAdd = true;
     }
 
     private async Task SubmitReceivingChanges()
     {
-        var recsUpdated = false;
+        recsUpdated = false;
         var serializedRecList = JsonSerializer.Serialize(player.ReceivingStats);
         var content = new StringContent(serializedRecList, System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/rec/update");
@@ -680,6 +738,7 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             recsUpdated = true;
         }
+        youTriedToUpdate = true;
     }
 
     private async Task AddNewReceiving()
@@ -701,7 +760,6 @@ else
         newRec.Fumbles = recFmb;
 
         var serializedRec = JsonSerializer.Serialize(newRec);
-        //pass newPass to a controller to add
         var content = new StringContent(serializedRec, System.Text.Encoding.UTF8, "application/json");
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/stats/rec/add");
         request.Content = content;
@@ -715,5 +773,6 @@ else
             using var responseStream = await response.Content.ReadAsStreamAsync();
             recsAdded = JsonSerializer.Deserialize<int>(responseStream, options);
         }
+        youTriedToAdd = true;
     }
 }
