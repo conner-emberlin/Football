@@ -19,7 +19,7 @@ namespace Football.Services
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
 
-        private readonly int QBProjections = 24;
+        private readonly int QBProjections = 25;
         private readonly int RBProjections = 24;
         private readonly int WRProjections = 36;
         private readonly int TEProjections = 12;
