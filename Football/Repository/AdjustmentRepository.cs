@@ -3,7 +3,7 @@ using Football.Models;
 using Dapper;
 using System.Data;
 
-namespace Football.Services
+namespace Football.Repository
 {
     public class AdjustmentRepository : IAdjustmentRepository
     {
@@ -20,6 +20,12 @@ namespace Football.Services
             var query = _sqlQueryService.GetGamesSuspended();
             var sus = await _dbConnection.QueryAsync<int>(query, new { playerId, season });
             return sus.FirstOrDefault();
+        }
+        public async Task<QBChange> GetTeamChange(int season, string team)
+        {
+            var query = _sqlQueryService.GetTeamChange();
+            var changes = await _dbConnection.QueryAsync<QBChange>(query, new { season, team });
+            return changes.FirstOrDefault();
         }
     }
 }
