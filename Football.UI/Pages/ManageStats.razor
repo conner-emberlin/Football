@@ -363,6 +363,8 @@ else if (Type == "receiving" && !badRequestError && player != null)
                     <th>Tds</th>
                     <th>Fds</th>
                     <th>Lng</th>
+                    <th>Rpg</th>
+                    <th>Fmbl</th>
                 </tr>
             </thead>
             <tbody>
@@ -399,6 +401,12 @@ else if (Type == "receiving" && !badRequestError && player != null)
                         <td>
                             <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.Long" />
                             </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.RpG" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="4" class="form-control" @bind="@stat.Fumbles" />
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -444,6 +452,7 @@ else if (Type == "receiving" && !badRequestError && player != null)
                         <th>Yds</th>
                         <th>Tds</th>
                         <th>Fds</th>
+                        <th>Lng</th>
                         <th>Rpg</th>
                         <th>Fmbl</th>
                     </tr>
@@ -772,10 +781,10 @@ else
     {
         ReceivingStatisticWithSeason newRec = new();
         newRec.Name = player.Name;
-        newRec.Season = rushSeason;
-        newRec.Team = rushTeam;
-        newRec.Age = rushAge;
-        newRec.Games = rushGames;
+        newRec.Season = recSeason;
+        newRec.Team = recTeam;
+        newRec.Age = recAge;
+        newRec.Games = recGames;
         newRec.Targets = recTgt;
         newRec.Receptions = recRec;
         newRec.Yards = recYds;
