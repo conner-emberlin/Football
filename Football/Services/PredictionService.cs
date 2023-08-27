@@ -255,6 +255,7 @@ namespace Football.Services
                             _cache.Set("WrProjections", projectionW);
                             projectionW = await _adjustmentCalculator.SuspensionAdjustment(projectionW);
                             projectionW = await _adjustmentCalculator.QBChangeAdjustment(projectionW, await GetProjections("QB"));
+                            projectionW = await _adjustmentCalculator.WRTeamChangeAdjustment(projectionW, await GetProjections("QB"));
                             return projectionW;
                         }
                         else
@@ -271,6 +272,7 @@ namespace Football.Services
                             _cache.Set("TeProjections", projectionsT);
                             projectionsT =  await _adjustmentCalculator.SuspensionAdjustment(projectionsT);
                             projectionsT = await _adjustmentCalculator.QBChangeAdjustment(projectionsT, await GetProjections("QB"));
+                            projectionsT = await _adjustmentCalculator.WRTeamChangeAdjustment(projectionsT, await GetProjections("QB"));
                             return projectionsT;
                         }
 

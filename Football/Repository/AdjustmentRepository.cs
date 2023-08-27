@@ -21,10 +21,16 @@ namespace Football.Repository
             var sus = await _dbConnection.QueryAsync<int>(query, new { playerId, season });
             return sus.FirstOrDefault();
         }
-        public async Task<QBChange> GetTeamChange(int season, string team)
+        public async Task<Change> GetTeamChange(int season, string team)
         {
             var query = _sqlQueryService.GetTeamChange();
-            var changes = await _dbConnection.QueryAsync<QBChange>(query, new { season, team });
+            var changes = await _dbConnection.QueryAsync<Change>(query, new { season, team });
+            return changes.FirstOrDefault();
+        }
+        public async Task<Change> GetTeamChange(int season, int playerId)
+        {
+            var query = _sqlQueryService.GetPlayerTeamChange();
+            var changes = await _dbConnection.QueryAsync<Change>(query, new { season, playerId });
             return changes.FirstOrDefault();
         }
     }

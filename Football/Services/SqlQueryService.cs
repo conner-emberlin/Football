@@ -259,5 +259,10 @@ namespace Football.Services
             return $@"SELECT [PlayerId], [Season], [PreviousTeam], [NewTeam] FROM [dbo].TeamChanges
                     WHERE [Season] = @season AND [NewTeam] = @team";
         }
+        public string GetPlayerTeamChange()
+        {
+            return $@"SELECT [PlayerId], [Season], [PreviousTeam], [NewTeam] FROM [dbo].TeamChanges
+                    WHERE [Season] = @season AND [PlayerId] = @playerid";
+        }
     }
 }

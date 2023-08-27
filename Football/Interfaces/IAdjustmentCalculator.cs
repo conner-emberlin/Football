@@ -6,5 +6,7 @@ namespace Football.Interfaces
     {
         public Task<IEnumerable<ProjectionModel>> SuspensionAdjustment(IEnumerable<ProjectionModel> projections);
         public Task<IEnumerable<ProjectionModel>> QBChangeAdjustment(IEnumerable<ProjectionModel> wrProjections, IEnumerable<ProjectionModel> qbProjections);
+        public Task<IEnumerable<ProjectionModel>> WRTeamChangeAdjustment(IEnumerable<ProjectionModel> wrProjections, IEnumerable<ProjectionModel> qbProjections);
+
     }
 }

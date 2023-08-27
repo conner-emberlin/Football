@@ -43,5 +43,6 @@
         public string DeleteReceivingStats();
         public string GetGamesSuspended();
         public string GetTeamChange();
+        public string GetPlayerTeamChange();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Football.Interfaces;
 using Football.Models;
+using Serilog;
 using System.Runtime;
 
 namespace Football.Services
@@ -8,12 +9,14 @@ namespace Football.Services
     {
         private readonly IAdjustmentRepository _adjustmentRepository;
         private readonly IPlayerService _playerService;
+        private readonly ILogger _logger;
 
         private readonly int _currentSeason = 2023;
-        public AdjustmentCalculator(IAdjustmentRepository adjustmentRepository, IPlayerService playerService)
+        public AdjustmentCalculator(IAdjustmentRepository adjustmentRepository, IPlayerService playerService, ILogger logger)
         {
             _adjustmentRepository = adjustmentRepository;
             _playerService = playerService;
+            _logger = logger;
         }
         public async Task<IEnumerable<ProjectionModel>> SuspensionAdjustment(IEnumerable<ProjectionModel> projection)
         {
@@ -36,6 +39,7 @@ namespace Football.Services
                 var qbRecord = await _adjustmentRepository.GetTeamChange(_currentSeason, team);
                 if(qbRecord != null)
                 {
+                    _logger.Information("New QB found for player " + proj.PlayerId);
                     ProjectionModel oldQBProj = new();
                     foreach (var qbProj in qbProjections)
                     {
@@ -55,6 +59,37 @@ namespace Football.Services
             }
             return wrProjections;
         }
-        
+
+        public async Task<IEnumerable<ProjectionModel>> WRTeamChangeAdjustment(IEnumerable<ProjectionModel> wrProjections, IEnumerable<ProjectionModel> qbProjections)
+        {
+            foreach (var wrProjection in wrProjections)
+            {
+                var change = await _adjustmentRepository.GetTeamChange(_currentSeason, wrProjection.PlayerId);
+                if (change != null)
+                {
+                    _logger.Information("Team change found for playerid " + wrProjection.PlayerId);
+                    ProjectionModel previousQBProjection = new();
+                    ProjectionModel currentQBProjection = new();
+                    foreach (var qbProj in qbProjections)
+                    {
+                        if (qbProj.Team == change.PreviousTeam)
+                        {
+                            previousQBProjection = qbProj;
+                        }
+                        if (qbProj.Team == change.NewTeam)
+                        {
+                            currentQBProjection = qbProj;
+                        }
+                    }
+                    previousQBProjection ??= qbProjections.ElementAt(qbProjections.Count() - 1);
+                    currentQBProjection ??= qbProjections.ElementAt(qbProjections.Count() - 1);
+
+                    var ratio = currentQBProjection.ProjectedPoints / previousQBProjection.ProjectedPoints;
+                    wrProjection.ProjectedPoints = (wrProjection.ProjectedPoints * (ratio + 1)) / 2;
+                }
+            }
+            return wrProjections;
+        }
+
     }
 }
