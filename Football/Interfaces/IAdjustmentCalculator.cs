@@ -4,9 +4,9 @@ namespace Football.Interfaces
 {
     public interface IAdjustmentCalculator
     {
-        public Task<IEnumerable<ProjectionModel>> SuspensionAdjustment(IEnumerable<ProjectionModel> projections);
-        public Task<IEnumerable<ProjectionModel>> QBChangeAdjustment(IEnumerable<ProjectionModel> wrProjections, IEnumerable<ProjectionModel> qbProjections);
-        public Task<IEnumerable<ProjectionModel>> WRTeamChangeAdjustment(IEnumerable<ProjectionModel> wrProjections, IEnumerable<ProjectionModel> qbProjections);
+        public Task<IEnumerable<ProjectionModel>> QBAdjustments(IEnumerable<ProjectionModel> qbProjections);
+        public Task<IEnumerable<ProjectionModel>> PCAdjustments(IEnumerable<ProjectionModel> pcProjections, IEnumerable<ProjectionModel> qbProjections);
+        public Task<IEnumerable<ProjectionModel>> RBAdjustments(IEnumerable<ProjectionModel> rbProjections);
 
     }
 }

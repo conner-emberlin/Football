@@ -20,9 +20,9 @@ namespace Football.Services
         private readonly IMemoryCache _cache;
 
         private readonly int QBProjections = 25;
-        private readonly int RBProjections = 24;
+        private readonly int RBProjections = 50;
         private readonly int WRProjections = 36;
-        private readonly int TEProjections = 12;
+        private readonly int TEProjections = 15;
 
         private readonly int QBStarters = 20;
         private readonly int RBStarters = 24;
@@ -170,7 +170,7 @@ namespace Football.Services
                         
                         var projections = projection.OrderByDescending(p => p.ProjectedPoints).Take(QBProjections);
                         _cache.Set("QbProjections", projections);
-                        return await _adjustmentCalculator.SuspensionAdjustment(projections);
+                        return await _adjustmentCalculator.QBAdjustments(projections);
                     }
                 case "RB":
                     _logger.Information("Getting RB Projections");
@@ -202,7 +202,7 @@ namespace Football.Services
                     }
                     var projectionsRb = projection.OrderByDescending(p => p.ProjectedPoints).Take(RBProjections);
                     _cache.Set("RbProjections", projectionsRb);
-                    return await _adjustmentCalculator.SuspensionAdjustment(projectionsRb);
+                    return await _adjustmentCalculator.RBAdjustments(projectionsRb);
                 case "WR":
                 case "TE":
                     _logger.Information("Getting Pass Catcher Projections");
@@ -253,10 +253,7 @@ namespace Football.Services
                             }
                             var projectionW = wideReceiversOnly.OrderByDescending(p => p.ProjectedPoints).Take(WRProjections);
                             _cache.Set("WrProjections", projectionW);
-                            projectionW = await _adjustmentCalculator.SuspensionAdjustment(projectionW);
-                            projectionW = await _adjustmentCalculator.QBChangeAdjustment(projectionW, await GetProjections("QB"));
-                            projectionW = await _adjustmentCalculator.WRTeamChangeAdjustment(projectionW, await GetProjections("QB"));
-                            return projectionW;
+                            return await _adjustmentCalculator.PCAdjustments(projectionW, await GetProjections("QB"));
                         }
                         else
                         {
@@ -270,10 +267,7 @@ namespace Football.Services
                             }
                             var projectionsT = tightEndsOnly.OrderByDescending(p => p.ProjectedPoints).Take(TEProjections);
                             _cache.Set("TeProjections", projectionsT);
-                            projectionsT =  await _adjustmentCalculator.SuspensionAdjustment(projectionsT);
-                            projectionsT = await _adjustmentCalculator.QBChangeAdjustment(projectionsT, await GetProjections("QB"));
-                            projectionsT = await _adjustmentCalculator.WRTeamChangeAdjustment(projectionsT, await GetProjections("QB"));
-                            return projectionsT;
+                            return await _adjustmentCalculator.PCAdjustments(projectionsT, await GetProjections("QB"));
                         }
 
                     }

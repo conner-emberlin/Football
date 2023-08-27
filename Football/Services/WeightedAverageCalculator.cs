@@ -9,6 +9,7 @@ namespace Football.Services
     {
         private readonly ILogger _logger;
         private readonly double weight = (double)5 / (double)8;
+        private readonly double secondYearLeap = 1.1;
 
         public WeightedAverageCalculator(ILogger logger)
         {
@@ -31,7 +32,7 @@ namespace Football.Services
                 try
                 {
                     var maxSeason = passing.Select(ps => ps.Season).Max();
-                    double maxSeasonWeight = passing.Count > 1 ? weight : 1;
+                    double maxSeasonWeight = passing.Count > 1 ? weight : secondYearLeap;
                     double previousSeasonCount = (double)passing.Count - 1;
                     double previousSeasonWeight = passing.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
 
@@ -96,7 +97,7 @@ namespace Football.Services
                 try
                 {
                     var maxSeason = rushing.Select(r => r.Season).Max();
-                    double maxSeasonWeight = rushing.Count > 1 ? weight : 1;
+                    double maxSeasonWeight = rushing.Count > 1 ? weight : secondYearLeap;
                     double previousSeasonCount = (double)rushing.Count - 1;
                     double previousSeasonWeight = rushing.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
 
@@ -160,7 +161,7 @@ namespace Football.Services
                 try
                 {
                     var maxSeason = receiving.Select(r => r.Season).Max();
-                    double maxSeasonWeight = receiving.Count > 1 ? weight : 1;
+                    double maxSeasonWeight = receiving.Count > 1 ? weight : secondYearLeap;
                     double previousSeasonCount = receiving.Count - 1;
                     double previousSeasonWeight = receiving.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
 
@@ -232,7 +233,7 @@ namespace Football.Services
                 {
                     double averageTotalPoints = 0;
                     var maxSeason = player.FantasySeasonGames.OrderByDescending(f => f.Season).FirstOrDefault().Season;
-                    double maxSeasonWeight = player.FantasySeasonGames.Count > 1 ? weight : 1;
+                    double maxSeasonWeight = player.FantasySeasonGames.Count > 1 ? weight : secondYearLeap;
                     double previousSeasonCount = player.FantasySeasonGames.Count - 1;
                     double previousSeasonWeight = player.FantasySeasonGames.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
 
