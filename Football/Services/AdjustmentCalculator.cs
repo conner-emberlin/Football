@@ -142,9 +142,7 @@ namespace Football.Services
                             {
                                 r.ProjectedPoints += improvementRatio*r.ProjectedPoints;
                             }
-                        }
-                        
-
+                        }                      
                     }
                 }
             }
