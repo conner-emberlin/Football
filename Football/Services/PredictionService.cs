@@ -25,7 +25,7 @@ namespace Football.Services
         private readonly int TEProjections = 15;
 
         private readonly int QBStarters = 20;
-        private readonly int RBStarters = 24;
+        private readonly int RBStarters = 20;
         private readonly int WRStarters = 24;
         private readonly int TEStarters = 12;
 
