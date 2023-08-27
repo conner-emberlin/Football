@@ -26,17 +26,17 @@ namespace Football.Services
             return qbProjection;
         }
         public async Task<IEnumerable<ProjectionModel>> PCAdjustments(IEnumerable<ProjectionModel> pcProjection, IEnumerable<ProjectionModel> qbProjection)
-        {
-            pcProjection = await SuspensionAdjustment(pcProjection);
+        {           
             pcProjection = await QBChangeAdjustment(pcProjection, qbProjection);
             pcProjection = await WRTeamChangeAdjustment(pcProjection, qbProjection);
+            pcProjection = await SuspensionAdjustment(pcProjection);
             return pcProjection;
         }
 
         public async Task<IEnumerable<ProjectionModel>> RBAdjustments(IEnumerable<ProjectionModel> rbProjection)
-        {
-            rbProjection = await SuspensionAdjustment(rbProjection);
+        {           
             rbProjection = await RBTimeshareAdjustment(rbProjection);
+            rbProjection = await SuspensionAdjustment(rbProjection);
             return rbProjection;
         }
 
@@ -134,7 +134,16 @@ namespace Football.Services
                         var improvementRatio = (replacementLevel.ProjectedPoints / (newGuyInTown.ProjectedPoints - _rbNewTeam));
                         var newcomerRatio = (replacementLevel.ProjectedPoints / rbProj.ProjectedPoints);
                         rbProj.ProjectedPoints = (rbProj.ProjectedPoints * (improvementRatio + 1)) / 2;
-                        rbProjection.Where(r => r.PlayerId == newGuyInTown.PlayerId).ToList().FirstOrDefault().ProjectedPoints = ((newcomerRatio+1) * rbProjection.Where(r => r.PlayerId == newGuyInTown.PlayerId).ToList().FirstOrDefault().ProjectedPoints)/2;
+                        var oldProj = rbProjection.Where(r => r.PlayerId == newGuyInTown.PlayerId).ToList().FirstOrDefault().ProjectedPoints;
+                        rbProjection.Where(r => r.PlayerId == newGuyInTown.PlayerId).ToList().FirstOrDefault().ProjectedPoints = ((newcomerRatio+1) * oldProj)/2;
+                        foreach(var r in rbProjection)
+                        {
+                            if(await _playerService.GetPlayerTeam(r.PlayerId) == change.PreviousTeam && r.PlayerId != change.PlayerId)
+                            {
+                                r.ProjectedPoints += improvementRatio*r.ProjectedPoints;
+                            }
+                        }
+                        
 
                     }
                 }
