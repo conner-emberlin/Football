@@ -11,6 +11,53 @@
     <TextBoxName @bind-Value="this.Value" />
 </EditForm>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
+<div>
+<button class="button-22" role="button" @onclick="AddPlayer">
+    Add
+</button>
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@if(add)
+{
+            <div class="table_container">
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Active</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="text" size="1" maxlength="25" class="form-control" @bind="@NewName" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="2" class="form-control" @bind="@NewPosition" />
+                        </td>
+                        <td>
+                            <input type="text" size="1" maxlength="1" class="form-control" @bind="@NewActive" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <button class="button-22" role="button" @onclick="CreatePlayer">
+            Submit
+        </button>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    @if(youTried && itWorked && recordsAdded > 0)
+    {
+        <text>Record added</text>
+    }
+    else if((youTried && !itWorked) || (youTried && itWorked && recordsAdded == 0))
+    {
+        <text>Something went wrong.</text>
+    }
+
+}
 @if(player.Name != null && !badRequestError){
     var photoPath = "https://localhost:7176/PlayerPhotos/" + player.PlayerId + ".png";
  <div>
@@ -184,6 +231,14 @@ else if(badRequestError)
     private string Active = "";
     private string Position = "";
 
+    private bool add;
+    public string NewName { get; set; } = "";
+    public string NewPosition {get; set; } = "";
+    public string NewActive { get; set; } = "";
+    private bool itWorked = false;
+    private bool youTried = false;
+    private int recordsAdded = 0;
+
     public async Task GetPlayers()
     {
         var id  = await GetPlayerId(this.Value);
@@ -244,6 +299,33 @@ else if(badRequestError)
         {
             return 0;
         }
+    }
+    private async Task CreatePlayer()
+    {
+        
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/create/" + NewName + "/" + NewPosition + "/" + NewActive);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            recordsAdded = await JsonSerializer.DeserializeAsync<int>(responseStream, options);
+            itWorked = true;
+        }
+        else
+        {
+            recordsAdded = 0;
+            itWorked = false;
+        }
+        youTried = true;
+    }
+
+    private void AddPlayer()
+    {
+        add = true;
+        shouldRender = true;
     }
 
 

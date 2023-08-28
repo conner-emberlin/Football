@@ -255,5 +255,15 @@ namespace Football.Repository
                 playerId,
             });
         }
+        public async Task<int> CreatePlayer(string name, string position, int active)
+        {
+            var query = _sqlQueryService.CreatePlayer();
+            return await _dbConnection.ExecuteAsync(query, new
+            {
+                name,
+                position,
+                active
+            });
+        }
     }
 }

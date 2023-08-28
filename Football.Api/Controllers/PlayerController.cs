@@ -111,5 +111,17 @@ namespace Football.Api.Controllers
             }
             return Ok(count);
         }
+
+        [HttpPost("create/{name}/{position}/{active}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> CreatePlayer(string name, string position, int active)
+        {
+            if(position == "WR" || position == "TE")
+            {
+                position = "WR/TE";
+            }
+            return await _playerService.CreatePlayer(name, position, active);
+        }
     }
 }
