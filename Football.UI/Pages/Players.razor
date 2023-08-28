@@ -1,6 +1,6 @@
 ﻿@page "/Players"
 <PageTitle>Players</PageTitle>
-<h4>Player Statistics</h4>
+<h4>Players</h4>
 
 @using System.Text.Json
 @using System.Text.Json.Serialization
@@ -58,7 +58,7 @@
     }
 
 }
-@if(player.Name != null && !badRequestError){
+@if(player.Name != null && !badRequestError && !add){
     var photoPath = "https://localhost:7176/PlayerPhotos/" + player.PlayerId + ".png";
  <div>
 <b>Name</b> @player.Name <b>Position</b> @Position <b>Active</b> @Active

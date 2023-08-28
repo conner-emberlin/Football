@@ -21,7 +21,7 @@ namespace Football.Services
 
         private readonly int QBProjections = 25;
         private readonly int RBProjections = 50;
-        private readonly int WRProjections = 36;
+        private readonly int WRProjections = 48;
         private readonly int TEProjections = 15;
 
         private readonly int QBStarters = 20;
@@ -49,8 +49,11 @@ namespace Football.Services
             foreach(var p in players)
             {
                 var player = await _playerService.GetPlayer(p);
-                var projected = _weightedAverageCalculator.WeightedAverage(player);
-                projectedAverage.Add(projected);
+                if (player.FantasyPoints.Count > 0)
+                {
+                    var projected = _weightedAverageCalculator.WeightedAverage(player);
+                    projectedAverage.Add(projected);
+                }
             }
             return projectedAverage;
         }
@@ -63,10 +66,13 @@ namespace Football.Services
             {               
                 _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
-                var projectedAveragePassing = _weightedAverageCalculator.WeightedAverage(player.PassingStats);
-                var projectedAverageRushing = _weightedAverageCalculator.WeightedAverage(player.RushingStats);
-                var model = _regressionModelService.RegressionModelQB(projectedAveragePassing, projectedAverageRushing, p);
-                regressionModel.Add(model);
+                if (player.PassingStats.Count > 0 || player.RushingStats.Count > 0)
+                {
+                    var projectedAveragePassing = _weightedAverageCalculator.WeightedAverage(player.PassingStats);
+                    var projectedAverageRushing = _weightedAverageCalculator.WeightedAverage(player.RushingStats);
+                    var model = _regressionModelService.RegressionModelQB(projectedAveragePassing, projectedAverageRushing, p);
+                    regressionModel.Add(model);
+                }
             }
             return regressionModel;          
         }
@@ -79,10 +85,13 @@ namespace Football.Services
             {
                 _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
-                var projectedAverageRushing =  _weightedAverageCalculator.WeightedAverage(player.RushingStats);
-                var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
-                var model = _regressionModelService.RegressionModelRB(projectedAverageRushing,projectedAverageReceiving, p);
-                regressionModel.Add(model);
+                if (player.RushingStats.Count > 0 || player.ReceivingStats.Count > 0)
+                {
+                    var projectedAverageRushing = _weightedAverageCalculator.WeightedAverage(player.RushingStats);
+                    var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
+                    var model = _regressionModelService.RegressionModelRB(projectedAverageRushing, projectedAverageReceiving, p);
+                    regressionModel.Add(model);
+                }
             }
             return regressionModel;
         }
@@ -95,9 +104,12 @@ namespace Football.Services
             {
                 _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
-                var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
-                var model = _regressionModelService.RegressionModelPC(projectedAverageReceiving, p);
-                regressionModel.Add(model);
+                if (player.ReceivingStats.Count > 0)
+                {
+                    var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
+                    var model = _regressionModelService.RegressionModelPC(projectedAverageReceiving, p);
+                    regressionModel.Add(model);
+                }
             }
             return regressionModel;
         }

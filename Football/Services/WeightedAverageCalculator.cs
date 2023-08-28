@@ -261,7 +261,7 @@ namespace Football.Services
             }
             else 
             {
-                _logger.Information("Player Id" + player.PlayerId + "returned null Fantasy Points");
+                _logger.Information("Player Id" + player.PlayerId + " returned null Fantasy Points");
                 return null; 
             }
         }        

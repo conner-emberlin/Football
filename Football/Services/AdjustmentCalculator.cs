@@ -12,7 +12,8 @@ namespace Football.Services
         private readonly ILogger _logger;
 
         private readonly int _currentSeason = 2023;
-        private readonly int _rbNewTeam = 85;
+        private readonly int _replacementLevelRB = 24;
+        private readonly int _replacementLevelQB = 20;
         public AdjustmentCalculator(IAdjustmentRepository adjustmentRepository, IPlayerService playerService, ILogger logger)
         {
             _adjustmentRepository = adjustmentRepository;
@@ -72,7 +73,7 @@ namespace Football.Services
                                 oldQBProj = proj;
                             }
                         }
-                        oldQBProj ??= qbProjections.ElementAt(qbProjections.Count() - 1);
+                        oldQBProj ??= qbProjections.ElementAt(_replacementLevelQB);
                         var newQBProj = qbProjections.Where(p => p.PlayerId == qbRecord.PlayerId).FirstOrDefault();
                         if (newQBProj != null)
                         {
@@ -106,8 +107,8 @@ namespace Football.Services
                             currentQBProjection = qbProj;
                         }
                     }
-                    previousQBProjection ??= qbProjections.ElementAt(qbProjections.Count() - 1);
-                    currentQBProjection ??= qbProjections.ElementAt(qbProjections.Count() - 1);
+                    previousQBProjection ??= qbProjections.ElementAt(_replacementLevelQB);
+                    currentQBProjection ??= qbProjections.ElementAt(_replacementLevelQB);
 
                     var ratio = currentQBProjection.ProjectedPoints / previousQBProjection.ProjectedPoints;
                     wrProjection.ProjectedPoints = (wrProjection.ProjectedPoints * (ratio + 1)) / 2;
@@ -118,7 +119,7 @@ namespace Football.Services
         
         private async Task<IEnumerable<ProjectionModel>> RBTimeshareAdjustment(IEnumerable<ProjectionModel> rbProjection)
         {
-            var replacementLevel = rbProjection.ElementAt(rbProjection.Count() - 1);
+            var replacementLevel = rbProjection.ElementAt(_replacementLevelRB);
             foreach (var rbProj in rbProjection)
             {
                 var team = await _playerService.GetPlayerTeam(rbProj.PlayerId);
@@ -131,7 +132,7 @@ namespace Football.Services
                         newGuyInTown = rbProjection.Where(r => r.PlayerId == change.PlayerId).ToList().FirstOrDefault();
                         newGuyInTown ??= replacementLevel;
 
-                        var improvementRatio = (replacementLevel.ProjectedPoints / (newGuyInTown.ProjectedPoints - _rbNewTeam));
+                        var improvementRatio = replacementLevel.ProjectedPoints / newGuyInTown.ProjectedPoints;
                         var newcomerRatio = (replacementLevel.ProjectedPoints / rbProj.ProjectedPoints);
                         rbProj.ProjectedPoints = (rbProj.ProjectedPoints * (improvementRatio + 1)) / 2;
                         var oldProj = rbProjection.Where(r => r.PlayerId == newGuyInTown.PlayerId).ToList().FirstOrDefault().ProjectedPoints;

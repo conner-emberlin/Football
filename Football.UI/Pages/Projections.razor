@@ -29,6 +29,7 @@
 {
     <p>Unexpected Error. Please try again.</p>
 }
+
 else if(players.Count > 0)
 {
     <button class="button-22" role = "button" @onclick="UploadProjections">
@@ -76,6 +77,7 @@ else if(players.Count > 0)
     private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "Flex" };
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
+    private bool loading = false;
     int count = 0;
 
     public async Task UploadProjections()
@@ -99,6 +101,7 @@ else if(players.Count > 0)
 
     public async Task CalculateProjections()
     {
+        loading = true;
         players.Clear();
         switch (Position.ToLower())
         {
@@ -134,6 +137,7 @@ else if(players.Count > 0)
         {
             badRequestError = true;
         }
+        loading = false;
         shouldRender = true;
     }
 }

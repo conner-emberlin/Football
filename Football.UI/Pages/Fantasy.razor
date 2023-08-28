@@ -7,7 +7,7 @@
 @using Football.Models;
 @inject IHttpClientFactory ClientFactory
 
-<EditForm Model="search" OnSubmit="GetFantasy">
+<EditForm Model="search" OnValidSubmit="GetFantasy">
     <TextBoxName @bind-Value="this.Value" />
     <TextBoxSeason @bind-Season="this.Season" />
     <button class="button-22" type="submit">Submit</button>
