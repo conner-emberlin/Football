@@ -264,5 +264,10 @@ namespace Football.Services
             return $@"SELECT [PlayerId], [Season], [PreviousTeam], [NewTeam] FROM [dbo].TeamChanges
                     WHERE [Season] = @season AND [PlayerId] = @playerid";
         }
+        public string CreatePlayer()
+        {
+            return $@"INSERT INTO [dbo].Players (Name, Position, Active) VALUES
+                (@name, @position, @active)";
+        }
     }
 }

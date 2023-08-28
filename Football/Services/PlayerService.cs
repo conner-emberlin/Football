@@ -146,5 +146,10 @@ namespace Football.Services
             return await _playerRepository.DeleteReceivingStats(playerId);
         }
 
+        public async Task<int> CreatePlayer(string name, string position, int active)
+        {
+            return await _playerRepository.CreatePlayer(name, position, active);
+        }
+
     }
 }
