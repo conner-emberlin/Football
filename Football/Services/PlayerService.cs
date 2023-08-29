@@ -10,6 +10,8 @@ namespace Football.Services
         private readonly IFantasyService _fantasyService;
         private readonly ILogger _logger;
 
+        private readonly int _currentSeason = 2023;
+
         public PlayerService(IPlayerRepository playerRepository, IFantasyService fantasyService, ILogger logger)
         {
             _playerRepository = playerRepository;
@@ -79,7 +81,24 @@ namespace Football.Services
 
         public async Task<string> GetPlayerTeam(int playerId)
         {
-            return await _playerRepository.GetPlayerTeam(playerId);
+            _logger.Information("Getting Team for player " + playerId);
+            try
+            {
+                var rookies = await GetCurrentRookies(_currentSeason);
+                if (rookies.Select(r => r.PlayerId).Contains(playerId))
+                {
+                    return rookies.Where(p => p.PlayerId == playerId).ToList().FirstOrDefault().TeamDrafted;
+                }
+                else
+                {
+                    return await _playerRepository.GetPlayerTeam(playerId);
+                }       
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.ToString() + Environment.NewLine + ex.StackTrace);
+                throw;
+            }
         }
 
         public async Task<List<int>> GetTightEnds()
@@ -149,6 +168,19 @@ namespace Football.Services
         public async Task<int> CreatePlayer(string name, string position, int active)
         {
             return await _playerRepository.CreatePlayer(name, position, active);
+        }
+        public async Task<List<Rookie>> GetHistoricalRookies(int season, string position)
+        {
+            return await _playerRepository.GetHistoricalRookies(season, position);
+        }
+        public async Task<List<Rookie>> GetCurrentRookies(int season, string position)
+        {
+            return await _playerRepository.GetCurrentRookies(season, position);
+        }
+
+        public async Task<List<Rookie>> GetCurrentRookies(int season)
+        {
+            return await _playerRepository.GetCurrentRookies(season);
         }
 
     }

@@ -71,7 +71,25 @@ namespace Football.Services
                 throw;
             }
         }
-
+        public Matrix<double> PopulateRookieRegressorMatrix(List<Rookie> rookies)
+        {
+            try
+            {
+                var rowCount = rookies.Count;
+                var columnCount = 3;
+                var rows = new List<Vector<double>>();
+                foreach(var rook in rookies)
+                {
+                    rows.Add(TransformRookieModel(rook));
+                }
+                return CreateMatrix(rows, rowCount, columnCount);
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                throw;
+            }
+        }
         public Vector<double> PopulateDependentVector(List<FantasyPoints> totalPoints)
         {
             try
@@ -151,6 +169,23 @@ namespace Football.Services
                 vec[4] = model.YardsPerReception;
                 vec[5] = model.TouchdownsPerGame;
                 return vec;
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+                throw;
+            }
+        }
+        public Vector<double> TransformRookieModel(Rookie rook)
+        {
+            try
+            {
+                var vec = Vector<double>.Build.Dense(3);
+                vec[0] = 1;
+                vec[1] = rook.DraftPosition;
+                vec[2] = rook.DeclareAge;
+                return vec;
+
             }
             catch(Exception ex)
             {

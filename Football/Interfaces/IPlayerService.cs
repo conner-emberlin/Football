@@ -27,5 +27,8 @@ namespace Football.Interfaces
         public Task<int> AddReceivingStat(ReceivingStatisticWithSeason rush);
         public Task<int> DeleteReceivingStats(int playerId);
         public Task<int> CreatePlayer(string name, string position, int active);
+        public Task<List<Rookie>> GetHistoricalRookies(int season, string position);
+        public Task<List<Rookie>> GetCurrentRookies(int season, string position);
+        public Task<List<Rookie>> GetCurrentRookies(int season);
     }
 }

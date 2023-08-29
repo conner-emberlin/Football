@@ -269,5 +269,25 @@ namespace Football.Services
             return $@"INSERT INTO [dbo].Players (Name, Position, Active) VALUES
                 (@name, @position, @active)";
         }
+        public string GetHistoricalRookies()
+        {
+            return $@"SELECT [PlayerId], [TeamDrafted], [Position], [RookieSeason], [DraftPosition], [DeclareAge] 
+                    FROM [dbo].Rookie
+                    WHERE [RookieSeason] < @season
+                    AND [Position] = @position";
+        }
+        public string GetCurrentRookies()
+        {
+            return $@"SELECT [PlayerId], [TeamDrafted], [Position], [RookieSeason], [DraftPosition], [DeclareAge] 
+                    FROM [dbo].Rookie
+                    WHERE [RookieSeason] = @season
+                    AND [Position] = @position";
+        }
+        public string GetAllCurrentRookies()
+        {
+            return $@"SELECT [PlayerId], [TeamDrafted], [Position], [RookieSeason], [DraftPosition], [DeclareAge] 
+                    FROM [dbo].Rookie
+                    WHERE [RookieSeason] = @season";
+        }
     }
 }

@@ -45,5 +45,8 @@
         public string GetTeamChange();
         public string GetPlayerTeamChange();
         public string CreatePlayer();
+        public string GetHistoricalRookies();
+        public string GetCurrentRookies();
+        public string GetAllCurrentRookies();
     }
 }

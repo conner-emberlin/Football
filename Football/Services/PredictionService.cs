@@ -29,6 +29,8 @@ namespace Football.Services
         private readonly int WRStarters = 24;
         private readonly int TEStarters = 12;
 
+        private readonly int _currentSeason = 2023;
+
         public PredictionService(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService, IFantasyService fantasyService, IPlayerService playerService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, IAdjustmentCalculator adjustmentCalculator, ILogger logger, IMemoryCache cache)
         {
             _performRegressionService = performRegressionService;
@@ -141,7 +143,29 @@ namespace Football.Services
                     return m;
             }
         }
+        public async Task<List<ProjectionModel>> PerformPredictedRookieRegression(string position)
+        {
+            List<ProjectionModel> rookieProjections = new();
+            var historicalRookies = await _playerService.GetHistoricalRookies(_currentSeason, position);
+            var coeff = await _performRegressionService.PerformRegression(historicalRookies);
+            var currentRookies = await _playerService.GetCurrentRookies(_currentSeason, position);
+            var model = _matrixService.PopulateRookieRegressorMatrix(currentRookies);
+            var predictions = PerformPrediction(model, coeff).ToList();
 
+            for(int i = 0; i < predictions.Count; i++)
+            {
+                var rookie = currentRookies.ElementAt(i);
+                rookieProjections.Add(new ProjectionModel
+                {
+                    PlayerId = rookie.PlayerId,
+                    Name = await _playerService.GetPlayerName(rookie.PlayerId),
+                    Team = rookie.TeamDrafted,
+                    Position =rookie.Position,
+                    ProjectedPoints = predictions[i]
+                });
+            }
+            return rookieProjections;
+        }
         public Vector<double> PerformPrediction(Matrix<double> model, Vector<double> coeff)
         {
             return model * coeff;
@@ -209,8 +233,14 @@ namespace Football.Services
                                     Position = await _playerService.GetPlayerPosition(rb.PlayerId),
                                     ProjectedPoints = resultsRB[i]
                                 });
+                            }
                         }
-                    }
+                        var rookieRbProjections = await PerformPredictedRookieRegression("RB");
+                        foreach(var proj in rookieRbProjections)
+                        {
+                            projection.Add(proj);
+                        }
+
                     }
                     var projectionsRb = projection.OrderByDescending(p => p.ProjectedPoints).Take(RBProjections);
                     _cache.Set("RbProjections", projectionsRb);

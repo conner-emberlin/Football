@@ -59,13 +59,19 @@ namespace Football.Services
                 default: throw new NotImplementedException();
             }
         }
+        public async Task<Vector<double>> PerformRegression(List<Rookie> rookies)
+        {
+            var vec = CholeskyDecomposition(_matrixService.PopulateRookieRegressorMatrix(rookies), _matrixService.PopulateDependentVector(await _fantasyService.GetRookieFantasyResults(rookies)));
+            return vec;
 
+        }
+            
         public double CalculateMSE(Vector<double> actual, Vector<double> coefficients, Matrix<double> model)
         {
             return MathNet.Numerics.Distance.MSE(actual, model * coefficients);
         }
 
-        public Vector<double> CalculatError(Vector<double> actual, Vector<double> coefficients, Matrix<double> model)
+        public Vector<double> CalculateError(Vector<double> actual, Vector<double> coefficients, Matrix<double> model)
         {
             return actual - model * coefficients;
         }

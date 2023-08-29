@@ -265,5 +265,23 @@ namespace Football.Repository
                 active
             });
         }
+        public async Task<List<Rookie>> GetHistoricalRookies(int season, string position)
+        {
+            var query = _sqlQueryService.GetHistoricalRookies();
+            var rookies = await _dbConnection.QueryAsync<Rookie>(query, new {season, position});
+            return rookies.ToList();
+        }
+        public async Task<List<Rookie>> GetCurrentRookies(int season, string position)
+        {
+            var query = _sqlQueryService.GetCurrentRookies();
+            var rookies = await _dbConnection.QueryAsync<Rookie>(query, new { season, position });
+            return rookies.ToList();
+        }
+        public async Task<List<Rookie>> GetCurrentRookies(int season)
+        {
+            var query = _sqlQueryService.GetAllCurrentRookies();
+            var rookies = await _dbConnection.QueryAsync<Rookie>(query, new { season });
+            return rookies.ToList();
+        }
     }
 }

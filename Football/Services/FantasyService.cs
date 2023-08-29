@@ -116,5 +116,14 @@ namespace Football.Services
         {
             return await _fantasyRepository.InsertFantasyProjections(rank, proj);
         }
+        public async Task<List<FantasyPoints>> GetRookieFantasyResults(List<Rookie> rookie)
+        {
+            List<FantasyPoints> rookiePoints = new();
+            foreach(var rook in  rookie)
+            {
+                rookiePoints.Add(await GetFantasyResults(rook.PlayerId, rook.RookieSeason));
+            }
+            return rookiePoints;
+        }
     }
 }

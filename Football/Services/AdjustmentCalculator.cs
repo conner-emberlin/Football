@@ -141,7 +141,7 @@ namespace Football.Services
                         {
                             if(await _playerService.GetPlayerTeam(r.PlayerId) == change.PreviousTeam && r.PlayerId != change.PlayerId)
                             {
-                                r.ProjectedPoints += improvementRatio*r.ProjectedPoints;
+                               r.ProjectedPoints += improvementRatio*r.ProjectedPoints;
                             }
                         }                      
                     }
