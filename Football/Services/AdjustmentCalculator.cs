@@ -47,7 +47,7 @@ namespace Football.Services
         {
             foreach(var proj in projection)
             {
-                var gamesSuspended = await _adjustmentRepository.GetGamesSuspended(proj.PlayerId, Int32.Parse(_configuration["CurrentSeason"]));
+                var gamesSuspended = await _adjustmentRepository.GetGamesSuspended(proj.PlayerId, CurrentSeason);
                 if(gamesSuspended > 0)
                 {
                     _logger.Information("Supsension found for player " + proj.PlayerId);
@@ -132,7 +132,7 @@ namespace Football.Services
                 {
                     if (change != null && await _playerService.GetPlayerPosition(change.PlayerId) == "RB")
                     {
-                        ProjectionModel newGuyInTown = new();
+                        ProjectionModel? newGuyInTown = new();
                         newGuyInTown = rbProjection.Where(r => r.PlayerId == change.PlayerId).ToList().FirstOrDefault();
                         newGuyInTown ??= replacementLevel;
 

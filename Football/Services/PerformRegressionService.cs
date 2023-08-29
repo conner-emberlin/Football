@@ -41,7 +41,7 @@ namespace Football.Services
                         var qb = await _playerService.GetPlayer(fp.PlayerId);
                         qbs.Add(_regressionModelService.RegressionModelQB(qb, season));
                     }
-                    return CholeskyDecomposition(_matrixService.PopulateQbRegressorMatrix(qbs), _matrixService.PopulateDependentVector(fantasyPoints));
+                    return CholeskyDecomposition(_matrixService.PopulateRegressorMatrix(qbs), _matrixService.PopulateDependentVector(fantasyPoints));
                 case "RB":
                     List<RegressionModelRB> rbs = new();
                     foreach(var fp in fantasyPoints)
@@ -49,7 +49,7 @@ namespace Football.Services
                         var rb = await _playerService.GetPlayer(fp.PlayerId);
                         rbs.Add(_regressionModelService.RegressionModelRB(rb, season));
                     }
-                    return CholeskyDecomposition(_matrixService.PopulateRbRegressorMatrix(rbs), _matrixService.PopulateDependentVector(fantasyPoints));
+                    return CholeskyDecomposition(_matrixService.PopulateRegressorMatrix(rbs), _matrixService.PopulateDependentVector(fantasyPoints));
                 case "WR/TE":
                     List<RegressionModelPassCatchers> passCatchers = new();
                     foreach (var fp in fantasyPoints)
@@ -57,13 +57,13 @@ namespace Football.Services
                         var pc = await _playerService.GetPlayer(fp.PlayerId);
                         passCatchers.Add(_regressionModelService.RegressionModelPC(pc, season));
                     }
-                    return CholeskyDecomposition(_matrixService.PopulatePassCatchersRegressorMatrix(passCatchers), _matrixService.PopulateDependentVector(fantasyPoints));
+                    return CholeskyDecomposition(_matrixService.PopulateRegressorMatrix(passCatchers), _matrixService.PopulateDependentVector(fantasyPoints));
                 default: throw new NotImplementedException();
             }
         }
         public async Task<Vector<double>> PerformRegression(List<Rookie> rookies)
         {
-            var vec = CholeskyDecomposition(_matrixService.PopulateRookieRegressorMatrix(rookies), _matrixService.PopulateDependentVector(await _fantasyService.GetRookieFantasyResults(rookies)));
+            var vec = CholeskyDecomposition(_matrixService.PopulateRegressorMatrix(rookies), _matrixService.PopulateDependentVector(await _fantasyService.GetRookieFantasyResults(rookies)));
             return vec;
 
         }

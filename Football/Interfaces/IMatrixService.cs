@@ -5,10 +5,10 @@ namespace Football.Interfaces
 {
     public interface IMatrixService
     {
-        public Matrix<double> PopulatePassCatchersRegressorMatrix(List<RegressionModelPassCatchers> model);
-        public Matrix<double> PopulateQbRegressorMatrix(List<RegressionModelQB> model);
-        public Matrix<double> PopulateRbRegressorMatrix(List<RegressionModelRB> model);
-        public Matrix<double> PopulateRookieRegressorMatrix(List<Rookie> rookies);
+        public Matrix<double> PopulateRegressorMatrix(List<RegressionModelPassCatchers> model);
+        public Matrix<double> PopulateRegressorMatrix(List<RegressionModelQB> model);
+        public Matrix<double> PopulateRegressorMatrix(List<RegressionModelRB> model);
+        public Matrix<double> PopulateRegressorMatrix(List<Rookie> rookies);
         public Vector<double> PopulateDependentVector(List<FantasyPoints> fantasyPoints);
         public Vector<double> TransformQbModel(RegressionModelQB model);
         public Vector<double> TransformRbModel(RegressionModelRB model);

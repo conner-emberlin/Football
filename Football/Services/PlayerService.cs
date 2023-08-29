@@ -30,17 +30,8 @@ namespace Football.Services
                 player.ReceivingStats = await GetReceivingStatisticsWithSeason(playerId);
                 player.FantasyPoints = await _fantasyService.GetAllFantasyResults(playerId);
                 player.FantasySeasonGames = await GetFantasySeasonGames(playerId);
-
                 var tightends = await GetTightEnds();
-                if (tightends.Contains(playerId))
-                {
-                    player.IsTightEnd = true;
-                }
-                else
-                {
-                    player.IsTightEnd = false;
-                }
-
+                player.IsTightEnd = tightends.Contains(playerId);
                 return player;
             }
             catch (Exception ex)

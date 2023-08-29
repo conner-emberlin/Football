@@ -55,7 +55,7 @@ namespace Football.Api.Controllers
                         var model = _regressionModelService.RegressionModelQB(await _playerService.GetPlayer(fr.PlayerId), fr.Season);
                         models.Add(model);
                     }
-                    var regressorMatrix = _matrixService.PopulateQbRegressorMatrix(models);
+                    var regressorMatrix = _matrixService.PopulateRegressorMatrix(models);
                     mse = Math.Round((double)_performRegressionService.CalculateMSE(actual, coefficients, regressorMatrix), 2);
                     break;
                 case 2:
@@ -65,7 +65,7 @@ namespace Football.Api.Controllers
                         var modelR = _regressionModelService.RegressionModelRB(await _playerService.GetPlayer(fr.PlayerId), fr.Season);
                         modelsR.Add(modelR);
                     }
-                    var regressorMatrixR = _matrixService.PopulateRbRegressorMatrix(modelsR);
+                    var regressorMatrixR = _matrixService.PopulateRegressorMatrix(modelsR);
                     mse = Math.Round((double)_performRegressionService.CalculateMSE(actual, coefficients, regressorMatrixR), 2);
                     break;
                 case 3:
@@ -75,7 +75,7 @@ namespace Football.Api.Controllers
                         var modelP = _regressionModelService.RegressionModelPC(await _playerService.GetPlayer(fr.PlayerId), fr.Season);
                         modelsP.Add(modelP);
                     }
-                    var regressorMatrixP = _matrixService.PopulatePassCatchersRegressorMatrix(modelsP);
+                    var regressorMatrixP = _matrixService.PopulateRegressorMatrix(modelsP);
                     mse = Math.Round((double)_performRegressionService.CalculateMSE(actual, coefficients, regressorMatrixP), 2);
                     break;
                 default: 

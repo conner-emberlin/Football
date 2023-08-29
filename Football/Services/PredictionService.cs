@@ -58,8 +58,7 @@ namespace Football.Services
                 var player = await _playerService.GetPlayer(p);
                 if (player.FantasyPoints.Count > 0)
                 {
-                    var projected = _weightedAverageCalculator.WeightedAverage(player);
-                    projectedAverage.Add(projected);
+                    projectedAverage.Add(_weightedAverageCalculator.WeightedAverage(player));
                 }
             }
             return projectedAverage;
@@ -127,20 +126,20 @@ namespace Football.Services
             {
                 case "QB":
                     var modelQB = await AverageProjectedModelQB();
-                    var modelQBFpts = await AverageProjectedFantasyByPosition("QB");
-                    var regressorMatrix = _matrixService.PopulateQbRegressorMatrix(modelQB);
+                    var modelQBFpts = await AverageProjectedFantasyByPosition(position);
+                    var regressorMatrix = _matrixService.PopulateRegressorMatrix(modelQB);
                     var dependentVector = _matrixService.PopulateDependentVector(modelQBFpts);
                     return _performRegressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
                 case "RB":
                     var modelRB = await AverageProjectedModelRB();
-                    var modelRBFpts = await AverageProjectedFantasyByPosition("RB");
-                    var regressorMatrixRB = _matrixService.PopulateRbRegressorMatrix(modelRB);
+                    var modelRBFpts = await AverageProjectedFantasyByPosition(position);
+                    var regressorMatrixRB = _matrixService.PopulateRegressorMatrix(modelRB);
                     var dependentVectorRB = _matrixService.PopulateDependentVector(modelRBFpts);
                     return _performRegressionService.CholeskyDecomposition(regressorMatrixRB, dependentVectorRB);
                 case "WR/TE":
                     var modelWR = await AverageProjectedModelPassCatchers();
-                    var modelWRFpts = await AverageProjectedFantasyByPosition("WR/TE");
-                    var regressorMatrixWR = _matrixService.PopulatePassCatchersRegressorMatrix(modelWR);
+                    var modelWRFpts = await AverageProjectedFantasyByPosition(position);
+                    var regressorMatrixWR = _matrixService.PopulateRegressorMatrix(modelWR);
                     var dependentVectorWR = _matrixService.PopulateDependentVector(modelWRFpts);
                     return _performRegressionService.CholeskyDecomposition(regressorMatrixWR, dependentVectorWR);
                 default:
@@ -154,7 +153,7 @@ namespace Football.Services
             var historicalRookies = await _playerService.GetHistoricalRookies(CurrentSeason, position);
             var coeff = await _performRegressionService.PerformRegression(historicalRookies);
             var currentRookies = await _playerService.GetCurrentRookies(CurrentSeason, position);
-            var model = _matrixService.PopulateRookieRegressorMatrix(currentRookies);
+            var model = _matrixService.PopulateRegressorMatrix(currentRookies);
             var predictions = PerformPrediction(model, coeff).ToList();
 
             for(int i = 0; i < predictions.Count; i++)
@@ -191,7 +190,7 @@ namespace Football.Services
                     else
                     {
                         var qbs = await AverageProjectedModelQB();
-                        var model = _matrixService.PopulateQbRegressorMatrix(qbs);
+                        var model = _matrixService.PopulateRegressorMatrix(qbs);
                         var results = PerformPrediction(model, await PerformPredictedRegression("QB")).ToList();
                         for (int i = 0; i < results.Count; i++)
                         {
@@ -223,7 +222,7 @@ namespace Football.Services
                     else
                     {
                         var rbs = await AverageProjectedModelRB();
-                        var modelRB = _matrixService.PopulateRbRegressorMatrix(rbs);
+                        var modelRB = _matrixService.PopulateRegressorMatrix(rbs);
                         var resultsRB = PerformPrediction(modelRB, await PerformPredictedRegression("RB")).ToList();
                         for (int i = 0; i < resultsRB.Count; i++)
                         {
@@ -266,7 +265,7 @@ namespace Football.Services
                     else 
                     {
                         var pcs = await AverageProjectedModelPassCatchers();
-                        var modelPC = _matrixService.PopulatePassCatchersRegressorMatrix(pcs);
+                        var modelPC = _matrixService.PopulateRegressorMatrix(pcs);
                         var resultsPC = PerformPrediction(modelPC, await PerformPredictedRegression("WR/TE")).ToList();
 
                         var tightEnds = await _playerService.GetTightEnds();

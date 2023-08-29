@@ -12,7 +12,7 @@ namespace Football.Services
         {
             _logger = logger;
         }
-        public Matrix<double> PopulatePassCatchersRegressorMatrix(List<RegressionModelPassCatchers> model)
+        public Matrix<double> PopulateRegressorMatrix(List<RegressionModelPassCatchers> model)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace Football.Services
             }
         }
 
-        public Matrix<double> PopulateQbRegressorMatrix(List<RegressionModelQB> model)
+        public Matrix<double> PopulateRegressorMatrix(List<RegressionModelQB> model)
         {
             try
             {
@@ -52,7 +52,7 @@ namespace Football.Services
             }
         }
 
-        public Matrix<double> PopulateRbRegressorMatrix(List<RegressionModelRB> model)
+        public Matrix<double> PopulateRegressorMatrix(List<RegressionModelRB> model)
         {
             try
             {
@@ -71,7 +71,7 @@ namespace Football.Services
                 throw;
             }
         }
-        public Matrix<double> PopulateRookieRegressorMatrix(List<Rookie> rookies)
+        public Matrix<double> PopulateRegressorMatrix(List<Rookie> rookies)
         {
             try
             {
