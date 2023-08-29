@@ -4,6 +4,7 @@ using System.Data;
 using Football.Interfaces;
 using Serilog;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 
 namespace Football.Services
 {
@@ -18,20 +19,23 @@ namespace Football.Services
         private readonly IAdjustmentCalculator _adjustmentCalculator;
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
+        private readonly IConfiguration _configuration;
 
-        private readonly int QBProjections = 25;
-        private readonly int RBProjections = 50;
-        private readonly int WRProjections = 48;
-        private readonly int TEProjections = 15;
+        public int QBProjections => Int32.Parse(_configuration["Projections:QBProjections"]);
+        public int RBProjections => Int32.Parse(_configuration["Projections:RBProjections"]);
+        public int WRProjections => Int32.Parse(_configuration["Projections:WRProjections"]);
+        public int TEProjections => Int32.Parse(_configuration["Projections:TEProjections"]);
+        public int QBStarters => Int32.Parse(_configuration["Starters:QBStarters"]);
+        public int RBStarters => Int32.Parse(_configuration["Starters:RBStarters"]);
+        public int WRStarters => Int32.Parse(_configuration["Starters:WRStarters"]);
+        public int TEStarters => Int32.Parse(_configuration["Starters:TEStarters"]);
+        public int CurrentSeason => Int32.Parse(_configuration["CurrentSeason"]);
 
-        private readonly int QBStarters = 24;
-        private readonly int RBStarters = 24;
-        private readonly int WRStarters = 24;
-        private readonly int TEStarters = 12;
-
-        private readonly int _currentSeason = 2023;
-
-        public PredictionService(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService, IFantasyService fantasyService, IPlayerService playerService, IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, IAdjustmentCalculator adjustmentCalculator, ILogger logger, IMemoryCache cache)
+        public PredictionService(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService, 
+            IFantasyService fantasyService, IPlayerService playerService, 
+            IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, 
+            IAdjustmentCalculator adjustmentCalculator, ILogger logger, IMemoryCache cache,
+            IConfiguration configuration)
         {
             _performRegressionService = performRegressionService;
             _matrixService = matrixService;
@@ -42,6 +46,7 @@ namespace Football.Services
             _regressionModelService = regressionModelService;
             _logger = logger;
             _cache = cache;
+            _configuration = configuration;
         }
  
         public async Task<List<FantasyPoints>> AverageProjectedFantasyByPosition(string position)
@@ -146,9 +151,9 @@ namespace Football.Services
         public async Task<List<ProjectionModel>> PerformPredictedRookieRegression(string position)
         {
             List<ProjectionModel> rookieProjections = new();
-            var historicalRookies = await _playerService.GetHistoricalRookies(_currentSeason, position);
+            var historicalRookies = await _playerService.GetHistoricalRookies(CurrentSeason, position);
             var coeff = await _performRegressionService.PerformRegression(historicalRookies);
-            var currentRookies = await _playerService.GetCurrentRookies(_currentSeason, position);
+            var currentRookies = await _playerService.GetCurrentRookies(CurrentSeason, position);
             var model = _matrixService.PopulateRookieRegressorMatrix(currentRookies);
             var predictions = PerformPrediction(model, coeff).ToList();
 

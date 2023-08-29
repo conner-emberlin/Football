@@ -1,5 +1,6 @@
 ﻿using Football.Interfaces;
 using Football.Models;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 
 namespace Football.Services
@@ -9,14 +10,14 @@ namespace Football.Services
         private readonly IPlayerRepository _playerRepository;
         private readonly IFantasyService _fantasyService;
         private readonly ILogger _logger;
-
-        private readonly int _currentSeason = 2023;
-
-        public PlayerService(IPlayerRepository playerRepository, IFantasyService fantasyService, ILogger logger)
+        private readonly IConfiguration _configuration;
+        public int CurrentSeason => Int32.Parse(_configuration["CurrentSeason"]);
+        public PlayerService(IPlayerRepository playerRepository, IFantasyService fantasyService, ILogger logger, IConfiguration configuration)
         {
             _playerRepository = playerRepository;
             _fantasyService = fantasyService;   
             _logger = logger;
+            _configuration = configuration;
         }
 
         public async Task<Player> GetPlayer(int playerId)
@@ -81,10 +82,9 @@ namespace Football.Services
 
         public async Task<string> GetPlayerTeam(int playerId)
         {
-            _logger.Information("Getting Team for player " + playerId);
             try
             {
-                var rookies = await GetCurrentRookies(_currentSeason);
+                var rookies = await GetCurrentRookies(CurrentSeason);
                 if (rookies.Select(r => r.PlayerId).Contains(playerId))
                 {
                     return rookies.Where(p => p.PlayerId == playerId).ToList().FirstOrDefault().TeamDrafted;
@@ -177,11 +177,9 @@ namespace Football.Services
         {
             return await _playerRepository.GetCurrentRookies(season, position);
         }
-
         public async Task<List<Rookie>> GetCurrentRookies(int season)
         {
             return await _playerRepository.GetCurrentRookies(season);
         }
-
     }
 }

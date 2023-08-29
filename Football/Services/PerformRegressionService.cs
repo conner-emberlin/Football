@@ -13,7 +13,9 @@ namespace Football.Services
         private readonly IMatrixService _matrixService;
         private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
-        public PerformRegressionService(IRegressionModelService regressionModelService, IFantasyService fantasyService,IPlayerService playerService, IMatrixService matrixService, ILogger logger) 
+        public PerformRegressionService(IRegressionModelService regressionModelService,
+            IFantasyService fantasyService,IPlayerService playerService, 
+            IMatrixService matrixService, ILogger logger) 
         { 
             _regressionModelService = regressionModelService;
             _fantasyService = fantasyService;
