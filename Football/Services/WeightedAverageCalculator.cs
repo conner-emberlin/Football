@@ -9,7 +9,7 @@ namespace Football.Services
     {
         private readonly ILogger _logger;
         private readonly double weight = (double)2 / (double)3;
-        private readonly double secondYearLeap = 1;
+        private readonly double secondYearLeap = 1.05;
 
         public WeightedAverageCalculator(ILogger logger)
         {
@@ -97,7 +97,7 @@ namespace Football.Services
                 try
                 {
                     var maxSeason = rushing.Select(r => r.Season).Max();
-                    double maxSeasonWeight = rushing.Count > 1 ? weight : secondYearLeap;
+                    double maxSeasonWeight = rushing.Count > 1 ? weight : 1;
                     double previousSeasonCount = (double)rushing.Count - 1;
                     double previousSeasonWeight = rushing.Count > 1 ? ((1 - weight) * ((double)1 / previousSeasonCount)) : 0;
 

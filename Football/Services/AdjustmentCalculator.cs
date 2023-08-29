@@ -14,6 +14,7 @@ namespace Football.Services
         private readonly int _currentSeason = 2023;
         private readonly int _replacementLevelRB = 24;
         private readonly int _replacementLevelQB = 20;
+        private readonly int _rbFloor = 170;
         public AdjustmentCalculator(IAdjustmentRepository adjustmentRepository, IPlayerService playerService, ILogger logger)
         {
             _adjustmentRepository = adjustmentRepository;
@@ -48,6 +49,7 @@ namespace Football.Services
                 var gamesSuspended = await _adjustmentRepository.GetGamesSuspended(proj.PlayerId, _currentSeason);
                 if(gamesSuspended > 0)
                 {
+                    _logger.Information("Supsension found for player " + proj.PlayerId);
                     proj.ProjectedPoints -= gamesSuspended * (proj.ProjectedPoints / 17);
                 }
             }
@@ -78,6 +80,7 @@ namespace Football.Services
                         if (newQBProj != null)
                         {
                             var ratio = newQBProj.ProjectedPoints / oldQBProj.ProjectedPoints;
+                            _logger.Information(proj.PlayerId + " has a new Quarterback: " + newQBProj.Name);
                             proj.ProjectedPoints = (proj.ProjectedPoints * (ratio + 1)) / 2;
                         }
                     }
@@ -141,7 +144,7 @@ namespace Football.Services
                         {
                             if(await _playerService.GetPlayerTeam(r.PlayerId) == change.PreviousTeam && r.PlayerId != change.PlayerId)
                             {
-                               r.ProjectedPoints += improvementRatio*r.ProjectedPoints;
+                                r.ProjectedPoints = ((double)1 / (double)2) * (Max(r.ProjectedPoints, _rbFloor)) * (improvementRatio + 2);
                             }
                         }                      
                     }
@@ -149,6 +152,10 @@ namespace Football.Services
             }
             return rbProjection;
         }
-        
+        private double Max(double one, double two)
+        {
+            return one >= two ? one : two;
+        }
+
     }
 }
