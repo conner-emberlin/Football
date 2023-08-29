@@ -8,8 +8,8 @@ namespace Football.Services
     public class WeightedAverageCalculator : IWeightedAverageCalculator
     {
         private readonly ILogger _logger;
-        private readonly double weight = (double)5 / (double)8;
-        private readonly double secondYearLeap = 1.1;
+        private readonly double weight = (double)2 / (double)3;
+        private readonly double secondYearLeap = 1;
 
         public WeightedAverageCalculator(ILogger logger)
         {
@@ -114,7 +114,7 @@ namespace Football.Services
                         {
                             s.RushAttempts += (s.RushAttempts / s.Games) * (17 - s.Games);
                             s.Yards += (s.Yards / s.Games) * (17 - s.Games);
-                            s.Touchdowns += (s.Yards / s.Games) * (17 - s.Games);
+                            s.Touchdowns += (s.Touchdowns / s.Games) * (17 - s.Games);
                             s.FirstDowns += (s.FirstDowns / s.Games) * (17 - s.Games);
                             s.Fumbles += (s.Fumbles / s.Games) * (17 - s.Games);
                         }
@@ -181,8 +181,8 @@ namespace Football.Services
                             s.Targets += (s.Targets / s.Games) * (17 - s.Games);
                             s.Receptions += (s.Receptions / s.Games) * (17 - s.Games);
                             s.Yards += (s.Yards / s.Games) * (17 - s.Games);
-                            s.Touchdowns += (s.Yards / s.Games) * (17 - s.Games);
-                            s.FirstDowns += (s.Yards / s.Games) * (17 - s.Games);
+                            s.Touchdowns += (s.Touchdowns / s.Games) * (17 - s.Games);
+                            s.FirstDowns += (s.FirstDowns / s.Games) * (17 - s.Games);
                             s.Fumbles += (s.Fumbles / s.Games) * (17 - s.Games);
                         }
                         averageTargets += s.Season == maxSeason ? maxSeasonWeight * s.Targets : previousSeasonWeight * s.Targets;
