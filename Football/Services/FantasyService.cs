@@ -12,10 +12,6 @@ namespace Football.Services
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
         private readonly IConfiguration _configuration;
-        public int PointsPerReception => Int32.Parse(_configuration["FantasyScoring:PointsPerReception"]);
-        public int PointsPerPassingTouchdown => Int32.Parse(_configuration["FantasyScoring:PointsPerPassingTouchdown"]);
-        public int PointsPerInterception => Int32.Parse(_configuration["FantasyScoring:PointsPerInterception"]);
-        public int PointsPerFumble => Int32.Parse(_configuration["FantasyScoring:PointsPerFumble"]);
         public FantasyService(IFantasyRepository fantasyRepository, ILogger logger, IMemoryCache cache, IConfiguration configuration)
         {
             _fantasyRepository = fantasyRepository;
@@ -105,10 +101,10 @@ namespace Football.Services
 
         public async Task<int> RefreshFantasyResults(FantasyPoints fantasyPoints)
         {
-            _cache.Remove("QbProjections");
-            _cache.Remove("RbProjections");
-            _cache.Remove("WrProjections");
-            _cache.Remove("TeProjections");
+            _cache.Remove("QBProjections");
+            _cache.Remove("RBProjections");
+            _cache.Remove("WRProjections");
+            _cache.Remove("TEProjections");
 
             return await _fantasyRepository.RefreshFantasyResults(fantasyPoints);
         }
@@ -126,5 +122,9 @@ namespace Football.Services
             }
             return rookiePoints;
         }
+        public int PointsPerReception => int.Parse(_configuration["FantasyScoring:PointsPerReception"]);
+        public int PointsPerPassingTouchdown => int.Parse(_configuration["FantasyScoring:PointsPerPassingTouchdown"]);
+        public int PointsPerInterception => int.Parse(_configuration["FantasyScoring:PointsPerInterception"]);
+        public int PointsPerFumble => int.Parse(_configuration["FantasyScoring:PointsPerFumble"]);
     }
 }

@@ -12,8 +12,6 @@ namespace Football.Services
         private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-
-        public int CurrentSeason => Int32.Parse(_configuration["CurrentSeason"]);
         public RegressionModelService(IFantasyService fantasyService, IPlayerService playerService, 
             ILogger logger, IConfiguration configuration)
         {
@@ -207,8 +205,7 @@ namespace Football.Services
             return fantasyPoints;
         }
 
-
-
-
+     
+        public int CurrentSeason => int.Parse(_configuration["CurrentSeason"]);
     }
 }

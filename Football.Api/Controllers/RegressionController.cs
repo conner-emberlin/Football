@@ -85,12 +85,5 @@ namespace Football.Api.Controllers
             return mse;
         }
 
-        [HttpGet("model-error/{playerId}")]
-        [ProducesResponseType(typeof(List<int>), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<double>>> GetModelErrorByPlayer(int playerId)
-        {
-            return await _performRegressionService.ModelErrorPerSeason(playerId, await _playerService.GetPlayerPosition(playerId));
-        }
     }
 }

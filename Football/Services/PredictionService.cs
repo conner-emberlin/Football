@@ -20,17 +20,6 @@ namespace Football.Services
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
         private readonly IConfiguration _configuration;
-
-        public int QBProjections => Int32.Parse(_configuration["Projections:QBProjections"]);
-        public int RBProjections => Int32.Parse(_configuration["Projections:RBProjections"]);
-        public int WRProjections => Int32.Parse(_configuration["Projections:WRProjections"]);
-        public int TEProjections => Int32.Parse(_configuration["Projections:TEProjections"]);
-        public int QBStarters => Int32.Parse(_configuration["Starters:QBStarters"]);
-        public int RBStarters => Int32.Parse(_configuration["Starters:RBStarters"]);
-        public int WRStarters => Int32.Parse(_configuration["Starters:WRStarters"]);
-        public int TEStarters => Int32.Parse(_configuration["Starters:TEStarters"]);
-        public int CurrentSeason => Int32.Parse(_configuration["CurrentSeason"]);
-
         public PredictionService(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService, 
             IFantasyService fantasyService, IPlayerService playerService, 
             IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, 
@@ -48,12 +37,169 @@ namespace Football.Services
             _cache = cache;
             _configuration = configuration;
         }
- 
-        public async Task<List<FantasyPoints>> AverageProjectedFantasyByPosition(string position)
+
+        public async Task<IEnumerable<ProjectionModel>> GetFinalProjections(string position)
+        {
+            if(RetrieveFromCache(position).Any())
+            {
+                return RetrieveFromCache(position);
+            }
+            else if(position == "QB")
+            {
+                var projections = (await CalculateProjections(await AverageProjectedModelQB(), position)).ToList();
+                var adjustedProjections = await _adjustmentCalculator.QBAdjustments(projections);
+                var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints).Take(QBProjections);
+                _cache.Set("QBProjections", formattedProjections);
+                return formattedProjections;
+            }
+            else if (position == "RB")
+            {
+                var rookieProjections = await PerformPredictedRookieRegression(position); 
+                var projections = (await CalculateProjections(await AverageProjectedModelRB(), position)).ToList();
+                foreach(var proj in rookieProjections)
+                {
+                    projections.Add(proj);
+                }
+                var adjustedProjections = await _adjustmentCalculator.RBAdjustments(projections);
+                var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints).Take(RBProjections);
+                _cache.Set("RBProjections", formattedProjections);
+                return formattedProjections;
+            }
+            else if (position == "WR")
+            {
+                var tightEnds = await _playerService.GetTightEnds();
+                var qbProjections = await GetFinalProjections("QB");
+                var projections = (await CalculateProjections(await AverageProjectedModelPassCatchers(), "WR/TE")).ToList();
+                var adjustedProjections = await _adjustmentCalculator.PCAdjustments(projections, qbProjections);
+                var formattedProjections = adjustedProjections.Where(p => !tightEnds.Contains(p.PlayerId)).OrderByDescending(p => p.ProjectedPoints).Take(WRProjections);
+                foreach(var projection in formattedProjections)
+                {
+                    projection.Position = "WR";
+                }
+                _cache.Set("WRProjections", formattedProjections);
+                return formattedProjections;
+            }
+            else if (position == "TE")
+            {
+                var tightEnds = await _playerService.GetTightEnds();
+                var qbProjections = await GetFinalProjections("QB");
+                var projections = (await CalculateProjections(await AverageProjectedModelPassCatchers(), "WR/TE")).ToList();
+                var adjustedProjections = await _adjustmentCalculator.PCAdjustments(projections, qbProjections);
+                var formattedProjections = adjustedProjections.Where(p => tightEnds.Contains(p.PlayerId)).OrderByDescending(p => p.ProjectedPoints).Take(TEProjections);
+                foreach(var projection in formattedProjections)
+                {
+                    projection.Position = "TE";
+                }
+                _cache.Set("TEProjections", formattedProjections);
+                return formattedProjections;
+            }
+            else
+            {                
+                return Enumerable.Empty<ProjectionModel>();
+            }
+        }
+        public async Task<IEnumerable<ProjectionModel>> CalculateProjections<T>(List<T> model, string position)
+        {
+            List<ProjectionModel> projections = new();
+            var regressorMatrix = _matrixService.PopulateRegressorMatrix(model);
+            var results = PerformPrediction(regressorMatrix, await PerformPredictedRegression(model, regressorMatrix, position));
+            for (int i = 0; i < results.Count; i++)
+            {
+                var playerId = (int)typeof(T).GetProperties()[0].GetValue(model[i]);
+                if(await _playerService.IsPlayerActive(playerId))
+                {
+                    projections.Add(new ProjectionModel
+                    {
+                        PlayerId = playerId,
+                        Name = await _playerService.GetPlayerName(playerId),
+                        Team = await _playerService.GetPlayerTeam(playerId),
+                        Position = await _playerService.GetPlayerPosition(playerId),
+                        ProjectedPoints = results[i]
+                    });
+                }               
+            }
+            return projections;
+        }
+        public async Task<Vector<double>> PerformPredictedRegression<T>(List<T> regressionModel, Matrix<double> regressorMatrix, string position)
+        {
+            var dependentVector = _matrixService.PopulateDependentVector(await AverageProjectedFantasyByPosition(position));
+            return _performRegressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
+        }
+        public Vector<double> PerformPrediction(Matrix<double> model, Vector<double> coeff)
+        {
+            return model * coeff;
+        }
+        public async Task<List<FlexProjectionModel>> FlexRankings()
+        {
+            List<FlexProjectionModel> flexRankings = new();
+            var qbProjections = (await GetFinalProjections("QB")).ToList();
+            var rbProjections = (await GetFinalProjections("RB")).ToList();
+            var wrProjections = (await GetFinalProjections("WR")).ToList();
+            var teProjections = (await GetFinalProjections("TE")).ToList();
+            try
+            {
+                var rankings = qbProjections.Concat(rbProjections).Concat(wrProjections).Concat(teProjections).ToList();
+                foreach(var rank in rankings)
+                {
+                    flexRankings.Add(new FlexProjectionModel
+                    {
+                        PlayerId = rank.PlayerId, 
+                        Name = rank.Name, 
+                        Team = rank.Team, 
+                        Position = rank.Position, 
+                        ProjectedPoints = rank.ProjectedPoints,
+                        VORP = rank.ProjectedPoints - await GetReplacementPoints(rank.Position)
+                    });
+                }
+                return flexRankings.OrderByDescending(f => f.VORP).ToList();
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.ToString() + Environment.NewLine + ex.StackTrace);
+                throw;
+            }
+        }
+        public async Task<int> InsertFantasyProjections(string position)
+        {
+            int rank = 1;
+            int count = 0;
+            var projections = await GetFinalProjections(position);
+            foreach (var proj in projections)
+            {
+                count += await _fantasyService.InsertFantasyProjections(rank, proj);
+                rank++;
+            }
+            return count;
+        }
+
+        private async Task<List<ProjectionModel>> PerformPredictedRookieRegression(string position)
+        {
+            List<ProjectionModel> rookieProjections = new();
+            var historicalRookies = await _playerService.GetHistoricalRookies(CurrentSeason, position);
+            var coeff = await _performRegressionService.PerformRegression(historicalRookies);
+            var currentRookies = await _playerService.GetCurrentRookies(CurrentSeason, position);
+            var model = _matrixService.PopulateRegressorMatrix(currentRookies);
+            var predictions = PerformPrediction(model, coeff).ToList();
+
+            for (int i = 0; i < predictions.Count; i++)
+            {
+                var rookie = currentRookies.ElementAt(i);
+                rookieProjections.Add(new ProjectionModel
+                {
+                    PlayerId = rookie.PlayerId,
+                    Name = await _playerService.GetPlayerName(rookie.PlayerId),
+                    Team = rookie.TeamDrafted,
+                    Position = rookie.Position,
+                    ProjectedPoints = predictions[i]
+                });
+            }
+            return rookieProjections;
+        }
+        private async Task<List<FantasyPoints>> AverageProjectedFantasyByPosition(string position)
         {
             var players = await _playerService.GetPlayersByPosition(position);
             List<FantasyPoints> projectedAverage = new();
-            foreach(var p in players)
+            foreach (var p in players)
             {
                 var player = await _playerService.GetPlayer(p);
                 if (player.FantasyPoints.Count > 0)
@@ -64,12 +210,12 @@ namespace Football.Services
             return projectedAverage;
         }
 
-        public async Task<List<RegressionModelQB>> AverageProjectedModelQB()
+        private async Task<List<RegressionModelQB>> AverageProjectedModelQB()
         {
             var players = await _playerService.GetPlayersByPosition("QB");
             List<RegressionModelQB> regressionModel = new();
             foreach (var p in players)
-            {               
+            {
                 _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
                 if (player.PassingStats.Count > 0 || player.RushingStats.Count > 0)
@@ -80,14 +226,14 @@ namespace Football.Services
                     regressionModel.Add(model);
                 }
             }
-            return regressionModel;          
+            return regressionModel;
         }
 
-        public async Task<List<RegressionModelRB>> AverageProjectedModelRB()
+        private async Task<List<RegressionModelRB>> AverageProjectedModelRB()
         {
             var players = await _playerService.GetPlayersByPosition("RB");
             List<RegressionModelRB> regressionModel = new();
-            foreach(var p in players)
+            foreach (var p in players)
             {
                 _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
@@ -102,11 +248,11 @@ namespace Football.Services
             return regressionModel;
         }
 
-        public async Task<List<RegressionModelPassCatchers>> AverageProjectedModelPassCatchers()
+        private async Task<List<RegressionModelPassCatchers>> AverageProjectedModelPassCatchers()
         {
             var players = await _playerService.GetPlayersByPosition("WR/TE");
             List<RegressionModelPassCatchers> regressionModel = new();
-            foreach(var p in players)
+            foreach (var p in players)
             {
                 _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
@@ -119,284 +265,40 @@ namespace Football.Services
             }
             return regressionModel;
         }
-
-        public async Task<Vector<double>> PerformPredictedRegression(string position)
+        private IEnumerable<ProjectionModel> RetrieveFromCache(string position)
         {
-            switch (position)
+            var key = position + "Projections";
+            if(_cache.TryGetValue(key, out IEnumerable<ProjectionModel> cachedProjections))
             {
-                case "QB":
-                    var modelQB = await AverageProjectedModelQB();
-                    var modelQBFpts = await AverageProjectedFantasyByPosition(position);
-                    var regressorMatrix = _matrixService.PopulateRegressorMatrix(modelQB);
-                    var dependentVector = _matrixService.PopulateDependentVector(modelQBFpts);
-                    return _performRegressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
-                case "RB":
-                    var modelRB = await AverageProjectedModelRB();
-                    var modelRBFpts = await AverageProjectedFantasyByPosition(position);
-                    var regressorMatrixRB = _matrixService.PopulateRegressorMatrix(modelRB);
-                    var dependentVectorRB = _matrixService.PopulateDependentVector(modelRBFpts);
-                    return _performRegressionService.CholeskyDecomposition(regressorMatrixRB, dependentVectorRB);
-                case "WR/TE":
-                    var modelWR = await AverageProjectedModelPassCatchers();
-                    var modelWRFpts = await AverageProjectedFantasyByPosition(position);
-                    var regressorMatrixWR = _matrixService.PopulateRegressorMatrix(modelWR);
-                    var dependentVectorWR = _matrixService.PopulateDependentVector(modelWRFpts);
-                    return _performRegressionService.CholeskyDecomposition(regressorMatrixWR, dependentVectorWR);
-                default:
-                    Vector<double> m = Vector<double>.Build.Random(1);
-                    return m;
+                return cachedProjections;
+            }
+            else
+            {
+                return Enumerable.Empty<ProjectionModel>();
             }
         }
-        public async Task<List<ProjectionModel>> PerformPredictedRookieRegression(string position)
-        {
-            List<ProjectionModel> rookieProjections = new();
-            var historicalRookies = await _playerService.GetHistoricalRookies(CurrentSeason, position);
-            var coeff = await _performRegressionService.PerformRegression(historicalRookies);
-            var currentRookies = await _playerService.GetCurrentRookies(CurrentSeason, position);
-            var model = _matrixService.PopulateRegressorMatrix(currentRookies);
-            var predictions = PerformPrediction(model, coeff).ToList();
 
-            for(int i = 0; i < predictions.Count; i++)
-            {
-                var rookie = currentRookies.ElementAt(i);
-                rookieProjections.Add(new ProjectionModel
-                {
-                    PlayerId = rookie.PlayerId,
-                    Name = await _playerService.GetPlayerName(rookie.PlayerId),
-                    Team = rookie.TeamDrafted,
-                    Position =rookie.Position,
-                    ProjectedPoints = predictions[i]
-                });
-            }
-            return rookieProjections;
-        }
-        public Vector<double> PerformPrediction(Matrix<double> model, Vector<double> coeff)
+        private async Task<double> GetReplacementPoints(string position)
         {
-            return model * coeff;
+            return position switch
+            {
+                "QB" => (await GetFinalProjections(position)).ElementAt(QBStarters - 1).ProjectedPoints,
+                "RB" => (await GetFinalProjections(position)).ElementAt(RBStarters - 1).ProjectedPoints,
+                "WR" => (await GetFinalProjections(position)).ElementAt(WRStarters - 1).ProjectedPoints,
+                "TE" => (await GetFinalProjections(position)).ElementAt(TEStarters - 1).ProjectedPoints,
+                _ => 0,
+            };
         }
 
-        public async Task<IEnumerable<ProjectionModel>> GetProjections(string position)
-        {
-            List<ProjectionModel> projection = new();
-            switch (position)
-            {
-                case "QB":
-                    _logger.Information("Getting QB Projections");
-                    if (_cache.TryGetValue("QbProjections", out IEnumerable<ProjectionModel> projectionModelQb))
-                    {
-                        _logger.Information("Retrieving QB projections from cache");
-                        return projectionModelQb;
-                    }
-                    else
-                    {
-                        var qbs = await AverageProjectedModelQB();
-                        var model = _matrixService.PopulateRegressorMatrix(qbs);
-                        var results = PerformPrediction(model, await PerformPredictedRegression("QB")).ToList();
-                        for (int i = 0; i < results.Count; i++)
-                        {
-                            var qb = qbs.ElementAt(i);
-                            if (await _playerService.IsPlayerActive(qb.PlayerId))
-                            {
-                                projection.Add(new ProjectionModel
-                                {
-                                    PlayerId = qb.PlayerId,
-                                    Name = await _playerService.GetPlayerName(qb.PlayerId),
-                                    Team = await _playerService.GetPlayerTeam(qb.PlayerId),
-                                    Position = await _playerService.GetPlayerPosition(qb.PlayerId),
-                                    ProjectedPoints = results[i]
-                                });
-                        }
-                        }
-                        
-                        var projections = projection.OrderByDescending(p => p.ProjectedPoints).Take(QBProjections);
-                        _cache.Set("QbProjections", projections);
-                        return await _adjustmentCalculator.QBAdjustments(projections);
-                    }
-                case "RB":
-                    _logger.Information("Getting RB Projections");
-                    if (_cache.TryGetValue("RbProjections", out IEnumerable<ProjectionModel> projectionModelRb))
-                    {
-                        _logger.Information("Retrieving RB projections from cache");
-                        return projectionModelRb;
-                    }
-                    else
-                    {
-                        var rbs = await AverageProjectedModelRB();
-                        var modelRB = _matrixService.PopulateRegressorMatrix(rbs);
-                        var resultsRB = PerformPrediction(modelRB, await PerformPredictedRegression("RB")).ToList();
-                        for (int i = 0; i < resultsRB.Count; i++)
-                        {
-                            var rb = rbs.ElementAt(i);
-                            if (await _playerService.IsPlayerActive(rb.PlayerId))
-                            {
-                                projection.Add(new ProjectionModel
-                                {
-                                    PlayerId = rb.PlayerId,
-                                    Name = await _playerService.GetPlayerName(rb.PlayerId),
-                                    Team = await _playerService.GetPlayerTeam(rb.PlayerId),
-                                    Position = await _playerService.GetPlayerPosition(rb.PlayerId),
-                                    ProjectedPoints = resultsRB[i]
-                                });
-                            }
-                        }
-                        var rookieRbProjections = await PerformPredictedRookieRegression("RB");
-                        foreach(var proj in rookieRbProjections)
-                        {
-                            projection.Add(proj);
-                        }
+        public int QBProjections => int.Parse(_configuration["Projections:QBProjections"]);
+        public int RBProjections => int.Parse(_configuration["Projections:RBProjections"]);
+        public int WRProjections => int.Parse(_configuration["Projections:WRProjections"]);
+        public int TEProjections => int.Parse(_configuration["Projections:TEProjections"]);
+        public int QBStarters => int.Parse(_configuration["Starters:QBStarters"]);
+        public int RBStarters => int.Parse(_configuration["Starters:RBStarters"]);
+        public int WRStarters => int.Parse(_configuration["Starters:WRStarters"]);
+        public int TEStarters => int.Parse(_configuration["Starters:TEStarters"]);
+        public int CurrentSeason => int.Parse(_configuration["CurrentSeason"]);
 
-                    }
-                    var projectionsRb = projection.OrderByDescending(p => p.ProjectedPoints).Take(RBProjections);
-                    _cache.Set("RbProjections", projectionsRb);
-                    return await _adjustmentCalculator.RBAdjustments(projectionsRb);
-                case "WR":
-                case "TE":
-                    _logger.Information("Getting Pass Catcher Projections");
-                    if (position == "WR" && _cache.TryGetValue("WrProjections", out IEnumerable<ProjectionModel> projectionModelWr))
-                    {
-                        _logger.Information("Retrieving WR projections from Cache");
-                        return projectionModelWr;
-                    }
-                    else if (position == "TE" && _cache.TryGetValue("TeProjections", out IEnumerable<ProjectionModel> projectionModelTe))
-                    {
-                        _logger.Information("Retrieving TE projections from Cache");
-                        return projectionModelTe;
-                    }
-                    else 
-                    {
-                        var pcs = await AverageProjectedModelPassCatchers();
-                        var modelPC = _matrixService.PopulateRegressorMatrix(pcs);
-                        var resultsPC = PerformPrediction(modelPC, await PerformPredictedRegression("WR/TE")).ToList();
-
-                        var tightEnds = await _playerService.GetTightEnds();
-                        List<ProjectionModel> tightEndsOnly = new();
-                        List<ProjectionModel> wideReceiversOnly = new();
-                        for (int i = 0; i < resultsPC.Count; i++)
-                        {
-                            var pc = pcs.ElementAt(i);
-                            if (await _playerService.IsPlayerActive(pc.PlayerId))
-                            {
-                                projection.Add(new ProjectionModel
-                                {
-                                    PlayerId = pc.PlayerId,
-                                    Name = await _playerService.GetPlayerName(pc.PlayerId),
-                                    Team = await _playerService.GetPlayerTeam(pc.PlayerId),
-                                    Position = await _playerService.GetPlayerPosition(pc.PlayerId),
-                                    ProjectedPoints = Math.Round((double)resultsPC[i], 2)
-                                });
-
-                        }
-                        }
-                        if (position == "WR")
-                        {
-                            foreach (var proj in projection)
-                            {
-                                if (!tightEnds.Contains(proj.PlayerId))
-                                {
-                                    proj.Position = "WR";
-                                    wideReceiversOnly.Add(proj);
-                                }
-                            }
-                            var projectionW = wideReceiversOnly.OrderByDescending(p => p.ProjectedPoints).Take(WRProjections);
-                            _cache.Set("WrProjections", projectionW);
-                            return await _adjustmentCalculator.PCAdjustments(projectionW, await GetProjections("QB"));
-                        }
-                        else
-                        {
-                            foreach (var proj in projection)
-                            {
-                                if (tightEnds.Contains(proj.PlayerId))
-                                {
-                                    proj.Position = "TE";
-                                    tightEndsOnly.Add(proj);
-                                }
-                            }
-                            var projectionsT = tightEndsOnly.OrderByDescending(p => p.ProjectedPoints).Take(TEProjections);
-                            _cache.Set("TeProjections", projectionsT);
-                            return await _adjustmentCalculator.PCAdjustments(projectionsT, await GetProjections("QB"));
-                        }
-
-                    }
-
-                default:
-                    _logger.Error("Bad position ({position}). Unable to get projections", position);
-                    return null;
-            }
-        }
-        public async Task<int> InsertFantasyProjections(string position)
-        {
-            int rank = 1;
-            int count = 0;
-            var projections = await GetProjections(position);
-            foreach (var proj in projections)
-            {
-                count += await _fantasyService.InsertFantasyProjections(rank, proj);
-                rank++;
-            }
-            return count;
-        }
-
-        public async Task<List<FlexProjectionModel>> FlexRankings()
-        {
-            List<FlexProjectionModel> flexRankings = new();
-            var qbProjections = await GetProjections("QB");
-            var replacementPoints = qbProjections.ElementAt(QBStarters - 1).ProjectedPoints;
-            foreach(var proj in qbProjections)
-            {
-                flexRankings.Add(new FlexProjectionModel
-                {
-                    PlayerId = proj.PlayerId,
-                    Name = proj.Name,
-                    Team = proj.Team,
-                    Position = proj.Position,
-                    ProjectedPoints = proj.ProjectedPoints,
-                    VORP = proj.ProjectedPoints - replacementPoints
-                });
-            }
-            var rbProjections = await GetProjections("RB");
-            var rbReplacementPoints = rbProjections.ElementAt(RBStarters- 1).ProjectedPoints;
-            foreach(var proj in rbProjections)
-            {
-                flexRankings.Add(new FlexProjectionModel
-                {
-                    PlayerId = proj.PlayerId,
-                    Name = proj.Name,
-                    Team = proj.Team,
-                    Position = proj.Position,
-                    ProjectedPoints = proj.ProjectedPoints,
-                    VORP = proj.ProjectedPoints - rbReplacementPoints
-                });
-            }
-            var wrProjections = await GetProjections("WR");
-            var wrReplacementPoints = wrProjections.ElementAt(WRStarters - 1).ProjectedPoints;
-            foreach (var proj in wrProjections)
-            {
-                flexRankings.Add(new FlexProjectionModel
-                {
-                    PlayerId = proj.PlayerId,
-                    Name = proj.Name,
-                    Team = proj.Team,
-                    Position = proj.Position,
-                    ProjectedPoints = proj.ProjectedPoints,
-                    VORP = proj.ProjectedPoints - wrReplacementPoints
-                });
-            }
-            var teProjections = await GetProjections("TE");
-            var teReplacementPoints = teProjections.ElementAt(TEStarters - 1).ProjectedPoints;
-            foreach (var proj in teProjections)
-            {
-                flexRankings.Add(new FlexProjectionModel
-                {
-                    PlayerId = proj.PlayerId,
-                    Name = proj.Name,
-                    Team = proj.Team,
-                    Position = proj.Position,
-                    ProjectedPoints = proj.ProjectedPoints,
-                    VORP = proj.ProjectedPoints - teReplacementPoints
-                });
-            }
-
-            return flexRankings.OrderByDescending(f => f.VORP).ToList();
-        }
     }
 }

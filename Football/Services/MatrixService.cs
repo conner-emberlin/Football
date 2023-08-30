@@ -12,64 +12,29 @@ namespace Football.Services
         {
             _logger = logger;
         }
-        public Matrix<double> PopulateRegressorMatrix(List<RegressionModelPassCatchers> model)
+        public Matrix<double> PopulateRegressorMatrix<T>(List<T> model)
         {
-            try
+            var rowCount = model.Count;
+            var columnCount = typeof(T).GetProperties().Length - 1;
+            var rows = new List<Vector<double>>();
+            foreach (var m in model)
             {
-                var rowCount = model.Count;
-                var columnCount = typeof(RegressionModelPassCatchers).GetProperties().Length - 1;
-                var rows = new List<Vector<double>>();
-                foreach (var m in model)
-                {
-                    rows.Add(TransformPassCatchersModel(m));
-                }
-                return CreateMatrix(rows, rowCount, columnCount);
+                rows.Add(TransformModel<T>(m));
             }
-            catch(Exception ex)
-            {
-                _logger.Error(ex.Message, ex);
-                throw;
-            }
+            return CreateMatrix(rows, rowCount, columnCount);
         }
 
-        public Matrix<double> PopulateRegressorMatrix(List<RegressionModelQB> model)
+        public Vector<double> TransformModel<T>(T modelItem)
         {
-            try
+            var properties = typeof(T).GetProperties();
+            var columnCount = properties.Length - 1;
+            var vec = Vector<double>.Build.Dense(columnCount);
+            vec[0] = 1;
+            for(int i = 2; i <= columnCount; i++)
             {
-                var rowCount = model.Count;
-                var columnCount = typeof(RegressionModelQB).GetProperties().Length - 1;
-                var rows = new List<Vector<double>>();
-                foreach (var m in model)
-                {
-                    rows.Add(TransformQbModel(m));
-                }
-                return CreateMatrix(rows, rowCount, columnCount);
+              vec[i - 1] = (double)properties[i].GetValue(modelItem);
             }
-            catch(Exception ex)
-            {
-                _logger.Error(ex.Message,ex);
-                throw;
-            }
-        }
-
-        public Matrix<double> PopulateRegressorMatrix(List<RegressionModelRB> model)
-        {
-            try
-            {
-                var rowCount = model.Count;
-                var columnCount = typeof(RegressionModelRB).GetProperties().Length - 1;
-                var rows = new List<Vector<double>>();
-                foreach (var m in model)
-                {
-                    rows.Add(TransformRbModel(m));
-                }
-                return CreateMatrix(rows, rowCount, columnCount);
-            }
-            catch(Exception ex)
-            {
-                _logger.Error(ex.Message, ex);
-                throw;
-            }
+            return vec;
         }
         public Matrix<double> PopulateRegressorMatrix(List<Rookie> rookies)
         {
@@ -100,74 +65,6 @@ namespace Football.Services
                 {
                     vec[i] = totalPoints[i].TotalPoints;
                 }
-                return vec;
-            }
-            catch(Exception ex)
-            {
-                _logger.Error(ex.Message, ex);
-                throw;
-            }
-        }
-
-        public Vector<double> TransformQbModel(RegressionModelQB model)
-        {
-            try
-            {
-                var columnCount = typeof(RegressionModelQB).GetProperties().Length - 1;
-                var vec = Vector<double>.Build.Dense(columnCount);
-                vec[0] = 1;
-                vec[1] = model.PassingAttemptsPerGame;
-                vec[2] = model.PassingYardsPerGame;
-                vec[3] = model.PassingTouchdownsPerGame;
-                vec[4] = model.RushingAttemptsPerGame;
-                vec[5] = model.RushingYardsPerGame;
-                vec[6] = model.RushingTouchdownsPerGame;
-                vec[7] = model.SackYardsPerGame;
-                return vec;
-            }
-            catch(Exception ex)
-            {
-                _logger.Error(ex.Message, ex);
-                throw;
-            }
-        }
-
-        public Vector<double> TransformRbModel(RegressionModelRB model)
-        {
-            try
-            {
-                var columnCount = typeof(RegressionModelRB).GetProperties().Length - 1;
-                var vec = Vector<double>.Build.Dense(columnCount);
-                vec[0] = 1;
-                vec[1] = model.RushingAttemptsPerGame;
-                vec[2] = model.RushingYardsPerGame;
-                vec[3] = model.RushingYardsPerAttempt;
-                vec[4] = model.RushingTouchdownsPerGame;
-                vec[5] = model.ReceptionsPerGame;
-                vec[6] = model.ReceivingYardsPerGame;
-                vec[7] = model.ReceivingTouchdownsPerGame;
-                vec[8] = model.Age;
-                return vec;
-            }
-            catch(Exception ex)
-            {
-                _logger.Error(ex.Message, ex);
-                throw;
-            }
-        }
-
-        public Vector<double> TransformPassCatchersModel(RegressionModelPassCatchers model)
-        {
-            try
-            {
-                var columnCount = typeof(RegressionModelPassCatchers).GetProperties().Length - 1;
-                var vec = Vector<double>.Build.Dense(columnCount);
-                vec[0] = 1;
-                vec[1] = model.TargetsPerGame;
-                vec[2] = model.ReceptionsPerGame;
-                vec[3] = model.YardsPerGame;
-                vec[4] = model.YardsPerReception;
-                vec[5] = model.TouchdownsPerGame;
                 return vec;
             }
             catch(Exception ex)
