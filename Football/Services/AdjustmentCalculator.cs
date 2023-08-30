@@ -159,17 +159,13 @@ namespace Football.Services
                         {
                             if(await _playerService.GetPlayerTeam(r.PlayerId) == change.PreviousTeam && r.PlayerId != change.PlayerId)
                             {
-                                r.ProjectedPoints = (0.5) * (Max(r.ProjectedPoints, RBFloor)) * (improvementRatio + LeadRBFactor);
+                                r.ProjectedPoints = (0.5) * (Math.Max(r.ProjectedPoints, RBFloor)) * (improvementRatio + LeadRBFactor);
                             }
                         }                      
                     }
                 }
             }
             return rbProjection;
-        }
-        private double Max(double one, double two)
-        {
-            return one >= two ? one : two;
         }
         public int CurrentSeason => int.Parse(_configuration["CurrentSeason"]);
         public int RBFloor => int.Parse(_configuration["RBFloor"]);
