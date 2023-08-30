@@ -23,6 +23,7 @@ namespace Football.Services
         public async Task<IEnumerable<ProjectionModel>> QBAdjustments(IEnumerable<ProjectionModel> qbProjection)
         {
             qbProjection = await SuspensionAdjustment(qbProjection);
+            qbProjection = await InjuryAdjustment(qbProjection);
             return qbProjection;
         }
         public async Task<IEnumerable<ProjectionModel>> PCAdjustments(IEnumerable<ProjectionModel> pcProjection, IEnumerable<ProjectionModel> qbProjection)
@@ -30,6 +31,7 @@ namespace Football.Services
             pcProjection = await QBChangeAdjustment(pcProjection, qbProjection);
             pcProjection = await WRTeamChangeAdjustment(pcProjection, qbProjection);
             pcProjection = await SuspensionAdjustment(pcProjection);
+            pcProjection = await InjuryAdjustment(pcProjection);
             return pcProjection;
         }
 
@@ -37,6 +39,7 @@ namespace Football.Services
         {           
             rbProjection = await RBTimeshareAdjustment(rbProjection);
             rbProjection = await SuspensionAdjustment(rbProjection);
+            rbProjection = await InjuryAdjustment(rbProjection);
             return rbProjection;
         }
 
@@ -49,6 +52,20 @@ namespace Football.Services
                 {
                     _logger.Information("Supsension found for player " + proj.PlayerId);
                     proj.ProjectedPoints -= gamesSuspended * (proj.ProjectedPoints / 17);
+                }
+            }
+            return projection;
+        }
+
+        private async Task<IEnumerable<ProjectionModel>> InjuryAdjustment(IEnumerable<ProjectionModel> projection)
+        {
+            foreach(var proj in projection)
+            {
+                var injuryGames = await _adjustmentRepository.GetInjuryConcerns(proj.PlayerId, CurrentSeason);
+                if(injuryGames > 0)
+                {
+                    _logger.Information("Injury found for {playerId} during the {season} Season", proj.PlayerId, CurrentSeason);
+                    proj.ProjectedPoints -= injuryGames * (proj.ProjectedPoints / 17);
                 }
             }
             return projection;

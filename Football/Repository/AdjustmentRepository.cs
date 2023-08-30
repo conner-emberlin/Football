@@ -33,5 +33,12 @@ namespace Football.Repository
             var changes = await _dbConnection.QueryAsync<Change>(query, new { season, playerId });
             return changes.FirstOrDefault();
         }
+
+        public async Task<int> GetInjuryConcerns(int playerId, int season)
+        {
+            var query = _sqlQueryService.GetInjuryConcerns();
+            var games = await _dbConnection.QueryAsync<int>(query, new { playerId, season });
+            return games.FirstOrDefault();
+        }
     }
 }
