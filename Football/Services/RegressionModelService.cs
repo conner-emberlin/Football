@@ -89,6 +89,7 @@ namespace Football.Services
                 {
                     PlayerId = player.PlayerId,
                     Season = season,
+                    Age = data ? receivingStat.Age : 0,
                     TargetsPerGame = data ? Math.Round((double)(receivingStat.Targets / receivingStat.Games), 4) : 0,
                     ReceptionsPerGame = data ? Math.Round((double)(receivingStat.Receptions / receivingStat.Games), 4) : 0,
                     YardsPerGame = data ? Math.Round((double)(receivingStat.Yards / receivingStat.Games), 4) : 0,
@@ -167,6 +168,7 @@ namespace Football.Services
                 {
                     PlayerId = playerId,
                     Season = CurrentSeason,
+                    Age = data ? receivingStat.Age : 0,
                     TargetsPerGame = data ? Math.Round((double)(receivingStat.Targets / receivingStat.Games), 4) : 0,
                     ReceptionsPerGame = data ? Math.Round((double)(receivingStat.Receptions / receivingStat.Games), 4) : 0,
                     YardsPerGame = data ? Math.Round((double)(receivingStat.Yards / receivingStat.Games), 4) : 0,

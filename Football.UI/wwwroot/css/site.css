@@ -213,3 +213,27 @@ a.editstats {
     text-decoration: none;
     text-transform: uppercase;
 }
+
+.spinner {
+    border: 16px solid silver;
+    border-top: 16px solid #A6F4CC;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    animation: spin 700ms linear infinite;
+    top: 40%;
+    left: 55%;
+    position: absolute;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg)
+    }
+
+    100% {
+        transform: rotate(360deg)
+    }
+}
+
+

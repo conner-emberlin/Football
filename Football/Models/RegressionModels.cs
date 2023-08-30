@@ -34,6 +34,7 @@
     {
         public int PlayerId { get; set; }
         public int Season { get; set; }
+        public double Age { get; set; }
         public double TargetsPerGame { get; set; }
         public double ReceptionsPerGame { get; set; }
         public double YardsPerGame { get; set; }
