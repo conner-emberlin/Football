@@ -48,5 +48,6 @@
         public string GetHistoricalRookies();
         public string GetCurrentRookies();
         public string GetAllCurrentRookies();
+        public string GetInjuryConcerns();
     }
 }

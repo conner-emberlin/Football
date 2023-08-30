@@ -289,5 +289,11 @@ namespace Football.Services
                     FROM [dbo].Rookie
                     WHERE [RookieSeason] = @season";
         }
+
+        public string GetInjuryConcerns()
+        {
+            return $@"SELECT [Games] FROM [dbo].InjuryConcerns
+                    WHERE [PlayerId] = @playerid AND [Season] = @season";
+        }
     }
 }
