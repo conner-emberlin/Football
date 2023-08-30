@@ -94,8 +94,9 @@ namespace Football.Services
                 return formattedProjections;
             }
             else
-            {                
-                return Enumerable.Empty<ProjectionModel>();
+            {
+                _logger.Error("Unable to retrieve projections");
+                return Enumerable.Empty<ProjectionModel>();         
             }
         }
         public async Task<IEnumerable<ProjectionModel>> CalculateProjections<T>(List<T> model, string position)
