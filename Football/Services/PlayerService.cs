@@ -11,7 +11,6 @@ namespace Football.Services
         private readonly IFantasyService _fantasyService;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-        public int CurrentSeason => Int32.Parse(_configuration["CurrentSeason"]);
         public PlayerService(IPlayerRepository playerRepository, IFantasyService fantasyService, ILogger logger, IConfiguration configuration)
         {
             _playerRepository = playerRepository;
@@ -172,5 +171,6 @@ namespace Football.Services
         {
             return await _playerRepository.GetCurrentRookies(season);
         }
+        public int CurrentSeason => int.Parse(_configuration["CurrentSeason"]);
     }
 }

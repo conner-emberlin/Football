@@ -9,12 +9,6 @@ namespace Football.Services
     {
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-
-        public double Weight => Double.Parse(_configuration["Weight"]);
-        public double SecondYearWRLeap => Double.Parse(_configuration["SecondYearWRLeap"]);
-        public double SecondYearRBLeap => Double.Parse(_configuration["SecondYearRBLeap"]);
-        public double SecondYearQBLeap => Double.Parse(_configuration["SecondYearQBLeap"]);
-
         public WeightedAverageCalculator(ILogger logger, IConfiguration configuration)
         {
             _logger = logger;
@@ -269,6 +263,10 @@ namespace Football.Services
                 _logger.Information("Player Id" + player.PlayerId + " returned null Fantasy Points");
                 return null; 
             }
-        }        
+        }
+        public double Weight => Double.Parse(_configuration["Weight"]);
+        public double SecondYearWRLeap => Double.Parse(_configuration["SecondYearWRLeap"]);
+        public double SecondYearRBLeap => Double.Parse(_configuration["SecondYearRBLeap"]);
+        public double SecondYearQBLeap => Double.Parse(_configuration["SecondYearQBLeap"]);
     }
 }

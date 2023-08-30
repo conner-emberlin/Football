@@ -34,7 +34,7 @@ namespace Football.Api.Controllers
             }
             else
             {
-                return Ok(await _predictionService.GetProjections(_serviceHelper.TransformPosition(position)));
+                return Ok(await _predictionService.GetFinalProjections(_serviceHelper.TransformPosition(position)));
             }
         }
 

@@ -11,10 +11,7 @@ namespace Football.Services
         private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
-        public int CurrentSeason => Int32.Parse(_configuration["CurrentSeason"]);
-        public int RBFloor => Int32.Parse(_configuration["RBFloor"]);
-        public int ReplacementRB => Int32.Parse(_configuration["ReplacementLevels:ReplacementLevelRB"]);
-        public int ReplacementQB => Int32.Parse(_configuration["ReplacementLevels:ReplacementLevelQB"]);
+
         public AdjustmentCalculator(IAdjustmentRepository adjustmentRepository, IPlayerService playerService, ILogger logger, IConfiguration configuration)
         {
             _adjustmentRepository = adjustmentRepository;
@@ -145,7 +142,7 @@ namespace Football.Services
                         {
                             if(await _playerService.GetPlayerTeam(r.PlayerId) == change.PreviousTeam && r.PlayerId != change.PlayerId)
                             {
-                                r.ProjectedPoints = ((double)1 / (double)2) * (Max(r.ProjectedPoints, RBFloor)) * (improvementRatio + 2);
+                                r.ProjectedPoints = (0.5) * (Max(r.ProjectedPoints, RBFloor)) * (improvementRatio + LeadRBFactor);
                             }
                         }                      
                     }
@@ -157,5 +154,10 @@ namespace Football.Services
         {
             return one >= two ? one : two;
         }
+        public int CurrentSeason => int.Parse(_configuration["CurrentSeason"]);
+        public int RBFloor => int.Parse(_configuration["RBFloor"]);
+        public double LeadRBFactor => double.Parse(_configuration["LeadRBFactor"]);
+        public int ReplacementRB => int.Parse(_configuration["ReplacementLevels:ReplacementLevelRB"]);
+        public int ReplacementQB => int.Parse(_configuration["ReplacementLevels:ReplacementLevelQB"]);
     }
 }
