@@ -1,6 +1,4 @@
 ﻿using News.Models;
-using News.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using News.Interfaces;
 

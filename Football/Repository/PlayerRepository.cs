@@ -126,7 +126,7 @@ namespace Football.Repository
         {
             var query = _sqlQueryService.GetPlayerName();
             var players = await _dbConnection.QueryAsync<string>(query, new { playerId });
-            return players.FirstOrDefault().ToString();
+            return players.First().ToString();
         }
 
         public async Task<bool> IsPlayerActive(int playerId)
@@ -136,11 +136,11 @@ namespace Football.Repository
             return truth.FirstOrDefault() == 1;
         }
 
-        public async Task<string> GetPlayerTeam(int playerId)
+        public async Task<string?> GetPlayerTeam(int playerId)
         {
             var query = _sqlQueryService.GetPlayerTeam();
             var team = await _dbConnection.QueryAsync<string>(query, new { playerId });
-            return team.FirstOrDefault().ToString();
+            return team.First().ToString();
         }
 
         public async Task<List<int>> GetTightEnds()
@@ -154,7 +154,7 @@ namespace Football.Repository
         {
             var query = _sqlQueryService.GetPlayerInfo();
             var player = await _dbConnection.QueryAsync<Player>(query, new { playerId });
-            return player.FirstOrDefault();
+            return player.First();
         }
 
         public async Task<int> GetPlayerId(string name)
@@ -166,8 +166,7 @@ namespace Football.Repository
         public async Task<int> AddPassingStat(PassingStatisticWithSeason pass, int playerId)
         {
             var query = _sqlQueryService.AddPassingStat();
-            int count = 0;
-            return count += await _dbConnection.ExecuteAsync(query, new
+            return await _dbConnection.ExecuteAsync(query, new
             {
                 pass.Season,
                 pass.Name,
@@ -189,8 +188,7 @@ namespace Football.Repository
         public async Task<int> DeletePassingStats(int playerId)
         {
             var query = _sqlQueryService.DeletePassingStats();
-            var count = 0;
-            return count += await _dbConnection.ExecuteAsync(query, new
+            return await _dbConnection.ExecuteAsync(query, new
             {
                 playerId,               
             });
@@ -198,8 +196,7 @@ namespace Football.Repository
         public async Task<int> AddRushingStat(RushingStatisticWithSeason rush, int playerId)
         {
             var query = _sqlQueryService.AddRushingStat();
-            int count = 0;
-            return count += await _dbConnection.ExecuteAsync(query, new
+            return await _dbConnection.ExecuteAsync(query, new
             {
                 rush.Season,
                 rush.Name,
@@ -218,8 +215,7 @@ namespace Football.Repository
         public async Task<int> DeleteRushingStats(int playerId)
         {
             var query = _sqlQueryService.DeleteRushingStats();
-            var count = 0;
-            return count += await _dbConnection.ExecuteAsync(query, new
+            return await _dbConnection.ExecuteAsync(query, new
             {
                 playerId,
             });
@@ -227,8 +223,7 @@ namespace Football.Repository
         public async Task<int> AddReceivingStat(ReceivingStatisticWithSeason rec, int playerId)
         {
             var query = _sqlQueryService.AddReceivingStat();
-            int count = 0;
-            return count += await _dbConnection.ExecuteAsync(query, new
+            return await _dbConnection.ExecuteAsync(query, new
             {
                 rec.Season,
                 rec.Name,
@@ -249,8 +244,7 @@ namespace Football.Repository
         public async Task<int> DeleteReceivingStats(int playerId)
         {
             var query = _sqlQueryService.DeleteReceivingStats();
-            var count = 0;
-            return count += await _dbConnection.ExecuteAsync(query, new
+            return await _dbConnection.ExecuteAsync(query, new
             {
                 playerId,
             });

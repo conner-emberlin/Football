@@ -13,7 +13,6 @@ using Microsoft.Extensions.Caching.Memory;
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
-//allow redirects to the UI
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -23,16 +22,10 @@ builder.Services.AddCors(options =>
                       });
 });
 
-//inject connection string to controllers
 string dboFoootballConnectionString = builder.Configuration.GetConnectionString("dboFootballConnectionString");
-
-//inject Seq loggin
 using var log = new LoggerConfiguration().WriteTo.Seq("http://localhost:5341/").CreateLogger();
-
-//inject memory cache
 MemoryCacheEntryOptions cache = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(120)).SetAbsoluteExpiration(TimeSpan.FromSeconds(3600)).SetPriority(CacheItemPriority.Normal);
 
-// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -57,7 +50,7 @@ builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballC
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
 
-//configurate app settings
+
 builder.Services.Configure<Season>(builder.Configuration.GetSection("Season"));
 builder.Services.Configure<ReplacementLevels>(builder.Configuration.GetSection("ReplacementLevels"));
 builder.Services.Configure<FantasyScoring>(builder.Configuration.GetSection("FantasyScoring"));
@@ -67,7 +60,6 @@ builder.Services.Configure<Tunings>(builder.Configuration.GetSection("Tunings"))
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -75,9 +67,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

@@ -28,7 +28,7 @@ namespace Football.Interfaces
         public Task<List<int>> GetActiveReceivingSeasons(int playerId);
         public Task<string> GetPlayerName(int playerId);
         public Task<bool> IsPlayerActive(int playerId);
-        public Task<string> GetPlayerTeam(int playerId);
+        public Task<string?> GetPlayerTeam(int playerId);
         public Task<List<int>> GetTightEnds();
         public Task<Player> GetPlayerInfo(int playerId);
         public Task<int> GetPlayerId(string name);

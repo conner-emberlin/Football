@@ -1,8 +1,6 @@
-﻿using Football.Api.Helpers;
-using Football.Interfaces;
+﻿using Football.Interfaces;
 using Football.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Drawing;
 
 namespace Football.Api.Controllers
 {

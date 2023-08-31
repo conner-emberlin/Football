@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Football.Models;
-using Football.Services;
 using MathNet.Numerics.LinearAlgebra;
 using Football.Api.Helpers;
 using Football.Interfaces;
