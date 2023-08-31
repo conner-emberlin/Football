@@ -1,7 +1,7 @@
 ﻿using Football.Interfaces;
 using Football.Models;
-using Microsoft.Extensions.Configuration;
 using Serilog;
+using Microsoft.Extensions.Options;
 
 namespace Football.Services
 {
@@ -10,14 +10,20 @@ namespace Football.Services
         private readonly IAdjustmentRepository _adjustmentRepository;
         private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
-        private readonly IConfiguration _configuration;
+        private readonly Season _season;
+        private readonly Tunings _tunings;
+        private readonly ReplacementLevels _replace;
 
-        public AdjustmentCalculator(IAdjustmentRepository adjustmentRepository, IPlayerService playerService, ILogger logger, IConfiguration configuration)
+
+        public AdjustmentCalculator(IAdjustmentRepository adjustmentRepository, IPlayerService playerService, ILogger logger, 
+                IOptionsMonitor<Season> season, IOptionsMonitor<Tunings> tunings, IOptionsMonitor<ReplacementLevels> replace)
         {
             _adjustmentRepository = adjustmentRepository;
             _playerService = playerService;
             _logger = logger;
-            _configuration = configuration;
+            _season = season.CurrentValue;
+            _tunings = tunings.CurrentValue;
+            _replace = replace.CurrentValue;
         }
 
         public async Task<IEnumerable<ProjectionModel>> QBAdjustments(IEnumerable<ProjectionModel> qbProjection)
@@ -47,7 +53,7 @@ namespace Football.Services
         {
             foreach(var proj in projection)
             {
-                var gamesSuspended = await _adjustmentRepository.GetGamesSuspended(proj.PlayerId, CurrentSeason);
+                var gamesSuspended = await _adjustmentRepository.GetGamesSuspended(proj.PlayerId, _season.CurrentSeason);
                 if(gamesSuspended > 0)
                 {
                     _logger.Information("Supsension found for player " + proj.PlayerId);
@@ -61,10 +67,10 @@ namespace Football.Services
         {
             foreach(var proj in projection)
             {
-                var injuryGames = await _adjustmentRepository.GetInjuryConcerns(proj.PlayerId, CurrentSeason);
+                var injuryGames = await _adjustmentRepository.GetInjuryConcerns(proj.PlayerId, _season.CurrentSeason);
                 if(injuryGames > 0)
                 {
-                    _logger.Information("Injury found for {playerId} during the {season} Season", proj.PlayerId, CurrentSeason);
+                    _logger.Information("Injury found for {playerId} during the {season} Season", proj.PlayerId, _season.CurrentSeason);
                     proj.ProjectedPoints -= injuryGames * (proj.ProjectedPoints / 17);
                 }
             }
@@ -76,7 +82,7 @@ namespace Football.Services
             foreach(var proj in wrProjections)
             {
                 var team = await _playerService.GetPlayerTeam(proj.PlayerId);
-                var qbRecords = await _adjustmentRepository.GetTeamChange(CurrentSeason, team);
+                var qbRecords = await _adjustmentRepository.GetTeamChange(_season.CurrentSeason, team);
                 foreach (var qbRecord in qbRecords)
                 {
                     if (qbRecord != null && await _playerService.GetPlayerPosition(qbRecord.PlayerId) == "QB")
@@ -90,7 +96,7 @@ namespace Football.Services
                                 oldQBProj = proj;
                             }
                         }
-                        oldQBProj ??= qbProjections.ElementAt(ReplacementQB);
+                        oldQBProj ??= qbProjections.ElementAt(_replace.ReplacementLevelQB);
                         var newQBProj = qbProjections.Where(p => p.PlayerId == qbRecord.PlayerId).FirstOrDefault();
                         if (newQBProj != null)
                         {
@@ -108,7 +114,7 @@ namespace Football.Services
         {
             foreach (var wrProjection in wrProjections)
             {
-                var change = await _adjustmentRepository.GetTeamChange(CurrentSeason, wrProjection.PlayerId);
+                var change = await _adjustmentRepository.GetTeamChange(_season.CurrentSeason, wrProjection.PlayerId);
                 if (change != null)
                 {
                     _logger.Information("Team change found for playerid " + wrProjection.PlayerId);
@@ -125,8 +131,8 @@ namespace Football.Services
                             currentQBProjection = qbProj;
                         }
                     }
-                    previousQBProjection ??= qbProjections.ElementAt(ReplacementQB);
-                    currentQBProjection ??= qbProjections.ElementAt(ReplacementQB);
+                    previousQBProjection ??= qbProjections.ElementAt(_replace.ReplacementLevelQB);
+                    currentQBProjection ??= qbProjections.ElementAt(_replace.ReplacementLevelQB);
 
                     var ratio = currentQBProjection.ProjectedPoints / previousQBProjection.ProjectedPoints;
                     wrProjection.ProjectedPoints = (wrProjection.ProjectedPoints * (ratio + 1)) / 2;
@@ -137,11 +143,11 @@ namespace Football.Services
         
         private async Task<IEnumerable<ProjectionModel>> RBTimeshareAdjustment(IEnumerable<ProjectionModel> rbProjection)
         {
-            var replacementLevel = rbProjection.ElementAt(ReplacementRB);
+            var replacementLevel = rbProjection.ElementAt(_replace.ReplacementLevelRB);
             foreach (var rbProj in rbProjection)
             {
                 var team = await _playerService.GetPlayerTeam(rbProj.PlayerId);
-                var changes = await _adjustmentRepository.GetTeamChange(CurrentSeason, team);
+                var changes = await _adjustmentRepository.GetTeamChange(_season.CurrentSeason, team);
                 foreach (var change in changes)
                 {
                     if (change != null && await _playerService.GetPlayerPosition(change.PlayerId) == "RB")
@@ -159,7 +165,7 @@ namespace Football.Services
                         {
                             if(await _playerService.GetPlayerTeam(r.PlayerId) == change.PreviousTeam && r.PlayerId != change.PlayerId)
                             {
-                                r.ProjectedPoints = (0.5) * (Math.Max(r.ProjectedPoints, RBFloor)) * (improvementRatio + LeadRBFactor);
+                                r.ProjectedPoints = (0.5) * (Math.Max(r.ProjectedPoints, _tunings.RBFloor)) * (improvementRatio + _tunings.LeadRBFactor);
                             }
                         }                      
                     }
@@ -167,10 +173,5 @@ namespace Football.Services
             }
             return rbProjection;
         }
-        public int CurrentSeason => int.Parse(_configuration["CurrentSeason"]);
-        public int RBFloor => int.Parse(_configuration["Tunings:RBFloor"]);
-        public double LeadRBFactor => double.Parse(_configuration["Tunings:LeadRBFactor"]);
-        public int ReplacementRB => int.Parse(_configuration["ReplacementLevels:ReplacementLevelRB"]);
-        public int ReplacementQB => int.Parse(_configuration["ReplacementLevels:ReplacementLevelQB"]);
     }
 }

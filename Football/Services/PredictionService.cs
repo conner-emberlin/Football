@@ -4,7 +4,6 @@ using System.Data;
 using Football.Interfaces;
 using Serilog;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Football.Services
