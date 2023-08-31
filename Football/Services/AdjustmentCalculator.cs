@@ -57,7 +57,7 @@ namespace Football.Services
                 if(gamesSuspended > 0)
                 {
                     _logger.Information("Supsension found for player " + proj.PlayerId);
-                    proj.ProjectedPoints -= gamesSuspended * (proj.ProjectedPoints / 17);
+                    proj.ProjectedPoints -= gamesSuspended * (proj.ProjectedPoints / _season.Games);
                 }
             }
             return projection;
@@ -71,7 +71,7 @@ namespace Football.Services
                 if(injuryGames > 0)
                 {
                     _logger.Information("Injury found for {playerId} during the {season} Season", proj.PlayerId, _season.CurrentSeason);
-                    proj.ProjectedPoints -= injuryGames * (proj.ProjectedPoints / 17);
+                    proj.ProjectedPoints -= injuryGames * (proj.ProjectedPoints / _season.Games);
                 }
             }
             return projection;

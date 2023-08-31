@@ -9,6 +9,7 @@ namespace Football.Models
     public class Season
     {
         public int CurrentSeason { get; set; }
+        public int Games { get; set; }
     }
 
     public class ReplacementLevels

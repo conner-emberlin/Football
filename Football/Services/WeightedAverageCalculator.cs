@@ -9,10 +9,12 @@ namespace Football.Services
     {
         private readonly ILogger _logger;
         private readonly Tunings _tunings;
-        public WeightedAverageCalculator(ILogger logger, IOptionsMonitor<Tunings> tunings)
+        private readonly Season _season;
+        public WeightedAverageCalculator(ILogger logger, IOptionsMonitor<Tunings> tunings, IOptionsMonitor<Season> season)
         {
             _logger = logger;
             _tunings = tunings.CurrentValue;
+            _season = season.CurrentValue;
         }
         public PassingStatistic WeightedAverage(List<PassingStatisticWithSeason> passing)
         {
@@ -37,16 +39,16 @@ namespace Football.Services
 
                     foreach (var s in passing)
                     {
-                        if (s.Games < 17)
+                        if (s.Games < _season.Games)
                         {
-                            s.Completions += (s.Completions / s.Games) * (17 - s.Games);
-                            s.Attempts += (s.Attempts / s.Games) * (17 - s.Games);
-                            s.Yards += (s.Yards / s.Games) * (17 - s.Games);
-                            s.Touchdowns += (s.Touchdowns / s.Games) * (17 - s.Games);
-                            s.Interceptions += (s.Interceptions / s.Games) * (17 - s.Games);
-                            s.FirstDowns += (s.FirstDowns / s.Games) * (17 - s.Games);
-                            s.Sacks += (s.Sacks / s.Games) * (17 - s.Games);
-                            s.SackYards += (s.SackYards / s.Games) * (17 - s.Games);
+                            s.Completions += (s.Completions / s.Games) * (_season.Games - s.Games);
+                            s.Attempts += (s.Attempts / s.Games) * (_season.Games - s.Games);
+                            s.Yards += (s.Yards / s.Games) * (_season.Games - s.Games);
+                            s.Touchdowns += (s.Touchdowns / s.Games) * (_season.Games - s.Games);
+                            s.Interceptions += (s.Interceptions / s.Games) * (_season.Games - s.Games);
+                            s.FirstDowns += (s.FirstDowns / s.Games) * (_season.Games - s.Games);
+                            s.Sacks += (s.Sacks / s.Games) * (_season.Games - s.Games);
+                            s.SackYards += (s.SackYards / s.Games) * (_season.Games - s.Games);
                         }
 
                         averageCompletions += s.Season == maxSeason ? maxSeasonWeight * s.Completions : previousSeasonWeight * s.Completions;
@@ -64,7 +66,7 @@ namespace Football.Services
                         Name = passing.ElementAt(passing.Count-1).Name,
                         Team = passing.ElementAt(passing.Count - 1).Team,
                         Age = passing.ElementAt(passing.Count - 1).Age + 1,
-                        Games = 17,
+                        Games = _season.Games,
                         Completions = averageCompletions,
                         Attempts = averageAttempts,
                         Yards = averageYards,
@@ -109,13 +111,13 @@ namespace Football.Services
 
                     foreach (var s in rushing)
                     {
-                        if (s.Games < 17)
+                        if (s.Games < _season.Games)
                         {
-                            s.RushAttempts += (s.RushAttempts / s.Games) * (17 - s.Games);
-                            s.Yards += (s.Yards / s.Games) * (17 - s.Games);
-                            s.Touchdowns += (s.Touchdowns / s.Games) * (17 - s.Games);
-                            s.FirstDowns += (s.FirstDowns / s.Games) * (17 - s.Games);
-                            s.Fumbles += (s.Fumbles / s.Games) * (17 - s.Games);
+                            s.RushAttempts += (s.RushAttempts / s.Games) * (_season.Games - s.Games);
+                            s.Yards += (s.Yards / s.Games) * (_season.Games - s.Games);
+                            s.Touchdowns += (s.Touchdowns / s.Games) * (_season.Games - s.Games);
+                            s.FirstDowns += (s.FirstDowns / s.Games) * (_season.Games - s.Games);
+                            s.Fumbles += (s.Fumbles / s.Games) * (_season.Games - s.Games);
                         }
 
                         averageRushAttempts += s.Season == maxSeason ? maxSeasonWeight * s.RushAttempts : previousSeasonWeight * s.RushAttempts;
@@ -131,7 +133,7 @@ namespace Football.Services
                         Name = rushing.ElementAt(rushing.Count - 1).Name,
                         Team = rushing.ElementAt(rushing.Count - 1).Team,
                         Age = rushing.ElementAt(rushing.Count - 1).Age + 1,
-                        Games = 17,
+                        Games = _season.Games,
                         RushAttempts = averageRushAttempts,
                         Yards = averageYards,
                         Touchdowns = averageTouchdowns,
@@ -175,14 +177,14 @@ namespace Football.Services
 
                     foreach (var s in receiving)
                     {
-                        if (s.Games < 17)
+                        if (s.Games < _season.Games)
                         {
-                            s.Targets += (s.Targets / s.Games) * (17 - s.Games);
-                            s.Receptions += (s.Receptions / s.Games) * (17 - s.Games);
-                            s.Yards += (s.Yards / s.Games) * (17 - s.Games);
-                            s.Touchdowns += (s.Touchdowns / s.Games) * (17 - s.Games);
-                            s.FirstDowns += (s.FirstDowns / s.Games) * (17 - s.Games);
-                            s.Fumbles += (s.Fumbles / s.Games) * (17 - s.Games);
+                            s.Targets += (s.Targets / s.Games) * (_season.Games - s.Games);
+                            s.Receptions += (s.Receptions / s.Games) * (_season.Games - s.Games);
+                            s.Yards += (s.Yards / s.Games) * (_season.Games - s.Games);
+                            s.Touchdowns += (s.Touchdowns / s.Games) * (_season.Games - s.Games);
+                            s.FirstDowns += (s.FirstDowns / s.Games) * (_season.Games - s.Games);
+                            s.Fumbles += (s.Fumbles / s.Games) * (_season.Games - s.Games);
                         }
                         averageTargets += s.Season == maxSeason ? maxSeasonWeight * s.Targets : previousSeasonWeight * s.Targets;
                         averageReceptions += s.Season == maxSeason ? maxSeasonWeight * s.Receptions : previousSeasonWeight * s.Receptions;
@@ -199,7 +201,7 @@ namespace Football.Services
                         Name = receiving.ElementAt(receiving.Count - 1).Name,
                         Team = receiving.ElementAt(receiving.Count - 1).Team,
                         Age = receiving.ElementAt(receiving.Count - 1).Age + 1,
-                        Games = 17,
+                        Games = _season.Games,
                         Targets = averageTargets,
                         Receptions = averageReceptions,
                         Yards = averageYards,
@@ -239,9 +241,9 @@ namespace Football.Services
                     foreach (var fs in player.FantasySeasonGames)
                     {
                         var fantasyPoints = player.FantasyPoints.Where(f => f.Season == fs.Season).FirstOrDefault();
-                        if (fs.Games < 17)
+                        if (fs.Games < _season.Games)
                         {
-                            fantasyPoints.TotalPoints += (fantasyPoints.TotalPoints / fs.Games) * (17 - fs.Games);
+                            fantasyPoints.TotalPoints += (fantasyPoints.TotalPoints / fs.Games) * (_season.Games - fs.Games);
                         }
                         averageTotalPoints += fantasyPoints.Season == maxSeason ? maxSeasonWeight * fantasyPoints.TotalPoints : previousSeasonWeight * fantasyPoints.TotalPoints;
                     }
