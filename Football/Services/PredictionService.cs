@@ -5,6 +5,7 @@ using Football.Interfaces;
 using Serilog;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Football.Services
 {
@@ -19,12 +20,14 @@ namespace Football.Services
         private readonly IAdjustmentCalculator _adjustmentCalculator;
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
-        private readonly IConfiguration _configuration;
+        private readonly Projections _projections;
+        private readonly Starters _starters;
+        private readonly Season _season;
         public PredictionService(IPerformRegressionService performRegressionService, IRegressionModelService regressionModelService, 
             IFantasyService fantasyService, IPlayerService playerService, 
             IMatrixService matrixService, IWeightedAverageCalculator weightedAverageCalculator, 
             IAdjustmentCalculator adjustmentCalculator, ILogger logger, IMemoryCache cache,
-            IConfiguration configuration)
+            IOptionsMonitor<Season> season, IOptionsMonitor<Projections> projections, IOptionsMonitor<Starters> starters)
         {
             _performRegressionService = performRegressionService;
             _matrixService = matrixService;
@@ -35,7 +38,9 @@ namespace Football.Services
             _regressionModelService = regressionModelService;
             _logger = logger;
             _cache = cache;
-            _configuration = configuration;
+            _season = season.CurrentValue;
+            _starters = starters.CurrentValue;
+            _projections = projections.CurrentValue;
         }
 
         public async Task<IEnumerable<ProjectionModel>> GetFinalProjections(string position)
@@ -48,7 +53,7 @@ namespace Football.Services
             {
                 var projections = (await CalculateProjections(await AverageProjectedModelQB(), position)).ToList();
                 var adjustedProjections = await _adjustmentCalculator.QBAdjustments(projections);
-                var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints).Take(QBProjections);
+                var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.QBProjections);
                 _cache.Set("QBProjections", formattedProjections);
                 return formattedProjections;
             }
@@ -61,7 +66,7 @@ namespace Football.Services
                     projections.Add(proj);
                 }
                 var adjustedProjections = await _adjustmentCalculator.RBAdjustments(projections);
-                var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints).Take(RBProjections);
+                var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.RBProjections);
                 _cache.Set("RBProjections", formattedProjections);
                 return formattedProjections;
             }
@@ -71,7 +76,7 @@ namespace Football.Services
                 var qbProjections = await GetFinalProjections("QB");
                 var projections = (await CalculateProjections(await AverageProjectedModelPassCatchers(), "WR/TE")).ToList();
                 var adjustedProjections = await _adjustmentCalculator.PCAdjustments(projections, qbProjections);
-                var formattedProjections = adjustedProjections.Where(p => !tightEnds.Contains(p.PlayerId)).OrderByDescending(p => p.ProjectedPoints).Take(WRProjections);
+                var formattedProjections = adjustedProjections.Where(p => !tightEnds.Contains(p.PlayerId)).OrderByDescending(p => p.ProjectedPoints).Take(_projections.WRProjections);
                 foreach(var projection in formattedProjections)
                 {
                     projection.Position = "WR";
@@ -85,7 +90,7 @@ namespace Football.Services
                 var qbProjections = await GetFinalProjections("QB");
                 var projections = (await CalculateProjections(await AverageProjectedModelPassCatchers(), "WR/TE")).ToList();
                 var adjustedProjections = await _adjustmentCalculator.PCAdjustments(projections, qbProjections);
-                var formattedProjections = adjustedProjections.Where(p => tightEnds.Contains(p.PlayerId)).OrderByDescending(p => p.ProjectedPoints).Take(TEProjections);
+                var formattedProjections = adjustedProjections.Where(p => tightEnds.Contains(p.PlayerId)).OrderByDescending(p => p.ProjectedPoints).Take(_projections.TEProjections);
                 foreach(var projection in formattedProjections)
                 {
                     projection.Position = "TE";
@@ -176,9 +181,9 @@ namespace Football.Services
         private async Task<List<ProjectionModel>> PerformPredictedRookieRegression(string position)
         {
             List<ProjectionModel> rookieProjections = new();
-            var historicalRookies = await _playerService.GetHistoricalRookies(CurrentSeason, position);
+            var historicalRookies = await _playerService.GetHistoricalRookies(_season.CurrentSeason, position);
             var coeff = await _performRegressionService.PerformRegression(historicalRookies);
-            var currentRookies = await _playerService.GetCurrentRookies(CurrentSeason, position);
+            var currentRookies = await _playerService.GetCurrentRookies(_season.CurrentSeason, position);
             var model = _matrixService.PopulateRegressorMatrix(currentRookies);
             var predictions = PerformPrediction(model, coeff).ToList();
 
@@ -283,23 +288,12 @@ namespace Football.Services
         {
             return position switch
             {
-                "QB" => (await GetFinalProjections(position)).ElementAt(QBStarters - 1).ProjectedPoints,
-                "RB" => (await GetFinalProjections(position)).ElementAt(RBStarters - 1).ProjectedPoints,
-                "WR" => (await GetFinalProjections(position)).ElementAt(WRStarters - 1).ProjectedPoints,
-                "TE" => (await GetFinalProjections(position)).ElementAt(TEStarters - 1).ProjectedPoints,
+                "QB" => (await GetFinalProjections(position)).ElementAt(_starters.QBStarters - 1).ProjectedPoints,
+                "RB" => (await GetFinalProjections(position)).ElementAt(_starters.RBStarters - 1).ProjectedPoints,
+                "WR" => (await GetFinalProjections(position)).ElementAt(_starters.WRStarters - 1).ProjectedPoints,
+                "TE" => (await GetFinalProjections(position)).ElementAt(_starters.TEStarters - 1).ProjectedPoints,
                 _ => 0,
             };
         }
-
-        public int QBProjections => int.Parse(_configuration["Projections:QBProjections"]);
-        public int RBProjections => int.Parse(_configuration["Projections:RBProjections"]);
-        public int WRProjections => int.Parse(_configuration["Projections:WRProjections"]);
-        public int TEProjections => int.Parse(_configuration["Projections:TEProjections"]);
-        public int QBStarters => int.Parse(_configuration["Starters:QBStarters"]);
-        public int RBStarters => int.Parse(_configuration["Starters:RBStarters"]);
-        public int WRStarters => int.Parse(_configuration["Starters:WRStarters"]);
-        public int TEStarters => int.Parse(_configuration["Starters:TEStarters"]);
-        public int CurrentSeason => int.Parse(_configuration["CurrentSeason"]);
-
     }
 }

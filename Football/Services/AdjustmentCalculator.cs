@@ -168,8 +168,8 @@ namespace Football.Services
             return rbProjection;
         }
         public int CurrentSeason => int.Parse(_configuration["CurrentSeason"]);
-        public int RBFloor => int.Parse(_configuration["RBFloor"]);
-        public double LeadRBFactor => double.Parse(_configuration["LeadRBFactor"]);
+        public int RBFloor => int.Parse(_configuration["Tunings:RBFloor"]);
+        public double LeadRBFactor => double.Parse(_configuration["Tunings:LeadRBFactor"]);
         public int ReplacementRB => int.Parse(_configuration["ReplacementLevels:ReplacementLevelRB"]);
         public int ReplacementQB => int.Parse(_configuration["ReplacementLevels:ReplacementLevelQB"]);
     }
