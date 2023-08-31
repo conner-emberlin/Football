@@ -207,7 +207,7 @@ namespace Football.Services
             foreach (var p in players)
             {
                 var player = await _playerService.GetPlayer(p);
-                if (player.FantasyPoints.Count > 0)
+                if (player.FantasyPoints?.Count > 0)
                 {
                     projectedAverage.Add(_weightedAverageCalculator.WeightedAverage(player));
                 }
@@ -223,7 +223,7 @@ namespace Football.Services
             {
                 _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
-                if (player.PassingStats.Count > 0 || player.RushingStats.Count > 0)
+                if (player.PassingStats?.Count > 0 || player.RushingStats?.Count > 0)
                 {
                     var projectedAveragePassing = _weightedAverageCalculator.WeightedAverage(player.PassingStats);
                     var projectedAverageRushing = _weightedAverageCalculator.WeightedAverage(player.RushingStats);
@@ -242,7 +242,7 @@ namespace Football.Services
             {
                 _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
-                if (player.RushingStats.Count > 0 || player.ReceivingStats.Count > 0)
+                if (player.RushingStats?.Count > 0 || player.ReceivingStats?.Count > 0)
                 {
                     var projectedAverageRushing = _weightedAverageCalculator.WeightedAverage(player.RushingStats);
                     var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
@@ -261,7 +261,7 @@ namespace Football.Services
             {
                 _logger.Information("Calculating weighted averages for playerId: {playerid}", p);
                 var player = await _playerService.GetPlayer(p);
-                if (player.ReceivingStats.Count > 0)
+                if (player.ReceivingStats?.Count > 0)
                 {
                     var projectedAverageReceiving = _weightedAverageCalculator.WeightedAverage(player.ReceivingStats);
                     var model = _regressionModelService.RegressionModelPC(projectedAverageReceiving, p);
@@ -272,17 +272,9 @@ namespace Football.Services
         }
         private IEnumerable<ProjectionModel> RetrieveFromCache(string position)
         {
-            var key = position + "Projections";
-            if(_cache.TryGetValue(key, out IEnumerable<ProjectionModel> cachedProjections))
-            {
-                return cachedProjections;
-            }
-            else
-            {
-                return Enumerable.Empty<ProjectionModel>();
-            }
+            return _cache.TryGetValue(position + "Projections", out IEnumerable<ProjectionModel> cachedProj) ? cachedProj 
+                : Enumerable.Empty<ProjectionModel>();
         }
-
         private async Task<double> GetReplacementPoints(string position)
         {
             return position switch

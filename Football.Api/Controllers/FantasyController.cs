@@ -1,9 +1,8 @@
 ﻿using Football.Api.Helpers;
 using Football.Interfaces;
 using Football.Models;
-using Football.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Drawing;
 
 namespace Football.Api.Controllers
 {
@@ -13,13 +12,10 @@ namespace Football.Api.Controllers
     {
         private readonly IFantasyService _fantasyService;
         private readonly IPlayerService _playerService;
-        private readonly IServiceHelper _serviceHelper;
-
-        public FantasyController(IFantasyService fantasyService,IPlayerService playerService, IServiceHelper serviceHelper)
+        public FantasyController(IFantasyService fantasyService, IPlayerService playerService)
         {
             _fantasyService = fantasyService;
             _playerService = playerService;
-            _serviceHelper = serviceHelper;
         }
         //POST fantasy results for a season/position (delete existing ones for the season/position)
         [HttpPost("refresh/{name}/{season}")]
@@ -30,8 +26,6 @@ namespace Football.Api.Controllers
             var playerId = await _playerService.GetPlayerId(name);
             var fantasyPoints = await _fantasyService.GetFantasyPoints(playerId, season);
             return Ok(await _fantasyService.RefreshFantasyResults(fantasyPoints));
-
-
         }
         //Use this for a complete refresh of a season. Delete season from table first.
         [HttpPost("{position}/{season}")]
@@ -39,10 +33,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> PostFantasyPoints(string position, int season)
         {
-            if (position == "WRTE")
-            {
-                position = "WR/TE";
-            }
+            position = position == "WRTE" ? "WR/TE" : position;
             var players = await _playerService.GetPlayersByPosition(position);
             int count = 0;
             foreach (var player in players)
@@ -54,9 +45,7 @@ namespace Football.Api.Controllers
                 }
             }
             return Ok(count);
-
         }
-
         //GET fantasy results for playerId, season
         [HttpGet("points/{name}/{season}")]
         [ProducesResponseType(typeof(List<FantasyPoints>), 200)]
@@ -64,31 +53,20 @@ namespace Football.Api.Controllers
         public async Task<ActionResult<List<FantasyPointsWithName>>> GetFantasyPoints(string name, int season)
         {
             var playerId = await _playerService.GetPlayerId(name);
-            List<FantasyPointsWithName> points = new();
-            if(playerId != 0)
+            if(playerId > 0)
             {
                 var player = await _playerService.GetPlayer(playerId);
-                foreach(var point in player.FantasyPoints)
-                {
-                    points.Add(new FantasyPointsWithName
+                var points = player.FantasyPoints?.Select(fp => new FantasyPointsWithName
                     {
-                        Season = point.Season,
-                        PlayerId = point.PlayerId,
-                        TotalPoints = point.TotalPoints,
-                        PassingPoints = point.PassingPoints,
-                        RushingPoints = point.RushingPoints,
-                        ReceivingPoints = point.ReceivingPoints,
+                        Season = fp.Season,
+                        PlayerId = fp.PlayerId,
+                        TotalPoints = fp.TotalPoints,
+                        PassingPoints = fp.PassingPoints,
+                        RushingPoints = fp.RushingPoints,
+                        ReceivingPoints = fp.ReceivingPoints,
                         Name = player.Name
-                    });
-                }
-                if (season == 0)
-                {
-                    return Ok(points.OrderBy(p => p.Season));
-                }
-                else
-                {
-                    return Ok(points.Where(p => p.Season == season));
-                }
+                    }).ToList();
+                return season == 0 ? Ok(points.OrderBy(p => p.Season)) : Ok(points.Where(p => p.Season == season));
             }
             else
             {

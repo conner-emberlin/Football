@@ -87,7 +87,7 @@ else if(!badRequestError && !fantasy.Any() && youTried)
 
     protected override async Task OnInitializedAsync()
     {
-        if (id != null)
+        if (!String.IsNullOrEmpty(id))
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/name/" + id);
             request.Headers.Add("Accept", "application/json");

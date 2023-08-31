@@ -133,7 +133,6 @@ namespace Football.Services
                     }
                     previousQBProjection ??= qbProjections.ElementAt(_replace.ReplacementLevelQB);
                     currentQBProjection ??= qbProjections.ElementAt(_replace.ReplacementLevelQB);
-
                     var ratio = currentQBProjection.ProjectedPoints / previousQBProjection.ProjectedPoints;
                     wrProjection.ProjectedPoints = (wrProjection.ProjectedPoints * (ratio + 1)) / 2;
                 }
@@ -159,8 +158,8 @@ namespace Football.Services
                         var improvementRatio = replacementLevel.ProjectedPoints / newGuyInTown.ProjectedPoints;
                         var newcomerRatio = (replacementLevel.ProjectedPoints / rbProj.ProjectedPoints);
                         rbProj.ProjectedPoints = (rbProj.ProjectedPoints * (improvementRatio + 1)) / 2;
-                        var oldProj = rbProjection.Where(r => r.PlayerId == newGuyInTown.PlayerId).ToList().FirstOrDefault().ProjectedPoints;
-                        rbProjection.Where(r => r.PlayerId == newGuyInTown.PlayerId).ToList().FirstOrDefault().ProjectedPoints = ((newcomerRatio+1) * oldProj)/2;
+                        var oldProj = rbProjection.Where(r => r.PlayerId == newGuyInTown.PlayerId).ToList().First().ProjectedPoints;
+                        rbProjection.Where(r => r.PlayerId == newGuyInTown.PlayerId).ToList().First().ProjectedPoints = ((newcomerRatio+1) * oldProj)/2;
                         foreach(var r in rbProjection)
                         {
                             if(await _playerService.GetPlayerTeam(r.PlayerId) == change.PreviousTeam && r.PlayerId != change.PlayerId)

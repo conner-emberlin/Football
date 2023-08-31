@@ -17,16 +17,14 @@ namespace Football.Api.Controllers
         private readonly IMatrixService _matrixService;
         private readonly IPlayerService _playerService;
         private readonly IServiceHelper _serviceHelper;
-        private readonly IFantasyService _fantasyService;
         public RegressionController(IPerformRegressionService performRegressionService,IPlayerService playerService, IRegressionModelService regressionModelService,
-            IMatrixService matrixService, IServiceHelper serviceHelper, IFantasyService fantasyService)
+            IMatrixService matrixService, IServiceHelper serviceHelper)
         {
             _performRegressionService = performRegressionService;
             _regressionModelService = regressionModelService;
             _playerService = playerService;
             _matrixService = matrixService;
             _serviceHelper = serviceHelper;
-            _fantasyService = fantasyService;   
         }
         [HttpGet("{season}/{pos}")]
         [ProducesResponseType(typeof(Vector<double>), 200)]

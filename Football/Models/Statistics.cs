@@ -2,8 +2,8 @@
 {
     public class PassingStatistic
     {
-        public string Name { get; set; }
-        public string Team { get; set; }
+        public string Name { get; set; } = "";
+        public string Team { get; set; } = "";
         public double Age { get; set; }
         public double Games { get; set; }
         public double Completions { get; set; }
@@ -25,8 +25,8 @@
 
     public class ReceivingStatistic
     {
-        public string Name { get; set; }
-        public string Team { get; set; }
+        public string Name { get; set; } = "";
+        public string Team { get; set; } = "";
         public double Age { get; set; }
         public double Games { get; set; }
         public double Targets { get; set; }
@@ -45,8 +45,8 @@
     }
     public class RushingStatistic
     {
-        public string Name { get; set; }
-        public string Team { get; set; }
+        public string Name { get; set; } = "";
+        public string Team { get; set; } = "";
         public double Age { get; set; }
         public double Games { get; set; }
         public double RushAttempts { get; set; }

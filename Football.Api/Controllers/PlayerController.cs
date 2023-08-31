@@ -20,13 +20,8 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<Player>> GetPlayer(int playerId)
         {
-            if(playerId != 0){
-                return Ok(await _playerService.GetPlayer(playerId));
-            }
-            else
-            {
-                return BadRequest("No player with that name");
-            }
+            return playerId > 0 ? Ok(await _playerService.GetPlayer(playerId)) 
+                                : BadRequest("No player with that name");
         }
         [HttpGet("id/{name}")]
         [ProducesResponseType(typeof(int), 200)]
@@ -43,7 +38,6 @@ namespace Football.Api.Controllers
         {
             return Ok(await _playerService.GetPlayerName(id));
         }
-
 
         [HttpGet("games/{playerId}/{season}")]
         [ProducesResponseType(typeof(FantasySeasonGames), 200)]
@@ -81,7 +75,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> AddRushingStat([FromBody] RushingStatisticWithSeason rush)
         {
-            return (Ok(await _playerService.AddRushingStat(rush)));
+            return Ok(await _playerService.AddRushingStat(rush));
         }
 
         [HttpPost("stats/rush/update/")]
@@ -126,11 +120,8 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> CreatePlayer(string name, string position, int active)
         {
-            if(position == "WR" || position == "TE")
-            {
-                position = "WR/TE";
-            }
-            return await _playerService.CreatePlayer(name, position, active);
+            position = position == "WR" || position == "TE" ? "WR/TE" : position;
+            return Ok(await _playerService.CreatePlayer(name, position, active));
         }
     }
 }

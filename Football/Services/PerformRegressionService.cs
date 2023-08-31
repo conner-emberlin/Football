@@ -63,9 +63,7 @@ namespace Football.Services
         }
         public async Task<Vector<double>> PerformRegression(List<Rookie> rookies)
         {
-            var vec = CholeskyDecomposition(_matrixService.PopulateRegressorMatrix(rookies), _matrixService.PopulateDependentVector(await _fantasyService.GetRookieFantasyResults(rookies)));
-            return vec;
-
+            return CholeskyDecomposition(_matrixService.PopulateRegressorMatrix(rookies), _matrixService.PopulateDependentVector(await _fantasyService.GetRookieFantasyResults(rookies)));
         }
             
         public double CalculateMSE(Vector<double> actual, Vector<double> coefficients, Matrix<double> model)

@@ -233,14 +233,14 @@ namespace Football.Services
                 try
                 {
                     double averageTotalPoints = 0;
-                    var maxSeason = player.FantasySeasonGames.OrderByDescending(f => f.Season).FirstOrDefault().Season;
+                    var maxSeason = player.FantasySeasonGames.OrderByDescending(f => f.Season).First().Season;
                     double maxSeasonWeight = player.FantasySeasonGames.Count > 1 ? _tunings.Weight : 1;
                     double previousSeasonCount = player.FantasySeasonGames.Count - 1;
                     double previousSeasonWeight = player.FantasySeasonGames.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasonCount)) : 0;
 
                     foreach (var fs in player.FantasySeasonGames)
                     {
-                        var fantasyPoints = player.FantasyPoints.Where(f => f.Season == fs.Season).FirstOrDefault();
+                        var fantasyPoints = player.FantasyPoints.Where(f => f.Season == fs.Season).First();
                         if (fs.Games < _season.Games)
                         {
                             fantasyPoints.TotalPoints += (fantasyPoints.TotalPoints / fs.Games) * (_season.Games - fs.Games);
