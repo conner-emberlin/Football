@@ -25,6 +25,9 @@ namespace Football.Models
         public int PointsPerPassingTouchdown { get; set; }
         public int PointsPerInterception { get; set; }
         public int PointsPerFumble { get; set; }
+        public int PointsPerTouchdown { get; set; }
+        public double PointsPerPassingYard { get; set; }
+        public double PointsPerYard { get; set; }
     }
 
     public class Projections

@@ -31,7 +31,7 @@ namespace Football.Services
             {
                 var fantasyPassing = await _fantasyRepository.GetFantasyPassing(playerId, season);
                 return fantasyPassing != null ?
-                    fantasyPassing.Yards * 0.04 + fantasyPassing.Touchdowns * _scoring.PointsPerPassingTouchdown - fantasyPassing.Interceptions * _scoring.PointsPerInterception
+                    fantasyPassing.Yards * _scoring.PointsPerPassingYard + fantasyPassing.Touchdowns * _scoring.PointsPerPassingTouchdown - fantasyPassing.Interceptions * _scoring.PointsPerInterception
                     : 0;
             }
             catch(Exception ex)
@@ -47,7 +47,7 @@ namespace Football.Services
             {
                 var fantasyRushing = await _fantasyRepository.GetFantasyRushing(playerId, season);
                 return fantasyRushing != null ?
-                    fantasyRushing.Yards * 0.1 + fantasyRushing.Touchdowns * 6 - fantasyRushing.Fumbles * _scoring.PointsPerFumble
+                    fantasyRushing.Yards * _scoring.PointsPerYard + fantasyRushing.Touchdowns * _scoring.PointsPerTouchdown - fantasyRushing.Fumbles * _scoring.PointsPerFumble
                     : 0;
             }
             catch(Exception ex)
@@ -63,7 +63,7 @@ namespace Football.Services
             {
                 var fantasyReceiving = await _fantasyRepository.GetFantasyReceiving(playerId, season);
                 return fantasyReceiving != null ?
-                    fantasyReceiving.Yards * 0.1 + fantasyReceiving.Touchdowns * 6 + fantasyReceiving.Receptions * _scoring.PointsPerReception
+                    fantasyReceiving.Yards * _scoring.PointsPerYard + fantasyReceiving.Touchdowns * _scoring.PointsPerTouchdown + fantasyReceiving.Receptions * _scoring.PointsPerReception
                     : 0;
             }
             catch(Exception ex)
