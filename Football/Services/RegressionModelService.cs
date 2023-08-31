@@ -1,6 +1,7 @@
 ﻿using Football.Interfaces;
 using Football.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Numerics;
 
@@ -11,14 +12,14 @@ namespace Football.Services
         private readonly IFantasyService _fantasyService;
         private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
-        private readonly IConfiguration _configuration;
+        private readonly Season _season;
         public RegressionModelService(IFantasyService fantasyService, IPlayerService playerService, 
-            ILogger logger, IConfiguration configuration)
+            ILogger logger, IOptionsMonitor<Season> season)
         {
             _fantasyService = fantasyService;
             _playerService = playerService;
             _logger = logger;
-            _configuration = configuration;
+            _season = season.CurrentValue;
         }
 
         public RegressionModelQB RegressionModelQB(Player player, int season)
@@ -113,7 +114,7 @@ namespace Football.Services
                 return new RegressionModelQB
                 {
                     PlayerId = playerId,
-                    Season = CurrentSeason,
+                    Season = _season.CurrentSeason,
                     PassingAttemptsPerGame = dataP ? Math.Round((double)(passingStat.Attempts / passingStat.Games), 4) : 0,
                     PassingYardsPerGame = dataP ? Math.Round((double)(passingStat.Yards / passingStat.Games), 4) : 0,
                     PassingTouchdownsPerGame = dataP ? Math.Round((double)(passingStat.Touchdowns / passingStat.Games), 4) : 0,
@@ -140,7 +141,7 @@ namespace Football.Services
                 return new RegressionModelRB
                 {
                     PlayerId = playerId,
-                    Season = CurrentSeason,
+                    Season = _season.CurrentSeason,
                     Age = dataRush ? rushingStat.Age : 0,
                     RushingAttemptsPerGame = dataRush ? Math.Round((double)(rushingStat.RushAttempts / rushingStat.Games), 4) : 0,
                     RushingYardsPerGame = dataRush ? Math.Round((double)(rushingStat.Yards / rushingStat.Games), 4) : 0,
@@ -167,7 +168,7 @@ namespace Football.Services
                 return new RegressionModelPassCatchers
                 {
                     PlayerId = playerId,
-                    Season = CurrentSeason,
+                    Season = _season.CurrentSeason,
                     Age = data ? receivingStat.Age : 0,
                     TargetsPerGame = data ? Math.Round((double)(receivingStat.Targets / receivingStat.Games), 4) : 0,
                     ReceptionsPerGame = data ? Math.Round((double)(receivingStat.Receptions / receivingStat.Games), 4) : 0,
@@ -206,8 +207,5 @@ namespace Football.Services
             }
             return fantasyPoints;
         }
-
-     
-        public int CurrentSeason => int.Parse(_configuration["CurrentSeason"]);
     }
 }

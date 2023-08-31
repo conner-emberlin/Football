@@ -1,7 +1,7 @@
 ﻿using Football.Interfaces;
 using Football.Models;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Football.Services
@@ -11,13 +11,13 @@ namespace Football.Services
         private readonly IFantasyRepository _fantasyRepository;
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
-        private readonly IConfiguration _configuration;
-        public FantasyService(IFantasyRepository fantasyRepository, ILogger logger, IMemoryCache cache, IConfiguration configuration)
+        private readonly FantasyScoring _scoring;
+        public FantasyService(IFantasyRepository fantasyRepository, ILogger logger, IMemoryCache cache, IOptionsMonitor<FantasyScoring> scoring)
         {
             _fantasyRepository = fantasyRepository;
             _logger = logger;
             _cache = cache;
-            _configuration = configuration;
+            _scoring = scoring.CurrentValue;
         }
         public async Task<double> CalculateTotalPoints(int playerId, int season)
         {
@@ -31,7 +31,7 @@ namespace Football.Services
             {
                 var fantasyPassing = await _fantasyRepository.GetFantasyPassing(playerId, season);
                 return fantasyPassing != null ?
-                    fantasyPassing.Yards * 0.04 + fantasyPassing.Touchdowns * PointsPerPassingTouchdown - fantasyPassing.Interceptions * PointsPerInterception
+                    fantasyPassing.Yards * 0.04 + fantasyPassing.Touchdowns * _scoring.PointsPerPassingTouchdown - fantasyPassing.Interceptions * _scoring.PointsPerInterception
                     : 0;
             }
             catch(Exception ex)
@@ -47,7 +47,7 @@ namespace Football.Services
             {
                 var fantasyRushing = await _fantasyRepository.GetFantasyRushing(playerId, season);
                 return fantasyRushing != null ?
-                    fantasyRushing.Yards * 0.1 + fantasyRushing.Touchdowns * 6 - fantasyRushing.Fumbles * PointsPerFumble
+                    fantasyRushing.Yards * 0.1 + fantasyRushing.Touchdowns * 6 - fantasyRushing.Fumbles * _scoring.PointsPerFumble
                     : 0;
             }
             catch(Exception ex)
@@ -63,7 +63,7 @@ namespace Football.Services
             {
                 var fantasyReceiving = await _fantasyRepository.GetFantasyReceiving(playerId, season);
                 return fantasyReceiving != null ?
-                    fantasyReceiving.Yards * 0.1 + fantasyReceiving.Touchdowns * 6 + fantasyReceiving.Receptions * PointsPerReception
+                    fantasyReceiving.Yards * 0.1 + fantasyReceiving.Touchdowns * 6 + fantasyReceiving.Receptions * _scoring.PointsPerReception
                     : 0;
             }
             catch(Exception ex)
@@ -122,9 +122,5 @@ namespace Football.Services
             }
             return rookiePoints;
         }
-        public int PointsPerReception => int.Parse(_configuration["FantasyScoring:PointsPerReception"]);
-        public int PointsPerPassingTouchdown => int.Parse(_configuration["FantasyScoring:PointsPerPassingTouchdown"]);
-        public int PointsPerInterception => int.Parse(_configuration["FantasyScoring:PointsPerInterception"]);
-        public int PointsPerFumble => int.Parse(_configuration["FantasyScoring:PointsPerFumble"]);
     }
 }

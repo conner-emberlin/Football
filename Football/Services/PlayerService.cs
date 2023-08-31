@@ -1,7 +1,8 @@
 ﻿using Football.Interfaces;
 using Football.Models;
-using Microsoft.Extensions.Configuration;
 using Serilog;
+using Microsoft.Extensions.Options;
+
 
 namespace Football.Services
 {
@@ -10,13 +11,14 @@ namespace Football.Services
         private readonly IPlayerRepository _playerRepository;
         private readonly IFantasyService _fantasyService;
         private readonly ILogger _logger;
-        private readonly IConfiguration _configuration;
-        public PlayerService(IPlayerRepository playerRepository, IFantasyService fantasyService, ILogger logger, IConfiguration configuration)
+        private readonly Season _season;
+        public PlayerService(IPlayerRepository playerRepository, IFantasyService fantasyService, 
+            ILogger logger, IOptionsMonitor<Season> season)
         {
             _playerRepository = playerRepository;
             _fantasyService = fantasyService;   
             _logger = logger;
-            _configuration = configuration;
+            _season = season.CurrentValue;
         }
 
         public async Task<Player> GetPlayer(int playerId)
@@ -74,7 +76,7 @@ namespace Football.Services
         {
             try
             {
-                var rookies = await GetCurrentRookies(CurrentSeason);
+                var rookies = await GetCurrentRookies(_season.CurrentSeason);
                 if (rookies.Select(r => r.PlayerId).Contains(playerId))
                 {
                     return rookies.Where(p => p.PlayerId == playerId).ToList().FirstOrDefault().TeamDrafted;
@@ -171,6 +173,5 @@ namespace Football.Services
         {
             return await _playerRepository.GetCurrentRookies(season);
         }
-        public int CurrentSeason => int.Parse(_configuration["CurrentSeason"]);
     }
 }

@@ -4,11 +4,10 @@ using Football.Services;
 using Football.Repository;
 using News.Interfaces;
 using News.Services;
-using System.Runtime.CompilerServices;
+using Football.Models;
 using System.Data;
 using System.Data.SqlClient;
 using Serilog;
-using Serilog.Sinks.Seq;
 using Microsoft.Extensions.Caching.Memory;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -57,6 +56,15 @@ builder.Services.AddScoped<IAdjustmentRepository, AdjustmentRepository>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
+
+//configurate app settings
+builder.Services.Configure<Season>(builder.Configuration.GetSection("Season"));
+builder.Services.Configure<ReplacementLevels>(builder.Configuration.GetSection("ReplacementLevels"));
+builder.Services.Configure<FantasyScoring>(builder.Configuration.GetSection("FantasyScoring"));
+builder.Services.Configure<Projections>(builder.Configuration.GetSection("Projections"));
+builder.Services.Configure<Starters>(builder.Configuration.GetSection("Starters"));
+builder.Services.Configure<Tunings>(builder.Configuration.GetSection("Tunings"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

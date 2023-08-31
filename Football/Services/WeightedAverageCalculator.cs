@@ -1,18 +1,18 @@
 ﻿using Football.Models;
 using Football.Interfaces;
 using Serilog;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Football.Services
 {
     public class WeightedAverageCalculator : IWeightedAverageCalculator
     {
         private readonly ILogger _logger;
-        private readonly IConfiguration _configuration;
-        public WeightedAverageCalculator(ILogger logger, IConfiguration configuration)
+        private readonly Tunings _tunings;
+        public WeightedAverageCalculator(ILogger logger, IOptionsMonitor<Tunings> tunings)
         {
             _logger = logger;
-            _configuration = configuration;
+            _tunings = tunings.CurrentValue;
         }
         public PassingStatistic WeightedAverage(List<PassingStatisticWithSeason> passing)
         {
@@ -31,9 +31,9 @@ namespace Football.Services
                 try
                 {
                     var maxSeason = passing.Select(ps => ps.Season).Max();
-                    double maxSeasonWeight = passing.Count > 1 ? Weight : SecondYearQBLeap;
+                    double maxSeasonWeight = passing.Count > 1 ? _tunings.Weight : _tunings.SecondYearQBLeap;
                     double previousSeasonCount = (double)passing.Count - 1;
-                    double previousSeasonWeight = passing.Count > 1 ? ((1 - Weight) * ((double)1 / previousSeasonCount)) : 0;
+                    double previousSeasonWeight = passing.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasonCount)) : 0;
 
                     foreach (var s in passing)
                     {
@@ -96,9 +96,9 @@ namespace Football.Services
                 try
                 {
                     var maxSeason = rushing.Select(r => r.Season).Max();
-                    double maxSeasonWeight = rushing.Count > 1 ? Weight : SecondYearRBLeap;
+                    double maxSeasonWeight = rushing.Count > 1 ? _tunings.Weight : _tunings.SecondYearRBLeap;
                     double previousSeasonCount = (double)rushing.Count - 1;
-                    double previousSeasonWeight = rushing.Count > 1 ? ((1 - Weight) * ((double)1 / previousSeasonCount)) : 0;
+                    double previousSeasonWeight = rushing.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasonCount)) : 0;
 
                     double averageRushAttempts = 0;
                     double averageYards = 0;
@@ -160,9 +160,9 @@ namespace Football.Services
                 try
                 {
                     var maxSeason = receiving.Select(r => r.Season).Max();
-                    double maxSeasonWeight = receiving.Count > 1 ? Weight : SecondYearWRLeap;
+                    double maxSeasonWeight = receiving.Count > 1 ? _tunings.Weight : _tunings.SecondYearWRLeap;
                     double previousSeasonCount = receiving.Count - 1;
-                    double previousSeasonWeight = receiving.Count > 1 ? ((1 - Weight) * ((double)1 / previousSeasonCount)) : 0;
+                    double previousSeasonWeight = receiving.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasonCount)) : 0;
 
                     double averageTargets = 0;
                     double averageReceptions = 0;
@@ -232,9 +232,9 @@ namespace Football.Services
                 {
                     double averageTotalPoints = 0;
                     var maxSeason = player.FantasySeasonGames.OrderByDescending(f => f.Season).FirstOrDefault().Season;
-                    double maxSeasonWeight = player.FantasySeasonGames.Count > 1 ? Weight : 1;
+                    double maxSeasonWeight = player.FantasySeasonGames.Count > 1 ? _tunings.Weight : 1;
                     double previousSeasonCount = player.FantasySeasonGames.Count - 1;
-                    double previousSeasonWeight = player.FantasySeasonGames.Count > 1 ? ((1 - Weight) * ((double)1 / previousSeasonCount)) : 0;
+                    double previousSeasonWeight = player.FantasySeasonGames.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasonCount)) : 0;
 
                     foreach (var fs in player.FantasySeasonGames)
                     {
@@ -264,9 +264,5 @@ namespace Football.Services
                 return null; 
             }
         }
-        public double Weight => Double.Parse(_configuration["Weight"]);
-        public double SecondYearWRLeap => Double.Parse(_configuration["SecondYearWRLeap"]);
-        public double SecondYearRBLeap => Double.Parse(_configuration["SecondYearRBLeap"]);
-        public double SecondYearQBLeap => Double.Parse(_configuration["SecondYearQBLeap"]);
     }
 }
