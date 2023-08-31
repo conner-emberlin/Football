@@ -1,4 +1,4 @@
-﻿@page "/Fantasy"
+﻿@page "/Fantasy/{id?}"
 <PageTitle>Fantasy</PageTitle>
 <h3>Fantasy</h3>
 
@@ -71,6 +71,9 @@ else if(!badRequestError && !fantasy.Any() && youTried)
 }
 
 @code {
+    [Parameter]
+    public string id { get; set; } = "";
+
     private string Value { get; set; } = "";
     private string Season { get; set; } = "";
     private Search search = new();
@@ -81,6 +84,25 @@ else if(!badRequestError && !fantasy.Any() && youTried)
     private List<FantasyPointsWithName> fantasy = new();
     private List<FantasyPointsTable> fantasyTable = new();
     private bool refreshed = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (id != null)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/name/" + id);
+            request.Headers.Add("Accept", "application/json");
+            var client = ClientFactory.CreateClient();
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                id = "";
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                this.Value = await JsonSerializer.DeserializeAsync<string>(responseStream, options);
+                await GetFantasy();
+            }
+        }
+    }
 
     private async Task GetFantasy()
     {

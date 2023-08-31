@@ -4,6 +4,7 @@
 @using System.Text.Json.Serialization
 @using Football.Models;
 @inject IHttpClientFactory ClientFactory
+@inject NavigationManager NavigationManager
 
 @if (header != "")
 {
@@ -507,6 +508,7 @@ else if (Type == "receiving" && !badRequestError && player != null)
          @if(youTriedToAdd && recsAdded > 0)
         {
             <text>Record Added</text>
+            
         }
         else if(youTriedToAdd && recsAdded == 0)
         {
@@ -645,12 +647,13 @@ else
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             passesUpdated = true;
+            NavigationManager.NavigateTo("/Players/" + PlayerId);
         }
         else
         {
             passesUpdated = false;
         }
-        youTriedToUpdate = true;
+        youTriedToUpdate = true;       
     }  
 
     private async Task AddNewPassing()
@@ -685,6 +688,7 @@ else
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             passesAdded = JsonSerializer.Deserialize<int>(responseStream, options);
+            NavigationManager.NavigateTo("/Players/" + PlayerId);
         }
         else
         {
@@ -708,6 +712,7 @@ else
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             rushesUpdated = true;
+            NavigationManager.NavigateTo("/Players/" + PlayerId);
         }
         else
         {
@@ -745,6 +750,7 @@ else
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             rushesAdded = JsonSerializer.Deserialize<int>(responseStream, options);
+            NavigationManager.NavigateTo("/Players/" + PlayerId);
         }
         else
         {
@@ -769,6 +775,7 @@ else
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             recsUpdated = true;
+            NavigationManager.NavigateTo("/Players/" + PlayerId);
         }
         else
         {
@@ -807,6 +814,7 @@ else
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             recsAdded = JsonSerializer.Deserialize<int>(responseStream, options);
+            NavigationManager.NavigateTo("/Players/" + PlayerId);
         }
         else
         {

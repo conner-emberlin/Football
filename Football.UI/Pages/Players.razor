@@ -1,4 +1,4 @@
-﻿@page "/Players"
+﻿@page "/Players/{id?}"
 <PageTitle>Players</PageTitle>
 <h4>Players</h4>
 
@@ -58,10 +58,11 @@
     }
 
 }
-@if(player.Name != null && !badRequestError && !add){
+@if(!String.IsNullOrEmpty(player.Name) && !badRequestError && !add){
     var photoPath = "https://localhost:7176/PlayerPhotos/" + player.PlayerId + ".png";
  <div>
 <b>Name</b> @player.Name <b>Position</b> @Position <b>Active</b> @Active
+     <b>Fantasy </b>   <a href="/Fantasy/@player.PlayerId"><span class="oi oi-badge" aria-hidden="true"></span></a>
 </div>
         <div>
         <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/PlayerPhotos/gen.png'">
@@ -74,7 +75,7 @@
             <a href="/ManageStats/passing/@player.PlayerId">&#9998</a>
         </div>
     }
-    @if(player.PassingStats.Count > 0)
+    @if(player.PassingStats.Any())
     {
         <div class="table_container"> 
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -222,6 +223,9 @@ else if(badRequestError)
 }
 
 @code{
+    [Parameter]
+    public string id { get; set; } = "";
+
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
     private bool badRequestError;
@@ -237,7 +241,27 @@ else if(badRequestError)
     public string NewActive { get; set; } = "";
     private bool itWorked = false;
     private bool youTried = false;
+    private bool showFantasy = false;
     private int recordsAdded = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!String.IsNullOrEmpty(id))
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/name/" + id );
+            request.Headers.Add("Accept", "application/json");
+            var client = ClientFactory.CreateClient();
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                id = "";
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                this.Value = await JsonSerializer.DeserializeAsync<string>(responseStream, options);
+                await GetPlayers();
+            }           
+        }
+    }
 
     public async Task GetPlayers()
     {
@@ -252,40 +276,21 @@ else if(badRequestError)
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             player = await JsonSerializer.DeserializeAsync<Player>(responseStream, options);
-
-            if(player.Active == 1)
-            {
-                Active = "Yes";
-            }
-            else
-            {
-                Active = "No";
-            }
-
-            if(player.Position == "WR/TE" && !player.IsTightEnd)
-            {
-                Position = "WR";
-            }
-            else if(player.Position == "WR/TE" && player.IsTightEnd)
-            {
-                Position = "TE";
-            }
-            else
-            {
-                Position = player.Position;
-            }
-
+            Active = player.Active == 1 ? "Yes" : "No";
+            Position = player.Position == "WR/TE" && player.IsTightEnd ? "TE"
+                        : player.Position == "WR/TE" && !player.IsTightEnd ? "WR"
+                        : player.Position;
         }
         else
         {
             badRequestError = true;
         }
         shouldRender = true;
-
     }
+
     private async Task<int> GetPlayerId(string name)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/name/" + name);
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/id/" + name);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);

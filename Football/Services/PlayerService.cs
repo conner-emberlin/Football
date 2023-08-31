@@ -79,7 +79,7 @@ namespace Football.Services
                 var rookies = await GetCurrentRookies(_season.CurrentSeason);
                 if (rookies.Select(r => r.PlayerId).Contains(playerId))
                 {
-                    return rookies.Where(p => p.PlayerId == playerId).ToList().FirstOrDefault().TeamDrafted;
+                    return rookies.Where(p => p.PlayerId == playerId).ToList().First().TeamDrafted;
                 }
                 else
                 {

@@ -28,13 +28,22 @@ namespace Football.Api.Controllers
                 return BadRequest("No player with that name");
             }
         }
-        [HttpGet("name/{name}")]
+        [HttpGet("id/{name}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> GetPlayerId(string name)
         {
             return Ok(await _playerService.GetPlayerId(name));
         }
+
+        [HttpGet("name/{id}")]
+        [ProducesResponseType(typeof(string), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<string>> GetPlayerName(int id)
+        {
+            return Ok(await _playerService.GetPlayerName(id));
+        }
+
 
         [HttpGet("games/{playerId}/{season}")]
         [ProducesResponseType(typeof(FantasySeasonGames), 200)]

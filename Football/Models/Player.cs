@@ -3,8 +3,8 @@
     public class Player
     {
         public int PlayerId { get; set; }
-        public string Name { get; set; }
-        public string? Position { get; set; }
+        public string Name { get; set; } = "";
+        public string Position { get; set; } = "";
         public int Active { get; set; }
         public bool IsTightEnd { get; set; }
         public List<PassingStatisticWithSeason>? PassingStats { get; set; }
