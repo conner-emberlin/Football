@@ -15,9 +15,9 @@ namespace Football.Api.Controllers
         }
 
         [HttpGet("espn")]
-        [ProducesResponseType(typeof(Root), 200)]
+        [ProducesResponseType(typeof(EspnNews), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<Root>> GetEspnNews()
+        public async Task<ActionResult<EspnNews>> GetEspnNews()
         {
             return Ok(await _newsService.GetEspnNews());
         }

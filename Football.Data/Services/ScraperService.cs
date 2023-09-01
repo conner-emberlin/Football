@@ -8,8 +8,8 @@ namespace Football.Data.Services
 {
     public class ScraperService : IScraperService
     {
-        private readonly Scraping _scraping;
-        public ScraperService(IOptionsMonitor<Scraping> scraping)
+        private readonly WeeklyScraping _scraping;
+        public ScraperService(IOptionsMonitor<WeeklyScraping> scraping)
         {
             _scraping = scraping.CurrentValue;
         }

@@ -12,9 +12,9 @@ namespace Football.Data.Services
         private readonly IUploadWeeklyDataRepository _uploadWeeklyDataRepository;
         private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
-        private readonly Scraping _scraping;
+        private readonly WeeklyScraping _scraping;
         public UploadWeeklyDataService(IScraperService scraperService, IUploadWeeklyDataRepository uploadWeeklyDataRepository, 
-            IPlayerService playerService, ILogger logger, IOptionsMonitor<Scraping> scraping)
+            IPlayerService playerService, ILogger logger, IOptionsMonitor<WeeklyScraping> scraping)
         {
             _scraperService = scraperService;
             _uploadWeeklyDataRepository = uploadWeeklyDataRepository;

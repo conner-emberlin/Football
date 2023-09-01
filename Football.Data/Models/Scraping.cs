@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace Football.Data.Models
 {
-    public class Scraping
+    public class WeeklyScraping
     {
         public string FantasyProsBaseURL { get; set; } = "";
         public string FantasyProsXPath { get; set; } = "";
+        public int CurrentWeek { get; set; }
     }
 }

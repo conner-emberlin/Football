@@ -4,6 +4,6 @@ namespace News.Interfaces {
 
     public interface INewsService
     {
-        public Task<Root> GetEspnNews(); 
+        public Task<EspnNews> GetEspnNews(); 
     }
 }

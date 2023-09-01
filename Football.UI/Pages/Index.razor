@@ -29,7 +29,7 @@
     protected override bool ShouldRender() => shouldRender;
     private bool badRequestError;
 
-    private Root root = new();
+    private EspnNews root = new();
     private List<Article> articles = new();
     protected override async Task OnInitializedAsync()
     {
@@ -41,7 +41,7 @@
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            root = await JsonSerializer.DeserializeAsync<Root>(responseStream, options);
+            root = await JsonSerializer.DeserializeAsync<EspnNews>(responseStream, options);
             articles = root.articles;
         }
         else

@@ -1,4 +1,5 @@
-﻿using News.Interfaces;
+﻿using Microsoft.Extensions.Options;
+using News.Interfaces;
 using News.Models;
 using System.Text.Json;
 
@@ -6,9 +7,15 @@ namespace News.Services
 {
     public class NewsService : INewsService
     {
-        public async Task<Root> GetEspnNews()
+        private readonly ESPN _espn;
+
+        public NewsService(IOptionsMonitor<ESPN> espn)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limt=25");
+            _espn = espn.CurrentValue;
+        }
+        public async Task<EspnNews> GetEspnNews()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, _espn.ESPNNewsURL);
             request.Headers.Add("Accept", "application/json");
             var client = new HttpClient();
             var response = await client.SendAsync(request);
@@ -16,7 +23,7 @@ namespace News.Services
             {
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<Root>(responseStream, options);
+                return await JsonSerializer.DeserializeAsync<EspnNews>(responseStream, options);
             }
             else return null;
         }
