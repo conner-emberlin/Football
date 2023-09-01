@@ -106,11 +106,7 @@ else if(!badRequestError && !fantasy.Any() && youTried)
 
     private async Task GetFantasy()
     {
-        var season = Season;
-        if(Season == "")
-        {
-            season = "0";
-        }
+        var season = Season == "" ? "0" : Season;
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/points/" + @Value + "/" + @season);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();

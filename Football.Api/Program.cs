@@ -1,5 +1,7 @@
 using Football.Api.Helpers;
 using Football.Interfaces;
+using Football.Data.Services;
+using Football.Data.Interfaces;
 using Football.Services;
 using Football.Repository;
 using News.Interfaces;
@@ -9,6 +11,8 @@ using System.Data;
 using System.Data.SqlClient;
 using Serilog;
 using Microsoft.Extensions.Caching.Memory;
+using Football.Data.Interfaces;
+using Football.Data.Repository;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -46,6 +50,9 @@ builder.Services.AddScoped<IDataUploadRepository, DataUploadRepository>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IAdjustmentCalculator, AdjustmentCalculator>();
 builder.Services.AddScoped<IAdjustmentRepository, AdjustmentRepository>();
+builder.Services.AddScoped<IScraperService, ScraperService>();
+builder.Services.AddScoped<IUploadWeeklyDataService, UploadWeeklyDataService>();
+builder.Services.AddScoped<IUploadWeeklyDataRepository, UploadWeeklyDataRepository>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
