@@ -124,7 +124,7 @@ namespace Football.Data.Services
                     ForcedFumbles = double.Parse(strings[i + 3].Trim()),
                     DefensiveTD = double.Parse(strings[i + 4].Trim()),
                     Safties = double.Parse(strings[i + 5].Trim()),
-                    SpecialTD = double.Parse(strings[i + 9].Trim()),
+                    SpecialTD = double.Parse(strings[i + 6].Trim()),
                 };
                 players.Add(parse);
             }

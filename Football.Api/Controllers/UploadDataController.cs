@@ -13,7 +13,7 @@ namespace Football.Api.Controllers
             _weeklyDataService = weeklyDataService;
         }
 
-        [HttpPost("weekly/upload/{position}/{week}/{season}")]
+        [HttpPost("weekly/{position}/{week}/{season}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadWeeklyData(int position, int season, int week)
