@@ -1,6 +1,7 @@
 ﻿using Football.Data.Interfaces;
 using Football.Data.Models;
 using Football.Interfaces;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Football.Data.Services
@@ -11,45 +12,44 @@ namespace Football.Data.Services
         private readonly IUploadWeeklyDataRepository _uploadWeeklyDataRepository;
         private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
-
-        private readonly string _xpath =  "//*[@id=\"data\"]/tbody";
-
+        private readonly Scraping _scraping;
         public UploadWeeklyDataService(IScraperService scraperService, IUploadWeeklyDataRepository uploadWeeklyDataRepository, 
-            IPlayerService playerService, ILogger logger )
+            IPlayerService playerService, ILogger logger, IOptionsMonitor<Scraping> scraping)
         {
             _scraperService = scraperService;
             _uploadWeeklyDataRepository = uploadWeeklyDataRepository;
             _playerService = playerService;
             _logger = logger;
+            _scraping = scraping.CurrentValue;
         }
         public async Task<int> UploadWeeklyQBData(int season, int week)
         {
             var url = _scraperService.FantasyProsURLFormatter("QB", season.ToString(), week.ToString());
-            var players = await WeeklyDataQB(_scraperService.ParseFantasyProsQBData(_scraperService.ScrapeData(url, _xpath)), season, week);
+            var players = await WeeklyDataQB(_scraperService.ParseFantasyProsQBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await _uploadWeeklyDataRepository.UploadWeeklyQBData(players);
         }
         public async Task<int> UploadWeeklyRBData(int season, int week)
         {
             var url = _scraperService.FantasyProsURLFormatter("RB", season.ToString(), week.ToString());
-            var players = await WeeklyDataRB(_scraperService.ParseFantasyProsRBData(_scraperService.ScrapeData(url, _xpath)), season, week);
+            var players = await WeeklyDataRB(_scraperService.ParseFantasyProsRBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await _uploadWeeklyDataRepository.UploadWeeklyRBData(players);
         }
         public async Task<int> UploadWeeklyWRData(int season, int week)
         {
             var url = _scraperService.FantasyProsURLFormatter("WR", season.ToString(), week.ToString());
-            var players = await WeeklyDataWR(_scraperService.ParseFantasyProsWRData(_scraperService.ScrapeData(url, _xpath)), season, week);
+            var players = await WeeklyDataWR(_scraperService.ParseFantasyProsWRData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await _uploadWeeklyDataRepository.UploadWeeklyWRData(players);
         }
         public async Task<int> UploadWeeklyTEData(int season, int week)
         {
             var url = _scraperService.FantasyProsURLFormatter("TE", season.ToString(), week.ToString());
-            var players = await WeeklyDataTE(_scraperService.ParseFantasyProsTEData(_scraperService.ScrapeData(url, _xpath)), season, week);
+            var players = await WeeklyDataTE(_scraperService.ParseFantasyProsTEData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await _uploadWeeklyDataRepository.UploadWeeklyTEData(players);
         }
         public async Task<int> UploadWeeklyDSTData(int season, int week)
         {
             var url = _scraperService.FantasyProsURLFormatter("DST", season.ToString(), week.ToString());
-            var players = await WeeklyDataDST(_scraperService.ParseFantasyProsDSTData(_scraperService.ScrapeData(url, _xpath)), season, week);
+            var players = await WeeklyDataDST(_scraperService.ParseFantasyProsDSTData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await _uploadWeeklyDataRepository.UploadWeeklyDSTData(players);
         }
 

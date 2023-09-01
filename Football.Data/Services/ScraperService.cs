@@ -1,16 +1,21 @@
 ﻿using Football.Data.Interfaces;
 using Football.Data.Models;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Options;
 using System.Text.RegularExpressions;
 
 namespace Football.Data.Services
 {
     public class ScraperService : IScraperService
-    {       
+    {
+        private readonly Scraping _scraping;
+        public ScraperService(IOptionsMonitor<Scraping> scraping)
+        {
+            _scraping = scraping.CurrentValue;
+        }
         public string FantasyProsURLFormatter(string position, string year, string week)
         {
-            var baseURL = "https://www.fantasypros.com/nfl/stats/";
-            return String.Format("{0}{1}.php?year={2}&week={3}&range=week", baseURL, position.ToLower(), year, week);
+            return String.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
         }
         public string[] ScrapeData(string url, string xpath)
         {

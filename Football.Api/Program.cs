@@ -11,8 +11,8 @@ using System.Data;
 using System.Data.SqlClient;
 using Serilog;
 using Microsoft.Extensions.Caching.Memory;
-using Football.Data.Interfaces;
 using Football.Data.Repository;
+using Football.Data.Models;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -64,6 +64,7 @@ builder.Services.Configure<FantasyScoring>(builder.Configuration.GetSection("Fan
 builder.Services.Configure<Projections>(builder.Configuration.GetSection("Projections"));
 builder.Services.Configure<Starters>(builder.Configuration.GetSection("Starters"));
 builder.Services.Configure<Tunings>(builder.Configuration.GetSection("Tunings"));
+builder.Services.Configure<Scraping>(builder.Configuration.GetSection("Scraping"));
 
 var app = builder.Build();
 
