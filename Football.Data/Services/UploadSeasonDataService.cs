@@ -6,65 +6,64 @@ using Serilog;
 
 namespace Football.Data.Services
 {
-    public class UploadWeeklyDataService : IUploadWeeklyDataService
+    public class UploadSeasonDataService : IUploadSeasonDataService
     {
         private readonly IScraperService _scraperService;
-        private readonly IUploadWeeklyDataRepository _uploadWeeklyDataRepository;
+        private readonly IUploadSeasonDataRepository _uploadSeasonDataRepository;
         private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
         private readonly WeeklyScraping _scraping;
-        public UploadWeeklyDataService(IScraperService scraperService, IUploadWeeklyDataRepository uploadWeeklyDataRepository, 
+        public UploadSeasonDataService(IScraperService scraperService, IUploadSeasonDataRepository uploadSeasonDataRepository,
             IPlayerService playerService, ILogger logger, IOptionsMonitor<WeeklyScraping> scraping)
         {
             _scraperService = scraperService;
-            _uploadWeeklyDataRepository = uploadWeeklyDataRepository;
+            _uploadSeasonDataRepository = uploadSeasonDataRepository;
             _playerService = playerService;
             _logger = logger;
             _scraping = scraping.CurrentValue;
         }
-        public async Task<int> UploadWeeklyQBData(int season, int week)
+        public async Task<int> UploadSeasonQBData(int season)
         {
-            var url = _scraperService.FantasyProsURLFormatter("QB", season.ToString(), week.ToString());
-            var players = await WeeklyDataQB(_scraperService.ParseFantasyProsQBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyQBData(players);
+            var url = _scraperService.FantasyProsURLFormatter("QB", season.ToString());
+            var players = await SeasonDataQB(_scraperService.ParseFantasyProsQBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
+            return await _uploadSeasonDataRepository.UploadSeasonQBData(players);
         }
-        public async Task<int> UploadWeeklyRBData(int season, int week)
+        public async Task<int> UploadSeasonRBData(int season)
         {
-            var url = _scraperService.FantasyProsURLFormatter("RB", season.ToString(), week.ToString());
-            var players = await WeeklyDataRB(_scraperService.ParseFantasyProsRBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyRBData(players);
+            var url = _scraperService.FantasyProsURLFormatter("RB", season.ToString());
+            var players = await SeasonDataRB(_scraperService.ParseFantasyProsRBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
+            return await _uploadSeasonDataRepository.UploadSeasonRBData(players);
         }
-        public async Task<int> UploadWeeklyWRData(int season, int week)
+        public async Task<int> UploadSeasonWRData(int season)
         {
-            var url = _scraperService.FantasyProsURLFormatter("WR", season.ToString(), week.ToString());
-            var players = await WeeklyDataWR(_scraperService.ParseFantasyProsWRData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyWRData(players);
+            var url = _scraperService.FantasyProsURLFormatter("WR", season.ToString());
+            var players = await SeasonDataWR(_scraperService.ParseFantasyProsWRData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
+            return await _uploadSeasonDataRepository.UploadSeasonWRData(players);
         }
-        public async Task<int> UploadWeeklyTEData(int season, int week)
+        public async Task<int> UploadSeasonTEData(int season)
         {
-            var url = _scraperService.FantasyProsURLFormatter("TE", season.ToString(), week.ToString());
-            var players = await WeeklyDataTE(_scraperService.ParseFantasyProsTEData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyTEData(players);
+            var url = _scraperService.FantasyProsURLFormatter("TE", season.ToString());
+            var players = await SeasonDataTE(_scraperService.ParseFantasyProsTEData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
+            return await _uploadSeasonDataRepository.UploadSeasonTEData(players);
         }
-        public async Task<int> UploadWeeklyDSTData(int season, int week)
+        public async Task<int> UploadSeasonDSTData(int season)
         {
-            var url = _scraperService.FantasyProsURLFormatter("DST", season.ToString(), week.ToString());
-            var players = await WeeklyDataDST(_scraperService.ParseFantasyProsDSTData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyDSTData(players);
+            var url = _scraperService.FantasyProsURLFormatter("DST", season.ToString());
+            var players = await SeasonDataDST(_scraperService.ParseFantasyProsDSTData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
+            return await _uploadSeasonDataRepository.UploadSeasonDSTData(players);
         }
 
-        private async Task<List<WeeklyDataQB>> WeeklyDataQB(List<FantasyProsStringParseQB> players, int season, int week)
+        private async Task<List<SeasonDataQB>> SeasonDataQB(List<FantasyProsStringParseQB> players, int season)
         {
-            List<WeeklyDataQB> weeklyData = new();
-            foreach(var p in players)
+            List<SeasonDataQB> seasonData = new();
+            foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
-                if (playerId > 0)
+                if (p.Games > 0)
                 {
-                    weeklyData.Add(new WeeklyDataQB
+                    seasonData.Add(new SeasonDataQB
                     {
                         Season = season,
-                        Week = week,
                         PlayerId = playerId,
                         Name = p.Name,
                         Completions = p.Completions,
@@ -85,21 +84,20 @@ namespace Football.Data.Services
                     _logger.Information("{name} does not exist in the Players table", p.Name);
                 }
             }
-            return weeklyData;
+            return seasonData;
         }
 
-        private async Task<List<WeeklyDataRB>> WeeklyDataRB(List<FantasyProsStringParseRB> players, int season, int week)
+        private async Task<List<SeasonDataRB>> SeasonDataRB(List<FantasyProsStringParseRB> players, int season)
         {
-            List<WeeklyDataRB> weeklyData = new();
+            List<SeasonDataRB> seasonData = new();
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
-                if (playerId > 0)
+                if (p.Games > 0)
                 {
-                    weeklyData.Add(new WeeklyDataRB
+                    seasonData.Add(new SeasonDataRB
                     {
                         Season = season,
-                        Week = week,
                         PlayerId = playerId,
                         Name = p.Name,
                         RushingAtt = p.RushingAtt,
@@ -118,20 +116,19 @@ namespace Football.Data.Services
                     _logger.Information("{name} does not exist in the Players table", p.Name);
                 }
             }
-            return weeklyData;
+            return seasonData;
         }
-        private async Task<List<WeeklyDataWR>> WeeklyDataWR(List<FantasyProsStringParseWR> players, int season, int week)
+        private async Task<List<SeasonDataWR>> SeasonDataWR(List<FantasyProsStringParseWR> players, int season)
         {
-            List<WeeklyDataWR> weeklyData = new();
+            List<SeasonDataWR> seasonData = new();
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
-                if (playerId > 0)
+                if (p.Games > 0)
                 {
-                    weeklyData.Add(new WeeklyDataWR
+                    seasonData.Add(new SeasonDataWR
                     {
                         Season = season,
-                        Week = week,
                         PlayerId = playerId,
                         Name = p.Name,
                         Receptions = p.Receptions,
@@ -151,21 +148,20 @@ namespace Football.Data.Services
                     _logger.Information("{name} does not exist in the Players table", p.Name);
                 }
             }
-            return weeklyData;
+            return seasonData;
         }
 
-        private async Task<List<WeeklyDataTE>> WeeklyDataTE(List<FantasyProsStringParseTE> players, int season, int week)
+        private async Task<List<SeasonDataTE>> SeasonDataTE(List<FantasyProsStringParseTE> players, int season)
         {
-            List<WeeklyDataTE> weeklyData = new();
+            List<SeasonDataTE> seasonData = new();
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
-                if (playerId > 0)
+                if ( p.Games > 0)
                 {
-                    weeklyData.Add(new WeeklyDataTE
+                    seasonData.Add(new SeasonDataTE
                     {
                         Season = season,
-                        Week = week,
                         PlayerId = playerId,
                         Name = p.Name,
                         Receptions = p.Receptions,
@@ -185,21 +181,20 @@ namespace Football.Data.Services
                     _logger.Information("{name} does not exist in the Players table", p.Name);
                 }
             }
-            return weeklyData;
+            return seasonData;
         }
 
-        private async Task<List<WeeklyDataDST>> WeeklyDataDST(List<FantasyProsStringParseDST> players, int season, int week)
+        private async Task<List<SeasonDataDST>> SeasonDataDST(List<FantasyProsStringParseDST> players, int season)
         {
-            List<WeeklyDataDST> weeklyData = new();
+            List<SeasonDataDST> seasonData = new();
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
-                if (playerId > 0)
+                if (p.Games > 0)
                 {
-                    weeklyData.Add(new WeeklyDataDST
+                    seasonData.Add(new SeasonDataDST
                     {
                         Season = season,
-                        Week = week,
                         PlayerId = playerId,
                         Name = p.Name,
                         Sacks = p.Sacks,
@@ -217,8 +212,9 @@ namespace Football.Data.Services
                     _logger.Information("{name} does not exist in the Players table", p.Name);
                 }
             }
-            return weeklyData;
+            return seasonData;
         }
 
     }
 }
+

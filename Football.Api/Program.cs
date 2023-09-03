@@ -54,6 +54,8 @@ builder.Services.AddScoped<IAdjustmentRepository, AdjustmentRepository>();
 builder.Services.AddScoped<IScraperService, ScraperService>();
 builder.Services.AddScoped<IUploadWeeklyDataService, UploadWeeklyDataService>();
 builder.Services.AddScoped<IUploadWeeklyDataRepository, UploadWeeklyDataRepository>();
+builder.Services.AddScoped<IUploadSeasonDataService, UploadSeasonDataService>();
+builder.Services.AddScoped<IUploadSeasonDataRepository, UploadSeasonDataRepository>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);

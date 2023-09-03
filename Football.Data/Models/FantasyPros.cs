@@ -12,6 +12,7 @@
         public double RushingYds { get; set; } 
         public double RushingTD { get; set; } 
         public double Fumbles { get; set; } 
+        public double Games { get; set; }
     }
 
     public class FantasyProsStringParseQB
@@ -27,6 +28,7 @@
         public double RushingYards { get; set; }
         public double RushingTD { get; set; }
         public double Fumbles { get; set; }
+        public double Games { get; set; }
     }
 
     public class FantasyProsStringParseRB
@@ -40,6 +42,7 @@
         public double Yards { get; set; }
         public double ReceivingTD { get; set; }
         public double Fumbles { get; set; }
+        public double Games { get; set; }
     }
     public class FantasyProsStringParseTE
     {
@@ -53,6 +56,7 @@
         public double RushingYds { get; set; }
         public double RushingTD { get; set; }
         public double Fumbles { get; set; }
+        public double Games { get; set; }
     }
     public class FantasyProsStringParseDST
     {
@@ -64,6 +68,7 @@
         public double DefensiveTD { get; set; }
         public double Safties { get; set; }
         public double SpecialTD { get; set; }
+        public double Games { get; set; }
     }
 
 

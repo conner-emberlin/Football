@@ -17,6 +17,11 @@ namespace Football.Data.Services
         {
             return String.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
         }
+        public string FantasyProsURLFormatter(string position, string year)
+        {
+            return String.Format("{0}{1}.php?year={2}", _scraping.FantasyProsBaseURL, position.ToLower(), year);
+        }
+
         public string[] ScrapeData(string url, string xpath)
         {
             var web = new HtmlWeb();
@@ -32,17 +37,18 @@ namespace Football.Data.Services
             for (int i = 0; i < strings.Length - 15; i += 15)
             {
                 FantasyProsStringParseWR parse = new()
-                {                    
+                {
                     Name = FormatName(strings[i]),
                     Receptions = double.Parse(Regex.Match(strings[i].Trim(), @"\d+$", RegexOptions.RightToLeft).Value),
                     Targets = double.Parse(strings[i + 1].Trim()),
                     Yards = double.Parse(strings[i + 2].Trim()),
-                    Long = double.Parse(strings[i + 3].Trim()),
-                    TD = double.Parse(strings[i + 5].Trim()),
-                    RushingAtt = double.Parse(strings[i + 6].Trim()),
-                    RushingYds = double.Parse(strings[i + 7].Trim()),
-                    RushingTD = double.Parse(strings[i + 8].Trim()),
-                    Fumbles = double.Parse(strings[i + 9].Trim()),
+                    Long = double.Parse(strings[i + 4].Trim()),
+                    TD = double.Parse(strings[i + 6].Trim()),
+                    RushingAtt = double.Parse(strings[i + 7].Trim()),
+                    RushingYds = double.Parse(strings[i + 8].Trim()),
+                    RushingTD = double.Parse(strings[i + 9].Trim()),
+                    Fumbles = double.Parse(strings[i + 10].Trim()),
+                    Games = double.Parse(strings[i + 11].Trim()),
                 };
                 players.Add(parse);
             }
@@ -62,8 +68,9 @@ namespace Football.Data.Services
                     Receptions = double.Parse(strings[i + 5].Trim()),
                     Targets = double.Parse(strings[i + 6].Trim()),
                     Yards = double.Parse(strings[i + 7].Trim()),
-                    ReceivingTD = double.Parse(strings[i + 9].Trim()),
-                    Fumbles = double.Parse(strings[i + 10].Trim())
+                    ReceivingTD = double.Parse(strings[i + 10].Trim()),
+                    Fumbles = double.Parse(strings[i + 11].Trim()),
+                    Games = double.Parse(strings[i + 12].Trim()),
                 };
                 players.Add(parse);
             }
@@ -88,6 +95,7 @@ namespace Football.Data.Services
                     RushingYards = double.Parse(strings[i + 9].Trim()),
                     RushingTD = double.Parse(strings[i + 10].Trim()),
                     Fumbles = double.Parse(strings[i + 11].Trim()),
+                    Games = double.Parse(strings[i + 12].Trim()),
                 };
                 players.Add(parse);
             }
@@ -104,12 +112,13 @@ namespace Football.Data.Services
                     Receptions = double.Parse(Regex.Match(strings[i].Trim(), @"\d+$", RegexOptions.RightToLeft).Value),
                     Targets = double.Parse(strings[i + 1].Trim()),
                     Yards = double.Parse(strings[i + 2].Trim()),
-                    Long = double.Parse(strings[i + 3].Trim()),
-                    TD = double.Parse(strings[i + 5].Trim()),
-                    RushingAtt = double.Parse(strings[i + 6].Trim()),
-                    RushingYds = double.Parse(strings[i + 7].Trim()),
-                    RushingTD = double.Parse(strings[i + 8].Trim()),
-                    Fumbles = double.Parse(strings[i + 9].Trim()),
+                    Long = double.Parse(strings[i + 4].Trim()),
+                    TD = double.Parse(strings[i + 6].Trim()),
+                    RushingAtt = double.Parse(strings[i + 7].Trim()),
+                    RushingYds = double.Parse(strings[i + 8].Trim()),
+                    RushingTD = double.Parse(strings[i + 9].Trim()),
+                    Fumbles = double.Parse(strings[i + 10].Trim()),
+                    Games = double.Parse(strings[i + 11].Trim()),
                 };
                 players.Add(parse);
             }
@@ -130,6 +139,7 @@ namespace Football.Data.Services
                     DefensiveTD = double.Parse(strings[i + 4].Trim()),
                     Safties = double.Parse(strings[i + 5].Trim()),
                     SpecialTD = double.Parse(strings[i + 6].Trim()),
+                    Games = double.Parse(strings[i + 7].Trim()),
                 };
                 players.Add(parse);
             }
