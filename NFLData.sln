@@ -20,7 +20,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.Data", "Football.Data\Football.Data.csproj", "{D901228F-DA3D-43A2-8B66-D45C397E6B7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.Fantasy", "Football.Fantasy\Football.Fantasy.csproj", "{F6A39569-6AA8-45EC-A248-5E83B4215C84}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.Fantasy", "Football.Fantasy\Football.Fantasy.csproj", "{F6A39569-6AA8-45EC-A248-5E83B4215C84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.Projections", "Football.Projections\Football.Projections.csproj", "{02F2086A-AFFD-445E-8965-06DD33BCC1A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +54,10 @@ Global
 		{F6A39569-6AA8-45EC-A248-5E83B4215C84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6A39569-6AA8-45EC-A248-5E83B4215C84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6A39569-6AA8-45EC-A248-5E83B4215C84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02F2086A-AFFD-445E-8965-06DD33BCC1A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02F2086A-AFFD-445E-8965-06DD33BCC1A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02F2086A-AFFD-445E-8965-06DD33BCC1A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02F2086A-AFFD-445E-8965-06DD33BCC1A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

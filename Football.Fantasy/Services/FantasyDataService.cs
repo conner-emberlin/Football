@@ -70,7 +70,14 @@ namespace Football.Fantasy.Services
                count += await  _fantasyData.PostSeasonFantasy(fp);
             }
             return count;
-
+        }
+        public async Task<List<Player>> GetPlayersByPosition(string position)
+        {
+            return await _fantasyData.GetPlayersByPosition(position);
+        }
+        public async Task<Player> GetPlayer(int playerId)
+        {
+            return await _fantasyData.GetPlayer(playerId);
         }
     }
 }

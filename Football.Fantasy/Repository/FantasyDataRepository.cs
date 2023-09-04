@@ -35,5 +35,20 @@ namespace Football.Fantasy.Repository
             return await _dbConnection.ExecuteAsync(query, data);
 
         }
+        public async Task<List<Player>> GetPlayersByPosition(string position)
+        {
+            var query = $@"SELECT [PlayerId], [Name], [Position], [Active]
+                            FROM [dbo].TempPlayer
+                            WHERE [Position] = @position";
+            return (await _dbConnection.QueryAsync<Player>(query, new { position })).ToList();
+        }
+
+        public async Task<Player> GetPlayer(int playerId)
+        {
+            var query = $@"SELECT [PlayerId], [Name], [Position], [Active]
+                        FROM [dbo].TempPlayer
+                        WHERE [PlayerId] = @playerId";
+            return (await _dbConnection.QueryAsync<Player>(query, new { playerId })).First();
+        }
     }
 }

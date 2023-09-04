@@ -17,7 +17,8 @@ using News.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Repository;
 using Football.Fantasy.Services;
-
+using Football.Projections.Interfaces;
+using Football.Projections.Services;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -65,6 +66,10 @@ builder.Services.AddScoped<IFantasyDataRepository, FantasyDataRepository>();
 builder.Services.AddScoped<IFantasyDataService, FantasyDataService>();
 builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IMatrixCalculator, MatrixCalculator>();
+builder.Services.AddScoped<IProjectionService, ProjectionService>();
+builder.Services.AddScoped<IRegressionService, RegressionService>();
+builder.Services.AddScoped<IStatProjectionCalculator, StatProjectionCalculator>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
