@@ -14,6 +14,10 @@ using Microsoft.Extensions.Caching.Memory;
 using Football.Data.Repository;
 using Football.Data.Models;
 using News.Models;
+using Football.Fantasy.Interfaces;
+using Football.Fantasy.Repository;
+using Football.Fantasy.Services;
+
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -56,6 +60,11 @@ builder.Services.AddScoped<IUploadWeeklyDataService, UploadWeeklyDataService>();
 builder.Services.AddScoped<IUploadWeeklyDataRepository, UploadWeeklyDataRepository>();
 builder.Services.AddScoped<IUploadSeasonDataService, UploadSeasonDataService>();
 builder.Services.AddScoped<IUploadSeasonDataRepository, UploadSeasonDataRepository>();
+builder.Services.AddScoped<IFantasyCalculator, FantasyCalculator>();
+builder.Services.AddScoped<IFantasyDataRepository, FantasyDataRepository>();
+builder.Services.AddScoped<IFantasyDataService, FantasyDataService>();
+builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);

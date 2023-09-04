@@ -1,5 +1,7 @@
 ﻿using Football.Interfaces;
 using Football.Models;
+using Football.Fantasy.Interfaces;
+using Football.Fantasy.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Football.Api.Controllers
@@ -10,11 +12,23 @@ namespace Football.Api.Controllers
     {
         private readonly IFantasyService _fantasyService;
         private readonly IPlayerService _playerService;
-        public FantasyController(IFantasyService fantasyService, IPlayerService playerService)
+        private readonly IFantasyDataService _fantasyDataService;
+        public FantasyController(IFantasyService fantasyService, IPlayerService playerService, IFantasyDataService fantasyDataService)
         {
             _fantasyService = fantasyService;
             _playerService = playerService;
+            _fantasyDataService = fantasyDataService;   
         }
+
+        [HttpPost("data/{position}/{season}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> RefreshFantasyPoints( int season, string position)
+        {
+            return Ok(await _fantasyDataService.PostSeasonFantasy(season, position));
+        }
+
+
         //POST fantasy results for a season/position (delete existing ones for the season/position)
         [HttpPost("refresh/{name}/{season}")]
         [ProducesResponseType(typeof(double), 200)]
