@@ -24,7 +24,9 @@ namespace Football.Fantasy.Services
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Games = stat.Games,
-                FantasyPoints = points
+                FantasyPoints = points,
+                Name = stat.Name,
+                Position = "QB"
             };
         }
         public SeasonFantasy CalculateRBFantasy(SeasonDataRB stat)
@@ -37,7 +39,9 @@ namespace Football.Fantasy.Services
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Games = stat.Games,
-                FantasyPoints = points
+                FantasyPoints = points,
+                Name = stat.Name,
+                Position = "RB"
             };
         }
         public SeasonFantasy CalculateWRFantasy(SeasonDataWR stat)
@@ -50,7 +54,9 @@ namespace Football.Fantasy.Services
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Games = stat.Games,
-                FantasyPoints = points
+                FantasyPoints = points,
+                Name = stat.Name,
+                Position = "WR"
             };
         }
         public SeasonFantasy CalculateTEFantasy(SeasonDataTE stat)
@@ -63,7 +69,9 @@ namespace Football.Fantasy.Services
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Games = stat.Games,
-                FantasyPoints = points
+                FantasyPoints = points,
+                Name = stat.Name,
+                Position = "TE"
             };
         }
         public SeasonFantasy CalculateDSTFantasy(SeasonDataDST stat)
@@ -74,7 +82,9 @@ namespace Football.Fantasy.Services
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Games = stat.Games,
-                FantasyPoints = points
+                FantasyPoints = points,
+                Name = stat.Name,
+                Position = "DST"
             };
         }
 

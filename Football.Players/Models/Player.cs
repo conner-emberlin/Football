@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Football.Fantasy.Models
+namespace Football.Players.Models
 {
-    public class SeasonProjection
+    public class Player
     {
         public int PlayerId { get; set; }
         public string Name { get; set; } = "";
         public string Position { get; set; } = "";
-        public double ProjectedPoints { get; set; }
+        public int Active { get; set; }
     }
 }

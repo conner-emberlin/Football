@@ -163,6 +163,12 @@ namespace Football.Repository
             var id = await _dbConnection.QueryFirstOrDefaultAsync<int>(query, new { name });
             return id;
         }
+        public async Task<int> GetNextPlayerId()
+        {
+            var query = $@"SELECT MAX([PlayerId]) from [dbo].TempPlayer";
+            var id = (await _dbConnection.QueryAsync<int>(query)).First();
+            return id + 1;
+        }
         public async Task<int> AddPassingStat(PassingStatisticWithSeason pass, int playerId)
         {
             var query = _sqlQueryService.AddPassingStat();

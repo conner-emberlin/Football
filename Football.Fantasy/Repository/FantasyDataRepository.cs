@@ -1,6 +1,7 @@
 ﻿using Football.Data.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
+using Football.Players.Models;
 using System.Data;
 using Dapper;
 
@@ -15,7 +16,7 @@ namespace Football.Fantasy.Repository
         }
         public async Task<SeasonFantasy> GetSeasonFantasy(int playerId, int season)
         {
-            var query = $@"SELECT [PlayerId], [Season], [Games], [FantasyPoints]
+            var query = $@"SELECT [PlayerId], [Season], [Games], [FantasyPoints, [Name], [Position]
                             FROM [dbo].SeasonFantasyData
                             WHERE [PlayerId] = @playerId
                             AND [Season] = @season";
@@ -23,32 +24,17 @@ namespace Football.Fantasy.Repository
         }
         public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId)
         {
-            var query = $@"SELECT [PlayerId], [Season], [Games], [FantasyPoints]
+            var query = $@"SELECT [PlayerId], [Season], [Games], [FantasyPoints], [Name], [Position]
                             FROM [dbo].SeasonFantasyData
                             WHERE [PlayerId] = @playerId";
             return (await _dbConnection.QueryAsync<SeasonFantasy>(query, new { playerId })).ToList();
         }
         public async Task<int> PostSeasonFantasy(SeasonFantasy data)
         {
-            var query = $@"INSERT INTO [dbo].SeasonFantasyData (PlayerId, Season, Games, FantasyPoints)
-                            VALUES (@PlayerId, @Season, @Games, @FantasyPoints)";
+            var query = $@"INSERT INTO [dbo].SeasonFantasyData (PlayerId, Season, Games, FantasyPoints, Name, Position)
+                            VALUES (@PlayerId, @Season, @Games, @FantasyPoints, @Name, @Position)";
             return await _dbConnection.ExecuteAsync(query, data);
 
-        }
-        public async Task<List<Player>> GetPlayersByPosition(string position)
-        {
-            var query = $@"SELECT [PlayerId], [Name], [Position], [Active]
-                            FROM [dbo].TempPlayer
-                            WHERE [Position] = @position";
-            return (await _dbConnection.QueryAsync<Player>(query, new { position })).ToList();
-        }
-
-        public async Task<Player> GetPlayer(int playerId)
-        {
-            var query = $@"SELECT [PlayerId], [Name], [Position], [Active]
-                        FROM [dbo].TempPlayer
-                        WHERE [PlayerId] = @playerId";
-            return (await _dbConnection.QueryAsync<Player>(query, new { playerId })).First();
         }
     }
 }

@@ -6,8 +6,8 @@ using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 using Microsoft.Extensions.Options;
 using Football.Fantasy.Models;
-using Football.Data.Models;
 using Football.Projections.Models;
+using Football.Players.Interfaces;
 
 namespace Football.Projections.Services
 {
@@ -18,25 +18,59 @@ namespace Football.Projections.Services
         private readonly ReplacementLevels _replacementLevels;
         private readonly Football.Models.Projections _projections;
         private readonly Starters _starters;
+        private readonly Season _season;
         private readonly IFantasyDataService _fantasyService;
         private readonly IStatisticsService _statisticsService;
         private readonly IMatrixCalculator _matrixCalculator;
         private readonly IStatProjectionCalculator _statCalculator;
-        private readonly IRegressionService _regressionService;        
+        private readonly IRegressionService _regressionService;
+        private readonly IPlayersService _playersService;
 
         public ProjectionService(IRegressionService regressionService, IFantasyDataService fantasyService, IOptionsMonitor<ReplacementLevels> replacementLevels, IOptionsMonitor<Football.Models.Projections> projections, 
-            IMemoryCache cache, ILogger logger, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator, IStatisticsService statisticsService, IOptionsMonitor<Starters> starters)
+            IMemoryCache cache, ILogger logger, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
+            IStatisticsService statisticsService, IOptionsMonitor<Starters> starters, IOptionsMonitor<Season> season, IPlayersService playersService)
         {
             _regressionService = regressionService;
             _replacementLevels = replacementLevels.CurrentValue;
             _projections = projections.CurrentValue;
             _starters = starters.CurrentValue;
+            _season = season.CurrentValue;
             _cache = cache;
             _logger = logger;
             _fantasyService = fantasyService;
             _matrixCalculator = matrixCalculator;
             _statCalculator = statCalculator;
             _statisticsService = statisticsService;
+            _playersService = playersService;
+        }
+        public async Task<List<SeasonFlex>> SeasonFlexRankings()
+        {
+            List<SeasonFlex> flexRankings = new();
+            var qbProjections = (await GetSeasonProjections("QB")).ToList();
+            var rbProjections = (await GetSeasonProjections("RB")).ToList();
+            var wrProjections = (await GetSeasonProjections("WR")).ToList();
+            var teProjections = (await GetSeasonProjections("TE")).ToList();
+            try
+            {
+                var rankings = qbProjections.Concat(rbProjections).Concat(wrProjections).Concat(teProjections).ToList();
+                foreach (var rank in rankings)
+                {
+                    flexRankings.Add(new SeasonFlex
+                    {
+                        PlayerId = rank.PlayerId,
+                        Name = rank.Name,
+                        Position = rank.Position,
+                        ProjectedPoints = rank.ProjectedPoints,
+                        Vorp = rank.ProjectedPoints - await GetReplacementPoints(rank.Position)
+                    });
+                }
+                return flexRankings.OrderByDescending(f => f.Vorp).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.ToString() + Environment.NewLine + ex.StackTrace);
+                throw;
+            }
         }
         public async Task<IEnumerable<SeasonProjection>> GetSeasonProjections(string position)
         {
@@ -86,12 +120,13 @@ namespace Football.Projections.Services
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = (int)typeof(T).GetProperties()[0].GetValue(model[i]);
-                var player = await _fantasyService.GetPlayer(playerId);
+                var player = await _playersService.GetPlayer(playerId);
                 if (player.Active == 1)
                 {
                     projections.Add(new SeasonProjection
                     {
                         PlayerId = playerId,
+                        Season = _season.CurrentSeason,
                         Name = player.Name,
                         Position = player.Position,
                         ProjectedPoints = results[i]
@@ -112,7 +147,7 @@ namespace Football.Projections.Services
 
         private async Task<List<SeasonFantasy>> SeasonFantasyProjectionModel(string position)
         {
-            var players = await _fantasyService.GetPlayersByPosition(position);
+            var players = await _playersService.GetPlayersByPosition(position);
             List<SeasonFantasy> seasonFantasy = new();
             foreach(var player in players) 
             {
@@ -127,7 +162,7 @@ namespace Football.Projections.Services
 
         private async Task<List<QBModelSeason>> QBProjectionModel()
         {
-            var players = await _fantasyService.GetPlayersByPosition("QB");
+            var players = await _playersService.GetPlayersByPosition("QB");
             List<QBModelSeason> qbModel = new();
             foreach(var player in players)
             {
@@ -141,7 +176,7 @@ namespace Football.Projections.Services
         }
         private async Task<List<RBModelSeason>> RBProjectionModel()
         {
-            var players = await _fantasyService.GetPlayersByPosition("RB");
+            var players = await _playersService.GetPlayersByPosition("RB");
             List<RBModelSeason> rbModel = new();
             foreach (var player in players)
             {
@@ -155,7 +190,7 @@ namespace Football.Projections.Services
         }
         private async Task<List<WRModelSeason>> WRProjectionModel()
         {
-            var players = await _fantasyService.GetPlayersByPosition("WR");
+            var players = await _playersService.GetPlayersByPosition("WR");
             List<WRModelSeason> wrModel = new();
             foreach (var player in players)
             {
@@ -169,7 +204,7 @@ namespace Football.Projections.Services
         }
         private async Task<List<TEModelSeason>> TEProjectionModel()
         {
-            var players = await _fantasyService.GetPlayersByPosition("TE");
+            var players = await _playersService.GetPlayersByPosition("TE");
             List<TEModelSeason> teModel = new();
             foreach (var player in players)
             {

@@ -10,17 +10,17 @@ namespace Football.Data.Services
     {
         private readonly IScraperService _scraperService;
         private readonly IUploadSeasonDataRepository _uploadSeasonDataRepository;
-        private readonly IPlayerService _playerService;
         private readonly ILogger _logger;
+        private readonly IPlayerService _playerService;
         private readonly WeeklyScraping _scraping;
         public UploadSeasonDataService(IScraperService scraperService, IUploadSeasonDataRepository uploadSeasonDataRepository,
-            IPlayerService playerService, ILogger logger, IOptionsMonitor<WeeklyScraping> scraping)
+             ILogger logger, IOptionsMonitor<WeeklyScraping> scraping, IPlayerService playerService)
         {
             _scraperService = scraperService;
             _uploadSeasonDataRepository = uploadSeasonDataRepository;
-            _playerService = playerService;
             _logger = logger;
             _scraping = scraping.CurrentValue;
+            _playerService = playerService; 
         }
         public async Task<int> UploadSeasonQBData(int season)
         {

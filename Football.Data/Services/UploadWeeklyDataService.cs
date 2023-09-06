@@ -59,7 +59,7 @@ namespace Football.Data.Services
             foreach(var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
-                if (playerId > 0)
+                if (p.Games > 0)
                 {
                     weeklyData.Add(new WeeklyDataQB
                     {
@@ -94,7 +94,7 @@ namespace Football.Data.Services
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
-                if (playerId > 0)
+                if (p.Games > 0)
                 {
                     weeklyData.Add(new WeeklyDataRB
                     {
@@ -126,7 +126,7 @@ namespace Football.Data.Services
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
-                if (playerId > 0)
+                if (p.Games > 0)
                 {
                     weeklyData.Add(new WeeklyDataWR
                     {
@@ -160,7 +160,7 @@ namespace Football.Data.Services
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
-                if (playerId > 0)
+                if (p.Games > 0)
                 {
                     weeklyData.Add(new WeeklyDataTE
                     {
@@ -194,7 +194,7 @@ namespace Football.Data.Services
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
-                if (playerId > 0)
+                if (p.Games > 0)
                 {
                     weeklyData.Add(new WeeklyDataDST
                     {

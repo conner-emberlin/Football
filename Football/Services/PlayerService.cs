@@ -102,6 +102,11 @@ namespace Football.Services
         {
             return await _playerRepository.GetPlayerId(name);
         }
+
+        public async Task<int> GetNextPlayerId()
+        {
+            return await _playerRepository.GetNextPlayerId();
+        }
         public async Task<List<FantasySeasonGames>> GetFantasySeasonGames(int playerId)
         {
             var games = await _playerRepository.GetFantasySeasonGames(playerId);

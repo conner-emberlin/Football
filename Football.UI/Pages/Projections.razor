@@ -3,6 +3,7 @@
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @using Football.Models;
+@using Football.Projections.Models;
 @inject IHttpClientFactory ClientFactory
 
 <h4>2023 Projections</h4>
@@ -51,7 +52,6 @@ else if(players.Count > 0)
             <tr>
                 <th>Rank</th>
                 <th>Name</th>
-                <th>Team</th>
                 <th>Position</th>
                 <th>Total Points</th>
                 <th>PPG</th>
@@ -63,7 +63,6 @@ else if(players.Count > 0)
             <tr>
             <td>@i</td>
             <td>@players.ElementAt(i-1).Name</td>
-            <td>@players.ElementAt(i-1).Team</td>
             <td>@players.ElementAt(i-1).Position</td>
             <td>@Math.Round((double)players.ElementAt(i-1).ProjectedPoints,2)</td>
             <td>@Math.Round((double)players.ElementAt(i-1).ProjectedPoints/17,2)</td>
@@ -77,7 +76,7 @@ else if(players.Count > 0)
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
     private bool badRequestError;   
-    private List<ProjectionModel> players = new();
+    private List<SeasonProjection> players = new();
     private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "Flex" };
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
@@ -111,23 +110,23 @@ else if(players.Count > 0)
         switch (Position.ToLower())
         {
             case "quarterback":
-                PositionEnum = "1";
+                PositionEnum = "QB";
                 break;
             case "runningback":
-                PositionEnum = "2";
+                PositionEnum = "RB";
                 break;
             case "wide receiver":
-                PositionEnum = "3";
+                PositionEnum = "WR";
                 break;
             case "tight end":
-                PositionEnum = "4";
+                PositionEnum = "TE";
                 break;
             case "flex":
                 PositionEnum = "5";
                 break;
-            default: PositionEnum = "1"; break;
+            default: PositionEnum = "QB"; break;
         }
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Prediction/" + @PositionEnum);          
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/season/" + @PositionEnum);          
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -135,7 +134,7 @@ else if(players.Count > 0)
         {
             var options = new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            players = await JsonSerializer.DeserializeAsync<List<ProjectionModel>>(responseStream, options);
+            players = await JsonSerializer.DeserializeAsync<List<SeasonProjection>>(responseStream, options);
             badRequestError = false;
         }
         else

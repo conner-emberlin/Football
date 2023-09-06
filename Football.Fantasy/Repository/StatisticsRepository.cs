@@ -14,7 +14,7 @@ namespace Football.Fantasy.Repository
             _dbConnection = dbConnection;
         }
 
-        public async Task<SeasonDataQB> GetSeasonDataQB(int playerId, int season)
+        public async Task<List<SeasonDataQB>> GetSeasonDataQBBySeason(int season)
         {
             var query = $@"SELECT 
 		                     [Season]
@@ -32,10 +32,10 @@ namespace Football.Fantasy.Repository
                             ,[Fumbles]
                             ,[Games]
                         FROM [dbo].SeasonQBData
-                        WHERE [PlayerId] = @playerId
+                        WHERE 1=1
                         AND [Season] = @season
                         ";
-            return (await _dbConnection.QueryAsync<SeasonDataQB>(query, new { playerId, season })).First();
+            return (await _dbConnection.QueryAsync<SeasonDataQB>(query, new {season })).ToList();
         }
         public async Task<List<SeasonDataQB>> GetSeasonDataQB(int playerId)
         {
@@ -60,7 +60,7 @@ namespace Football.Fantasy.Repository
                         ";
             return (await _dbConnection.QueryAsync<SeasonDataQB>(query, new { playerId })).ToList();
         }
-        public async Task<SeasonDataRB> GetSeasonDataRB(int playerId, int season)
+        public async Task<List<SeasonDataRB>> GetSeasonDataRBBySeason(int season)
         {
             var query = $@"SELECT [Season]
                          ,[PlayerID]
@@ -75,10 +75,10 @@ namespace Football.Fantasy.Repository
                          ,[Fumbles]
                          ,[Games]
                         FROM [dbo].SeasonRBData
-                        WHERE [PlayerId] = @playerId
+                        WHERE 1=1
                         AND [Season] = @season
                         ";
-            return (await _dbConnection.QueryAsync<SeasonDataRB>(query, new { playerId, season })).First();
+            return (await _dbConnection.QueryAsync<SeasonDataRB>(query, new{season })).ToList();
         }
         public async Task<List<SeasonDataRB>> GetSeasonDataRB(int playerId)
         {
@@ -100,7 +100,7 @@ namespace Football.Fantasy.Repository
                         ";
             return (await _dbConnection.QueryAsync<SeasonDataRB>(query, new {playerId })).ToList();
         }
-        public async Task<SeasonDataWR> GetSeasonDataWR(int playerId, int season)
+        public async Task<List<SeasonDataWR>> GetSeasonDataWRBySeason(int season)
         {
             var query = $@"SELECT 
                             [Season]
@@ -117,10 +117,10 @@ namespace Football.Fantasy.Repository
                             ,[Fumbles]
                             ,[Games]
                         FROM [dbo].SeasonWRData
-                        WHERE [PlayerId] = @playerId
+                        WHERE 1=1
                         AND [Season] = @season
                         ";
-            return (await _dbConnection.QueryAsync<SeasonDataWR>(query, new { playerId, season })).First();
+            return (await _dbConnection.QueryAsync<SeasonDataWR>(query, new {season })).ToList();
         }
         public async Task<List<SeasonDataWR>> GetSeasonDataWR(int playerId)
         {
@@ -144,7 +144,7 @@ namespace Football.Fantasy.Repository
                         ";
             return (await _dbConnection.QueryAsync<SeasonDataWR>(query, new {playerId })).ToList();
         }
-        public async Task<SeasonDataTE> GetSeasonDataTE(int playerId, int season)
+        public async Task<List<SeasonDataTE>> GetSeasonDataTEBySeason(int season)
         {
             var query = $@"SELECT 
                             [Season]
@@ -161,10 +161,10 @@ namespace Football.Fantasy.Repository
                             ,[Fumbles]
                             ,[Games]
                         FROM [dbo].SeasonTEData
-                        WHERE [PlayerId] = @playerId
+                        WHERE 1=1
                         AND [Season] = @season
                         ";
-            return (await _dbConnection.QueryAsync<SeasonDataTE>(query, new { playerId, season })).First();
+            return (await _dbConnection.QueryAsync<SeasonDataTE>(query, new { season })).ToList();
         }
         public async Task<List<SeasonDataTE>> GetSeasonDataTE(int playerId)
         {
@@ -188,7 +188,7 @@ namespace Football.Fantasy.Repository
                         ";
             return (await _dbConnection.QueryAsync<SeasonDataTE>(query, new { playerId })).ToList();
         }
-        public async Task<SeasonDataDST> GetSeasonDataDST(int playerId, int season)
+        public async Task<List<SeasonDataDST>> GetSeasonDataDSTBySeason(int season)
         {
             var query = $@"SELECT 
                             [Season]
@@ -203,10 +203,10 @@ namespace Football.Fantasy.Repository
                             ,[SpecialTD]
                             ,[Games]
                         FROM [dbo].SeasonDSTData
-                        WHERE [PlayerId] = @playerId
+                        WHERE 1=1
                         AND [Season] = @season
                         ";
-            return (await _dbConnection.QueryAsync<SeasonDataDST>(query, new { playerId, season })).First();
+            return (await _dbConnection.QueryAsync<SeasonDataDST>(query, new {season })).ToList();
         }
         public async Task<List<SeasonDataDST>> GetSeasonDataDST(int playerId)
         {

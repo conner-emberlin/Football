@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
-using Football.Fantasy.Models;
+
 
 namespace Football.Api.Controllers
 {
@@ -22,6 +22,13 @@ namespace Football.Api.Controllers
         public async Task<ActionResult<List<SeasonProjection>>> GetSeasonProjection(string position)
         {
             return Ok(await _projectionService.GetSeasonProjections(position));
+        }
+        [HttpGet("season/flex")]
+        [ProducesResponseType(typeof(List<SeasonFlex>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<SeasonProjection>>> GetSeasonFlexRankings()
+        {
+            return Ok(await _projectionService.SeasonFlexRankings());
         }
     }
 }
