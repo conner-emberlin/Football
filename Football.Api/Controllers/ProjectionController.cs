@@ -21,7 +21,14 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<SeasonProjection>>> GetSeasonProjection(string position)
         {
-            return Ok(await _projectionService.GetSeasonProjections(position));
+            if (position == "FLEX")
+            {
+                return Ok(await _projectionService.SeasonFlexRankings());
+            }
+            else
+            {
+                return Ok(await _projectionService.GetSeasonProjections(position));
+            }
         }
         [HttpGet("season/flex")]
         [ProducesResponseType(typeof(List<SeasonFlex>), 200)]

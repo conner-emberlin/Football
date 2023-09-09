@@ -277,14 +277,14 @@ a.editstats {
                 background: lightgrey;
                 color: var(--bs-body);
             }
-
-.card {
-    transition: 0.3s;
-    border-radius: 5px; 
-    width: fit-content
+a.page-links {
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
 }
-
-img {
-    border-radius: 5px 5px 0 0;
-}
+    a.page-links:hover {
+        text-decoration: underline;
+        color: black;
+        font-weight: bold;
+    }
 

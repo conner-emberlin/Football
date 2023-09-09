@@ -12,7 +12,7 @@
     foreach(var article in articles)
     {
         <div>
-        <a href="@article.links.web.href"> @article.headline</a>
+        <a class="page-links" href="@article.links.web.href"> @article.headline </a>
         <p>@article.description</p>
             @if (article.images.FirstOrDefault() != null){
             <img src="@article.images.FirstOrDefault().url" height="200" />

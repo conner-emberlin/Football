@@ -269,6 +269,12 @@ else if (youTried && badRequestError)
             players = players.Where(p => p.Active == 1 && p.Position != "DST").OrderBy(p => p.Position).OrderBy(p => p.Name).ToList();
             badRequestError = false;
             youTried = true;
+
+            if(!String.IsNullOrEmpty(id))
+            {
+                SelectPlayer(int.Parse(id));
+                id = "";
+            }
         }
         else
         {
@@ -293,6 +299,7 @@ else if (youTried && badRequestError)
     private async void SelectPlayer(int pid)
     {
         playerSelected = false;
+        selectedPlayer = "";
         playerId = pid;
         playerPosition = players.Where(p => p.PlayerId == pid).First().Position;
         playerName = players.Where(p => p.PlayerId == pid).First().Name;
@@ -306,6 +313,7 @@ else if (youTried && badRequestError)
         }
         await GetFantasySeasonData();
         playerSelected = true;
+        selectedPlayer = playerName;
         filteredPlayers = null;
         StateHasChanged();
 
