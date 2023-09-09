@@ -10,5 +10,6 @@ namespace Football.Projections.Interfaces
         public Task<IEnumerable<SeasonProjection>> CalculateSeasonProjections<T>(List<T> model, string position);
         public Task<Vector<double>> PerformRegression<T>(List<T> regressionModel, Matrix<double> regressorMatrix, string position);
         public Vector<double> PerformProjection(Matrix<double> model, Vector<double> coeff);
+        public Task<List<SeasonProjection>> RookieSeasonProjections(string position);
     }
 }

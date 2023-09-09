@@ -4,293 +4,335 @@
 
 @using System.Text.Json
 @using System.Text.Json.Serialization
-@using Football.Models;
+@using Football.Data.Models;
+@using Football.Fantasy.Models;
+@using Football.Players.Models;
 @inject IHttpClientFactory ClientFactory
 
-<EditForm Model="player" OnValidSubmit="GetPlayers">
-    <TextBoxName @bind-Value="this.Value" />
-</EditForm>
-<div style="height:10px;font-size:1px;">&nbsp;</div>
-<div>
-<button class="button-22" role="button" @onclick="AddPlayer">
-    Add
-</button>
-</div>
-<div style="height:10px;font-size:1px;">&nbsp;</div>
-@if(add)
+@if (!badRequestError && players.Any())
 {
-            <div class="table_container">
+    <div class="autocomplete w-25">
+        <input @bind=selectedPlayer @oninput=HandleInput class="form-control filter" />
+        @if (filteredPlayers is not null)
+        {
+            <ul class="options">
+                @if (filteredPlayers.Any())
+                {
+                    @foreach (var p in filteredPlayers)
+                    {
+                        <li class="option" @onclick=@(_ => SelectPlayer(p.PlayerId))>
+                            <span class="option-text">@p.Name</span>
+                        </li>
+                    }
+
+                }
+                else
+                {
+                    <li class="disabled option">No results</li>
+                }
+            </ul>
+        }
+    </div>
+}
+else if (youTried && badRequestError)
+{
+    <p>Bad Request</p>
+}
+
+@if(playerSelected && playerId > 0)
+{
+    var photoPath = "https://localhost:7176/PlayerPhotos/" + playerId + ".png";
+    <div>
+        <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/PlayerPhotos/gen.png'">
+    </div>
+    <div>
+        <b>Name</b> @playerName <b>Position</b> @playerPosition 
+    </div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    @if(playerPosition == "QB" && seasonQBData.Any())
+    {
+        <div class="table_container">
             <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Position</th>
-                        <th>Active</th>
+                        <th>Season</th>
+                        <th>Games</th>
+                        <th>Comp</th>
+                        <th>Att</th>
+                        <th>Yd</th>
+                        <th>TD</th>
+                        <th>Int</th>
+                        <th>Sck</th>
+                        <th>RAtt</th>
+                        <th>RYds</th>
+                        <th>RTd</th>
+                        <th>Fum</th>
+                        <th>Fpts</th>
+                        <th>FPPG</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>
-                            <input type="text" size="1" maxlength="25" class="form-control" @bind="@NewName" />
-                        </td>
-                        <td>
-                            <input type="text" size="1" maxlength="2" class="form-control" @bind="@NewPosition" />
-                        </td>
-                        <td>
-                            <input type="text" size="1" maxlength="1" class="form-control" @bind="@NewActive" />
-                        </td>
-                    </tr>
+                    @foreach (var stat in seasonQBData)
+                    {                      
+                        <tr>
+                            <td>@stat.Season</td>
+                            <td>@stat.Games</td>
+                            <td>@stat.Completions</td>
+                            <td>@stat.Attempts</td>
+                            <td>@stat.Yards</td>
+                            <td>@stat.TD</td>
+                            <td>@stat.Int</td>
+                            <td>@stat.Sacks</td>
+                            <td>@stat.RushingAttempts</td>
+                            <td>@stat.RushingYards</td>
+                            <td>@stat.RushingTD</td>
+                            <td>@stat.Fumbles</td>
+                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                        </tr>
+                    }
                 </tbody>
             </table>
-            </div>
-        <div style="height:10px;font-size:1px;">&nbsp;</div>
-        <button class="button-22" role="button" @onclick="CreatePlayer">
-            Submit
-        </button>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    @if(youTried && itWorked && recordsAdded > 0)
-    {
-        <text>Record added</text>
-    }
-    else if((youTried && !itWorked) || (youTried && itWorked && recordsAdded == 0))
-    {
-        <text>Something went wrong.</text>
+        </div>
     }
 
-}
-@if(!String.IsNullOrEmpty(player.Name) && !badRequestError && !add){
-    var photoPath = "https://localhost:7176/PlayerPhotos/" + player.PlayerId + ".png";
- <div>
-<b>Name</b> @player.Name <b>Position</b> @Position <b>Active</b> @Active
-     <b>Fantasy </b>   <a href="/Fantasy/@player.PlayerId"><span class="oi oi-badge" aria-hidden="true"></span></a>
-</div>
-        <div>
-        <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/PlayerPhotos/gen.png'">
-        </div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    @if (player.Position == "QB")
+    else if(playerPosition == "RB" && seasonRBData.Any())
     {
-        <div>
-            <b>Passing Statistics</b>
-            <a href="/ManageStats/passing/@player.PlayerId">&#9998</a>
-        </div>
-    }
-    @if(player.PassingStats.Any())
-    {
-        <div class="table_container"> 
-        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
-            <thead>
-                <tr>
-                    <th>Season</th>
-                    <th>Team</th>
-                    <th>Age</th>
-                    <th>Games</th>
-                    <th>Comps</th>
-                    <th>Atts</th>
-                    <th>Yds</th>
-                    <th>Tds</th>
-                    <th>Ints</th>
-                    <th>Fds</th>
-                    <th>Lng</th>
-                    <th>Scks</th>
-                    <th>SckYds</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach(var stat in player.PassingStats)
-                {
-                    <tr>
-                        <td>@stat.Season</td>
-                        <td>@stat.Team</td>
-                        <td>@stat.Age</td>
-                        <td>@stat.Games</td>
-                        <td>@stat.Completions</td>
-                        <td>@stat.Attempts</td>
-                        <td>@stat.Yards</td>
-                        <td>@stat.Touchdowns</td>
-                        <td>@stat.Interceptions</td>
-                        <td>@stat.FirstDowns</td>
-                        <td>@stat.Long</td>
-                        <td>@stat.Sacks</td>
-                        <td>@stat.SackYards</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        </div>
-    }
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    @if (player.Position == "QB" || player.Position == "RB")
-    {
-        <div>
-            <b>Rushing Statistics</b>
-            <a href="/ManageStats/rushing/@player.PlayerId">&#9998</a>
-        </div>
-    }
-    @if (player.RushingStats.Count > 0)
-    {
-        <div class="table_container"> 
-        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
-            <thead>
-                <tr>
-                    <th>Season</th>
-                    <th>Team</th>
-                    <th>Age</th>
-                    <th>Games</th>
-                    <th>Atts</th>
-                    <th>Yds</th>
-                    <th>Tds</th>
-                    <th>Fds</th>
-                    <th>Lng</th>
-                    <th>Fmbls</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var stat in player.RushingStats)
-                {
-                    <tr>
-                        <td>@stat.Season</td>
-                        <td>@stat.Team</td>
-                        <td>@stat.Age</td>
-                        <td>@stat.Games</td>
-                        <td>@stat.RushAttempts</td>
-                        <td>@stat.Yards</td>
-                        <td>@stat.Touchdowns</td>
-                        <td>@stat.FirstDowns</td>
-                        <td>@stat.Long</td>
-                        <td>@stat.Fumbles</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        </div>
-    }
-    <div style="height:10px;font-size:1px;">&nbsp;</div>  
-        @if(player.Position == "RB" || player.Position == "WR/TE")
-        {
-        <div>
-        <b>Receiving Statistics</b>
-        <a href="/ManageStats/receiving/@player.PlayerId">&#9998</a>
-        </div>
-        }
-    @if (player.ReceivingStats.Count > 0)
-    {
-
         <div class="table_container">
-        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
-            <thead>
-                <tr>
-                    <th>Season</th>
-                    <th>Team</th>
-                    <th>Age</th>
-                    <th>Games</th>
-                    <th>Tgts</th>
-                    <th>Rec</th>
-                    <th>Yds</th>
-                    <th>Tds</th>
-                    <th>Fds</th>
-                    <th>Lng</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var stat in player.ReceivingStats)
-                {
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
                     <tr>
-                        <td>@stat.Season</td>
-                        <td>@stat.Team</td>
-                        <td>@stat.Age</td>
-                        <td>@stat.Games</td>
-                        <td>@stat.Targets</td>
-                        <td>@stat.Receptions</td>
-                        <td>@stat.Yards</td>
-                        <td>@stat.Touchdowns</td>
-                        <td>@stat.FirstDowns</td>
-                        <td>@stat.Long</td>
+                        <th>Season</th>
+                        <th>Games</th>
+                        <th>Att</th>
+                        <th>Yds</th>
+                        <th>TD</th>
+                        <th>Rec</th>
+                        <th>Tgt</th>
+                        <th>RecYds</th>
+                        <th>RecTD</th>
+                        <th>Fum</th>
+                        <th>Fpts</th>
+                        <th>FPPG</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var stat in seasonRBData)
+                    {
+                        <tr>
+                            <td>@stat.Season</td>
+                            <td>@stat.Games</td>
+                            <td>@stat.RushingAtt</td>
+                            <td>@stat.RushingYds</td>
+                            <td>@stat.RushingTD</td>
+                            <td>@stat.Receptions</td>
+                            <td>@stat.Targets</td>
+                            <td>@stat.Yards</td>
+                            <td>@stat.ReceivingTD</td>
+                            <td>@stat.Fumbles</td>
+                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
 
-}
+    else if(playerPosition == "WR" && seasonWRData.Any())
+    {
+        <div class="table_container">
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th>Season</th>
+                        <th>Games</th>
+                        <th>Rec</th>
+                        <th>Tgt</th>
+                        <th>Yds</th>
+                        <th>Lng</th>
+                        <th>TD</th>
+                        <th>RAtt</th>
+                        <th>RYds</th>
+                        <th>RTD</th>
+                        <th>Fum</th>
+                        <th>Fpts</th>
+                        <th>FPPG</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var stat in seasonWRData)
+                    {
+                        <tr>
+                            <td>@stat.Season</td>
+                            <td>@stat.Games</td>
+                            <td>@stat.Receptions</td>
+                            <td>@stat.Targets</td>
+                            <td>@stat.Yards</td>
+                            <td>@stat.Long</td>
+                            <td>@stat.TD</td>
+                            <td>@stat.RushingAtt</td>
+                            <td>@stat.RushingYds</td>
+                            <td>@stat.RushingTD</td>
+                            <td>@stat.Fumbles</td>
+                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 
-else if(badRequestError)
-{
-    <div>
-        <p style="color:red">No players with that name</p>
-    </div>
+    else if(playerPosition == "TE" && seasonTEData.Any())
+    {
+        <div class="table_container">
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th>Season</th>
+                        <th>Games</th>
+                        <th>Rec</th>
+                        <th>Tgt</th>
+                        <th>Yds</th>
+                        <th>Lng</th>
+                        <th>TD</th>
+                        <th>RAtt</th>
+                        <th>RYds</th>
+                        <th>RTD</th>
+                        <th>Fum</th>
+                        <th>Fpts</th>
+                        <th>FPPG</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var stat in seasonTEData)
+                    {
+                        <tr>
+                            <td>@stat.Season</td>
+                            <td>@stat.Games</td>
+                            <td>@stat.Receptions</td>
+                            <td>@stat.Targets</td>
+                            <td>@stat.Yards</td>
+                            <td>@stat.Long</td>
+                            <td>@stat.TD</td>
+                            <td>@stat.RushingAtt</td>
+                            <td>@stat.RushingYds</td>
+                            <td>@stat.RushingTD</td>
+                            <td>@stat.Fumbles</td>
+                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 }
-
+ 
 @code{
     [Parameter]
     public string id { get; set; } = "";
 
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
-    private bool badRequestError;
-
-    private string Value { get; set; } = "";
-    private Player player = new();
-    private string Active = "";
-    private string Position = "";
-
-    private bool add;
-    public string NewName { get; set; } = "";
-    public string NewPosition {get; set; } = "";
-    public string NewActive { get; set; } = "";
-    private bool itWorked = false;
+    private bool badRequestError = false;
     private bool youTried = false;
-    private bool showFantasy = false;
-    private int recordsAdded = 0;
+
+    private bool playerSelected = false;
+    public List<Player> players { get; set; } = new();
+
+    public List<Player>? filteredPlayers { get; set; }
+    public string selectedPlayer { get; set; } = "";
+
+    public string? playerName { get; set; }
+    public int playerId { get; set; }
+    public string playerPosition { get; set; } = "";
+
+    List<SeasonDataQB> seasonQBData { get; set; } = new();
+    List<SeasonDataRB> seasonRBData { get; set; } = new();
+    List<SeasonDataWR> seasonWRData { get; set; } = new();
+    List<SeasonDataTE> seasonTEData { get; set; } = new();
+    List<FantasyPPG> seasonFantasy {get; set;} = new();
 
     protected override async Task OnInitializedAsync()
     {
-        if (!String.IsNullOrEmpty(id))
-        {
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/name/" + id );
-            request.Headers.Add("Accept", "application/json");
-            var client = ClientFactory.CreateClient();
-            var response = await client.SendAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                id = "";
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                using var responseStream = await response.Content.ReadAsStreamAsync();
-                this.Value = await JsonSerializer.DeserializeAsync<string>(responseStream, options);
-                await GetPlayers();
-            }           
-        }
-    }
-
-    public async Task GetPlayers()
-    {
-        var id  = await GetPlayerId(this.Value);
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/" + id);
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players");
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
-            badRequestError = false;
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            player = await JsonSerializer.DeserializeAsync<Player>(responseStream, options);
-            Active = player.Active == 1 ? "Yes" : "No";
-            Position = player.Position == "WR/TE" && player.IsTightEnd ? "TE"
-                        : player.Position == "WR/TE" && !player.IsTightEnd ? "WR"
-                        : player.Position;
+            players = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
+            players = players.Where(p => p.Active == 1 && p.Position != "DST").OrderBy(p => p.Position).OrderBy(p => p.Name).ToList();
+            badRequestError = false;
+            youTried = true;
+        }
+        else
+        {
+            badRequestError = true;
+            youTried = true;
+        }
+        shouldRender = true;
+    }
+    private void HandleInput(ChangeEventArgs e)
+    {
+        var filter = e.Value?.ToString();
+        if(filter?.Length > 2)
+        {
+            filteredPlayers = players.Where(p => p.Name.ToLower().Contains(filter.ToLower())).ToList();
+        }
+        else
+        {
+            filteredPlayers = null;
+        }
+    }
+
+    private async void SelectPlayer(int pid)
+    {
+        playerSelected = false;
+        playerId = pid;
+        playerPosition = players.Where(p => p.PlayerId == pid).First().Position;
+        playerName = players.Where(p => p.PlayerId == pid).First().Name;
+        switch (playerPosition)
+        {
+            case "QB": await GetQBSeasonData(); break;
+            case "RB": await GetRBSeasonData(); break;
+            case "WR": await GetWRSeasonData(); break;
+            case "TE": await GetTESeasonData(); break;
+            default: break;
+        }
+        await GetFantasySeasonData();
+        playerSelected = true;
+        filteredPlayers = null;
+        StateHasChanged();
+
+    }
+
+    #region API Requests
+    private async Task GetQBSeasonData()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/qb/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            seasonQBData = await JsonSerializer.DeserializeAsync<List<SeasonDataQB>>(responseStream, options);
         }
         else
         {
             badRequestError = true;
         }
-        shouldRender = true;
     }
 
-    private async Task<int> GetPlayerId(string name)
+    private async Task GetRBSeasonData()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/id/" + name);
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/rb/" + playerId.ToString());
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -298,17 +340,16 @@ else if(badRequestError)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<int>(responseStream, options);
+            seasonRBData = await JsonSerializer.DeserializeAsync<List<SeasonDataRB>>(responseStream, options);
         }
         else
         {
-            return 0;
+            badRequestError = true;
         }
     }
-    private async Task CreatePlayer()
+    private async Task GetWRSeasonData()
     {
-        
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/create/" + NewName + "/" + NewPosition + "/" + NewActive);
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/wr/" + playerId.ToString());
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -316,23 +357,62 @@ else if(badRequestError)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            recordsAdded = await JsonSerializer.DeserializeAsync<int>(responseStream, options);
-            itWorked = true;
+            seasonWRData = await JsonSerializer.DeserializeAsync<List<SeasonDataWR>>(responseStream, options);
         }
         else
         {
-            recordsAdded = 0;
-            itWorked = false;
+            badRequestError = true;
         }
-        youTried = true;
     }
-
-    private void AddPlayer()
+    private async Task GetTESeasonData()
     {
-        add = true;
-        shouldRender = true;
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/te/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            seasonTEData = await JsonSerializer.DeserializeAsync<List<SeasonDataTE>>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+    private async Task GetFantasySeasonData()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/data/season/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            seasonFantasy = await JsonSerializer.DeserializeAsync<List<FantasyPPG>>(responseStream, options);
+            if (seasonFantasy.Any())
+            {
+                foreach (var s in seasonFantasy)
+                {
+                    s.FantasyPoints = Math.Round(s.FantasyPoints, 2);
+                    s.FPPG = Math.Round(s.FantasyPoints / s.Games, 2);
+                }
+            }
+        }
+        else
+        {
+            badRequestError = true;
+        }
     }
 
+    #endregion
+
+    public class FantasyPPG : SeasonFantasy
+    {
+        public double FPPG { get; set; }
+    }
 
 }
 

@@ -1,4 +1,5 @@
 ﻿using Football.Fantasy.Models;
+using Football.Players.Models;
 using Football.Projections.Interfaces;
 using MathNet.Numerics.LinearAlgebra;
 using Serilog;
@@ -29,6 +30,25 @@ namespace Football.Projections.Services
             catch (Exception ex)
             {
                 _logger.Error(ex.ToString(), ex.StackTrace, ex);
+                throw;
+            }
+        }
+        public Matrix<double> RegressorMatrix(List<Rookie> rookies)
+        {
+            try
+            {
+                var rowCount = rookies.Count;
+                var columnCount = 3;
+                var rows = new List<Vector<double>>();
+                foreach (var rook in rookies)
+                {
+                    rows.Add(TransformRookieModel(rook));
+                }
+                return CreateMatrix(rows, rowCount, columnCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
                 throw;
             }
         }
@@ -67,6 +87,23 @@ namespace Football.Projections.Services
             catch(Exception ex)
             {
                 _logger.Error(ex.ToString(), ex.StackTrace, ex);
+                throw;
+            }
+        }
+        private Vector<double> TransformRookieModel(Rookie rook)
+        {
+            try
+            {
+                var vec = Vector<double>.Build.Dense(3);
+                vec[0] = 1;
+                vec[1] = rook.DraftPosition;
+                vec[2] = rook.DeclareAge;
+                return vec;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
                 throw;
             }
         }

@@ -16,7 +16,7 @@ namespace Football.Fantasy.Repository
         }
         public async Task<SeasonFantasy> GetSeasonFantasy(int playerId, int season)
         {
-            var query = $@"SELECT [PlayerId], [Season], [Games], [FantasyPoints, [Name], [Position]
+            var query = $@"SELECT [PlayerId], [Season], [Games], [FantasyPoints], [Name], [Position]
                             FROM [dbo].SeasonFantasyData
                             WHERE [PlayerId] = @playerId
                             AND [Season] = @season";

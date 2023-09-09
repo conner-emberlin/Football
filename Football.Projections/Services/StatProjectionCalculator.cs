@@ -23,7 +23,7 @@ namespace Football.Projections.Services
             _logger.Information("Calculating QB Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
-                var recentWeight = seasons.Count > 0 ? _tunings.Weight : _tunings.SecondYearQBLeap;
+                var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearQBLeap;
                 var recentSeason = seasons.Max(s => s.Season);
                 var previousSeasons = seasons.Count - 1;
                 var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -97,7 +97,7 @@ namespace Football.Projections.Services
             _logger.Information("Calculating RB Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
-                var recentWeight = seasons.Count > 0 ? _tunings.Weight : _tunings.SecondYearRBLeap;
+                var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearRBLeap;
                 var recentSeason = seasons.Max(s => s.Season);
                 var previousSeasons = seasons.Count - 1;
                 var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -160,7 +160,7 @@ namespace Football.Projections.Services
             _logger.Information("Calculating WR Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
-                var recentWeight = seasons.Count > 0 ? _tunings.Weight : _tunings.SecondYearWRLeap;
+                var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearWRLeap;
                 var recentSeason = seasons.Max(s => s.Season);
                 var previousSeasons = seasons.Count - 1;
                 var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -224,7 +224,7 @@ namespace Football.Projections.Services
             _logger.Information("Calculating TE Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
-                var recentWeight = seasons.Count > 0 ? _tunings.Weight : _tunings.SecondYearWRLeap;
+                var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearWRLeap;
                 var recentSeason = seasons.Max(s => s.Season);
                 var previousSeasons = seasons.Count - 1;
                 var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -289,7 +289,7 @@ namespace Football.Projections.Services
             _logger.Information("Calculating Fantsay Stat projections for {p}", seasons.First().PlayerId);
             try
             {
-                var recentWeight = seasons.Count > 0 ? _tunings.Weight : 1;
+                var recentWeight = seasons.Count > 1 ? _tunings.Weight : 1;
                 var recentSeason = seasons.Max(s => s.Season);
                 var previousSeasons = seasons.Count - 1;
                 var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;

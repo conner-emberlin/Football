@@ -1,17 +1,26 @@
 ﻿using Football.Data.Interfaces;
 using Football.Data.Models;
+using Football.Players.Interfaces;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
+using Serilog;
+using System.IO;
 using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Net.WebRequestMethods;
 
 namespace Football.Data.Services
 {
     public class ScraperService : IScraperService
     {
         private readonly WeeklyScraping _scraping;
-        public ScraperService(IOptionsMonitor<WeeklyScraping> scraping)
+        private readonly IPlayersService _playersService;
+        private readonly ILogger _logger;
+        public ScraperService(IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playersService, ILogger logger)
         {
             _scraping = scraping.CurrentValue;
+            _playersService = playersService;
+            _logger = logger;
         }
         public string FantasyProsURLFormatter(string position, string year, string week)
         {
@@ -146,6 +155,44 @@ namespace Football.Data.Services
             return players;
         }
 
+        public async Task<int> DownloadHeadShots(string position)
+        {
+            var web = new HtmlWeb();
+            List<string> urls = new();
+            var count = 0;
+            var linkParser = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            var activePlayers = (await _playersService.GetAllPlayers()).Where(p => p.Active == 1 && p.Position == position).ToList();
+            foreach (var player in activePlayers)
+            {
+                _logger.Information("Getting url for {p}", player.Name);
+                var name = Regex.Replace(player.Name, @"[^\w\s]", string.Empty).Trim();
+                name = Regex.Replace(name, @"Jr", string.Empty).Trim();
+                name = Regex.Replace(name, @"III", string.Empty).Trim();
+                name = Regex.Replace(name, @"II", string.Empty).Trim();
+                name = Regex.Replace(name, @"[\s]", "-").Trim();
+                name = name.ToLower().Trim();
+                var baseUrl = string.Format("{0}{1}.php", "https://www.fantasypros.com/nfl/players/", name);
+                HtmlDocument doc = web.Load(baseUrl);
+                if (doc != null)
+                {
+                    var xpath = "//*[@id=\"main-container\"]/div/nav/picture/img";
+                    var tempdata = doc.DocumentNode.SelectNodes(xpath);
+                    if (tempdata != null)
+                    {
+                        var url = linkParser.Match(tempdata[0].OuterHtml).Value;
+                        HttpClient client = new();
+                        var res = await client.GetAsync(url);
+                        byte[] bytes = await res.Content.ReadAsByteArrayAsync();
+                        MemoryStream memoryStream = new(bytes);
+                        var fileName = player.PlayerId.ToString() + ".png";
+                        using var fs = new FileStream(@"C:\NFLData\Headshots\" + fileName, FileMode.Create);
+                        memoryStream.WriteTo(fs);
+                        count++;
+                    }
+                }
+            }
+            return count;
+        }
 
         private string FormatName(string name)
         {

@@ -25,7 +25,7 @@
         public double PointsPerYard { get; set; }
     }
 
-    public class Projections
+    public class ProjectionLimits
     {
         public int QBProjections { get; set; }
         public int RBProjections { get; set; }
@@ -48,5 +48,7 @@
         public double SecondYearWRLeap { get; set; }
         public double SecondYearRBLeap { get; set; }
         public double SecondYearQBLeap { get; set; }
+        public double NewQBFloor { get; set; }
+        public double NewQBCeiling { get; set; }
     }
 }

@@ -26,9 +26,16 @@ namespace Football.Api.Controllers
         [HttpGet("season/flex")]
         [ProducesResponseType(typeof(List<SeasonFlex>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonProjection>>> GetSeasonFlexRankings()
+        public async Task<ActionResult<List<SeasonFlex>>> GetSeasonFlexRankings()
         {
             return Ok(await _projectionService.SeasonFlexRankings());
+        }
+        [HttpGet("season/rookie/{position}")]
+        [ProducesResponseType(typeof(List<SeasonProjection>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<SeasonProjection>>> GetRookieProjections(string position)
+        {
+            return Ok(await _projectionService.RookieSeasonProjections(position));
         }
     }
 }

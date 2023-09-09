@@ -9,13 +9,15 @@ namespace Football.Api.Controllers
     {
         private readonly IUploadWeeklyDataService _weeklyDataService;
         private readonly IUploadSeasonDataService _seasonDataService;
-        public UploadDataController(IUploadWeeklyDataService weeklyDataService, IUploadSeasonDataService seasonDataService)
+        private readonly IScraperService _scraperService;
+        public UploadDataController(IUploadWeeklyDataService weeklyDataService, IUploadSeasonDataService seasonDataService, IScraperService scraperService)
         {
             _weeklyDataService = weeklyDataService;
-            _seasonDataService = seasonDataService; 
+            _seasonDataService = seasonDataService;
+            _scraperService = scraperService;
         }
 
-        [HttpPost("weekly/{position}/{week}/{season}")]
+        [HttpPost("{position}/{week}/{season}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadWeeklyData(int position, int season, int week)
@@ -30,7 +32,7 @@ namespace Football.Api.Controllers
                 _ => BadRequest(),
             };
         }
-        [HttpPost("weekly/{position}/{season}")]
+        [HttpPost("{position}/{season}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadSeasonData(int position, int season)
@@ -45,5 +47,14 @@ namespace Football.Api.Controllers
                 _ => BadRequest(),
             };
         }
+
+        [HttpPost("headshots/{position}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> DownloadHeadShots(string position)
+        {
+            return Ok(await _scraperService.DownloadHeadShots(position));
+        }
+
     }
 }

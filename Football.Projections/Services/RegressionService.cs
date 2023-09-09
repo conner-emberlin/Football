@@ -1,18 +1,39 @@
 ﻿using Football.Data.Models;
+using Football.Fantasy.Models;
+using Football.Fantasy.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
-
+using Football.Players.Models;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearRegression;
+
 
 namespace Football.Projections.Services
 {
     public class RegressionService : IRegressionService
     {
+        private readonly IMatrixCalculator _matrixCalculator;
+        private readonly IFantasyDataService _fantasyService;
+        public RegressionService(IMatrixCalculator matrixCalculator, IFantasyDataService fantasyService)
+        {
+            _matrixCalculator = matrixCalculator;
+            _fantasyService = fantasyService;
+        }
+
         public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents)
         {
             var vec = MultipleRegression.NormalEquations(regressors, dependents);
             return vec;
+        }
+        public async Task<Vector<double>> PerformRegression(List<Rookie> rookies)
+        {
+            List<SeasonFantasy> rookieSeasons = new();
+            foreach (var rookie in rookies)
+            {
+                rookieSeasons.Add(await _fantasyService.GetSeasonFantasy(rookie.PlayerId, rookie.RookieSeason));
+            }
+
+            return CholeskyDecomposition(_matrixCalculator.RegressorMatrix(rookies), _matrixCalculator.PopulateDependentVector(rookieSeasons));
         }
 
         public QBModelSeason QBModelSeason(SeasonDataQB stat)

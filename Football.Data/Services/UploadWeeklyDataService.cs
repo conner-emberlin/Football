@@ -1,6 +1,7 @@
 ﻿using Football.Data.Interfaces;
 using Football.Data.Models;
-using Football.Interfaces;
+using Football.Players.Interfaces;
+using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -10,11 +11,11 @@ namespace Football.Data.Services
     {
         private readonly IScraperService _scraperService;
         private readonly IUploadWeeklyDataRepository _uploadWeeklyDataRepository;
-        private readonly IPlayerService _playerService;
+        private readonly IPlayersService _playerService;
         private readonly ILogger _logger;
         private readonly WeeklyScraping _scraping;
         public UploadWeeklyDataService(IScraperService scraperService, IUploadWeeklyDataRepository uploadWeeklyDataRepository, 
-            IPlayerService playerService, ILogger logger, IOptionsMonitor<WeeklyScraping> scraping)
+            IPlayersService playerService, ILogger logger, IOptionsMonitor<WeeklyScraping> scraping)
         {
             _scraperService = scraperService;
             _uploadWeeklyDataRepository = uploadWeeklyDataRepository;
@@ -59,6 +60,12 @@ namespace Football.Data.Services
             foreach(var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
+                if (playerId == 0)
+                {
+                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = "QB", Active = 1 });
+                    _logger.Information("New player created: {p}", p.Name);
+                    playerId = await _playerService.GetPlayerId(p.Name);
+                }
                 if (p.Games > 0)
                 {
                     weeklyData.Add(new WeeklyDataQB
@@ -94,6 +101,12 @@ namespace Football.Data.Services
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
+                if (playerId == 0)
+                {
+                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = "RB", Active = 1 });
+                    _logger.Information("New player created: {p}", p.Name);
+                    playerId = await _playerService.GetPlayerId(p.Name);
+                }
                 if (p.Games > 0)
                 {
                     weeklyData.Add(new WeeklyDataRB
@@ -126,6 +139,12 @@ namespace Football.Data.Services
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
+                if (playerId == 0)
+                {
+                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = "WR", Active = 1 });
+                    _logger.Information("New player created: {p}", p.Name);
+                    playerId = await _playerService.GetPlayerId(p.Name);
+                }
                 if (p.Games > 0)
                 {
                     weeklyData.Add(new WeeklyDataWR
@@ -160,6 +179,12 @@ namespace Football.Data.Services
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
+                if (playerId == 0)
+                {
+                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = "TE", Active = 1 });
+                    _logger.Information("New player created: {p}", p.Name);
+                    playerId = await _playerService.GetPlayerId(p.Name);
+                }
                 if (p.Games > 0)
                 {
                     weeklyData.Add(new WeeklyDataTE
@@ -194,6 +219,12 @@ namespace Football.Data.Services
             foreach (var p in players)
             {
                 var playerId = await _playerService.GetPlayerId(p.Name);
+                if (playerId == 0)
+                {
+                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = "DST", Active = 1 });
+                    _logger.Information("New player created: {p}", p.Name);
+                    playerId = await _playerService.GetPlayerId(p.Name);
+                }
                 if (p.Games > 0)
                 {
                     weeklyData.Add(new WeeklyDataDST

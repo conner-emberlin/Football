@@ -1,6 +1,6 @@
-﻿using News.Models;
+﻿using Football.News.Models;
 
-namespace News.Interfaces {
+namespace Football.News.Interfaces {
 
     public interface INewsService
     {
