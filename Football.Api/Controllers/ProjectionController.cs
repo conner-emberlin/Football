@@ -19,7 +19,7 @@ namespace Football.Api.Controllers
         [HttpGet("season/{position}")]
         [ProducesResponseType(typeof(List<SeasonProjection>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonProjection>>> GetSeasonProjection(string position)
+        public async Task<ActionResult<List<SeasonProjection>>> GetSeasonProjections(string position)
         {
             if (position == "FLEX")
             {
@@ -30,19 +30,37 @@ namespace Football.Api.Controllers
                 return Ok(await _projectionService.GetSeasonProjections(position));
             }
         }
-        [HttpGet("season/flex")]
-        [ProducesResponseType(typeof(List<SeasonFlex>), 200)]
+        [HttpGet("season/player/{playerId}")]
+        [ProducesResponseType(typeof(SeasonProjection), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonFlex>>> GetSeasonFlexRankings()
+        public async Task<ActionResult<SeasonProjection>> GetSeasonProjections(int playerId)
         {
-            return Ok(await _projectionService.SeasonFlexRankings());
+            if(playerId > 0)
+            {
+                return Ok(await _projectionService.GetSeasonProjection(playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+
         }
-        [HttpGet("season/rookie/{position}")]
-        [ProducesResponseType(typeof(List<SeasonProjection>), 200)]
+
+        [HttpPost("season/{position}")]
+        [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonProjection>>> GetRookieProjections(string position)
+        public async Task<ActionResult<int>> PostSeasonProjections(string position)
         {
-            return Ok(await _projectionService.RookieSeasonProjections(position));
+            if (position != null)
+            {
+                var proj = (await _projectionService.GetSeasonProjections(position)).ToList();
+                return Ok(await _projectionService.PostSeasonProjections(proj));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
         }
+
     }
 }

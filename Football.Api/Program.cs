@@ -13,6 +13,7 @@ using Football.Players.Interfaces;
 using Football.Players.Repository;
 using Football.Players.Services;
 using Football.Projections.Interfaces;
+using Football.Projections.Repository;
 using Football.Projections.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Serilog;
@@ -57,6 +58,7 @@ builder.Services.AddScoped<IStatProjectionCalculator, StatProjectionCalculator>(
 builder.Services.AddScoped<IPlayersService, PlayersService>();
 builder.Services.AddScoped<IPlayersRepository, PlayersRepository>();
 builder.Services.AddScoped<IAdjustmentService, AdjustmentService>();
+builder.Services.AddScoped<IProjectionRepository, ProjectionRepository>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);

@@ -26,11 +26,12 @@ namespace Football.Projections.Services
         private readonly IRegressionService _regressionService;
         private readonly IAdjustmentService _adjustmentService;
         private readonly IPlayersService _playersService;
+        private readonly IProjectionRepository _projectionRepository;
 
         public ProjectionService(IRegressionService regressionService, IFantasyDataService fantasyService, IOptionsMonitor<ProjectionLimits> projections, 
             IMemoryCache cache, ILogger logger, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
             IStatisticsService statisticsService, IOptionsMonitor<Starters> starters, IOptionsMonitor<Season> season, 
-            IPlayersService playersService, IAdjustmentService adjustmentService)
+            IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository)
         {
             _regressionService = regressionService;
             _projections = projections.CurrentValue;
@@ -44,6 +45,17 @@ namespace Football.Projections.Services
             _statisticsService = statisticsService;
             _playersService = playersService;
             _adjustmentService = adjustmentService;
+            _projectionRepository = projectionRepository;
+        }
+        public async Task<SeasonProjection> GetSeasonProjection(int playerId) => await _projectionRepository.GetSeasonProjection(playerId);
+        public async Task<int> PostSeasonProjections(List<SeasonProjection> projections)
+        {
+            var count = 0;
+            foreach(var proj in projections)
+            {
+                count += await _projectionRepository.PostSeasonProjections(proj);
+            }
+            return count;
         }
         public async Task<List<SeasonProjection>> RookieSeasonProjections(string position)
         {
