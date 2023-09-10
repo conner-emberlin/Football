@@ -47,7 +47,7 @@ namespace Football.Projections.Services
             _adjustmentService = adjustmentService;
             _projectionRepository = projectionRepository;
         }
-        public async Task<SeasonProjection> GetSeasonProjection(int playerId) => await _projectionRepository.GetSeasonProjection(playerId);
+        public async Task<SeasonProjection?> GetSeasonProjection(int playerId) => await _projectionRepository.GetSeasonProjection(playerId);
         public async Task<int> PostSeasonProjections(List<SeasonProjection> projections)
         {
             var count = 0;

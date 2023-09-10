@@ -12,6 +12,6 @@ namespace Football.Projections.Interfaces
         public Vector<double> PerformProjection(Matrix<double> model, Vector<double> coeff);
         public Task<List<SeasonProjection>> RookieSeasonProjections(string position);
         public Task<int> PostSeasonProjections(List<SeasonProjection> projections);
-        public Task<SeasonProjection> GetSeasonProjection(int playerId);
+        public Task<SeasonProjection?> GetSeasonProjection(int playerId);
     }
 }

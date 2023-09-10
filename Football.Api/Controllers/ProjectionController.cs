@@ -43,7 +43,6 @@ namespace Football.Api.Controllers
             {
                 return BadRequest("Bad Request");
             }
-
         }
 
         [HttpPost("season/{position}")]
