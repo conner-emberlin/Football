@@ -70,6 +70,7 @@ builder.Services.Configure<FantasyScoring>(builder.Configuration.GetSection("Fan
 builder.Services.Configure<ProjectionLimits>(builder.Configuration.GetSection("Projections"));
 builder.Services.Configure<Starters>(builder.Configuration.GetSection("Starters"));
 builder.Services.Configure<Tunings>(builder.Configuration.GetSection("Tunings"));
+builder.Services.Configure<WeeklyTunings>(builder.Configuration.GetSection("WeeklyTunings"));
 builder.Services.Configure<WeeklyScraping>(builder.Configuration.GetSection("Scraping"));
 builder.Services.Configure<ESPN>(builder.Configuration.GetSection("ESPN"));
 

@@ -61,5 +61,13 @@ namespace Football.Api.Controllers
             }
         }
 
+        [HttpGet("weekly/{position}")]
+        [ProducesResponseType(typeof(List<WeekProjection>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeekProjection>>> GetWeeklyProjections(string position)
+        {
+           return Ok(await _projectionService.GetWeeklyProjections(position));
+        }
+
     }
 }

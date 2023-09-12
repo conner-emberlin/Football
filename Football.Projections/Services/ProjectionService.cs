@@ -9,7 +9,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Serilog;
 
-
 namespace Football.Projections.Services
 {
     public class ProjectionService : IProjectionService
@@ -19,6 +18,7 @@ namespace Football.Projections.Services
         private readonly ProjectionLimits _projections;
         private readonly Starters _starters;
         private readonly Season _season;
+        private readonly WeeklyTunings _weeklyTunings;
         private readonly IFantasyDataService _fantasyService;
         private readonly IStatisticsService _statisticsService;
         private readonly IMatrixCalculator _matrixCalculator;
@@ -31,12 +31,13 @@ namespace Football.Projections.Services
         public ProjectionService(IRegressionService regressionService, IFantasyDataService fantasyService, IOptionsMonitor<ProjectionLimits> projections, 
             IMemoryCache cache, ILogger logger, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
             IStatisticsService statisticsService, IOptionsMonitor<Starters> starters, IOptionsMonitor<Season> season, 
-            IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository)
+            IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, IOptionsMonitor<WeeklyTunings> weeklyTunings)
         {
             _regressionService = regressionService;
             _projections = projections.CurrentValue;
             _starters = starters.CurrentValue;
             _season = season.CurrentValue;
+            _weeklyTunings = weeklyTunings.CurrentValue;
             _cache = cache;
             _logger = logger;
             _fantasyService = fantasyService;
@@ -158,11 +159,51 @@ namespace Football.Projections.Services
                 return Enumerable.Empty<SeasonProjection>();
             }
         }
-            public async Task<IEnumerable<SeasonProjection>> CalculateSeasonProjections<T>(List<T> model, string position)
+        public async Task<IEnumerable<WeekProjection>> GetWeeklyProjections(string position)
+        {
+            if (RetrieveWeeklyFromCache(position).Any())
+            {
+                return RetrieveWeeklyFromCache(position);
+            }
+            else if (position == "QB")
+            {
+                var projections = await CalculateWeeklyProjections(await QBWeeklyProjectionModel());
+                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.QBProjections);
+                _cache.Set("QBWeeklyProjections", formattedProjections);
+                return formattedProjections;
+            }
+            else if (position == "RB")
+            {
+                var projections = await CalculateWeeklyProjections(await RBWeeklyProjectionModel());
+                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.RBProjections);
+                _cache.Set("RBWeeklyProjections", formattedProjections);
+                return formattedProjections;
+            }
+            else if (position == "WR")
+            {
+                var projections = await CalculateWeeklyProjections(await WRWeeklyProjectionModel());
+                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.WRProjections);
+                _cache.Set("WRWeeklyProjections", formattedProjections);
+                return formattedProjections;
+            }
+            else if (position == "TE")
+            {
+                var projections = await CalculateWeeklyProjections(await TEWeeklyProjectionModel());
+                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.TEProjections);
+                _cache.Set("TEWeeklyProjections", formattedProjections);
+                return formattedProjections;
+            }
+            else
+            {
+                _logger.Error("Unable to retrieve projections");
+                return Enumerable.Empty<WeekProjection>(); 
+            }
+        }
+        public async Task<IEnumerable<SeasonProjection>> CalculateSeasonProjections<T>(List<T> model, string position)
         {
             List<SeasonProjection> projections = new();
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
-            var results = PerformProjection(regressorMatrix, await PerformRegression(model, regressorMatrix, position));
+            var results = PerformProjection(regressorMatrix, await PerformRegression(regressorMatrix, position));
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = (int)typeof(T).GetProperties()[0].GetValue(model[i]);
@@ -181,16 +222,115 @@ namespace Football.Projections.Services
             }
             return projections;
         }
-        public async Task<Vector<double>> PerformRegression<T>(List<T> regressionModel, Matrix<double> regressorMatrix, string position)
+        public async Task<IEnumerable<WeekProjection>> CalculateWeeklyProjections(List<QBModelWeek> model)
+        {
+            List<WeekProjection> projections = new();
+            var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
+            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, "QB"));
+            for (int i = 0; i < results.Count; i++)
+            {
+                var playerId = model[i].PlayerId;
+                var player = await _playersService.GetPlayer(playerId);
+                if(player.Active == 1)
+                {
+                    projections.Add(new WeekProjection
+                    {
+                        PlayerId = playerId,
+                        Season = _season.CurrentSeason,
+                        Week = model.First().Week,
+                        Name = player.Name,
+                        Position = player.Position,
+                        ProjectedPoints = WeightedWeeklyProjection(model[i].ProjectedPoints / _season.Games, results[i], model.First().Week - 1)
+                    }); ;
+                }
+            }
+            return projections;
+        }
+        public async Task<IEnumerable<WeekProjection>> CalculateWeeklyProjections(List<RBModelWeek> model)
+        {
+            List<WeekProjection> projections = new();
+            var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
+            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, "RB"));
+            for (int i = 0; i < results.Count; i++)
+            {
+                var playerId = model[i].PlayerId;
+                var player = await _playersService.GetPlayer(playerId);
+                if(player.Active == 1)
+                {
+                    projections.Add(new WeekProjection
+                    {
+                        PlayerId = playerId,
+                        Season = _season.CurrentSeason,
+                        Week = model.First().Week,
+                        Name = player.Name,
+                        Position = player.Position,
+                        ProjectedPoints = WeightedWeeklyProjection(model[i].ProjectedPoints / _season.Games, results[i], model.First().Week - 1)
+                    });
+                }
+            }
+            return projections;
+        }
+        public async Task<IEnumerable<WeekProjection>> CalculateWeeklyProjections(List<WRModelWeek> model)
+        {
+            List<WeekProjection> projections = new();
+            var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
+            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, "WR"));
+            for (int i = 0; i < results.Count; i++)
+            {
+                var playerId = model[i].PlayerId;
+                var player = await _playersService.GetPlayer(playerId);
+                if (player.Active == 1)
+                {
+                    projections.Add(new WeekProjection
+                    {
+                        PlayerId = playerId,
+                        Season = _season.CurrentSeason,
+                        Week = model.First().Week,
+                        Name = player.Name,
+                        Position = player.Position,
+                        ProjectedPoints = WeightedWeeklyProjection(model[i].ProjectedPoints / _season.Games, results[i], model.First().Week - 1)
+                    });
+                }
+            }
+            return projections;
+        }
+        public async Task<IEnumerable<WeekProjection>> CalculateWeeklyProjections(List<TEModelWeek> model)
+        {
+            List<WeekProjection> projections = new();
+            var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
+            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, "TE"));
+            for (int i = 0; i < results.Count; i++)
+            {
+                var playerId = model[i].PlayerId;
+                var player = await _playersService.GetPlayer(playerId);
+                if (player.Active == 1)
+                {
+                    projections.Add(new WeekProjection
+                    {
+                        PlayerId = playerId,
+                        Season = _season.CurrentSeason,
+                        Week = model.First().Week,
+                        Name = player.Name,
+                        Position = player.Position,
+                        ProjectedPoints = WeightedWeeklyProjection(model[i].ProjectedPoints / _season.Games, results[i], model.First().Week - 1)
+                    });
+                }
+            }
+            return projections;
+        }
+        public async Task<Vector<double>> PerformRegression( Matrix<double> regressorMatrix, string position)
         {
             var dependentVector = _matrixCalculator.PopulateDependentVector(await SeasonFantasyProjectionModel(position));
             return _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
         }
-        public Vector<double> PerformProjection(Matrix<double> model, Vector<double> coeff)
+        public async Task<Vector<double>> PerformWeeklyRegression(Matrix<double> regressorMatrix, string position)
         {
-            return model * coeff;
+            var dependentVector = _matrixCalculator.PopulateDependentVector(await WeeklyFantasyProjectionModel(position));
+            return _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
         }
+        public Vector<double> PerformProjection(Matrix<double> model, Vector<double> coeff) => model * coeff;
 
+        #region Projection Models
         private async Task<List<SeasonFantasy>> SeasonFantasyProjectionModel(string position)
         {
             var players = await _playersService.GetPlayersByPosition(position);
@@ -205,6 +345,20 @@ namespace Football.Projections.Services
             }
             return seasonFantasy;
         }
+        private async Task<List<WeeklyFantasy>> WeeklyFantasyProjectionModel(string position)
+        {
+            var players = await _playersService.GetPlayersByPosition(position);
+            List<WeeklyFantasy> weeklyFantasy = new();
+            foreach (var player in players)
+            {
+                var weeklyResults = await _fantasyService.GetWeeklyFantasy(player.PlayerId);
+                if (weeklyResults.Any())
+                {
+                    weeklyFantasy.Add(_statCalculator.CalculateWeeklyAverage(weeklyResults));
+                }
+            }
+            return weeklyFantasy;
+        }
 
         private async Task<List<QBModelSeason>> QBProjectionModel()
         {
@@ -216,6 +370,20 @@ namespace Football.Projections.Services
                 if (stats.Any())
                 {
                     qbModel.Add(_regressionService.QBModelSeason(_statCalculator.CalculateStatProjection(stats)));
+                }
+            }
+            return qbModel;
+        }
+        private async Task<List<QBModelWeek>> QBWeeklyProjectionModel()
+        {
+            var players = await _playersService.GetPlayersByPosition("QB");
+            List<QBModelWeek> qbModel = new();
+            foreach(var player in players)
+            {
+                var stats = await _statisticsService.GetWeeklyDataQB(player.PlayerId);
+                if (stats.Any())
+                {
+                    qbModel.Add(await _regressionService.QBModelWeek(_statCalculator.CalculateWeeklyAverage(stats)));
                 }
             }
             return qbModel;
@@ -234,6 +402,21 @@ namespace Football.Projections.Services
             }
             return rbModel;
         }
+
+        private async Task<List<RBModelWeek>> RBWeeklyProjectionModel()
+        {
+            var players = await _playersService.GetPlayersByPosition("RB");
+            List<RBModelWeek> rbModel = new();
+            foreach (var player in players)
+            {
+                var stats = await _statisticsService.GetWeeklyDataRB(player.PlayerId);
+                if (stats.Any())
+                {
+                    rbModel.Add(await _regressionService.RBModelWeek(_statCalculator.CalculateWeeklyAverage(stats)));
+                }
+            }
+            return rbModel;
+        }
         private async Task<List<WRModelSeason>> WRProjectionModel()
         {
             var players = await _playersService.GetPlayersByPosition("WR");
@@ -244,6 +427,20 @@ namespace Football.Projections.Services
                 if (stats.Any())
                 {
                     wrModel.Add(_regressionService.WRModelSeason(_statCalculator.CalculateStatProjection(stats)));
+                }
+            }
+            return wrModel;
+        }
+        private async Task<List<WRModelWeek>> WRWeeklyProjectionModel()
+        {
+            var players = await _playersService.GetPlayersByPosition("WR");
+            List<WRModelWeek> wrModel = new();
+            foreach (var player in players)
+            {
+                var stats = await _statisticsService.GetWeeklyDataWR(player.PlayerId);
+                if (stats.Any())
+                {
+                    wrModel.Add(await _regressionService.WRModelWeek(_statCalculator.CalculateWeeklyAverage(stats)));
                 }
             }
             return wrModel;
@@ -262,11 +459,28 @@ namespace Football.Projections.Services
             }
             return teModel;
         }
-        private IEnumerable<SeasonProjection> RetrieveFromCache(string position)
+        private async Task<List<TEModelWeek>> TEWeeklyProjectionModel()
         {
-            return _cache.TryGetValue(position + "Projections", out IEnumerable<SeasonProjection> cachedProj) ? cachedProj
-                : Enumerable.Empty<SeasonProjection>();
+            var players = await _playersService.GetPlayersByPosition("TE");
+            List<TEModelWeek> teModel = new();
+            foreach (var player in players)
+            {
+                var stats = await _statisticsService.GetWeeklyDataTE(player.PlayerId);
+                if (stats.Any())
+                {
+                    teModel.Add(await _regressionService.TEModelWeek(_statCalculator.CalculateWeeklyAverage(stats)));
+                }
+            }
+            return teModel;
         }
+        #endregion
+        private IEnumerable<SeasonProjection> RetrieveFromCache(string position) =>  
+            _cache.TryGetValue(position + "Projections", out IEnumerable<SeasonProjection> cachedProj) ? cachedProj
+                  : Enumerable.Empty<SeasonProjection>();
+        private IEnumerable<WeekProjection> RetrieveWeeklyFromCache(string position) =>
+            _cache.TryGetValue(position + "WeeklyProjections", out IEnumerable<WeekProjection> cachedProj) ? cachedProj
+            : Enumerable.Empty<WeekProjection>();
+        
         private async Task<double> GetReplacementPoints(string position)
         {
             return position switch
@@ -278,5 +492,8 @@ namespace Football.Projections.Services
                 _ => 0,
             };
         }
+        private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) => 
+            (_weeklyTunings.ProjectionWeight / week) * seasonProjection + (1 - (_weeklyTunings.ProjectionWeight / week)) * weeklyProjection;
+        
     }
 }

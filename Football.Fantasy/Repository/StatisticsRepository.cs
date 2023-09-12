@@ -380,7 +380,7 @@ namespace Football.Fantasy.Repository
                             ,[RushingYds]
                             ,[RushingTD]
                             ,[Fumbles]
-                        FROM [dbo].WeeklyWRData
+                        FROM [dbo].WeeklyTEData
                         WHERE 1=1
                         AND [Season] = @season
                         AND [Week] = @week
@@ -403,7 +403,7 @@ namespace Football.Fantasy.Repository
                             ,[RushingYds]
                             ,[RushingTD]
                             ,[Fumbles]
-                        FROM [dbo].WeeklyWRData
+                        FROM [dbo].WeeklyTEData
                         WHERE 1=1
                         AND [PlayerId] = @playerId
                         ";

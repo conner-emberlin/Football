@@ -1,12 +1,14 @@
-﻿using Football.Data.Models;
+﻿using Football.Models;
+using Football.Data.Models;
 using Football.Fantasy.Models;
 using Football.Fantasy.Interfaces;
+using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using Football.Players.Models;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearRegression;
-
+using Microsoft.Extensions.Options;
 
 namespace Football.Projections.Services
 {
@@ -14,12 +16,15 @@ namespace Football.Projections.Services
     {
         private readonly IMatrixCalculator _matrixCalculator;
         private readonly IFantasyDataService _fantasyService;
-        private readonly IProjectionService _projectionService;
-        public RegressionService(IMatrixCalculator matrixCalculator, IFantasyDataService fantasyService, IProjectionService projectionService)
+        private readonly IPlayersService _playerService;
+        private readonly Season _season;
+
+        public RegressionService(IMatrixCalculator matrixCalculator, IFantasyDataService fantasyService, IPlayersService playerService, IOptionsMonitor<Season> season)
         {
             _matrixCalculator = matrixCalculator;
             _fantasyService = fantasyService;
-            _projectionService = projectionService;
+            _playerService = playerService;
+            _season = season.CurrentValue;
         }
 
         public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents)
@@ -55,13 +60,13 @@ namespace Football.Projections.Services
         }
         public async Task<QBModelWeek> QBModelWeek(WeeklyDataQB stat)
         {
-            var projection = await _projectionService.GetSeasonProjection(stat.PlayerId);
+            var projection = await _playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
             return new QBModelWeek
             {
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Week = stat.Week,
-                ProjectedPoints = projection != null ? projection.ProjectedPoints : 0,
+                ProjectedPoints = projection,
                 PassingAttemptsPerGame = stat.Attempts,
                 PassingYardsPerGame = stat.Yards,
                 PassingTouchdownsPerGame = stat.TD,
@@ -88,13 +93,13 @@ namespace Football.Projections.Services
         }
         public async Task<RBModelWeek> RBModelWeek(WeeklyDataRB stat)
         {
-            var projection = await _projectionService.GetSeasonProjection(stat.PlayerId);
+            var projection = await _playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
             return new RBModelWeek
             {
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Week = stat.Week,
-                ProjectedPoints = projection != null ? projection.ProjectedPoints : 0,
+                ProjectedPoints = projection,
                 RushingAttemptsPerGame = stat.RushingAtt,
                 RushingYardsPerGame = stat.RushingYds,
                 RushingYardsPerAttempt = stat.RushingAtt > 0 ? stat.RushingYds / stat.RushingAtt : 0,
@@ -119,13 +124,13 @@ namespace Football.Projections.Services
         }
         public async Task<WRModelWeek> WRModelWeek(WeeklyDataWR stat)
         {
-            var projection = await _projectionService.GetSeasonProjection(stat.PlayerId);
+            var projection = await _playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
             return new WRModelWeek
             {
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Week = stat.Week,
-                ProjectedPoints = projection != null ? projection.ProjectedPoints : 0,
+                ProjectedPoints = projection,
                 TargetsPerGame = stat.Targets,
                 ReceptionsPerGame = stat.Receptions,
                 YardsPerGame = stat.Yards,
@@ -148,13 +153,13 @@ namespace Football.Projections.Services
         }
         public async Task<TEModelWeek> TEModelWeek(WeeklyDataTE stat)
         {
-            var projection = await _projectionService.GetSeasonProjection(stat.PlayerId);
+            var projection = await _playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
             return new TEModelWeek
             {
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Week = stat.Week,
-                ProjectedPoints = projection != null ? projection.ProjectedPoints : 0,
+                ProjectedPoints = projection,
                 TargetsPerGame = stat.Targets,
                 ReceptionsPerGame = stat.Receptions,
                 YardsPerGame = stat.Yards,

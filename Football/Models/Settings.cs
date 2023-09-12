@@ -51,4 +51,10 @@
         public double NewQBFloor { get; set; }
         public double NewQBCeiling { get; set; }
     }
+
+    public class WeeklyTunings
+    {
+        public double RecentWeekWeight { get; set; }
+        public double ProjectionWeight { get; set; }
+    }
 }

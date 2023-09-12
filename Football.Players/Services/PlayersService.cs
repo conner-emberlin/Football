@@ -24,5 +24,6 @@ namespace Football.Players.Services
         public async Task<int> GetPlayerSuspensions(int playerId, int season) => await _playersRepository.GetPlayerSuspensions(playerId, season);
         public async Task<List<QuarterbackChange>> GetQuarterbackChanges(int season) => await _playersRepository.GetQuarterbackChanges(season);
         public async Task<double> GetEPA(int playerId, int season) => await _playersRepository.GetEPA(playerId, season);
+        public async Task<double> GetSeasonProjection(int season, int playerId) => await _playersRepository.GetSeasonProjection(season, playerId);
     }
 }
