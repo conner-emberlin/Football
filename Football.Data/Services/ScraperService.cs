@@ -184,10 +184,13 @@ namespace Football.Data.Services
                         var res = await client.GetAsync(url);
                         byte[] bytes = await res.Content.ReadAsByteArrayAsync();
                         MemoryStream memoryStream = new(bytes);
-                        var fileName = player.PlayerId.ToString() + ".png";
-                        using var fs = new FileStream(@"C:\NFLData\Headshots\" + fileName, FileMode.Create);
-                        memoryStream.WriteTo(fs);
-                        count++;
+                        var fileName = @"C:\NFLData\Headshots\" + player.PlayerId.ToString() + ".png";
+                        if (!System.IO.File.Exists(fileName))
+                        {
+                            using var fs = new FileStream(fileName, FileMode.Create);
+                            memoryStream.WriteTo(fs);
+                            count++;
+                        }
                     }
                 }
             }

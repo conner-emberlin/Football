@@ -17,7 +17,7 @@ namespace Football.Api.Controllers
             _scraperService = scraperService;
         }
 
-        [HttpPost("{position}/{week}/{season}")]
+        [HttpPost("{position}/{season}/{week}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadWeeklyData(int position, int season, int week)

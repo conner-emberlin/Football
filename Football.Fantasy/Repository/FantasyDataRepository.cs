@@ -34,7 +34,19 @@ namespace Football.Fantasy.Repository
             var query = $@"INSERT INTO [dbo].SeasonFantasyData (PlayerId, Season, Games, FantasyPoints, Name, Position)
                             VALUES (@PlayerId, @Season, @Games, @FantasyPoints, @Name, @Position)";
             return await _dbConnection.ExecuteAsync(query, data);
-
+        }
+        public async Task<int> PostWeeklyFantasy(WeeklyFantasy data)
+        {
+            var query = $@"INSERT INTO [dbo].WeeklyFantasyData (PlayerId, Name, Position, Season, Week, Games, FantasyPoints)
+                        VALUES (@PlayerId, @Name, @Position, @Season, @Week, @Games, @FantasyPoints)";
+            return await _dbConnection.ExecuteAsync(query, data);
+        }
+        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId)
+        {
+            var query = $@"SELECT [PlayerId], [Name], [Position], [Season], [Week], [Games], [FantasyPoints]
+                        FROM [dbo].WeeklyFantasyData
+                        WHERE [PlayerId] = @playerId";
+            return (await _dbConnection.QueryAsync<WeeklyFantasy>(query, new {playerId})).ToList();
         }
     }
 }

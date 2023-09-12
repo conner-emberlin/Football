@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Football.Data.Models;
 using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
@@ -76,6 +75,62 @@ namespace Football.Api.Controllers
             if (playerId > 0)
             {
                 return Ok(await _statisticsService.GetSeasonDataTE(playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+        [HttpGet("data/weekly/qb/{playerId}")]
+        [ProducesResponseType(typeof(List<WeeklyDataQB>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyDataQB>>> GetWeeklyDataQB(int playerId)
+        {
+            if (playerId > 0)
+            {
+                return Ok(await _statisticsService.GetWeeklyDataQB(playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+        [HttpGet("data/weekly/rb/{playerId}")]
+        [ProducesResponseType(typeof(List<WeeklyDataRB>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyDataRB>>> GetWeeklyDataRB(int playerId)
+        {
+            if (playerId > 0)
+            {
+                return Ok(await _statisticsService.GetWeeklyDataRB(playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+        [HttpGet("data/weekly/wr/{playerId}")]
+        [ProducesResponseType(typeof(List<WeeklyDataWR>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyDataWR>>> GetWeeklyDataWR(int playerId)
+        {
+            if (playerId > 0)
+            {
+                return Ok(await _statisticsService.GetWeeklyDataWR(playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+        [HttpGet("data/weekly/te/{playerId}")]
+        [ProducesResponseType(typeof(List<WeeklyDataTE>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyDataTE>>> GetWeeklyDataTE(int playerId)
+        {
+            if (playerId > 0)
+            {
+                return Ok(await _statisticsService.GetWeeklyDataTE(playerId));
             }
             else
             {

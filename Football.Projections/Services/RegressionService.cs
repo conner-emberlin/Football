@@ -14,10 +14,12 @@ namespace Football.Projections.Services
     {
         private readonly IMatrixCalculator _matrixCalculator;
         private readonly IFantasyDataService _fantasyService;
-        public RegressionService(IMatrixCalculator matrixCalculator, IFantasyDataService fantasyService)
+        private readonly IProjectionService _projectionService;
+        public RegressionService(IMatrixCalculator matrixCalculator, IFantasyDataService fantasyService, IProjectionService projectionService)
         {
             _matrixCalculator = matrixCalculator;
             _fantasyService = fantasyService;
+            _projectionService = projectionService;
         }
 
         public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents)
@@ -51,6 +53,24 @@ namespace Football.Projections.Services
                 SacksPerGame = stat.Sacks / stat.Games
             };
         }
+        public async Task<QBModelWeek> QBModelWeek(WeeklyDataQB stat)
+        {
+            var projection = await _projectionService.GetSeasonProjection(stat.PlayerId);
+            return new QBModelWeek
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                ProjectedPoints = projection != null ? projection.ProjectedPoints : 0,
+                PassingAttemptsPerGame = stat.Attempts,
+                PassingYardsPerGame = stat.Yards,
+                PassingTouchdownsPerGame = stat.TD,
+                RushingAttemptsPerGame= stat.RushingAttempts,
+                RushingYardsPerGame = stat.RushingYards,
+                RushingTouchdownsPerGame = stat.RushingTD,
+                SacksPerGame = stat.Sacks
+            };
+        }
         public RBModelSeason RBModelSeason(SeasonDataRB stat)
         {
             return new RBModelSeason
@@ -66,6 +86,24 @@ namespace Football.Projections.Services
                 ReceivingTouchdownsPerGame = stat.ReceivingTD / stat.Games
             };
         }
+        public async Task<RBModelWeek> RBModelWeek(WeeklyDataRB stat)
+        {
+            var projection = await _projectionService.GetSeasonProjection(stat.PlayerId);
+            return new RBModelWeek
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                ProjectedPoints = projection != null ? projection.ProjectedPoints : 0,
+                RushingAttemptsPerGame = stat.RushingAtt,
+                RushingYardsPerGame = stat.RushingYds,
+                RushingYardsPerAttempt = stat.RushingAtt > 0 ? stat.RushingYds / stat.RushingAtt : 0,
+                RushingTouchdownsPerGame = stat.RushingTD,
+                ReceptionsPerGame = stat.Receptions,
+                ReceivingYardsPerGame = stat.Yards,
+                ReceivingTouchdownsPerGame = stat.ReceivingTD
+            };
+        }
         public WRModelSeason WRModelSeason(SeasonDataWR stat)
         {
             return new WRModelSeason
@@ -79,6 +117,22 @@ namespace Football.Projections.Services
                 TouchdownsPerGame = stat.TD / stat.Games
             };
         }
+        public async Task<WRModelWeek> WRModelWeek(WeeklyDataWR stat)
+        {
+            var projection = await _projectionService.GetSeasonProjection(stat.PlayerId);
+            return new WRModelWeek
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                ProjectedPoints = projection != null ? projection.ProjectedPoints : 0,
+                TargetsPerGame = stat.Targets,
+                ReceptionsPerGame = stat.Receptions,
+                YardsPerGame = stat.Yards,
+                YardsPerReception = stat.Receptions > 0 ? stat.Yards/stat.Receptions : 0,
+                TouchdownsPerGame = stat.TD
+            };
+        }
         public TEModelSeason TEModelSeason(SeasonDataTE stat)
         {
             return new TEModelSeason
@@ -90,6 +144,22 @@ namespace Football.Projections.Services
                 YardsPerGame = stat.Yards / stat.Games,
                 YardsPerReception = stat.Receptions > 0 ? stat.Yards / stat.Receptions : 0,
                 TouchdownsPerGame = stat.TD / stat.Games
+            };
+        }
+        public async Task<TEModelWeek> TEModelWeek(WeeklyDataTE stat)
+        {
+            var projection = await _projectionService.GetSeasonProjection(stat.PlayerId);
+            return new TEModelWeek
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                ProjectedPoints = projection != null ? projection.ProjectedPoints : 0,
+                TargetsPerGame = stat.Targets,
+                ReceptionsPerGame = stat.Receptions,
+                YardsPerGame = stat.Yards,
+                YardsPerReception = stat.Receptions > 0 ? stat.Yards / stat.Receptions : 0,
+                TouchdownsPerGame = stat.TD
             };
         }
     }

@@ -17,7 +17,7 @@ namespace Football.Api.Controllers
         [HttpPost("data/{position}/{season}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> RefreshFantasyPoints( int season, string position)
+        public async Task<ActionResult<int>> PostSeasonFantasy( int season, string position)
         {
             if (season > 0 && position != null)
             {
@@ -28,6 +28,21 @@ namespace Football.Api.Controllers
                 return BadRequest("Bad Request");
             }
         }
+        [HttpPost("data/{position}/{season}/{week}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> PostWeeklyFantasy(int season, int week, string position)
+        {
+            if (season > 0 && week > 0 && position != null)
+            {
+                return Ok(await _fantasyDataService.PostWeeklyFantasy(season, week, position));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+
 
         [HttpGet("data/season/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonFantasy>), 200)]
@@ -37,6 +52,20 @@ namespace Football.Api.Controllers
             if (playerId > 0)
             {
                 return Ok(await _fantasyDataService.GetSeasonFantasy(playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+        [HttpGet("data/weekly/{playerId}")]
+        [ProducesResponseType(typeof(List<WeeklyFantasy>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyFantasy>>> GetWeeklyFantasy(int playerId)
+        {
+            if (playerId > 0)
+            {
+                return Ok(await _fantasyDataService.GetWeeklyFantasy(playerId));
             }
             else
             {

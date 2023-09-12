@@ -44,4 +44,27 @@
         public double YardsPerReception { get; set; }
         public double TouchdownsPerGame { get; set; }
     }
+
+    public class QBModelWeek : QBModelSeason
+    {
+        public int Week { get; set; }
+        public double ProjectedPoints { get; set; }
+    }
+
+    public class RBModelWeek : RBModelSeason
+    {
+        public int Week { get; set; }
+        public double ProjectedPoints { get; set; }
+    }
+
+    public class WRModelWeek : WRModelSeason
+    {
+        public int Week { get; set; }
+        public double ProjectedPoints { get; set; }
+    }
+    public class TEModelWeek : TEModelSeason
+    {
+        public int Week { get; set; }
+        public double ProjectedPoints { get; set; }
+    }
 }

@@ -21,7 +21,7 @@ namespace Football.Projections.Repository
             return await _dbConnection.ExecuteAsync(query, projection);
         }
 
-        public async Task<SeasonProjection> GetSeasonProjection(int playerId)
+        public async Task<SeasonProjection?> GetSeasonProjection(int playerId)
         {
             var query = $@"SELECT [PlayerId], [Season], [Name], [Position], [ProjectedPoints]
                         FROM [dbo].SeasonProjections

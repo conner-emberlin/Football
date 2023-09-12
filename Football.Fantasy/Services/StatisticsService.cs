@@ -20,5 +20,13 @@ namespace Football.Fantasy.Services
         public async Task<List<SeasonDataTE>> GetSeasonDataTE(int playerId) => await _statisticsRepository.GetSeasonDataTE(playerId);
         public async Task<List<SeasonDataDST>> GetSeasonDataDSTBySeason( int season) => await _statisticsRepository.GetSeasonDataDSTBySeason(season);
         public async Task<List<SeasonDataDST>> GetSeasonDataDST(int playerId) => await _statisticsRepository.GetSeasonDataDST(playerId);
+        public async Task<List<WeeklyDataQB>> GetWeeklyDataQB(int season, int week) => await _statisticsRepository.GetWeeklyDataQB(season, week);
+        public async Task<List<WeeklyDataRB>> GetWeeklyDataRB(int season, int week) => await _statisticsRepository.GetWeeklyDataRB(season, week);
+        public async Task<List<WeeklyDataWR>> GetWeeklyDataWR(int season, int week) => await _statisticsRepository.GetWeeklyDataWR(season, week);
+        public async Task<List<WeeklyDataTE>> GetWeeklyDataTE(int season, int week) => await _statisticsRepository.GetWeeklyDataTE(season, week);
+        public async Task<List<WeeklyDataQB>> GetWeeklyDataQB(int playerId) => await _statisticsRepository.GetWeeklyDataQB(playerId);
+        public async Task<List<WeeklyDataRB>> GetWeeklyDataRB(int playerId) => await _statisticsRepository.GetWeeklyDataRB(playerId);
+        public async Task<List<WeeklyDataWR>> GetWeeklyDataWR(int playerId) => await _statisticsRepository.GetWeeklyDataWR(playerId);
+        public async Task<List<WeeklyDataTE>> GetWeeklyDataTE(int playerId) => await _statisticsRepository.GetWeeklyDataTE(playerId);
     }
 }

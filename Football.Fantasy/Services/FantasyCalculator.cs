@@ -17,13 +17,29 @@ namespace Football.Fantasy.Services
         public SeasonFantasy CalculateQBFantasy(SeasonDataQB stat)
         {
             var points = _scoring.PointsPerPassingTouchdown * stat.TD + _scoring.PointsPerTouchdown * stat.RushingTD
-                        + _scoring.PointsPerPassingYard * stat.Yards + _scoring.PointsPerYard * _scoring.PointsPerYard
+                        + _scoring.PointsPerPassingYard * stat.Yards + _scoring.PointsPerYard * stat.RushingYards
                         - _scoring.PointsPerFumble * stat.Fumbles - _scoring.PointsPerInterception * stat.Int;
             return new SeasonFantasy
             {
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Games = stat.Games,
+                FantasyPoints = points,
+                Name = stat.Name,
+                Position = "QB"
+            };
+        }
+        public WeeklyFantasy CalculateQBFantasy(WeeklyDataQB stat)
+        {
+            var points = _scoring.PointsPerPassingTouchdown * stat.TD + _scoring.PointsPerTouchdown * stat.RushingTD
+                        + _scoring.PointsPerPassingYard * stat.Yards + _scoring.PointsPerYard * stat.RushingYards
+                        - _scoring.PointsPerFumble * stat.Fumbles - _scoring.PointsPerInterception * stat.Int;
+            return new WeeklyFantasy
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                Games = 1,
                 FantasyPoints = points,
                 Name = stat.Name,
                 Position = "QB"
@@ -44,6 +60,22 @@ namespace Football.Fantasy.Services
                 Position = "RB"
             };
         }
+        public WeeklyFantasy CalculateRBFantasy(WeeklyDataRB stat)
+        {
+            var points = _scoring.PointsPerYard * stat.RushingYds + _scoring.PointsPerTouchdown * stat.RushingTD
+                        + _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerTouchdown * stat.ReceivingTD
+                        + _scoring.PointsPerYard * stat.Yards - _scoring.PointsPerFumble * stat.Fumbles;
+            return new WeeklyFantasy
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                Games = 1,
+                FantasyPoints = points,
+                Name = stat.Name,
+                Position = "RB"
+            };
+        }
         public SeasonFantasy CalculateWRFantasy(SeasonDataWR stat)
         {
             var points = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
@@ -59,6 +91,22 @@ namespace Football.Fantasy.Services
                 Position = "WR"
             };
         }
+        public WeeklyFantasy CalculateWRFantasy(WeeklyDataWR stat)
+        {
+            var points = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
+                        + _scoring.PointsPerTouchdown * stat.TD + _scoring.PointsPerYard * stat.RushingYds
+                        + _scoring.PointsPerTouchdown * stat.RushingTD - _scoring.PointsPerFumble * stat.Fumbles;
+            return new WeeklyFantasy
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                Games = 1,
+                FantasyPoints = points,
+                Name = stat.Name,
+                Position = "WR"
+            };
+        }
         public SeasonFantasy CalculateTEFantasy(SeasonDataTE stat)
         {
             var points = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
@@ -69,6 +117,22 @@ namespace Football.Fantasy.Services
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
                 Games = stat.Games,
+                FantasyPoints = points,
+                Name = stat.Name,
+                Position = "TE"
+            };
+        }
+        public WeeklyFantasy CalculateTEFantasy(WeeklyDataTE stat)
+        {
+            var points = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
+                        + _scoring.PointsPerTouchdown * stat.TD + _scoring.PointsPerYard * stat.RushingYds
+                        + _scoring.PointsPerTouchdown * stat.RushingTD - _scoring.PointsPerFumble * stat.Fumbles;
+            return new WeeklyFantasy
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                Games = 1,
                 FantasyPoints = points,
                 Name = stat.Name,
                 Position = "TE"

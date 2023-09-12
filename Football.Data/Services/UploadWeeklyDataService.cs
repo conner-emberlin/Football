@@ -89,7 +89,7 @@ namespace Football.Data.Services
                 }
                 else
                 {
-                    _logger.Information("{name} does not exist in the Players table", p.Name);
+                    _logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -128,7 +128,7 @@ namespace Football.Data.Services
                 }
                 else
                 {
-                    _logger.Information("{name} does not exist in the Players table", p.Name);
+                    _logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -167,7 +167,7 @@ namespace Football.Data.Services
                 }
                 else
                 {
-                    _logger.Information("{name} does not exist in the Players table", p.Name);
+                    _logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -207,7 +207,7 @@ namespace Football.Data.Services
                 }
                 else
                 {
-                    _logger.Information("{name} does not exist in the Players table", p.Name);
+                    _logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -245,7 +245,7 @@ namespace Football.Data.Services
                 }
                 else
                 {
-                    _logger.Information("{name} does not exist in the Players table", p.Name);
+                    _logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;

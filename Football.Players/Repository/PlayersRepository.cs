@@ -17,14 +17,14 @@ namespace Football.Players.Repository
         public async Task<int> GetPlayerId(string name)
         {
             var query = $@"SELECT [PlayerId] FROM [dbo].TempPlayer
-                            WHERE [Name] LIKE '%' + @name + '%'
+                            WHERE [Name] = @name
                             ORDER BY [Active] DESC";
-            return await _dbConnection.ExecuteAsync(query, new { name });
+            return (await _dbConnection.QueryAsync<int>(query, new { name })).FirstOrDefault();
         }
         public async Task<int> CreatePlayer(Player player)
         {
-            var query = $@"INSERT INTO [dbo].TempPlayer (PlayerId, Name, Position, Active)
-                        VALUES (@PlayerId, @Name, @Position, @Active";
+            var query = $@"INSERT INTO [dbo].TempPlayer (Name, Position, Active)
+                        VALUES (@Name, @Position, @Active)";
             return await _dbConnection.ExecuteAsync(query, player);
         }
         public async Task<List<Player>> GetAllPlayers()

@@ -286,7 +286,7 @@ namespace Football.Projections.Services
 
         public SeasonFantasy CalculateStatProjection(List<SeasonFantasy> seasons)
         {
-            _logger.Information("Calculating Fantsay Stat projections for {p}", seasons.First().PlayerId);
+            _logger.Information("Calculating Fantasy Stat projections for {p}", seasons.First().PlayerId);
             try
             {
                 var recentWeight = seasons.Count > 1 ? _tunings.Weight : 1;
@@ -315,7 +315,56 @@ namespace Football.Projections.Services
                 _logger.Error(ex.ToString(), ex.StackTrace, ex);
                 throw;
             }
+        }
+        public WeeklyDataQB CalculateWeeklyAverage(List<WeeklyDataQB> weeks)
+        {
+            _logger.Information("Calculating Weekly averages for player {playerId}", weeks.First().PlayerId);
+            var recentWeight = weeks.Count > 1 ? _tunings.Weight : 1;
+            var recentWeek = weeks.Max(w => w.Week);
+            var previousWeeks = weeks.Count - 1;
+            var previousWeight = weeks.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousWeeks)) : 0;
 
+            double avgComp = 0;
+            double avgAtt = 0;
+            double avgYd = 0;
+            double avgTD = 0;
+            double avgInt = 0;
+            double avgSacks = 0;
+            double avgRAtt = 0;
+            double avgRYd = 0;
+            double avgRTD = 0;
+            double avgFum = 0;
+
+            foreach (var w in weeks)
+            {
+                avgComp += w.Week == recentWeek ? recentWeight * w.Completions : previousWeight * w.Completions;
+                avgAtt += w.Week == recentWeek ? recentWeight * w.Attempts : previousWeight * w.Attempts;
+                avgYd += w.Week == recentWeek ? recentWeight * w.Yards : previousWeight * w.Yards;
+                avgTD += w.Week == recentWeek ? recentWeight * w.TD : previousWeight * w.TD;
+                avgInt += w.Week == recentWeek ? recentWeight * w.Int : previousWeight * w.Int;
+                avgSacks += w.Week == recentWeek ? recentWeight * w.Sacks : previousWeight * w.Sacks;
+                avgRAtt += w.Week == recentWeek ? recentWeight * w.RushingAttempts : previousWeight * w.RushingAttempts;
+                avgRYd += w.Week == recentWeek ? recentWeight * w.RushingYards : previousWeight * w.RushingYards;
+                avgRTD += w.Week == recentWeek ? recentWeight * w.RushingTD : previousWeight * w.RushingTD;
+                avgFum += w.Week == recentWeek ? recentWeight * w.Fumbles : previousWeight * w.Fumbles;
+            }
+
+            return new WeeklyDataQB
+            {
+                PlayerId = weeks.First().PlayerId,
+                Season = weeks.First().Season,
+                Week = recentWeek + 1,
+                Completions = avgComp,
+                Attempts = avgAtt,
+                Yards = avgYd,
+                TD = avgTD,
+                Int = avgInt,
+                Sacks = avgSacks,
+                RushingAttempts = avgRAtt,
+                RushingYards = avgRYd,
+                RushingTD = avgRTD,
+                Fumbles = avgFum
+            };
         }
     }
 }
