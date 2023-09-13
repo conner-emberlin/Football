@@ -66,7 +66,29 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<WeekProjection>>> GetWeeklyProjections(string position)
         {
-           return Ok(await _projectionService.GetWeeklyProjections(position));
+            if (position != null)
+            {
+                return Ok(await _projectionService.GetWeeklyProjections(position));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+        [HttpPost("weekly/{position}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> PostWeeklyProjections(string position)
+        {
+            if (position != null)
+            {
+                var proj = (await _projectionService.GetWeeklyProjections(position)).ToList();
+                return Ok(await _projectionService.PostWeeklyProjections(proj));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
         }
 
     }

@@ -21,6 +21,13 @@ namespace Football.Projections.Repository
             return await _dbConnection.ExecuteAsync(query, projection);
         }
 
+        public async Task<int> PostWeeklyProjections(WeekProjection projection)
+        {
+            var query = $@"INSERT INTO [dbo].WeeklyProjections (PlayerId, Season, Week, Name, Position, ProjectedPoints)
+                        VALUES (@PlayerId, @Season, @Week, @Name, @Position, @ProjectedPoints)";
+            return await _dbConnection.ExecuteAsync(query, projection);
+        }
+
         public async Task<SeasonProjection?> GetSeasonProjection(int playerId)
         {
             var query = $@"SELECT [PlayerId], [Season], [Name], [Position], [ProjectedPoints]

@@ -19,5 +19,6 @@ namespace Football.Projections.Interfaces
         public Task<List<SeasonProjection>> RookieSeasonProjections(string position);
         public Task<int> PostSeasonProjections(List<SeasonProjection> projections);
         public Task<SeasonProjection?> GetSeasonProjection(int playerId);
+        public Task<int> PostWeeklyProjections(List<WeekProjection> projections);
     }
 }

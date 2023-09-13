@@ -49,184 +49,364 @@ else if (youTried && badRequestError)
         <b>Name</b> @playerName <b>Position</b> @playerPosition 
     </div>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
-    @if(playerPosition == "QB" && seasonQBData.Any())
+    @if(playerPosition == "QB")
     {
-        <div class="table_container">
-            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
-                <thead>
-                    <tr>
-                        <th>Season</th>
-                        <th>Games</th>
-                        <th>Comp</th>
-                        <th>Att</th>
-                        <th>Yd</th>
-                        <th>TD</th>
-                        <th>Int</th>
-                        <th>Sck</th>
-                        <th>RAtt</th>
-                        <th>RYds</th>
-                        <th>RTd</th>
-                        <th>Fum</th>
-                        <th>Fpts</th>
-                        <th>FPPG</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var stat in seasonQBData)
-                    {                      
+        @if (weeklyQBData.Any())
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
                         <tr>
-                            <td>@stat.Season</td>
-                            <td>@stat.Games</td>
-                            <td>@stat.Completions</td>
-                            <td>@stat.Attempts</td>
-                            <td>@stat.Yards</td>
-                            <td>@stat.TD</td>
-                            <td>@stat.Int</td>
-                            <td>@stat.Sacks</td>
-                            <td>@stat.RushingAttempts</td>
-                            <td>@stat.RushingYards</td>
-                            <td>@stat.RushingTD</td>
-                            <td>@stat.Fumbles</td>
-                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
-                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                            <th>Season</th>
+                            <th>Week</th>
+                            <th>Comp</th>
+                            <th>Att</th>
+                            <th>Yd</th>
+                            <th>TD</th>
+                            <th>Int</th>
+                            <th>Sck</th>
+                            <th>RAtt</th>
+                            <th>RYds</th>
+                            <th>RTd</th>
+                            <th>Fum</th>
+                            <th>Fpts</th>
                         </tr>
-                    }
-                </tbody>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in weeklyQBData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Week</td>
+                                <td>@stat.Completions</td>
+                                <td>@stat.Attempts</td>
+                                <td>@stat.Yards</td>
+                                <td>@stat.TD</td>
+                                <td>@stat.Int</td>
+                                <td>@stat.Sacks</td>
+                                <td>@stat.RushingAttempts</td>
+                                <td>@stat.RushingYards</td>
+                                <td>@stat.RushingTD</td>
+                                <td>@stat.Fumbles</td>
+                                <td>@weeklyFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        @if (seasonQBData.Any())
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
+                        <tr>
+                            <th>Season</th>
+                            <th>Games</th>
+                            <th>Comp</th>
+                            <th>Att</th>
+                            <th>Yd</th>
+                            <th>TD</th>
+                            <th>Int</th>
+                            <th>Sck</th>
+                            <th>RAtt</th>
+                            <th>RYds</th>
+                            <th>RTd</th>
+                            <th>Fum</th>
+                            <th>Fpts</th>
+                            <th>FPPG</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in seasonQBData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Games</td>
+                                <td>@stat.Completions</td>
+                                <td>@stat.Attempts</td>
+                                <td>@stat.Yards</td>
+                                <td>@stat.TD</td>
+                                <td>@stat.Int</td>
+                                <td>@stat.Sacks</td>
+                                <td>@stat.RushingAttempts</td>
+                                <td>@stat.RushingYards</td>
+                                <td>@stat.RushingTD</td>
+                                <td>@stat.Fumbles</td>
+                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                            </tr>
+                        }
+                    </tbody>
             </table>
         </div>
+        }
     }
 
-    else if(playerPosition == "RB" && seasonRBData.Any())
+    else if(playerPosition == "RB")
     {
-        <div class="table_container">
-            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
-                <thead>
-                    <tr>
-                        <th>Season</th>
-                        <th>Games</th>
-                        <th>Att</th>
-                        <th>Yds</th>
-                        <th>TD</th>
-                        <th>Rec</th>
-                        <th>Tgt</th>
-                        <th>RecYds</th>
-                        <th>RecTD</th>
-                        <th>Fum</th>
-                        <th>Fpts</th>
-                        <th>FPPG</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var stat in seasonRBData)
-                    {
+        @if (weeklyRBData.Any())
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
                         <tr>
-                            <td>@stat.Season</td>
-                            <td>@stat.Games</td>
-                            <td>@stat.RushingAtt</td>
-                            <td>@stat.RushingYds</td>
-                            <td>@stat.RushingTD</td>
-                            <td>@stat.Receptions</td>
-                            <td>@stat.Targets</td>
-                            <td>@stat.Yards</td>
-                            <td>@stat.ReceivingTD</td>
-                            <td>@stat.Fumbles</td>
-                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
-                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                            <th>Season</th>
+                            <th>Week</th>
+                            <th>Att</th>
+                            <th>Yds</th>
+                            <th>TD</th>
+                            <th>Rec</th>
+                            <th>Tgt</th>
+                            <th>RecYds</th>
+                            <th>RecTD</th>
+                            <th>Fum</th>
+                            <th>Fpts</th>
                         </tr>
-                    }
-                </tbody>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in weeklyRBData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Week</td>
+                                <td>@stat.RushingAtt</td>
+                                <td>@stat.RushingYds</td>
+                                <td>@stat.RushingTD</td>
+                                <td>@stat.Receptions</td>
+                                <td>@stat.Targets</td>
+                                <td>@stat.Yards</td>
+                                <td>@stat.ReceivingTD</td>
+                                <td>@stat.Fumbles</td>
+                                <td>@weeklyFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>             
+        }
+        @if (seasonRBData.Any())
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
+                        <tr>
+                            <th>Season</th>
+                            <th>Games</th>
+                            <th>Att</th>
+                            <th>Yds</th>
+                            <th>TD</th>
+                            <th>Rec</th>
+                            <th>Tgt</th>
+                            <th>RecYds</th>
+                            <th>RecTD</th>
+                            <th>Fum</th>
+                            <th>Fpts</th>
+                            <th>FPPG</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in seasonRBData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Games</td>
+                                <td>@stat.RushingAtt</td>
+                                <td>@stat.RushingYds</td>
+                                <td>@stat.RushingTD</td>
+                                <td>@stat.Receptions</td>
+                                <td>@stat.Targets</td>
+                                <td>@stat.Yards</td>
+                                <td>@stat.ReceivingTD</td>
+                                <td>@stat.Fumbles</td>
+                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                            </tr>
+                        }
+                    </tbody>
             </table>
         </div>
+        }
     }
 
-    else if(playerPosition == "WR" && seasonWRData.Any())
+    else if(playerPosition == "WR")
     {
-        <div class="table_container">
-            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
-                <thead>
-                    <tr>
-                        <th>Season</th>
-                        <th>Games</th>
-                        <th>Rec</th>
-                        <th>Tgt</th>
-                        <th>Yds</th>
-                        <th>Lng</th>
-                        <th>TD</th>
-                        <th>RAtt</th>
-                        <th>RYds</th>
-                        <th>RTD</th>
-                        <th>Fum</th>
-                        <th>Fpts</th>
-                        <th>FPPG</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var stat in seasonWRData)
-                    {
+        @if (weeklyWRData.Any())
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
                         <tr>
-                            <td>@stat.Season</td>
-                            <td>@stat.Games</td>
-                            <td>@stat.Receptions</td>
-                            <td>@stat.Targets</td>
-                            <td>@stat.Yards</td>
-                            <td>@stat.Long</td>
-                            <td>@stat.TD</td>
-                            <td>@stat.RushingAtt</td>
-                            <td>@stat.RushingYds</td>
-                            <td>@stat.RushingTD</td>
-                            <td>@stat.Fumbles</td>
-                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
-                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                            <th>Season</th>
+                            <th>Week</th>
+                            <th>Rec</th>
+                            <th>Tgt</th>
+                            <th>Yds</th>
+                            <th>Lng</th>
+                            <th>TD</th>
+                            <th>RAtt</th>
+                            <th>RYds</th>
+                            <th>RTD</th>
+                            <th>Fum</th>
+                            <th>Fpts</th>
                         </tr>
-                    }
-                </tbody>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in weeklyWRData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Week</td>
+                                <td>@stat.Receptions</td>
+                                <td>@stat.Targets</td>
+                                <td>@stat.Yards</td>
+                                <td>@stat.Long</td>
+                                <td>@stat.TD</td>
+                                <td>@stat.RushingAtt</td>
+                                <td>@stat.RushingYds</td>
+                                <td>@stat.RushingTD</td>
+                                <td>@stat.Fumbles</td>
+                                <td>@weeklyFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        @if (seasonWRData.Any())
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
+                        <tr>
+                            <th>Season</th>
+                            <th>Games</th>
+                            <th>Rec</th>
+                            <th>Tgt</th>
+                            <th>Yds</th>
+                            <th>Lng</th>
+                            <th>TD</th>
+                            <th>RAtt</th>
+                            <th>RYds</th>
+                            <th>RTD</th>
+                            <th>Fum</th>
+                            <th>Fpts</th>
+                            <th>FPPG</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in seasonWRData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Games</td>
+                                <td>@stat.Receptions</td>
+                                <td>@stat.Targets</td>
+                                <td>@stat.Yards</td>
+                                <td>@stat.Long</td>
+                                <td>@stat.TD</td>
+                                <td>@stat.RushingAtt</td>
+                                <td>@stat.RushingYds</td>
+                                <td>@stat.RushingTD</td>
+                                <td>@stat.Fumbles</td>
+                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                            </tr>
+                        }
+                    </tbody>
             </table>
         </div>
+        }
     }
 
-    else if(playerPosition == "TE" && seasonTEData.Any())
+    else if(playerPosition == "TE")
     {
-        <div class="table_container">
-            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
-                <thead>
-                    <tr>
-                        <th>Season</th>
-                        <th>Games</th>
-                        <th>Rec</th>
-                        <th>Tgt</th>
-                        <th>Yds</th>
-                        <th>Lng</th>
-                        <th>TD</th>
-                        <th>RAtt</th>
-                        <th>RYds</th>
-                        <th>RTD</th>
-                        <th>Fum</th>
-                        <th>Fpts</th>
-                        <th>FPPG</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var stat in seasonTEData)
-                    {
+        @if (weeklyTEData.Any())
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
                         <tr>
-                            <td>@stat.Season</td>
-                            <td>@stat.Games</td>
-                            <td>@stat.Receptions</td>
-                            <td>@stat.Targets</td>
-                            <td>@stat.Yards</td>
-                            <td>@stat.Long</td>
-                            <td>@stat.TD</td>
-                            <td>@stat.RushingAtt</td>
-                            <td>@stat.RushingYds</td>
-                            <td>@stat.RushingTD</td>
-                            <td>@stat.Fumbles</td>
-                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
-                            <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                            <th>Season</th>
+                            <th>Week</th>
+                            <th>Rec</th>
+                            <th>Tgt</th>
+                            <th>Yds</th>
+                            <th>Lng</th>
+                            <th>TD</th>
+                            <th>RAtt</th>
+                            <th>RYds</th>
+                            <th>RTD</th>
+                            <th>Fum</th>
+                            <th>Fpts</th>
                         </tr>
-                    }
-                </tbody>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in weeklyTEData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Week</td>
+                                <td>@stat.Receptions</td>
+                                <td>@stat.Targets</td>
+                                <td>@stat.Yards</td>
+                                <td>@stat.Long</td>
+                                <td>@stat.TD</td>
+                                <td>@stat.RushingAtt</td>
+                                <td>@stat.RushingYds</td>
+                                <td>@stat.RushingTD</td>
+                                <td>@stat.Fumbles</td>
+                                <td>@weeklyFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        @if (seasonTEData.Any())
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
+                        <tr>
+                            <th>Season</th>
+                            <th>Games</th>
+                            <th>Rec</th>
+                            <th>Tgt</th>
+                            <th>Yds</th>
+                            <th>Lng</th>
+                            <th>TD</th>
+                            <th>RAtt</th>
+                            <th>RYds</th>
+                            <th>RTD</th>
+                            <th>Fum</th>
+                            <th>Fpts</th>
+                            <th>FPPG</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in seasonTEData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Games</td>
+                                <td>@stat.Receptions</td>
+                                <td>@stat.Targets</td>
+                                <td>@stat.Yards</td>
+                                <td>@stat.Long</td>
+                                <td>@stat.TD</td>
+                                <td>@stat.RushingAtt</td>
+                                <td>@stat.RushingYds</td>
+                                <td>@stat.RushingTD</td>
+                                <td>@stat.Fumbles</td>
+                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                            </tr>
+                        }
+                    </tbody>
             </table>
         </div>
+        }
     }
 }
  
@@ -254,6 +434,13 @@ else if (youTried && badRequestError)
     List<SeasonDataWR> seasonWRData { get; set; } = new();
     List<SeasonDataTE> seasonTEData { get; set; } = new();
     List<FantasyPPG> seasonFantasy {get; set;} = new();
+
+    List<WeeklyDataQB> weeklyQBData { get; set; } = new();
+    List<WeeklyDataRB> weeklyRBData { get; set; } = new();
+    List<WeeklyDataWR> weeklyWRData { get; set; } = new();
+    List<WeeklyDataTE> weeklyTEData { get; set; } = new();
+    List<WeeklyFantasy> weeklyFantasy { get; set; } = new();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -305,13 +492,14 @@ else if (youTried && badRequestError)
         playerName = players.Where(p => p.PlayerId == pid).First().Name;
         switch (playerPosition)
         {
-            case "QB": await GetQBSeasonData(); break;
-            case "RB": await GetRBSeasonData(); break;
-            case "WR": await GetWRSeasonData(); break;
-            case "TE": await GetTESeasonData(); break;
+            case "QB": await GetQBSeasonData(); await GetQBWeeklyData(); break;
+            case "RB": await GetRBSeasonData(); await GetRBWeeklyData(); break;
+            case "WR": await GetWRSeasonData(); await GetWRWeeklyData(); break;
+            case "TE": await GetTESeasonData(); await GetTEWeeklyData(); break;
             default: break;
         }
         await GetFantasySeasonData();
+        await GetFantasyWeeklyData();
         playerSelected = true;
         selectedPlayer = playerName;
         filteredPlayers = null;
@@ -337,6 +525,23 @@ else if (youTried && badRequestError)
             badRequestError = true;
         }
     }
+    private async Task GetQBWeeklyData()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/weekly/qb/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            weeklyQBData = await JsonSerializer.DeserializeAsync<List<WeeklyDataQB>>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
 
     private async Task GetRBSeasonData()
     {
@@ -349,6 +554,23 @@ else if (youTried && badRequestError)
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             seasonRBData = await JsonSerializer.DeserializeAsync<List<SeasonDataRB>>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+    private async Task GetRBWeeklyData()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/weekly/rb/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            weeklyRBData = await JsonSerializer.DeserializeAsync<List<WeeklyDataRB>>(responseStream, options);
         }
         else
         {
@@ -372,6 +594,23 @@ else if (youTried && badRequestError)
             badRequestError = true;
         }
     }
+    private async Task GetWRWeeklyData()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/weekly/wr/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            weeklyWRData = await JsonSerializer.DeserializeAsync<List<WeeklyDataWR>>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
     private async Task GetTESeasonData()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/te/" + playerId.ToString());
@@ -383,6 +622,23 @@ else if (youTried && badRequestError)
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             seasonTEData = await JsonSerializer.DeserializeAsync<List<SeasonDataTE>>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+    private async Task GetTEWeeklyData()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/weekly/te/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            weeklyTEData = await JsonSerializer.DeserializeAsync<List<WeeklyDataTE>>(responseStream, options);
         }
         else
         {
@@ -414,6 +670,30 @@ else if (youTried && badRequestError)
             badRequestError = true;
         }
     }
+    private async Task GetFantasyWeeklyData()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/data/weekly/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            weeklyFantasy = await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options);
+            if (seasonFantasy.Any())
+            {
+                foreach (var s in seasonFantasy)
+                {
+                    s.FantasyPoints = Math.Round(s.FantasyPoints, 2);
+                }
+            }
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
 
     #endregion
 
@@ -421,6 +701,7 @@ else if (youTried && badRequestError)
     {
         public double FPPG { get; set; }
     }
+
 
 }
 

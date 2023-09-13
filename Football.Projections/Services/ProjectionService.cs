@@ -58,6 +58,15 @@ namespace Football.Projections.Services
             }
             return count;
         }
+        public async Task<int> PostWeeklyProjections(List<WeekProjection> projections)
+        {
+            var count = 0;
+            foreach(var proj in projections)
+            {
+                count += await _projectionRepository.PostWeeklyProjections(proj);
+            }
+            return count;
+        }
         public async Task<List<SeasonProjection>> RookieSeasonProjections(string position)
         {
             List<SeasonProjection> rookieProjections = new();
