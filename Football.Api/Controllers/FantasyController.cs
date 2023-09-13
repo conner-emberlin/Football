@@ -21,7 +21,7 @@ namespace Football.Api.Controllers
         {
             if (season > 0 && position != null)
             {
-                return Ok(await _fantasyDataService.PostSeasonFantasy(season, position));
+                return Ok(await _fantasyDataService.PostSeasonFantasy(season, position.Trim().ToUpper()));
             }
             else
             {
@@ -35,7 +35,7 @@ namespace Football.Api.Controllers
         {
             if (season > 0 && week > 0 && position != null)
             {
-                return Ok(await _fantasyDataService.PostWeeklyFantasy(season, week, position));
+                return Ok(await _fantasyDataService.PostWeeklyFantasy(season, week, position.Trim().ToUpper()));
             }
             else
             {

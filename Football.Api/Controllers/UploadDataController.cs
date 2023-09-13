@@ -20,30 +20,30 @@ namespace Football.Api.Controllers
         [HttpPost("{position}/{season}/{week}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadWeeklyData(int position, int season, int week)
+        public async Task<ActionResult<int>> UploadWeeklyData(string position, int season, int week)
         {
-            return position switch
+            return position.Trim().ToLower() switch
             {
-                1 => Ok(await _weeklyDataService.UploadWeeklyQBData(season, week)),
-                2 => Ok(await _weeklyDataService.UploadWeeklyRBData(season, week)),
-                3 => Ok(await _weeklyDataService.UploadWeeklyWRData(season, week)),
-                4 => Ok(await _weeklyDataService.UploadWeeklyTEData(season, week)),
-                5 => Ok(await _weeklyDataService.UploadWeeklyDSTData(season, week)),
+                "qb" => Ok(await _weeklyDataService.UploadWeeklyQBData(season, week)),
+                "rb" => Ok(await _weeklyDataService.UploadWeeklyRBData(season, week)),
+                "wr" => Ok(await _weeklyDataService.UploadWeeklyWRData(season, week)),
+                "te" => Ok(await _weeklyDataService.UploadWeeklyTEData(season, week)),
+                "dst" => Ok(await _weeklyDataService.UploadWeeklyDSTData(season, week)),
                 _ => BadRequest(),
             };
         }
         [HttpPost("{position}/{season}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadSeasonData(int position, int season)
+        public async Task<ActionResult<int>> UploadSeasonData(string position, int season)
         {
-            return position switch
+            return position.Trim().ToLower() switch
             {
-                1 => Ok(await _seasonDataService.UploadSeasonQBData(season)),
-                2 => Ok(await _seasonDataService.UploadSeasonRBData(season)),
-                3 => Ok(await _seasonDataService.UploadSeasonWRData(season)),
-                4 => Ok(await _seasonDataService.UploadSeasonTEData(season)),
-                5 => Ok(await _seasonDataService.UploadSeasonDSTData(season)),
+                "qb" => Ok(await _seasonDataService.UploadSeasonQBData(season)),
+                "rb"=> Ok(await _seasonDataService.UploadSeasonRBData(season)),
+                "wr" => Ok(await _seasonDataService.UploadSeasonWRData(season)),
+                "te" => Ok(await _seasonDataService.UploadSeasonTEData(season)),
+                "dst" => Ok(await _seasonDataService.UploadSeasonDSTData(season)),
                 _ => BadRequest(),
             };
         }

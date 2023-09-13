@@ -288,3 +288,8 @@ a.page-links {
         font-weight: bold;
     }
 
+.box {
+    display: flex;
+    justify-content: space-between;
+}
+

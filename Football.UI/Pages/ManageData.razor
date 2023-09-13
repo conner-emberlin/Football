@@ -1,0 +1,204 @@
+﻿@page "/ManageData"
+<PageTitle>Manage Data</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Projections.Models;
+@inject IHttpClientFactory ClientFactory
+
+<div class="box">
+    <div>
+        <h5>Weekly Data</h5>
+        <EditForm Model="this" OnSubmit="UploadWeeklyData">
+            <TextBoxSeason @bind-Season="this.WeeklyUploadSeason" />
+            <TextBoxWeek @bind-Week="this.WeeklyUploadWeek"/>
+            <TextBoxPosition @bind-Position="this.WeeklyUploadPosition"/>
+            <button class="button-22" type="submit">Submit</button>
+        </EditForm>
+        @if(recordsAdded > 0 && weeklyUploadData)
+        {
+            <text>@recordsAdded added</text>
+            weeklyUploadData = false;
+            recordsAdded = 0;
+        }
+        else if ((badRequestError || recordsAdded == 0) && weeklyUploadData)
+        {
+            <text>Something went wrong.</text>
+            weeklyUploadData = false;
+        }
+    </div>
+    <div>
+        <h5>Weekly Fantasy</h5>
+        <EditForm Model="@this" OnSubmit="PostWeeklyFantasy">
+            <TextBoxSeason @bind-Season="this.WeeklyUploadSeasonF" />
+            <TextBoxWeek @bind-Week="this.WeeklyUploadWeekF" />
+            <TextBoxPosition @bind-Position="this.WeeklyUploadPositionF" />
+            <button class="button-22" type="submit">Submit</button>
+        </EditForm>
+        @if (recordsAdded > 0 && weeklyFantasy)
+        {
+            <text>@recordsAdded added</text>
+            weeklyFantasy = false;
+            recordsAdded = 0;
+        }
+        else if ((badRequestError || recordsAdded == 0) && weeklyFantasy)
+        {
+            <text>Something went wrong.</text>
+            weeklyFantasy = false;
+        }
+    </div>
+    <div>
+        <h5>Season Data</h5>
+        <EditForm Model="@this" OnSubmit="UploadSeasonData">
+            <TextBoxSeason @bind-Season="this.SeasonUploadSeason" />
+            <TextBoxPosition @bind-Position="this.SeasonUploadPosition" />
+            <button class="button-22" type="submit">Submit</button>
+        </EditForm>
+        @if (recordsAdded > 0 && seasonUploadData)
+        {
+            <text>@recordsAdded added</text>
+            seasonUploadData = false;
+            recordsAdded = 0;
+        }
+        else if ((badRequestError || recordsAdded == 0) && seasonUploadData)
+        {
+            <text>Something went wrong.</text>
+            seasonUploadData = false;
+        }
+    </div>
+    <div>
+        <h5>Season Fantasy</h5>
+        <EditForm Model="@this" OnSubmit="PostSeasonFantasy">
+            <TextBoxSeason @bind-Season="this.SeasonUploadSeasonF" />
+            <TextBoxPosition @bind-Position="this.SeasonUploadPositionF" />
+            <button class="button-22" type="submit">Submit</button>
+        </EditForm>
+        @if (recordsAdded > 0 && weeklyFantasy)
+        {
+            <text>@recordsAdded added</text>
+            weeklyFantasy = false;
+            recordsAdded = 0;
+        }
+        else if ((badRequestError || recordsAdded == 0) && seasonFantasy)
+        {
+            <text>Something went wrong.</text>
+            seasonFantasy = false;
+        }
+    </div>
+
+</div>
+
+
+
+
+@code {
+    public string WeeklyUploadSeason { get; set; } = "";
+    public string WeeklyUploadWeek { get; set; } = "";
+    public string WeeklyUploadPosition { get; set; } = "";
+
+    public string WeeklyUploadSeasonF { get; set; } = "";
+    public string WeeklyUploadWeekF { get; set; } = "";
+    public string WeeklyUploadPositionF { get; set; } = "";
+
+    public string SeasonUploadSeason { get; set; } = "";
+    public string SeasonUploadPosition { get; set; } = "";
+    public string SeasonUploadSeasonF { get; set; } = "";
+    public string SeasonUploadPositionF { get; set; } = "";
+
+    public bool badRequestError = false;
+    public bool weeklyUploadData = false;
+    public bool seasonUploadData = false;
+    public bool weeklyFantasy = false;
+    public bool seasonFantasy = false;
+    public int recordsAdded;
+
+    public async Task UploadWeeklyData()
+    {
+        weeklyUploadData = true;
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/UploadData/" + this.WeeklyUploadPosition + "/" + this.WeeklyUploadSeason + "/" + this.WeeklyUploadWeek);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            recordsAdded = await JsonSerializer.DeserializeAsync<int>(responseStream, options);            
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        StateHasChanged();
+    }
+
+    public async Task UploadSeasonData()
+    {
+        seasonUploadData = true;
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/UploadData/" + this.SeasonUploadPosition + "/" + this.SeasonUploadSeason);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            recordsAdded = await JsonSerializer.DeserializeAsync<int>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        StateHasChanged();
+
+    }
+
+    public async Task PostWeeklyFantasy()
+    {
+        weeklyFantasy = true;
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Fantasy/data/" + this.WeeklyUploadPositionF + "/" + this.WeeklyUploadSeasonF + "/" + this.WeeklyUploadWeekF);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            recordsAdded = await JsonSerializer.DeserializeAsync<int>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        StateHasChanged();
+
+    }
+
+    public async Task PostSeasonFantasy()
+    {
+        seasonFantasy = true;
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Fantasy/data/" + this.SeasonUploadPositionF + "/" + this.SeasonUploadSeasonF);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            recordsAdded = await JsonSerializer.DeserializeAsync<int>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        StateHasChanged();
+
+
+    }
+
+    public async Task RefreshHeadshots()
+    {
+
+
+
+    }
+}
