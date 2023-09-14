@@ -27,6 +27,4 @@
         public int PlayerId { get; set; }
     }
 
-
-
 }

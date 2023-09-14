@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
-using News.Interfaces;
-using News.Models;
+using Football.News.Interfaces;
+using Football.News.Models;
 using System.Text.Json;
 
-namespace News.Services
+namespace Football.News.Services
 {
     public class NewsService : INewsService
     {

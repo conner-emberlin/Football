@@ -10,11 +10,13 @@ namespace Football.Projections.Services
     public class StatProjectionCalculator : IStatProjectionCalculator
     {
         private readonly Tunings _tunings;
+        private readonly WeeklyTunings _weeklyTunings;
         private readonly Season _season;
         private readonly ILogger _logger;
-        public StatProjectionCalculator(IOptionsMonitor<Tunings> tunings, IOptionsMonitor<Season> season, ILogger logger)
+        public StatProjectionCalculator(IOptionsMonitor<Tunings> tunings, IOptionsMonitor<WeeklyTunings> weeklyTunings, IOptionsMonitor<Season> season, ILogger logger)
         {
             _tunings = tunings.CurrentValue;
+            _weeklyTunings = weeklyTunings.CurrentValue;
             _season = season.CurrentValue;
             _logger = logger;
         }
@@ -23,7 +25,7 @@ namespace Football.Projections.Services
             _logger.Information("Calculating QB Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
-                var recentWeight = seasons.Count > 0 ? _tunings.Weight : _tunings.SecondYearQBLeap;
+                var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearQBLeap;
                 var recentSeason = seasons.Max(s => s.Season);
                 var previousSeasons = seasons.Count - 1;
                 var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -97,7 +99,7 @@ namespace Football.Projections.Services
             _logger.Information("Calculating RB Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
-                var recentWeight = seasons.Count > 0 ? _tunings.Weight : _tunings.SecondYearRBLeap;
+                var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearRBLeap;
                 var recentSeason = seasons.Max(s => s.Season);
                 var previousSeasons = seasons.Count - 1;
                 var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -160,7 +162,7 @@ namespace Football.Projections.Services
             _logger.Information("Calculating WR Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
-                var recentWeight = seasons.Count > 0 ? _tunings.Weight : _tunings.SecondYearWRLeap;
+                var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearWRLeap;
                 var recentSeason = seasons.Max(s => s.Season);
                 var previousSeasons = seasons.Count - 1;
                 var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -224,7 +226,7 @@ namespace Football.Projections.Services
             _logger.Information("Calculating TE Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
-                var recentWeight = seasons.Count > 0 ? _tunings.Weight : _tunings.SecondYearWRLeap;
+                var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearWRLeap;
                 var recentSeason = seasons.Max(s => s.Season);
                 var previousSeasons = seasons.Count - 1;
                 var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -286,10 +288,10 @@ namespace Football.Projections.Services
 
         public SeasonFantasy CalculateStatProjection(List<SeasonFantasy> seasons)
         {
-            _logger.Information("Calculating Fantsay Stat projections for {p}", seasons.First().PlayerId);
+            _logger.Information("Calculating Fantasy Stat projections for {p}", seasons.First().PlayerId);
             try
             {
-                var recentWeight = seasons.Count > 0 ? _tunings.Weight : 1;
+                var recentWeight = seasons.Count > 1 ? _tunings.Weight : 1;
                 var recentSeason = seasons.Max(s => s.Season);
                 var previousSeasons = seasons.Count - 1;
                 var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -315,7 +317,212 @@ namespace Football.Projections.Services
                 _logger.Error(ex.ToString(), ex.StackTrace, ex);
                 throw;
             }
+        }
+        public WeeklyFantasy CalculateWeeklyAverage(List<WeeklyFantasy> weeks)
+        {
+            _logger.Information("Calculating Weekly fantasy averages for player {playerId}", weeks.First().PlayerId);
+            var recentWeight = weeks.Count > 1 ? _weeklyTunings.RecentWeekWeight : 1;
+            var recentWeek = weeks.Max(w => w.Week);
+            var previousWeeks = weeks.Count - 1;
+            var previousWeight = weeks.Count > 1 ? ((1 - _weeklyTunings.RecentWeekWeight) * ((double)1 / previousWeeks)) : 0;
 
+            double ftp = 0;
+            foreach (var w in weeks)
+            {
+                ftp += w.Week == recentWeek ? recentWeight * w.FantasyPoints : previousWeight * w.FantasyPoints;
+            }
+            return new WeeklyFantasy
+            {
+                PlayerId = weeks.First().PlayerId,
+                Season = _season.CurrentSeason,
+                Week = recentWeek + 1,
+                Games = 1,
+                Name = weeks.First().Name,
+                Position = weeks.First().Position,
+                FantasyPoints = ftp
+            };
+
+        }
+        public WeeklyDataQB CalculateWeeklyAverage(List<WeeklyDataQB> weeks)
+        {
+            _logger.Information("Calculating Weekly averages for player {playerId}", weeks.First().PlayerId);
+            var recentWeight = weeks.Count > 1 ? _weeklyTunings.RecentWeekWeight : 1;
+            var recentWeek = weeks.Max(w => w.Week);
+            var previousWeeks = weeks.Count - 1;
+            var previousWeight = weeks.Count > 1 ? ((1 - _weeklyTunings.RecentWeekWeight) * ((double)1 / previousWeeks)) : 0;
+
+            double avgComp = 0;
+            double avgAtt = 0;
+            double avgYd = 0;
+            double avgTD = 0;
+            double avgInt = 0;
+            double avgSacks = 0;
+            double avgRAtt = 0;
+            double avgRYd = 0;
+            double avgRTD = 0;
+            double avgFum = 0;
+
+            foreach (var w in weeks)
+            {
+                avgComp += w.Week == recentWeek ? recentWeight * w.Completions : previousWeight * w.Completions;
+                avgAtt += w.Week == recentWeek ? recentWeight * w.Attempts : previousWeight * w.Attempts;
+                avgYd += w.Week == recentWeek ? recentWeight * w.Yards : previousWeight * w.Yards;
+                avgTD += w.Week == recentWeek ? recentWeight * w.TD : previousWeight * w.TD;
+                avgInt += w.Week == recentWeek ? recentWeight * w.Int : previousWeight * w.Int;
+                avgSacks += w.Week == recentWeek ? recentWeight * w.Sacks : previousWeight * w.Sacks;
+                avgRAtt += w.Week == recentWeek ? recentWeight * w.RushingAttempts : previousWeight * w.RushingAttempts;
+                avgRYd += w.Week == recentWeek ? recentWeight * w.RushingYards : previousWeight * w.RushingYards;
+                avgRTD += w.Week == recentWeek ? recentWeight * w.RushingTD : previousWeight * w.RushingTD;
+                avgFum += w.Week == recentWeek ? recentWeight * w.Fumbles : previousWeight * w.Fumbles;
+            }
+
+            return new WeeklyDataQB
+            {
+                PlayerId = weeks.First().PlayerId,
+                Season = weeks.First().Season,
+                Week = recentWeek + 1,
+                Completions = avgComp,
+                Attempts = avgAtt,
+                Yards = avgYd,
+                TD = avgTD,
+                Int = avgInt,
+                Sacks = avgSacks,
+                RushingAttempts = avgRAtt,
+                RushingYards = avgRYd,
+                RushingTD = avgRTD,
+                Fumbles = avgFum
+            };
+        }
+
+        public WeeklyDataRB CalculateWeeklyAverage(List<WeeklyDataRB> weeks)
+        {
+            _logger.Information("Calculating Weekly averages for player {playerId}", weeks.First().PlayerId);
+            var recentWeight = weeks.Count > 1 ? _weeklyTunings.RecentWeekWeight : 1;
+            var recentWeek = weeks.Max(w => w.Week);
+            var previousWeeks = weeks.Count - 1;
+            var previousWeight = weeks.Count > 1 ? ((1 - _weeklyTunings.RecentWeekWeight) * ((double)1 / previousWeeks)) : 0;
+
+            double avgRAtt = 0;
+            double avgRYd = 0;
+            double avgRTD = 0;
+            double avgRec = 0;
+            double avgTgt = 0;
+            double avgYds = 0;
+            double avgRecTD = 0;
+            double avgFum = 0;
+
+            foreach (var w in weeks)
+            {
+                avgRAtt += w.Week == recentWeek ? recentWeight * w.RushingAtt : previousWeight * w.RushingAtt;
+                avgRYd += w.Week == recentWeek ? recentWeight * w.RushingYds : previousWeight * w.RushingYds;
+                avgRTD += w.Week == recentWeek ? recentWeight * w.RushingTD : previousWeight * w.RushingTD;
+                avgRec += w.Week == recentWeek ? recentWeight * w.Receptions : previousWeight * w.Receptions;
+                avgTgt += w.Week == recentWeek ? recentWeight * w.Targets : previousWeight * w.Targets;
+                avgYds += w.Week == recentWeek ? recentWeight * w.Yards : previousWeight * w.Yards;
+                avgRecTD += w.Week == recentWeek ? recentWeight * w.ReceivingTD : previousWeight * w.ReceivingTD;
+                avgFum += w.Week == recentWeek ? recentWeight * w.Fumbles : previousWeight * w.Fumbles;
+            }
+
+            return new WeeklyDataRB
+            {
+                PlayerId = weeks.First().PlayerId,
+                Season = weeks.First().Season,
+                Week = recentWeek + 1,
+                RushingAtt = avgRAtt,
+                RushingYds = avgRYd,
+                RushingTD = avgRTD,
+                Receptions = avgRec,
+                Targets = avgTgt,
+                Yards = avgYds,
+                ReceivingTD = avgRecTD,
+                Fumbles = avgFum
+            };
+        }
+        public WeeklyDataWR CalculateWeeklyAverage(List<WeeklyDataWR> weeks)
+        {
+            _logger.Information("Calculating Weekly averages for player {playerId}", weeks.First().PlayerId);
+            var recentWeight = weeks.Count > 1 ? _weeklyTunings.RecentWeekWeight : 1;
+            var recentWeek = weeks.Max(w => w.Week);
+            var previousWeeks = weeks.Count - 1;
+            var previousWeight = weeks.Count > 1 ? ((1 - _weeklyTunings.RecentWeekWeight) * ((double)1 / previousWeeks)) : 0;
+
+            double avgRec = 0;
+            double avgTgt = 0;
+            double avgYds = 0;
+            double avgTD = 0;
+            double avgRAtt = 0;
+            double avgRYd = 0;
+            double avgRTD = 0;
+            double avgFum = 0;
+
+            foreach (var w in weeks)
+            {
+                avgRec += w.Week == recentWeek ? recentWeight * w.Receptions : previousWeight * w.Receptions;
+                avgTgt += w.Week == recentWeek ? recentWeight * w.Targets : previousWeight * w.Targets;
+                avgYds += w.Week == recentWeek ? recentWeight * w.Yards : previousWeight * w.Yards;
+                avgTD += w.Week == recentWeek ? recentWeight * w.TD : previousWeight * w.TD;
+                avgRAtt += w.Week == recentWeek ? recentWeight * w.RushingAtt : previousWeight * w.RushingAtt;
+                avgRYd += w.Week == recentWeek ? recentWeight * w.RushingYds : previousWeight * w.RushingYds;
+                avgRTD += w.Week == recentWeek ? recentWeight * w.RushingTD : previousWeight * w.RushingTD;
+                avgFum += w.Week == recentWeek ? recentWeight * w.Fumbles : previousWeight * w.Fumbles;
+            }
+            return new WeeklyDataWR
+            {
+                PlayerId = weeks.First().PlayerId,
+                Season = weeks.First().Season,
+                Week = recentWeek + 1,
+                Receptions = avgRec,
+                Targets = avgTgt,
+                Yards = avgYds,
+                TD = avgTD,
+                RushingAtt = avgRAtt,
+                RushingYds = avgRYd,
+                RushingTD = avgRTD,
+                Fumbles = avgFum
+            };
+        }
+        public WeeklyDataTE CalculateWeeklyAverage(List<WeeklyDataTE> weeks)
+        {
+            _logger.Information("Calculating Weekly averages for player {playerId}", weeks.First().PlayerId);
+            var recentWeight = weeks.Count > 1 ? _weeklyTunings.RecentWeekWeight : 1;
+            var recentWeek = weeks.Max(w => w.Week);
+            var previousWeeks = weeks.Count - 1;
+            var previousWeight = weeks.Count > 1 ? ((1 - _weeklyTunings.RecentWeekWeight) * ((double)1 / previousWeeks)) : 0;
+
+            double avgRec = 0;
+            double avgTgt = 0;
+            double avgYds = 0;
+            double avgTD = 0;
+            double avgRAtt = 0;
+            double avgRYd = 0;
+            double avgRTD = 0;
+            double avgFum = 0;
+
+            foreach (var w in weeks)
+            {
+                avgRec += w.Week == recentWeek ? recentWeight * w.Receptions : previousWeight * w.Receptions;
+                avgTgt += w.Week == recentWeek ? recentWeight * w.Targets : previousWeight * w.Targets;
+                avgYds += w.Week == recentWeek ? recentWeight * w.Yards : previousWeight * w.Yards;
+                avgTD += w.Week == recentWeek ? recentWeight * w.TD : previousWeight * w.TD;
+                avgRAtt += w.Week == recentWeek ? recentWeight * w.RushingAtt : previousWeight * w.RushingAtt;
+                avgRYd += w.Week == recentWeek ? recentWeight * w.RushingYds : previousWeight * w.RushingYds;
+                avgRTD += w.Week == recentWeek ? recentWeight * w.RushingTD : previousWeight * w.RushingTD;
+                avgFum += w.Week == recentWeek ? recentWeight * w.Fumbles : previousWeight * w.Fumbles;
+            }
+            return new WeeklyDataTE
+            {
+                PlayerId = weeks.First().PlayerId,
+                Season = weeks.First().Season,
+                Week = recentWeek + 1,
+                Receptions = avgRec,
+                Targets = avgTgt,
+                Yards = avgYds,
+                TD = avgTD,
+                RushingAtt = avgRAtt,
+                RushingYds = avgRYd,
+                RushingTD = avgRTD,
+                Fumbles = avgFum
+            };
         }
     }
 }

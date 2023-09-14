@@ -66,5 +66,48 @@ namespace Football.Fantasy.Services
             return count;
         }
 
+        public async Task<int> PostWeeklyFantasy(int season, int week, string position)
+        {
+            List<WeeklyFantasy> weeklyFantasy = new();
+            switch (position)
+            {
+                case "QB": 
+                    foreach(var data in await _statisticsService.GetWeeklyDataQB(season, week))
+                    {
+                        weeklyFantasy.Add(_calculator.CalculateQBFantasy(data));
+                    }
+                    break;
+                case "RB":
+                    foreach (var data in await _statisticsService.GetWeeklyDataRB(season, week))
+                    {
+                        weeklyFantasy.Add(_calculator.CalculateRBFantasy(data));
+                    }
+                    break;
+                case "WR":
+                    foreach (var data in await _statisticsService.GetWeeklyDataWR(season, week))
+                    {
+                        weeklyFantasy.Add(_calculator.CalculateWRFantasy(data));
+                    }
+                    break;
+                case "TE":
+                    foreach (var data in await _statisticsService.GetWeeklyDataTE(season, week))
+                    {
+                        weeklyFantasy.Add(_calculator.CalculateTEFantasy(data));
+                    }
+                    break;
+                default: _logger.Error("Invalid position {position}", position); break;
+            }
+            var count = 0;
+            foreach(var fp in weeklyFantasy)
+            {
+                count += await _fantasyData.PostWeeklyFantasy(fp);
+            }
+            return count;
+        }
+
+        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId) => await _fantasyData.GetWeeklyFantasy(playerId);
+
+        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => await _fantasyData.GetWeeklyFantasy(season, week);
+
     }
 }

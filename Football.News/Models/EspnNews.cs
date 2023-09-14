@@ -1,5 +1,5 @@
 using System.Collections.Generic; 
-namespace News.Models{ 
+namespace Football.News.Models{ 
 
     public class EspnNews
     {

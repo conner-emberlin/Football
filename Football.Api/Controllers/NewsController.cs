@@ -1,6 +1,6 @@
-﻿using News.Models;
+﻿using Football.News.Models;
 using Microsoft.AspNetCore.Mvc;
-using News.Interfaces;
+using Football.News.Interfaces;
 
 namespace Football.Api.Controllers
 {

@@ -24,7 +24,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.Fantasy", "Footbal
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.Projections", "Football.Projections\Football.Projections.csproj", "{02F2086A-AFFD-445E-8965-06DD33BCC1A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.Players", "Football.Players\Football.Players.csproj", "{3FA3B79B-C190-49C4-9A3C-B4BAB1907C6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.Players", "Football.Players\Football.Players.csproj", "{3FA3B79B-C190-49C4-9A3C-B4BAB1907C6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
