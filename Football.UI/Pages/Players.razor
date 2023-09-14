@@ -88,7 +88,7 @@ else if (youTried && badRequestError)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTD</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@weeklyFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                                <td>@weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints</td>
                             </tr>
                         }
                     </tbody>
@@ -178,7 +178,7 @@ else if (youTried && badRequestError)
                                 <td>@stat.Yards</td>
                                 <td>@stat.ReceivingTD</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@weeklyFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                                <td>@weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints</td>
                             </tr>
                         }
                     </tbody>
@@ -266,7 +266,7 @@ else if (youTried && badRequestError)
                                 <td>@stat.RushingYds</td>
                                 <td>@stat.RushingTD</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@weeklyFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                                <td>@weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints</td>
                             </tr>
                         }
                     </tbody>
@@ -356,7 +356,7 @@ else if (youTried && badRequestError)
                                 <td>@stat.RushingYds</td>
                                 <td>@stat.RushingTD</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@weeklyFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
+                                <td>@weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints</td>
                             </tr>
                         }
                     </tbody>

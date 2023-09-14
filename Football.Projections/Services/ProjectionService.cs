@@ -501,8 +501,9 @@ namespace Football.Projections.Services
                 _ => 0,
             };
         }
-        private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) => 
-            (_weeklyTunings.ProjectionWeight / week) * seasonProjection + (1 - (_weeklyTunings.ProjectionWeight / week)) * weeklyProjection;
+        private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) => seasonProjection > 0 ?
+            (_weeklyTunings.ProjectionWeight / week) * seasonProjection + (1 - (_weeklyTunings.ProjectionWeight / week)) * weeklyProjection
+            : weeklyProjection;
         
     }
 }
