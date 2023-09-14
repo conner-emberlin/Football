@@ -11,5 +11,6 @@ namespace Football.Fantasy.Interfaces
         public Task<int> PostSeasonFantasy(int season, string position);
         public Task<int> PostWeeklyFantasy(int season, int week, string position);
         public Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId);
+        public Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week);
     }
 }

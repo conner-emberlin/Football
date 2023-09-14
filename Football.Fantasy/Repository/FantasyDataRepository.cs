@@ -48,5 +48,13 @@ namespace Football.Fantasy.Repository
                         WHERE [PlayerId] = @playerId";
             return (await _dbConnection.QueryAsync<WeeklyFantasy>(query, new {playerId})).ToList();
         }
+        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week)
+        {
+            var query = $@"SELECT [PlayerId], [Name], [Position], [Season], [Week], [Games], [FantasyPoints]
+                        FROM [dbo].WeeklyFantasyData
+                        WHERE [Season] = @season
+                                AND [Week] = @week";
+            return (await _dbConnection.QueryAsync<WeeklyFantasy>(query, new { season, week })).ToList();
+        }
     }
 }

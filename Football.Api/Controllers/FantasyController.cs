@@ -1,6 +1,8 @@
-﻿using Football.Fantasy.Interfaces;
+﻿using Football.Models;
+using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Football.Api.Controllers
 {
@@ -9,9 +11,12 @@ namespace Football.Api.Controllers
     public class FantasyController : ControllerBase
     {
         private readonly IFantasyDataService _fantasyDataService;
-        public FantasyController(IFantasyDataService fantasyDataService)
+        private readonly Season _season;
+
+        public FantasyController(IFantasyDataService fantasyDataService, IOptionsMonitor<Season> season)
         {
-            _fantasyDataService = fantasyDataService;   
+            _fantasyDataService = fantasyDataService;
+            _season = season.CurrentValue;
         }
 
         [HttpPost("data/{position}/{season}")]
@@ -66,6 +71,20 @@ namespace Football.Api.Controllers
             if (playerId > 0)
             {
                 return Ok(await _fantasyDataService.GetWeeklyFantasy(playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+        [HttpGet("data/weekly/leaders/{week}")]
+        [ProducesResponseType(typeof(List<WeeklyFantasy>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyFantasy>>> GetWeeklyFantasyLeaders(int week)
+        {
+            if (week > 0)
+            {
+                return Ok(await _fantasyDataService.GetWeeklyFantasy(_season.CurrentSeason, week));
             }
             else
             {

@@ -106,6 +106,8 @@ namespace Football.Fantasy.Services
         }
 
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId) => await _fantasyData.GetWeeklyFantasy(playerId);
-     
+
+        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => await _fantasyData.GetWeeklyFantasy(season, week);
+
     }
 }

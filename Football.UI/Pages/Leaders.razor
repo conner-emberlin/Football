@@ -1,0 +1,90 @@
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Data.Models;
+@using Football.Fantasy.Models;
+@using Football.Players.Models;
+@inject IHttpClientFactory ClientFactory
+@page "/Leaders/"
+
+<h3>Leaders</h3>
+<EditForm model="this" OnSubmit="GetFantasyResults">
+<TextBoxWeek @bind-Week ="this.week"/>
+<TextBoxPosition @bind-Position="this.position"/>
+<button class="button-22" type="submit">Submit</button>
+</EditForm>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if(youTried && !badRequestError && weeklyResults.Any())
+{
+        <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+        <thead>
+            <tr>
+                <th>Season</th>
+                <th>Week</th>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody>
+                @for(int i = 1; i < weeklyResults.Count; i ++)
+                {
+                    <tr>
+                        <td>@weeklyResults.ElementAt(i-1).Season</td>
+                        <td>@weeklyResults.ElementAt(i-1).Week</td>
+                        <td>@i</td>
+                        <td><a class="page-links" href="Players/@weeklyResults.ElementAt(i-1).PlayerId"> @weeklyResults.ElementAt(i-1).Name</a></td>
+                        <td>@weeklyResults.ElementAt(i-1).Position</td>
+                        <td>@weeklyResults.ElementAt(i-1).FantasyPoints</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if(youTried && (badRequestError || !weeklyResults.Any()))
+{
+    <text>Something Went Wrong.</text>
+}
+
+@code {
+    public string week { get; set; } = "";
+    public string position { get; set; } = "";
+    public List<WeeklyFantasy> weeklyResults = new();
+
+    public bool badRequestError = false;
+    public bool youTried = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    public async Task GetFantasyResults()
+    {
+        youTried = true;
+        badRequestError = false;
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/data/weekly/leaders/" + week);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            weeklyResults = (await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options)).OrderByDescending(p => p.FantasyPoints).ToList();
+            foreach (var r in weeklyResults)
+            {
+                r.FantasyPoints = Math.Round(r.FantasyPoints, 2);
+            }
+
+            weeklyResults = !String.IsNullOrEmpty(position) ? weeklyResults.Where(w => w.Position.ToLower() == position.Trim().ToLower()).ToList() : weeklyResults;
+
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        shouldRender = true;
+    }
+}

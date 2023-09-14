@@ -10,6 +10,7 @@ namespace Football.Fantasy.Interfaces
         public Task<int> PostSeasonFantasy(SeasonFantasy data);
         public Task<int> PostWeeklyFantasy(WeeklyFantasy data);
         public Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId);
+        public Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week);
 
     }
 }
