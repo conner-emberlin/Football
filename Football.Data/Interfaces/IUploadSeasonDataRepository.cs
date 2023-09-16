@@ -1,4 +1,5 @@
-﻿using Football.Data.Models;
+﻿using Football.Players.Models;
+using Football.Data.Models;
 
 namespace Football.Data.Interfaces
 {
@@ -9,5 +10,6 @@ namespace Football.Data.Interfaces
         public Task<int> UploadSeasonWRData(List<SeasonDataWR> players);
         public Task<int> UploadSeasonTEData(List<SeasonDataTE> players);
         public Task<int> UploadSeasonDSTData(List<SeasonDataDST> players);
+        public Task<int> UploadCurrentTeams(List<PlayerTeam> teams);
     }
 }

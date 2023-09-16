@@ -1,11 +1,7 @@
 ﻿using Football.Data.Interfaces;
 using Football.Data.Models;
-using System;
-using System.Collections.Generic;
+using Football.Players.Models;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Dapper;
 
 namespace Football.Data.Repository
@@ -75,6 +71,17 @@ namespace Football.Data.Repository
             return count;
         }
 
+        public async Task<int> UploadCurrentTeams(List<PlayerTeam> teams)
+        {
+            var query = $@"INSERT INTO [dbo].PlayerTeam (Season, PlayerId, Name, Team)
+                        VALUES (@Season, @PlayerId, @Name, @Team)";
+            var count = 0;
+            foreach (var t in teams)
+            {
+                count += await _dbConnection.ExecuteAsync(query, t);
+            }
+            return count;
+        }
 
 
 

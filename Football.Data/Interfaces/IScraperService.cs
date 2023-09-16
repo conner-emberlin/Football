@@ -1,4 +1,6 @@
 ﻿using Football.Data.Models;
+using Football.Players.Models;
+
 namespace Football.Data.Interfaces
 {
     public interface IScraperService
@@ -12,5 +14,6 @@ namespace Football.Data.Interfaces
         public List<FantasyProsStringParseTE> ParseFantasyProsTEData(string[] strings);
         public List<FantasyProsStringParseDST> ParseFantasyProsDSTData(string[] strings);
         public Task<int> DownloadHeadShots(string position);
+        public List<PlayerTeam> ParseFantasyProsPlayerTeam(string[] strings, string position);
     }
 }

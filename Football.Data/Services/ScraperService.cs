@@ -1,6 +1,7 @@
 ﻿using Football.Data.Interfaces;
 using Football.Data.Models;
 using Football.Players.Interfaces;
+using Football.Players.Models;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -195,6 +196,26 @@ namespace Football.Data.Services
                 }
             }
             return count;
+        }
+
+        public List<PlayerTeam> ParseFantasyProsPlayerTeam(string[] strings, string position)
+        {
+            var len = position == "QB" || position == "RB" ? 16
+                    : position == "TE" || position == "WR" ? 15
+                    : 0;
+            List<PlayerTeam> playerTeams = new();
+            for (int i = 0; i < strings.Length - len; i+=len)
+            {
+                int start = strings[i].IndexOf("(") + 1;
+                int end = strings[i].IndexOf(")", start);
+
+                playerTeams.Add(new PlayerTeam
+                {
+                    Name = FormatName(strings[i]),
+                    Team = strings[i].Substring(start, end - start)
+                });
+            }
+            return playerTeams;
         }
 
         private string FormatName(string name)

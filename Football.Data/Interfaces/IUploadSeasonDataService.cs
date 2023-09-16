@@ -6,7 +6,9 @@
        public Task<int> UploadSeasonRBData(int season);
        public Task<int> UploadSeasonWRData(int season);
        public Task<int> UploadSeasonTEData(int season);
-       public Task<int> UploadSeasonDSTData(int season);  
+       public Task<int> UploadSeasonDSTData(int season);
+       public Task<int> UploadCurrentTeams(int season, string position); 
+       
     }
 }
 

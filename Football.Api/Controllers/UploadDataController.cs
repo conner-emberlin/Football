@@ -1,5 +1,7 @@
 ﻿using Football.Data.Interfaces;
+using Football.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Football.Api.Controllers
 {
@@ -10,11 +12,14 @@ namespace Football.Api.Controllers
         private readonly IUploadWeeklyDataService _weeklyDataService;
         private readonly IUploadSeasonDataService _seasonDataService;
         private readonly IScraperService _scraperService;
-        public UploadDataController(IUploadWeeklyDataService weeklyDataService, IUploadSeasonDataService seasonDataService, IScraperService scraperService)
+        private readonly Season _season;
+        public UploadDataController(IUploadWeeklyDataService weeklyDataService, IUploadSeasonDataService seasonDataService, 
+            IScraperService scraperService, IOptionsMonitor<Season> season)
         {
             _weeklyDataService = weeklyDataService;
             _seasonDataService = seasonDataService;
             _scraperService = scraperService;
+            _season = season.CurrentValue;
         }
 
         [HttpPost("{position}/{season}/{week}")]
@@ -56,5 +61,19 @@ namespace Football.Api.Controllers
             return Ok(await _scraperService.DownloadHeadShots(position));
         }
 
+        [HttpPost("teams/{position}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UploadCurrentTeams(string position)
+        {
+            if (!string.IsNullOrEmpty(position))
+            {
+                return Ok(await _seasonDataService.UploadCurrentTeams(_season.CurrentSeason, position));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
     }
 }
