@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Football.Models;
 using Football.Data.Models;
 using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
 using Football.Players.Models;
+using Microsoft.Extensions.Options;
 
 namespace Football.Api.Controllers
 {
@@ -12,10 +14,12 @@ namespace Football.Api.Controllers
     {
         private readonly IStatisticsService _statisticsService;
         private readonly IPlayersService _playersService;
-        public PlayerController(IPlayersService playersService, IStatisticsService statisticsService)
+        private readonly Season _season;
+        public PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season)
         {
             _playersService = playersService;
             _statisticsService = statisticsService;
+            _season = season.CurrentValue;
         }
         [HttpGet("data/players")]
         [ProducesResponseType(typeof(List<Player>), 200)]
@@ -137,5 +141,21 @@ namespace Football.Api.Controllers
                 return BadRequest("Bad Request");
             }
         }
+
+        [HttpGet("team/{playerId}")]
+        [ProducesResponseType(typeof(PlayerTeam), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<PlayerTeam>> GetPlayerTeam(int playerId)
+        {
+            if (playerId > 0)
+            {
+                return Ok(await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+
     }
 }

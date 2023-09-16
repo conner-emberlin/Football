@@ -16,5 +16,6 @@ namespace Football.Players.Interfaces
         public Task<List<QuarterbackChange>> GetQuarterbackChanges(int season);
         public Task<double> GetEPA(int playerId, int season);
         public Task<double> GetSeasonProjection(int season, int playerId);
+        public Task<PlayerTeam?> GetPlayerTeam(int season, int playerId);
     }
 }

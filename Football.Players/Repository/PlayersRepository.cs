@@ -99,5 +99,14 @@ namespace Football.Players.Repository
                             AND [Season] = @season";
             return (await _dbConnection.QueryAsync<double>(query, new { season, playerId })).FirstOrDefault(); 
         }
+        public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId)
+        {
+            var query = $@"SELECT [PlayerId], [Name], [Season], [Team]
+                        FROM [dbo].PlayerTeam
+                        WHERE [Season] = @season
+                            AND [PlayerId] = @playerId";
+
+            return (await _dbConnection.QueryAsync<PlayerTeam>(query, new { season, playerId })).FirstOrDefault();
+        }
     }
 }

@@ -37,6 +37,7 @@ namespace Football.Players.Services
         public async Task<List<QuarterbackChange>> GetQuarterbackChanges(int season) => await _playersRepository.GetQuarterbackChanges(season);
         public async Task<double> GetEPA(int playerId, int season) => await _playersRepository.GetEPA(playerId, season);
         public async Task<double> GetSeasonProjection(int season, int playerId) => await _playersRepository.GetSeasonProjection(season, playerId);
+        public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId) => await _playersRepository.GetPlayerTeam(season, playerId);
         private List<Player> RetrieveFromCache() =>
                      _cache.TryGetValue("AllPlayers", out List<Player> cachedPlayers) ? cachedPlayers
                      : Enumerable.Empty<Player>().ToList();
