@@ -1,4 +1,5 @@
-﻿using Football.Data.Interfaces;
+﻿using Football.Models;
+using Football.Data.Interfaces;
 using Football.Data.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
@@ -14,14 +15,16 @@ namespace Football.Data.Services
         private readonly ILogger _logger;
         private readonly IPlayersService _playerService;
         private readonly WeeklyScraping _scraping;
+        private readonly Season _season;
         public UploadSeasonDataService(IScraperService scraperService, IUploadSeasonDataRepository uploadSeasonDataRepository,
-             ILogger logger, IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playerService)
+             ILogger logger, IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playerService, IOptionsMonitor<Season> season)
         {
             _scraperService = scraperService;
             _uploadSeasonDataRepository = uploadSeasonDataRepository;
             _logger = logger;
             _scraping = scraping.CurrentValue;
-            _playerService = playerService; 
+            _playerService = playerService;
+            _season = season.CurrentValue;
         }
         public async Task<int> UploadSeasonQBData(int season)
         {
@@ -52,6 +55,23 @@ namespace Football.Data.Services
             var url = _scraperService.FantasyProsURLFormatter("DST", season.ToString());
             var players = await SeasonDataDST(_scraperService.ParseFantasyProsDSTData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await _uploadSeasonDataRepository.UploadSeasonDSTData(players);
+        }
+        public async Task<int> UploadCurrentTeams(int season, string position)
+        {
+            var url = _scraperService.FantasyProsURLFormatter(position, season.ToString());
+            var str = _scraperService.ScrapeData(url, _scraping.FantasyProsXPath);
+            var parsedStr = _scraperService.ParseFantasyProsPlayerTeam(str, position);
+            foreach (var pt in parsedStr)
+            {
+                _logger.Information("Getting team for player {playerId}", pt.PlayerId);
+                pt.PlayerId = await _playerService.GetPlayerId(pt.Name);
+                if(pt.PlayerId == 0)
+                {
+                    _logger.Information("Player {Name} does not exist in players table", pt.Name);
+                }
+                pt.Season = season;
+            }
+            return await _uploadSeasonDataRepository.UploadCurrentTeams(parsedStr);
         }
 
         private async Task<List<SeasonDataQB>> SeasonDataQB(List<FantasyProsStringParseQB> players, int season)
