@@ -108,5 +108,11 @@ namespace Football.Players.Repository
 
             return (await _dbConnection.QueryAsync<PlayerTeam>(query, new { season, playerId })).FirstOrDefault();
         }
+        public async Task<int> GetTeamId(string teamName)
+        {
+            var query = $@"SELECT [TeamId] FROM [dbo].TeamMap
+                        WHERE [Team] = @teamName";
+            return (await _dbConnection.QueryAsync<int>(query, new { teamName })).FirstOrDefault();
+        }
     }
 }

@@ -1,14 +1,12 @@
-﻿using Football.Data.Interfaces;
+﻿using Football.Models;
+using Football.Data.Interfaces;
 using Football.Data.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Serilog;
-using System.IO;
 using System.Text.RegularExpressions;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Net.WebRequestMethods;
 
 namespace Football.Data.Services
 {
@@ -17,10 +15,12 @@ namespace Football.Data.Services
         private readonly WeeklyScraping _scraping;
         private readonly IPlayersService _playersService;
         private readonly ILogger _logger;
-        public ScraperService(IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playersService, ILogger logger)
+        private readonly Season _season;
+        public ScraperService(IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playersService, ILogger logger, IOptionsMonitor<Season> season)
         {
             _scraping = scraping.CurrentValue;
             _playersService = playersService;
+            _season = season.CurrentValue;
             _logger = logger;
         }
         public string FantasyProsURLFormatter(string position, string year, string week)
@@ -37,7 +37,7 @@ namespace Football.Data.Services
             var web = new HtmlWeb();
             HtmlDocument doc = web.Load(url);
             var data = doc.DocumentNode.SelectNodes(xpath)[0].InnerText;
-            string[] strings = data.Split(new string[] { "\r\n", "\r", "\n" },
+            string[] strings = data.Split(new string[] { "\r\n", "\r", "\n"},
                     StringSplitOptions.RemoveEmptyEntries);
             return strings;
         }
@@ -212,10 +212,56 @@ namespace Football.Data.Services
                 playerTeams.Add(new PlayerTeam
                 {
                     Name = FormatName(strings[i]),
-                    Team = strings[i].Substring(start, end - start)
+                    Team = strings[i][start..end]
                 });
             }
             return playerTeams;
+        }
+
+        public async Task<List<Schedule>> ParseFantasyProsSeasonSchedule(string[] str)
+        {
+            List<List<string>> games = new();
+            List<Schedule> schedules = new();
+
+            foreach (var s in str)
+            {
+                games.Add(s.Split(new string[] { "@", "vs" }, StringSplitOptions.RemoveEmptyEntries).ToList());
+            }
+            foreach (var g in games)
+            {
+                for (int i = 0; i < g.Count; i++)
+                {
+                    g[i] = g[i].Trim();
+                    if (g.ElementAt(i).StartsWith("BYE"))
+                    {
+                        g.Insert(i - 1, "BYE");
+                        g[i] = Regex.Replace(g.ElementAt(i), "BYE", string.Empty).Trim();
+                        break;
+                    }
+                    else if (g.ElementAt(i).EndsWith("BYE"))
+                    {
+                        g.Insert(i + 1, "BYE");
+                        g[i] = Regex.Replace(g.ElementAt(i), "BYE", string.Empty).Trim();
+                        break;
+                    }
+                }
+            }
+            foreach (var g in games)
+            {
+              for (int i = 1; i < g.Count; i++)
+              {
+                schedules.Add(new Schedule
+                {
+                  Season = _season.CurrentSeason,
+                  TeamId = await _playersService.GetTeamId(g.ElementAt(0).Trim()),
+                  Team = g.ElementAt(0).Trim(),
+                  Week = i,
+                  OpposingTeamId = g.ElementAt(i).Trim() == "BYE" ? 0 : await _playersService.GetTeamId(g.ElementAt(i).Trim()),
+                  OpposingTeam = g.ElementAt(i).Trim()
+                 });                                     
+              }
+            }
+            return schedules;
         }
 
         private string FormatName(string name)

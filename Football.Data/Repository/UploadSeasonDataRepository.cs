@@ -82,7 +82,17 @@ namespace Football.Data.Repository
             }
             return count;
         }
-
+        public async Task<int> UploadSchedule(List<Schedule> schedules)
+        {
+            var query = $@"INSERT INTO [dbo].Schedule (Season, TeamId, Team, Week, OpposingTeamId, OpposingTeam)
+                        VALUES (@Season, @TeamId, @Team, @Week, @OpposingTeamId, @OpposingTeam)";
+            var count = 0;
+            foreach (var s in schedules)
+            {
+                count += await _dbConnection.ExecuteAsync(query, s);
+            }
+            return count;
+        }
 
 
 

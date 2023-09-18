@@ -75,5 +75,13 @@ namespace Football.Api.Controllers
                 return BadRequest("Bad Request");
             }
         }
+
+        [HttpPost("schedule")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UploadSchedule()
+        {
+            return Ok(await _seasonDataService.UploadSchedule(_season.CurrentSeason));
+        }
     }
 }

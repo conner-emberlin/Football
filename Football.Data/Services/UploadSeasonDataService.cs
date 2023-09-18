@@ -5,6 +5,8 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
+using static System.Net.WebRequestMethods;
+using System.Text.RegularExpressions;
 
 namespace Football.Data.Services
 {
@@ -72,6 +74,15 @@ namespace Football.Data.Services
                 pt.Season = season;
             }
             return await _uploadSeasonDataRepository.UploadCurrentTeams(parsedStr);
+        }
+
+        public async Task<int> UploadSchedule(int season)
+        {
+            var url = "https://www.fantasypros.com/nfl/schedule/grid.php";
+            var xpath = "//*[@id=\"data\"]/tbody";
+            var str = _scraperService.ScrapeData(url, xpath);
+            var schedules = await _scraperService.ParseFantasyProsSeasonSchedule(str);
+            return await _uploadSeasonDataRepository.UploadSchedule(schedules);
         }
 
         private async Task<List<SeasonDataQB>> SeasonDataQB(List<FantasyProsStringParseQB> players, int season)

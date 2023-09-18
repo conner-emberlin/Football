@@ -15,5 +15,6 @@ namespace Football.Data.Interfaces
         public List<FantasyProsStringParseDST> ParseFantasyProsDSTData(string[] strings);
         public Task<int> DownloadHeadShots(string position);
         public List<PlayerTeam> ParseFantasyProsPlayerTeam(string[] strings, string position);
+        public Task<List<Schedule>> ParseFantasyProsSeasonSchedule(string[] strings);
     }
 }

@@ -46,8 +46,16 @@ else if (youTried && badRequestError)
         <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/PlayerPhotos/gen.png'">
     </div>
     <div>
-        <b>Name</b> @playerName <b>Position</b> @playerPosition 
+       <b>@playerName</b> 
     </div>
+    @if(team != null)
+    {
+        <div><b>@team.Team</b> <b>&#x2022;</b>  <b>@playerPosition</b> </div>
+    }
+    else
+    {
+        <div><b>@playerPosition</b> </div>
+    }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if(playerPosition == "QB")
     {
@@ -441,6 +449,8 @@ else if (youTried && badRequestError)
     List<WeeklyDataTE> weeklyTEData { get; set; } = new();
     List<WeeklyFantasy> weeklyFantasy { get; set; } = new();
 
+    public PlayerTeam team = new();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -500,6 +510,7 @@ else if (youTried && badRequestError)
         }
         await GetFantasySeasonData();
         await GetFantasyWeeklyData();
+        await GetPlayerTeam();
         playerSelected = true;
         selectedPlayer = playerName;
         filteredPlayers = null;
@@ -688,6 +699,24 @@ else if (youTried && badRequestError)
                     s.FantasyPoints = Math.Round(s.FantasyPoints, 2);
                 }
             }
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+
+    private async Task GetPlayerTeam()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/team/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions {PropertyNameCaseInsensitive=true};
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            team = await JsonSerializer.DeserializeAsync<PlayerTeam>(responseStream, options);
         }
         else
         {
