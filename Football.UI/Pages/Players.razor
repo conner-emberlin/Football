@@ -1,6 +1,5 @@
 ﻿@page "/Players/{id?}"
 <PageTitle>Players</PageTitle>
-<h4>Players</h4>
 
 @using System.Text.Json
 @using System.Text.Json.Serialization
@@ -12,7 +11,7 @@
 @if (!badRequestError && players.Any())
 {
     <div class="autocomplete w-25">
-        <input @bind=selectedPlayer @oninput=HandleInput class="form-control filter" />
+        <input @bind=selectedPlayer @oninput=HandleInput class="form-control filter" placeholder="Player Name..."/>
         @if (filteredPlayers is not null)
         {
             <ul class="options">
@@ -24,7 +23,6 @@
                             <span class="option-text">@p.Name</span>
                         </li>
                     }
-
                 }
                 else
                 {
@@ -55,6 +53,18 @@ else if (youTried && badRequestError)
     else
     {
         <div><b>@playerPosition</b> </div>
+    }
+    @if (schedule.Any())
+    {
+        <div class="parent">
+            @foreach (var s in schedule)
+        {
+                <div class="child">
+                        <div>Week: @s.Week</div>
+                        <div>Opponent: @s.OpposingTeam</div>
+                </div>
+        }
+        </div>
     }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if(playerPosition == "QB")
@@ -451,6 +461,8 @@ else if (youTried && badRequestError)
 
     public PlayerTeam team = new();
 
+    public List<Schedule> schedule { get; set; } = new();
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -511,6 +523,7 @@ else if (youTried && badRequestError)
         await GetFantasySeasonData();
         await GetFantasyWeeklyData();
         await GetPlayerTeam();
+        await GetUpcomingGames();
         playerSelected = true;
         selectedPlayer = playerName;
         filteredPlayers = null;
@@ -712,11 +725,25 @@ else if (youTried && badRequestError)
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NoContent)
         {
             var options = new JsonSerializerOptions {PropertyNameCaseInsensitive=true};
             using var responseStream = await response.Content.ReadAsStreamAsync();
             team = await JsonSerializer.DeserializeAsync<PlayerTeam>(responseStream, options);
+        }
+    }
+
+    private async Task GetUpcomingGames()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/schedule/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            schedule = (await JsonSerializer.DeserializeAsync<List<Schedule>>(responseStream, options)).Take(5).ToList();
         }
         else
         {

@@ -16,8 +16,10 @@ namespace Football.Players.Interfaces
         public Task<List<QuarterbackChange>> GetQuarterbackChanges(int season);
         public Task<double> GetEPA(int playerId, int season);
         public Task<double> GetSeasonProjection(int season, int playerId);
-
         public Task<PlayerTeam?> GetPlayerTeam(int season, int playerId);
         public Task<int> GetTeamId(string teamName);
+        public Task<List<TeamMap>> GetAllTeams();
+        public Task<int> GetCurrentWeek(int season);
+        public Task<List<Schedule>> GetUpcomingGames(int playerId);
     }
 }

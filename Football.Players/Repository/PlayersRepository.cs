@@ -114,5 +114,28 @@ namespace Football.Players.Repository
                         WHERE [Team] = @teamName";
             return (await _dbConnection.QueryAsync<int>(query, new { teamName })).FirstOrDefault();
         }
+        public async Task<List<TeamMap>> GetAllTeams()
+        {
+            var query = $@"SELECT [TeamId], [Team], [TeamDescription]
+                        FROM [dbo].TeamMap
+                        ";
+            return (await _dbConnection.QueryAsync<TeamMap>(query)).ToList();
+        }
+        public async Task<int> GetCurrentWeek(int season)
+        {
+            var query = $@"SELECT Max(Week) + 1 
+                        FROM [dbo].WeeklyQBData
+                        WHERE [Season] = @season";
+            return (await _dbConnection.QueryAsync<int>(query, new { season })).FirstOrDefault();
+        }
+        public async Task<List<Schedule>> GetUpcomingGames(int teamId, int season, int currentWeek)
+        {
+            var query = $@"SELECT [Season], [TeamId], [Team], [Week], [OpposingTeamId], [OpposingTeam]
+                        FROM [dbo].Schedule
+                        WHERE [TeamId] = @teamId
+                            AND [Week] >= @currentWeek
+                            AND [Season] = @season";
+            return (await _dbConnection.QueryAsync<Schedule>(query, new { teamId, season, currentWeek })).ToList();
+        }
     }
 }

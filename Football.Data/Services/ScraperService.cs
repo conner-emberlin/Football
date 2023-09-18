@@ -186,13 +186,35 @@ namespace Football.Data.Services
                         byte[] bytes = await res.Content.ReadAsByteArrayAsync();
                         MemoryStream memoryStream = new(bytes);
                         var fileName = @"C:\NFLData\Headshots\" + player.PlayerId.ToString() + ".png";
-                        if (!System.IO.File.Exists(fileName))
+                        if (!File.Exists(fileName))
                         {
                             using var fs = new FileStream(fileName, FileMode.Create);
                             memoryStream.WriteTo(fs);
                             count++;
                         }
                     }
+                }
+            }
+            return count;
+        }
+
+        public async Task<int> DownloadTeamLogos()
+        {
+            var teams = await _playersService.GetAllTeams();
+            var count = 0;
+            foreach (var team in teams)
+            {
+                var url = _scraping.NFLTeamLogoURL + team.Team;
+                HttpClient client = new();
+                var res = await client.GetAsync(url);
+                byte[] bytes = await res.Content.ReadAsByteArrayAsync();
+                MemoryStream memoryStream = new(bytes);
+                var fileName = @"C:\NFLData\Logos\" + team.Team.ToString() + ".png";
+                if (!File.Exists(fileName))
+                {
+                    using var fs = new FileStream(fileName, FileMode.Create);
+                    memoryStream.WriteTo(fs);
+                    count++;
                 }
             }
             return count;

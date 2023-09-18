@@ -60,6 +60,13 @@ namespace Football.Api.Controllers
         {
             return Ok(await _scraperService.DownloadHeadShots(position));
         }
+        [HttpPost("logos")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> DownloadTeamLogos()
+        {
+            return Ok(await _scraperService.DownloadTeamLogos());
+        }
 
         [HttpPost("teams/{position}")]
         [ProducesResponseType(typeof(int), 200)]

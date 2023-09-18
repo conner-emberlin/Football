@@ -1,6 +1,8 @@
-﻿using Football.Players.Interfaces;
+﻿using Football.Models;
+using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
 namespace Football.Players.Services
 {
@@ -8,9 +10,11 @@ namespace Football.Players.Services
     {
         private readonly IPlayersRepository _playersRepository;
         private readonly IMemoryCache _cache;
-        public PlayersService(IPlayersRepository playersRepository, IMemoryCache cache)
+        private readonly Season _season;
+        public PlayersService(IPlayersRepository playersRepository, IMemoryCache cache, IOptionsMonitor<Season> season)
         {
             _playersRepository = playersRepository;
+            _season = season.CurrentValue;
             _cache = cache;
         }
         public async Task<List<Player>> GetAllPlayers()
@@ -39,6 +43,17 @@ namespace Football.Players.Services
         public async Task<double> GetSeasonProjection(int season, int playerId) => await _playersRepository.GetSeasonProjection(season, playerId);
         public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId) => await _playersRepository.GetPlayerTeam(season, playerId);
         public async Task<int> GetTeamId(string teamName) => await _playersRepository.GetTeamId(teamName);
+        public async Task<int> GetCurrentWeek(int season) => await _playersRepository.GetCurrentWeek(season);
+        public async Task<List<Schedule>> GetUpcomingGames(int playerId)
+        {
+            var team = await GetPlayerTeam(_season.CurrentSeason, playerId);
+            if (team != null)
+            {
+                return await _playersRepository.GetUpcomingGames(await GetTeamId(team.Team), _season.CurrentSeason, await GetCurrentWeek(_season.CurrentSeason));
+            }
+            else { return new List<Schedule>(); }
+        }
+        public async Task<List<TeamMap>> GetAllTeams() => await _playersRepository.GetAllTeams();
         private List<Player> RetrieveFromCache() =>
                      _cache.TryGetValue("AllPlayers", out List<Player> cachedPlayers) ? cachedPlayers
                      : Enumerable.Empty<Player>().ToList();

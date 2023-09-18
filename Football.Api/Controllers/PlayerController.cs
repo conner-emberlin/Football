@@ -157,5 +157,21 @@ namespace Football.Api.Controllers
             }
         }
 
+        [HttpGet("schedule/{playerId}")]
+        [ProducesResponseType(typeof(List<Schedule>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<Schedule>>> GetUpcomingGames(int playerId)
+        {
+            if (playerId > 0)
+            {
+                return Ok(await _playersService.GetUpcomingGames(playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+
+
     }
 }
