@@ -54,6 +54,10 @@ else if (youTried && badRequestError)
     {
         <div><b>@playerPosition</b> </div>
     }
+    @if (runningTotal != null)
+    {
+        <div>@playerPosition #@positionRank <b>&#x2022;</b> #@rank Overall <b>&#x2022;</b> Fpts: @runningTotal.FantasyPoints </div>
+    }
     @if (schedule.Any())
     {
         <div class="parent">
@@ -460,6 +464,10 @@ else if (youTried && badRequestError)
     List<WeeklyDataTE> weeklyTEData { get; set; } = new();
     List<WeeklyFantasy> weeklyFantasy { get; set; } = new();
 
+    SeasonFantasy runningTotal { get; set; } = new();
+    public int rank { get; set; }
+    public int positionRank { get; set; }
+
     public PlayerTeam team = new();
 
     public List<Schedule> schedule { get; set; } = new();
@@ -525,6 +533,7 @@ else if (youTried && badRequestError)
         await GetFantasyWeeklyData();
         await GetPlayerTeam();
         await GetUpcomingGames();
+        await GetRunningFantasyTotals();
         playerSelected = true;
         selectedPlayer = playerName;
         filteredPlayers = null;
@@ -749,6 +758,23 @@ else if (youTried && badRequestError)
         else
         {
             badRequestError = true;
+        }
+    }
+
+    private async Task GetRunningFantasyTotals()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/season-totals");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            var list = await JsonSerializer.DeserializeAsync<List<SeasonFantasy>>(responseStream, options);
+            runningTotal = list.Where(l => l.PlayerId == playerId).First();
+            rank = list.Select(l => l.PlayerId).ToList().IndexOf(playerId) + 1;
+            positionRank = list.Where(l => l.Position == playerPosition).Select(l => l.PlayerId).ToList().IndexOf(playerId) + 1;
         }
     }
 

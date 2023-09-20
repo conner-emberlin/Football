@@ -91,5 +91,13 @@ namespace Football.Api.Controllers
                 return BadRequest("Bad Request");
             }
         }
+
+        [HttpGet("season-totals")]
+        [ProducesResponseType(typeof(List<SeasonFantasy>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<SeasonFantasy>>> GetCurrentFantasyTotals()
+        {
+            return Ok(await _fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason));
+        }
     }
 }
