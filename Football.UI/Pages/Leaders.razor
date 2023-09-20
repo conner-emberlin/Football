@@ -14,7 +14,72 @@
 </EditForm>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 
-@if(youTried && !badRequestError && weeklyResults.Any())
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+@if (currentLeaders.Any() && (!youTried || showAll))
+{
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Season</th>                   
+                    <th>Rank</th>
+                    <th>Games</th>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i < currentLeaders.Count; i++)
+                {
+                    <tr>
+                        <td>@currentLeaders.ElementAt(i-1).Season</td>                        
+                        <td>@i</td>
+                        <td>@currentLeaders.ElementAt(i-1).Games</td>
+                        <td><a class="page-links" href="Players/@currentLeaders.ElementAt(i-1).PlayerId"> @currentLeaders.ElementAt(i-1).Name</a></td>
+                        <td>@currentLeaders.ElementAt(i-1).Position</td>
+                        <td>@currentLeaders.ElementAt(i-1).FantasyPoints</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if(youTried && !badRequestError && filterRunning && filteredLeaders.Any())
+{
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Season</th>
+                    <th>Rank</th>
+                    <th>Games</th>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i < filteredLeaders.Count; i++)
+                {
+                    <tr>
+                        <td>@filteredLeaders.ElementAt(i-1).Season</td>
+                        <td>@i</td>
+                        <td>@filteredLeaders.ElementAt(i-1).Games</td>
+                        <td><a class="page-links" href="Players/@filteredLeaders.ElementAt(i-1).PlayerId"> @filteredLeaders.ElementAt(i-1).Name</a></td>
+                        <td>@filteredLeaders.ElementAt(i-1).Position</td>
+                        <td>@filteredLeaders.ElementAt(i-1).FantasyPoints</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if(youTried && !badRequestError && filterWeekly && weeklyResults.Any())
 {
         <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -44,7 +109,7 @@
         </table>
     </div>
 }
-else if(youTried && (badRequestError || !weeklyResults.Any()))
+else if(youTried && badRequestError)
 {
     <text>Something Went Wrong.</text>
 }
@@ -53,17 +118,24 @@ else if(youTried && (badRequestError || !weeklyResults.Any()))
     public string week { get; set; } = "";
     public string position { get; set; } = "";
     public List<WeeklyFantasy> weeklyResults = new();
+    public List<SeasonFantasy> currentLeaders = new();
+    public List<SeasonFantasy> filteredLeaders = new();
 
     public bool badRequestError = false;
     public bool youTried = false;
     private bool shouldRender;
+    private bool loading = false;
+
+    private bool filterWeekly = false;
+    private bool filterRunning = false;
+    private bool showAll = false;
+
     protected override bool ShouldRender() => shouldRender;
 
-    public async Task GetFantasyResults()
+    protected override async Task OnInitializedAsync()
     {
-        youTried = true;
-        badRequestError = false;
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/data/weekly/leaders/" + week);
+        loading = true;
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/season-totals");
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -71,19 +143,57 @@ else if(youTried && (badRequestError || !weeklyResults.Any()))
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            weeklyResults = (await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options)).OrderByDescending(p => p.FantasyPoints).ToList();
-            foreach (var r in weeklyResults)
+            currentLeaders = await JsonSerializer.DeserializeAsync<List<SeasonFantasy>>(responseStream, options);
+        }
+        loading = false;
+        shouldRender = true;
+    }
+
+    public async Task GetFantasyResults()
+    {
+        youTried = true;
+        badRequestError = false;
+        filterRunning = false;
+        filterWeekly = false;
+        showAll = false;
+
+        if (!string.IsNullOrEmpty(week))
+        {
+            filterWeekly = true;
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/data/weekly/leaders/" + week);
+            request.Headers.Add("Accept", "application/json");
+            var client = ClientFactory.CreateClient();
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
             {
-                r.FantasyPoints = Math.Round(r.FantasyPoints, 2);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                weeklyResults = (await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options)).OrderByDescending(p => p.FantasyPoints).ToList();
+                foreach (var r in weeklyResults)
+                {
+                    r.FantasyPoints = Math.Round(r.FantasyPoints, 2);
+                }
+
+                weeklyResults = !String.IsNullOrEmpty(position) ? weeklyResults.Where(w => w.Position.ToLower() == position.Trim().ToLower()).ToList() : weeklyResults;
+
+                badRequestError = false;
             }
-
-            weeklyResults = !String.IsNullOrEmpty(position) ? weeklyResults.Where(w => w.Position.ToLower() == position.Trim().ToLower()).ToList() : weeklyResults;
-
+            else
+            {
+                badRequestError = true;
+            }
+        }
+        else if(string.IsNullOrEmpty(week) && !string.IsNullOrEmpty(position))
+        {
+            filterRunning = true;
+            filteredLeaders = currentLeaders.Where(c => c.Position.ToLower() == position.ToLower()).ToList();
             badRequestError = false;
+
         }
         else
         {
-            badRequestError = true;
+            showAll = true;
+            badRequestError = false;
         }
         shouldRender = true;
     }
