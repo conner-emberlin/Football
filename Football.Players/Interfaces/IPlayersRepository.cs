@@ -21,5 +21,6 @@ namespace Football.Players.Interfaces
         public Task<int> GetTeamId(string teamName);
         public Task<List<TeamMap>> GetAllTeams();
         public Task<List<Schedule>> GetUpcomingGames(int teamId, int season, int currentWeek);
+        public Task<List<Schedule>> GetGames(int season, int week);
     }
 }

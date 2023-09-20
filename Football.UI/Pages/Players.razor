@@ -36,7 +36,7 @@ else if (youTried && badRequestError)
 {
     <p>Bad Request</p>
 }
-
+<div style="height:10px;font-size:1px;">&nbsp;</div>
 @if(playerSelected && playerId > 0)
 {
     var photoPath = "https://localhost:7176/PlayerPhotos/" + playerId + ".png";
@@ -58,10 +58,11 @@ else if (youTried && badRequestError)
     {
         <div class="parent">
             @foreach (var s in schedule)
-        {
+            {
+                var logoPhotoPath = "https://localhost:7176/Logos/" + s.OpposingTeam + ".png";
                 <div class="child">
-                        <div>Week: @s.Week</div>
-                        <div>Opponent: @s.OpposingTeam</div>
+                        <div>Wk @s.Week vs @s.OpposingTeam </div>
+                    <div style="text-align: center;">  <img src="@logoPhotoPath" width="30" height="30"></div>
                 </div>
         }
         </div>
@@ -106,7 +107,7 @@ else if (youTried && badRequestError)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTD</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints</td>
+                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
                             </tr>
                         }
                     </tbody>
@@ -196,7 +197,7 @@ else if (youTried && badRequestError)
                                 <td>@stat.Yards</td>
                                 <td>@stat.ReceivingTD</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints</td>
+                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
                             </tr>
                         }
                     </tbody>
@@ -284,7 +285,7 @@ else if (youTried && badRequestError)
                                 <td>@stat.RushingYds</td>
                                 <td>@stat.RushingTD</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints</td>
+                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
                             </tr>
                         }
                     </tbody>
@@ -374,7 +375,7 @@ else if (youTried && badRequestError)
                                 <td>@stat.RushingYds</td>
                                 <td>@stat.RushingTD</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints</td>
+                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
                             </tr>
                         }
                     </tbody>

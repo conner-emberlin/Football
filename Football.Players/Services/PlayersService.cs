@@ -53,6 +53,7 @@ namespace Football.Players.Services
             }
             else { return new List<Schedule>(); }
         }
+        public async Task<List<Schedule>> GetGames(int season, int week) => await _playersRepository.GetGames(season, week);
         public async Task<List<TeamMap>> GetAllTeams() => await _playersRepository.GetAllTeams();
         private List<Player> RetrieveFromCache() =>
                      _cache.TryGetValue("AllPlayers", out List<Player> cachedPlayers) ? cachedPlayers
