@@ -7,6 +7,7 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text.RegularExpressions;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Football.Data.Services
 {
@@ -37,7 +38,7 @@ namespace Football.Data.Services
             var web = new HtmlWeb();
             HtmlDocument doc = web.Load(url);
             var data = doc.DocumentNode.SelectNodes(xpath)[0].InnerText;
-            string[] strings = data.Split(new string[] { "\r\n", "\r", "\n"},
+            string[] strings = data.Split(new string[] { "\r\n", "\r", "\n" },
                     StringSplitOptions.RemoveEmptyEntries);
             return strings;
         }
@@ -197,7 +198,6 @@ namespace Football.Data.Services
             }
             return count;
         }
-
         public async Task<int> DownloadTeamLogos()
         {
             var teams = await _playersService.GetAllTeams();
@@ -219,14 +219,13 @@ namespace Football.Data.Services
             }
             return count;
         }
-
         public List<PlayerTeam> ParseFantasyProsPlayerTeam(string[] strings, string position)
         {
             var len = position == "QB" || position == "RB" ? 16
                     : position == "TE" || position == "WR" ? 15
                     : 0;
             List<PlayerTeam> playerTeams = new();
-            for (int i = 0; i < strings.Length - len; i+=len)
+            for (int i = 0; i < strings.Length - len; i += len)
             {
                 int start = strings[i].IndexOf("(") + 1;
                 int end = strings[i].IndexOf(")", start);
@@ -239,7 +238,6 @@ namespace Football.Data.Services
             }
             return playerTeams;
         }
-
         public async Task<List<Schedule>> ParseFantasyProsSeasonSchedule(string[] str)
         {
             List<List<string>> games = new();
@@ -270,20 +268,83 @@ namespace Football.Data.Services
             }
             foreach (var g in games)
             {
-              for (int i = 1; i < g.Count; i++)
-              {
-                schedules.Add(new Schedule
+                for (int i = 1; i < g.Count; i++)
                 {
-                  Season = _season.CurrentSeason,
-                  TeamId = await _playersService.GetTeamId(g.ElementAt(0).Trim()),
-                  Team = g.ElementAt(0).Trim(),
-                  Week = i,
-                  OpposingTeamId = g.ElementAt(i).Trim() == "BYE" ? 0 : await _playersService.GetTeamId(g.ElementAt(i).Trim()),
-                  OpposingTeam = g.ElementAt(i).Trim()
-                 });                                     
-              }
+                    schedules.Add(new Schedule
+                    {
+                        Season = _season.CurrentSeason,
+                        TeamId = await _playersService.GetTeamId(g.ElementAt(0).Trim()),
+                        Team = g.ElementAt(0).Trim(),
+                        Week = i,
+                        OpposingTeamId = g.ElementAt(i).Trim() == "BYE" ? 0 : await _playersService.GetTeamId(g.ElementAt(i).Trim()),
+                        OpposingTeam = g.ElementAt(i).Trim()
+                    });
+                }
             }
             return schedules;
+        }
+        public async Task<List<ProFootballReferenceGameScores>> ScrapeGameScores(int week)
+        {
+            var t = await Task.Run(() =>
+            {
+                List<ProFootballReferenceGameScores> scores = new();
+                var url = string.Format("{0}{1}games.htm", "https://www.pro-football-reference.com/years/", _season.CurrentSeason.ToString() + "/");
+                var xpath = "//*[@id=\"games\"]/tbody";
+                var web = new HtmlWeb();
+                HtmlDocument doc = web.Load(url);
+                var tempdata = doc.DocumentNode.SelectNodes(xpath)[0].InnerHtml;
+                var strings = tempdata.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                strings = strings.Where(s => !s.Contains("aria-label") && s.Contains("data-stat")).ToList();
+                List<List<string>> splits = new();
+                foreach (var s in strings)
+                {
+                    var splitS = s.Split(new[] { "data-stat" }, StringSplitOptions.RemoveEmptyEntries);
+                    splits.Add(splitS.ToList());
+                }
+
+                foreach (var split in splits)
+                {
+                    for (int index = split.Count - 1; index >= 0; index--)
+                    {
+
+                        if (split[index].Contains("<tr><th scope=\"row\" class=\"right"))
+                        {
+                            split.Remove(split[index]);
+                        }
+                        else
+                        {
+                            doc.LoadHtml(split[index]);
+                            split[index] = doc.DocumentNode.InnerText;
+                            var ind = split[index].IndexOf(">");
+                            if (ind > -1)
+                            {
+                                split[index] = split[index][ind..].Trim();
+                            }
+                            split[index] = Regex.Replace(split[index], ">", string.Empty);
+                        }
+                    }
+
+                    if (int.Parse(split[0]) == week)
+                    {
+                        scores.Add(new ProFootballReferenceGameScores
+                        {
+                            Week = int.Parse(split[0]),
+                            Day = split[1],
+                            Date = split[2],
+                            Time = split[3],
+                            Winner = split[4],
+                            HomeIndicator = split[5],
+                            Loser = split[6],
+                            WinnerPoints = int.Parse(split[8]),
+                            LoserPoints = int.Parse(split[9]),
+                            WinnerYards = int.Parse(split[10]),
+                            LoserYards = int.Parse(split[12])
+                        });
+                    }
+                }
+                return scores;
+            });
+            return t;
         }
 
         private string FormatName(string name)

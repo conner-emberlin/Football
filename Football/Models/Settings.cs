@@ -23,6 +23,16 @@
         public int PointsPerTouchdown { get; set; }
         public double PointsPerPassingYard { get; set; }
         public double PointsPerYard { get; set; }
+        public double PointsPerSack { get; set; }
+        public double PointsPerSafety { get; set; }
+        public double ZeroPointsAllowed { get; set; }
+        public double OneToSixPointsAllowed { get; set; }
+        public double SevenToThirteenPointsAllowed { get; set; }
+        public double FourteenToSeventeenPointsAllowed { get; set; }
+        public double EighteenToTwentySevenPointsAllowed { get; set; }
+        public double TwentyEightToThirtyFourPointsAllowed { get; set; }
+        public double ThirtyFiveToFourtyFivePointsAllowed { get; set; }
+        public double FourtySixOrMorePointsAllowed { get; set; }
     }
 
     public class ProjectionLimits

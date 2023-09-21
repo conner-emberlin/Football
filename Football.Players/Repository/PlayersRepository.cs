@@ -114,9 +114,22 @@ namespace Football.Players.Repository
                         WHERE [Team] = @teamName";
             return (await _dbConnection.QueryAsync<int>(query, new { teamName })).FirstOrDefault();
         }
+        public async Task<int> GetTeamId(int playerId)
+        {
+            var query = $@"SELECT [TeamId] FROM [dbo].TeamMap
+                        WHERE [PlayerId] = @playerId";
+            return (await _dbConnection.QueryAsync<int>(query, new { playerId })).FirstOrDefault();
+        }
+        public async Task<int> GetTeamIdFromDescription(string teamDescription)
+        {
+            var query = $@"SELECT [TeamId] FROM [dbo].TeamMap
+                        WHERE [TeamDescription] 
+                        LIKE '%' + @teamDescription + '%'";
+            return (await _dbConnection.QueryAsync<int>(query, new {teamDescription})).FirstOrDefault();
+        }
         public async Task<List<TeamMap>> GetAllTeams()
         {
-            var query = $@"SELECT [TeamId], [Team], [TeamDescription]
+            var query = $@"SELECT [TeamId], [Team], [TeamDescription], [PlayerId]
                         FROM [dbo].TeamMap
                         ";
             return (await _dbConnection.QueryAsync<TeamMap>(query)).ToList();

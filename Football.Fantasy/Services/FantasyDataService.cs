@@ -1,5 +1,4 @@
-﻿using Football.Data.Models;
-using Football.Fantasy.Models;
+﻿using Football.Fantasy.Models;
 using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
 using Serilog;
@@ -56,12 +55,6 @@ namespace Football.Fantasy.Services
                         seasonFantasy.Add(_calculator.CalculateTEFantasy(data));
                     }
                     break;
-                case "DST":
-                    foreach (var data in await _statisticsService.GetSeasonDataDSTBySeason(season))
-                    {
-                        seasonFantasy.Add(_calculator.CalculateDSTFantasy(data));
-                    }
-                    break;
                 default: _logger.Error("Invalid position {position}", position); break;
             }
             var count = 0;
@@ -98,6 +91,23 @@ namespace Football.Fantasy.Services
                     foreach (var data in await _statisticsService.GetWeeklyDataTE(season, week))
                     {
                         weeklyFantasy.Add(_calculator.CalculateTEFantasy(data));
+                    }
+                    break;
+                case "DST":
+                    var stats = await _statisticsService.GetWeeklyDataDST(season, week);
+                    var teams = await _playersService.GetAllTeams();
+                    foreach (var data in stats)
+                    {
+                        var teamId = await _playersService.GetTeamId(data.PlayerId);
+                        var gameResult = (await _statisticsService.GetGameResults(season, week)).Where(g => g.WinnerId == teamId || g.LoserId == teamId).First();
+                        var opponent = gameResult.WinnerId == teamId ? gameResult.LoserId : gameResult.WinnerId;
+                        var opponentPID = teams.Where(t => t.TeamId == opponent).First().PlayerId;
+                        var opponentStat = stats.Where(s => s.PlayerId == opponentPID).First();
+
+                        if(teamId > 0 && gameResult != null) 
+                        {
+                            weeklyFantasy.Add(_calculator.CalculateDSTFantasy(data, opponentStat, gameResult, teamId));                               
+                        }
                     }
                     break;
                 default: _logger.Error("Invalid position {position}", position); break;

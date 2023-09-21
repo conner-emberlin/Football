@@ -409,5 +409,38 @@ namespace Football.Fantasy.Repository
                         ";
             return (await _dbConnection.QueryAsync<WeeklyDataTE>(query, new { playerId })).ToList();
         }
+        public async Task<List<WeeklyDataDST>> GetWeeklyDataDST(int season, int week)
+        {
+            var query = $@"SELECT
+                            [Season], [Week], [PlayerId], [Name],
+                            [Sacks], [Ints], [FumblesRecovered],
+                            [ForcedFumbles], [DefensiveTD], [Safties], [SpecialTD]
+                            FROM [dbo].WeeklyDSTData
+                            WHERE [Season] = @season
+                                AND [Week] = @week";
+            return (await _dbConnection.QueryAsync<WeeklyDataDST>(query, new {season, week})).ToList();
+        }
+        public async Task<List<GameResult>> GetGameResults(int season, int week)
+        {
+            var query = $@"SELECT [Season]
+                                ,[WinnerId]
+                                ,[LoserId]
+                                ,[HomeTeamId]
+                                ,[AwayTeamId]
+                                ,[Week]
+                                ,[Day]
+                                ,[Date]
+                                ,[Time]
+                                ,[Winner]
+                                ,[Loser]
+                                ,[WinnerPoints]
+                                ,[LoserPoints]
+                                ,[WinnerYards]
+                                ,[LoserYards]
+                        FROM [dbo].GameResults
+                        WHERE [Season] = @season
+                        AND [Week] = @week";
+            return (await _dbConnection.QueryAsync<GameResult>(query, new { season, week })).ToList();
+        }
     }
 }

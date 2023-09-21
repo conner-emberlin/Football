@@ -138,15 +138,34 @@ namespace Football.Fantasy.Services
                 Position = "TE"
             };
         }
-        public SeasonFantasy CalculateDSTFantasy(SeasonDataDST stat)
+        public WeeklyFantasy CalculateDSTFantasy(WeeklyDataDST stat, WeeklyDataDST opponentStat, GameResult result, int teamId)
         {
-            var points = 0;
-            return new SeasonFantasy
+            var pointsAllowed = result.WinnerId == teamId ? result.LoserPoints - 6 * opponentStat.DefensiveTD 
+                                : result.WinnerPoints - 6 * opponentStat.DefensiveTD;
+
+            var pointsAllowedFantasy = pointsAllowed == 0 ? _scoring.ZeroPointsAllowed
+                                     : 1 <= pointsAllowed && pointsAllowed <= 6 ? _scoring.OneToSixPointsAllowed
+                                     : 7 <= pointsAllowed && pointsAllowed <= 13 ? _scoring.SevenToThirteenPointsAllowed
+                                     : 14 <= pointsAllowed && pointsAllowed <= 17 ? _scoring.FourteenToSeventeenPointsAllowed
+                                     : 18 <= pointsAllowed && pointsAllowed <= 27 ? _scoring.EighteenToTwentySevenPointsAllowed
+                                     : 28 <= pointsAllowed && pointsAllowed <= 34 ? _scoring.TwentyEightToThirtyFourPointsAllowed
+                                     : 35 <= pointsAllowed && pointsAllowed <= 45 ? _scoring.ThirtyFiveToFourtyFivePointsAllowed
+                                     : _scoring.FourtySixOrMorePointsAllowed;
+
+            var fantasyPoints = pointsAllowedFantasy
+                                + stat.Sacks * _scoring.PointsPerSack
+                                + stat.Ints * _scoring.PointsPerInterception
+                                + stat.FumblesRecovered * _scoring.PointsPerFumble
+                                + (stat.SpecialTD + stat.DefensiveTD) * _scoring.PointsPerTouchdown
+                                + stat.Safties * _scoring.PointsPerSafety;
+
+            return new WeeklyFantasy
             {
                 PlayerId = stat.PlayerId,
                 Season = stat.Season,
+                Week = stat.Week,
                 Games = stat.Games,
-                FantasyPoints = points,
+                FantasyPoints = fantasyPoints,
                 Name = stat.Name,
                 Position = "DST"
             };

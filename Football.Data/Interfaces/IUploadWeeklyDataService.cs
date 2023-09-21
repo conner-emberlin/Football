@@ -1,5 +1,4 @@
-﻿using Football.Data.Models;
-namespace Football.Data.Interfaces
+﻿namespace Football.Data.Interfaces
 {
     public interface IUploadWeeklyDataService
     {
@@ -8,6 +7,7 @@ namespace Football.Data.Interfaces
         public Task<int> UploadWeeklyWRData(int season, int week);
         public Task<int> UploadWeeklyTEData(int season, int week);
         public Task<int> UploadWeeklyDSTData(int season, int week);
+        public Task<int> UploadWeeklyGameResults(int season, int week);
 
     }
 }

@@ -9,5 +9,6 @@ namespace Football.Data.Interfaces
         public Task<int> UploadWeeklyWRData(List<WeeklyDataWR> players);
         public Task<int> UploadWeeklyTEData(List<WeeklyDataTE> players);
         public Task<int> UploadWeeklyDSTData(List<WeeklyDataDST> players);
+        public Task<int> UploadWeeklyGameResults(List<GameResult> results);
     }
 }

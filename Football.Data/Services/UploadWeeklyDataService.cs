@@ -53,6 +53,11 @@ namespace Football.Data.Services
             var players = await WeeklyDataDST(_scraperService.ParseFantasyProsDSTData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await _uploadWeeklyDataRepository.UploadWeeklyDSTData(players);
         }
+        public async Task<int> UploadWeeklyGameResults(int season, int week)
+        {
+            var results = await GameResult(await _scraperService.ScrapeGameScores(week), season);
+            return await _uploadWeeklyDataRepository.UploadWeeklyGameResults(results);
+        }
 
         private async Task<List<WeeklyDataQB>> WeeklyDataQB(List<FantasyProsStringParseQB> players, int season, int week)
         {
@@ -249,6 +254,35 @@ namespace Football.Data.Services
                 }
             }
             return weeklyData;
+        }
+
+        private async Task<List<GameResult>> GameResult(List<ProFootballReferenceGameScores> games, int season)
+        {
+            List<GameResult> results = new();
+            foreach (var g in games)
+            {
+                var winnerId = await _playerService.GetTeamIdFromDescription(g.Winner);
+                var loserId = await _playerService.GetTeamIdFromDescription(g.Loser);
+                results.Add(new GameResult
+                {
+                    Season = season,
+                    WinnerId = winnerId,
+                    LoserId = loserId,
+                    HomeTeamId = g.HomeIndicator == "@" ? loserId : winnerId,
+                    AwayTeamId = g.HomeIndicator == "@" ? winnerId : loserId,
+                    Week = g.Week,
+                    Day = g.Day,
+                    Date = g.Date,
+                    Time = g.Time,
+                    Winner = g.Winner,
+                    Loser = g.Loser,
+                    WinnerPoints = g.WinnerPoints,
+                    LoserPoints = g.LoserPoints,
+                    WinnerYards = g.WinnerYards,
+                    LoserYards = g.LoserYards
+                });
+            }
+            return results;
         }
 
     }

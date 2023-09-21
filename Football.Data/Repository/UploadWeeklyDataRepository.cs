@@ -2,6 +2,9 @@
 using Dapper;
 using Football.Data.Models;
 using System.Data;
+using Football.Models;
+using Serilog.Core;
+using System.Reflection;
 
 namespace Football.Data.Repository
 {
@@ -70,5 +73,22 @@ namespace Football.Data.Repository
             return count;
         }
 
+        public async Task<int> UploadWeeklyGameResults(List<GameResult> results)
+        {
+            var query = $@"INSERT INTO [dbo].GameResults
+                        (Season, WinnerId, LoserId, HomeTeamId, AwayTeamId,
+                        Week, Day, Date, Time, Winner, Loser, WinnerPoints, LoserPoints,
+                        WinnerYards, LoserYards)
+                        VALUES
+                        (@Season, @WinnerId, @LoserId, @HomeTeamId, @AwayTeamId,
+                        @Week, @Day, @Date, @Time, @Winner, @Loser, @WinnerPoints, @LoserPoints,
+                        @WinnerYards, @LoserYards)";
+            var count = 0;
+            foreach (var r in results)
+            {
+                count += await _dbConnection.ExecuteAsync(query, r);
+            }
+            return count;
+        }
     }
 }

@@ -24,10 +24,12 @@ namespace Football.Fantasy.Services
         public async Task<List<WeeklyDataRB>> GetWeeklyDataRB(int season, int week) => await _statisticsRepository.GetWeeklyDataRB(season, week);
         public async Task<List<WeeklyDataWR>> GetWeeklyDataWR(int season, int week) => await _statisticsRepository.GetWeeklyDataWR(season, week);
         public async Task<List<WeeklyDataTE>> GetWeeklyDataTE(int season, int week) => await _statisticsRepository.GetWeeklyDataTE(season, week);
+        public async Task<List<WeeklyDataDST>> GetWeeklyDataDST(int season, int week) => await _statisticsRepository.GetWeeklyDataDST(season, week);
         public async Task<List<WeeklyDataQB>> GetWeeklyDataQB(int playerId) => await _statisticsRepository.GetWeeklyDataQB(playerId);
         public async Task<List<WeeklyDataRB>> GetWeeklyDataRB(int playerId) => await _statisticsRepository.GetWeeklyDataRB(playerId);
         public async Task<List<WeeklyDataWR>> GetWeeklyDataWR(int playerId) => await _statisticsRepository.GetWeeklyDataWR(playerId);
         public async Task<List<WeeklyDataTE>> GetWeeklyDataTE(int playerId) => await _statisticsRepository.GetWeeklyDataTE(playerId);
-        
+        public async Task<List<GameResult>> GetGameResults(int season, int week) => await _statisticsRepository.GetGameResults(season, week);
+
     }
 }
