@@ -81,22 +81,8 @@ namespace Football.Projections.Services
             }
             return seasonProjections;
         }
-
-        private double EPARatio(double previousEPA, double currentEPA)
-        {
-            if (previousEPA == 0)
-            {
-                return 1;
-            }
-            else if(previousEPA > currentEPA)
-            {
-                return Math.Max(_tunings.NewQBFloor, currentEPA / previousEPA);
-            }
-            else
-            {
-                return Math.Min(_tunings.NewQBCeiling, currentEPA / previousEPA);
-            }
-        }
-        
+        private double EPARatio(double previousEPA, double currentEPA) => previousEPA == 0 ? 1
+                   : previousEPA > currentEPA ? Math.Max(_tunings.NewQBFloor, currentEPA / previousEPA)
+                   : Math.Min(_tunings.NewQBCeiling, currentEPA / previousEPA);               
     }
 }
