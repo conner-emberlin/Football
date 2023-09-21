@@ -1,5 +1,6 @@
 ﻿using Football.Data.Models;
 using Football.Fantasy.Interfaces;
+using System.Runtime.InteropServices;
 
 namespace Football.Fantasy.Services
 {
@@ -29,6 +30,7 @@ namespace Football.Fantasy.Services
         public async Task<List<WeeklyDataRB>> GetWeeklyDataRB(int playerId) => await _statisticsRepository.GetWeeklyDataRB(playerId);
         public async Task<List<WeeklyDataWR>> GetWeeklyDataWR(int playerId) => await _statisticsRepository.GetWeeklyDataWR(playerId);
         public async Task<List<WeeklyDataTE>> GetWeeklyDataTE(int playerId) => await _statisticsRepository.GetWeeklyDataTE(playerId);
+        public async Task<List<WeeklyDataDST>> GetWeeklyDataDST(int playerId) => await _statisticsRepository.GetWeeklyDataDST(playerId);
         public async Task<List<GameResult>> GetGameResults(int season, int week) => await _statisticsRepository.GetGameResults(season, week);
 
     }

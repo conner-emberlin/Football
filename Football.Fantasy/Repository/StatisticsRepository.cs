@@ -420,6 +420,17 @@ namespace Football.Fantasy.Repository
                                 AND [Week] = @week";
             return (await _dbConnection.QueryAsync<WeeklyDataDST>(query, new {season, week})).ToList();
         }
+        public async Task<List<WeeklyDataDST>> GetWeeklyDataDST(int playerId)
+        {
+            var query = $@"SELECT
+                            [Season], [Week], [PlayerId], [Name],
+                            [Sacks], [Ints], [FumblesRecovered],
+                            [ForcedFumbles], [DefensiveTD], [Safties], [SpecialTD]
+                            FROM [dbo].WeeklyDSTData
+                            WHERE 1=1
+                                AND [PlayerId] = @playerId";
+            return (await _dbConnection.QueryAsync<WeeklyDataDST>(query, new { playerId})).ToList();
+        }
         public async Task<List<GameResult>> GetGameResults(int season, int week)
         {
             var query = $@"SELECT [Season]

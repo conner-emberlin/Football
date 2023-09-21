@@ -23,6 +23,7 @@ namespace Football.Fantasy.Interfaces
         public Task<List<WeeklyDataRB>> GetWeeklyDataRB(int playerId);
         public Task<List<WeeklyDataWR>> GetWeeklyDataWR(int playerId);
         public Task<List<WeeklyDataTE>> GetWeeklyDataTE(int playerId);
+        public Task<List<WeeklyDataDST>> GetWeeklyDataDST(int playerId);
         public Task<List<GameResult>> GetGameResults(int season, int week);
        
     }
