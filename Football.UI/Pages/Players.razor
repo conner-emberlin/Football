@@ -46,7 +46,7 @@ else if (youTried && badRequestError)
     <div>
        <b>@playerName</b> 
     </div>
-    @if(team != null)
+    @if(!string.IsNullOrEmpty(team.Team))
     {
         <div><b>@team.Team</b> <b>&#x2022;</b>  <b>@playerPosition</b> </div>
     }
@@ -431,6 +431,83 @@ else if (youTried && badRequestError)
         </div>
         }
     }
+    else if (playerPosition == "DST")
+    {
+        @if (weeklyDSTData.Any())
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
+                        <tr>
+                            <th>Season</th>
+                            <th>Week</th>
+                            <th>Sacks</th>
+                            <th>Ints</th>
+                            <th>FumRecvd</th>
+                            <th>ForcedFum</th>
+                            <th>DefTD</th>
+                            <th>Safety</th>
+                            <th>SpecTD</th>
+                            <th>Fpts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in weeklyDSTData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Week</td>
+                                <td>@stat.Sacks</td>
+                                <td>@stat.Ints</td>
+                                <td>@stat.FumblesRecovered</td>
+                                <td>@stat.ForcedFumbles</td>
+                                <td>@stat.DefensiveTD</td>
+                                <td>@stat.Safties</td>
+                                <td>@stat.SpecialTD</td>
+                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        @if (seasonDSTData.Any())
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
+                        <tr>
+                            <th>Season</th>
+                            <th>Games</th>
+                            <th>Sacks</th>
+                            <th>Ints</th>
+                            <th>FumRecvd</th>
+                            <th>ForcedFum</th>
+                            <th>DefTD</th>
+                            <th>Safety</th>
+                            <th>SpecTD</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in seasonDSTData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Games</td>
+                                <td>@stat.Sacks</td>
+                                <td>@stat.Ints</td>
+                                <td>@stat.FumblesRecovered</td>
+                                <td>@stat.ForcedFumbles</td>
+                                <td>@stat.DefensiveTD</td>
+                                <td>@stat.Safties</td>
+                                <td>@stat.SpecialTD</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
 }
  
 @code{
@@ -456,12 +533,14 @@ else if (youTried && badRequestError)
     List<SeasonDataRB> seasonRBData { get; set; } = new();
     List<SeasonDataWR> seasonWRData { get; set; } = new();
     List<SeasonDataTE> seasonTEData { get; set; } = new();
+    List<SeasonDataDST> seasonDSTData { get; set; } = new();
     List<FantasyPPG> seasonFantasy {get; set;} = new();
 
     List<WeeklyDataQB> weeklyQBData { get; set; } = new();
     List<WeeklyDataRB> weeklyRBData { get; set; } = new();
     List<WeeklyDataWR> weeklyWRData { get; set; } = new();
     List<WeeklyDataTE> weeklyTEData { get; set; } = new();
+    List<WeeklyDataDST> weeklyDSTData { get; set; } = new();
     List<WeeklyFantasy> weeklyFantasy { get; set; } = new();
 
     SeasonFantasy runningTotal { get; set; } = new();
@@ -484,7 +563,7 @@ else if (youTried && badRequestError)
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             players = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
-            players = players.Where(p => p.Active == 1 && p.Position != "DST").OrderBy(p => p.Position).OrderBy(p => p.Name).ToList();
+            players = players.Where(p => p.Active == 1).OrderBy(p => p.Position).OrderBy(p => p.Name).ToList();
             badRequestError = false;
             youTried = true;
 
@@ -521,19 +600,23 @@ else if (youTried && badRequestError)
         playerId = pid;
         playerPosition = players.Where(p => p.PlayerId == pid).First().Position;
         playerName = players.Where(p => p.PlayerId == pid).First().Name;
+
         switch (playerPosition)
         {
             case "QB": await GetQBSeasonData(); await GetQBWeeklyData(); break;
             case "RB": await GetRBSeasonData(); await GetRBWeeklyData(); break;
             case "WR": await GetWRSeasonData(); await GetWRWeeklyData(); break;
             case "TE": await GetTESeasonData(); await GetTEWeeklyData(); break;
+            case "DST":await GetDSTSeasonData(); await GetDSTWeeklyData(); break;
             default: break;
         }
+
         await GetFantasySeasonData();
         await GetFantasyWeeklyData();
         await GetPlayerTeam();
         await GetUpcomingGames();
         await GetRunningFantasyTotals();
+
         playerSelected = true;
         selectedPlayer = playerName;
         filteredPlayers = null;
@@ -704,6 +787,41 @@ else if (youTried && badRequestError)
             badRequestError = true;
         }
     }
+    private async Task GetDSTSeasonData()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/dst/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            seasonDSTData = await JsonSerializer.DeserializeAsync<List<SeasonDataDST>>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+    private async Task GetDSTWeeklyData()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/weekly/dst/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            weeklyDSTData = await JsonSerializer.DeserializeAsync<List<WeeklyDataDST>>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+
     private async Task GetFantasyWeeklyData()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/data/weekly/" + playerId.ToString());

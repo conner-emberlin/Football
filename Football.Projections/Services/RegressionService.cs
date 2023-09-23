@@ -27,11 +27,7 @@ namespace Football.Projections.Services
             _season = season.CurrentValue;
         }
 
-        public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents)
-        {
-            var vec = MultipleRegression.NormalEquations(regressors, dependents);
-            return vec;
-        }
+        public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents) => MultipleRegression.NormalEquations(regressors, dependents);
         public async Task<Vector<double>> PerformRegression(List<Rookie> rookies)
         {
             List<SeasonFantasy> rookieSeasons = new();

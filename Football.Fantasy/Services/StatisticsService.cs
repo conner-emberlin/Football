@@ -1,6 +1,5 @@
 ﻿using Football.Data.Models;
 using Football.Fantasy.Interfaces;
-using System.Runtime.InteropServices;
 
 namespace Football.Fantasy.Services
 {

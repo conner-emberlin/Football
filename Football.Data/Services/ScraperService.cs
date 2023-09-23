@@ -7,7 +7,6 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text.RegularExpressions;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Football.Data.Services
 {
@@ -24,23 +23,14 @@ namespace Football.Data.Services
             _season = season.CurrentValue;
             _logger = logger;
         }
-        public string FantasyProsURLFormatter(string position, string year, string week)
-        {
-            return String.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
-        }
-        public string FantasyProsURLFormatter(string position, string year)
-        {
-            return String.Format("{0}{1}.php?year={2}", _scraping.FantasyProsBaseURL, position.ToLower(), year);
-        }
-
+        public string FantasyProsURLFormatter(string position, string year, string week) => String.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
+        public string FantasyProsURLFormatter(string position, string year) => String.Format("{0}{1}.php?year={2}", _scraping.FantasyProsBaseURL, position.ToLower(), year);        
         public string[] ScrapeData(string url, string xpath)
         {
             var web = new HtmlWeb();
             HtmlDocument doc = web.Load(url);
-            var data = doc.DocumentNode.SelectNodes(xpath)[0].InnerText;
-            string[] strings = data.Split(new string[] { "\r\n", "\r", "\n" },
-                    StringSplitOptions.RemoveEmptyEntries);
-            return strings;
+            return doc.DocumentNode.SelectNodes(xpath)[0].InnerText.Split(new string[] { "\r\n", "\r", "\n" },
+                    StringSplitOptions.RemoveEmptyEntries); 
         }
         public List<FantasyProsStringParseWR> ParseFantasyProsWRData(string[] strings)
         {
@@ -323,7 +313,6 @@ namespace Football.Data.Services
                             split[index] = Regex.Replace(split[index], ">", string.Empty);
                         }
                     }
-
                     if (int.Parse(split[0]) == week)
                     {
                         scores.Add(new ProFootballReferenceGameScores
@@ -347,11 +336,6 @@ namespace Football.Data.Services
             return t;
         }
 
-        private string FormatName(string name)
-        {
-            name = Regex.Replace(name, @"[\d-]", string.Empty);
-            name = Regex.Replace(name, @"\(.*\)", string.Empty).Trim();
-            return name;
-        }
+        private static string FormatName(string name) => Regex.Replace(Regex.Replace(name, @"[\d-]", string.Empty), @"\(.*\)", string.Empty).Trim();
     }
 }

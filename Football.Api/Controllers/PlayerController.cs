@@ -85,6 +85,20 @@ namespace Football.Api.Controllers
                 return BadRequest("Bad Request");
             }
         }
+        [HttpGet("data/dst/{playerId}")]
+        [ProducesResponseType(typeof(List<SeasonDataDST>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<SeasonDataDST>>> GetSeasonDataDST(int playerId)
+        {
+            if (playerId > 0)
+            {
+                return Ok(await _statisticsService.GetSeasonDataDST(playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
         [HttpGet("data/weekly/qb/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataQB>), 200)]
         [ProducesResponseType(typeof(string), 400)]
@@ -141,6 +155,20 @@ namespace Football.Api.Controllers
                 return BadRequest("Bad Request");
             }
         }
+        [HttpGet("data/weekly/dst/{playerId}")]
+        [ProducesResponseType(typeof(List<WeeklyDataDST>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyDataDST>>> GetWeeklyDataDST(int playerId)
+        {
+            if (playerId > 0)
+            {
+                return Ok(await _statisticsService.GetWeeklyDataDST(playerId));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
 
         [HttpGet("team/{playerId}")]
         [ProducesResponseType(typeof(PlayerTeam), 200)]
@@ -160,7 +188,7 @@ namespace Football.Api.Controllers
         [HttpGet("schedule/{playerId}")]
         [ProducesResponseType(typeof(List<Schedule>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<Schedule>>> GetUpcomingGames(int playerId)
+        public async Task<ActionResult<List<Schedule>>> GetUpcomingGames(int playerId) 
         {
             if (playerId > 0)
             {
