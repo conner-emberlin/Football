@@ -47,7 +47,8 @@ namespace Football.Fantasy.Services
                     Team = team,
                     GamesPlayed = currentWeek - 1,
                     Position = position,
-                    PointsAllowed = Math.Round(fpTotal, 2)
+                    PointsAllowed = Math.Round(fpTotal, 2),
+                    AvgPointsAllowed = currentWeek > 1 ? Math.Round(fpTotal/(currentWeek - 1),2) : 0
                 });
             }
             return rankings.OrderBy(r => r.PointsAllowed).ToList();

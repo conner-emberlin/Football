@@ -8,5 +8,6 @@ namespace Football.Fantasy.Models
         public int GamesPlayed { get; set; }
         public string Position { get; set; } = "";
         public double PointsAllowed { get; set; }
+        public double AvgPointsAllowed { get; set; }
     }
 }
