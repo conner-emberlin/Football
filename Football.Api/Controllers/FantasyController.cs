@@ -11,11 +11,13 @@ namespace Football.Api.Controllers
     public class FantasyController : ControllerBase
     {
         private readonly IFantasyDataService _fantasyDataService;
+        private readonly IMatchupAnalysisService _matchupAnalysisService;
         private readonly Season _season;
 
-        public FantasyController(IFantasyDataService fantasyDataService, IOptionsMonitor<Season> season)
+        public FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IOptionsMonitor<Season> season)
         {
             _fantasyDataService = fantasyDataService;
+            _matchupAnalysisService = matchupAnalysisService;
             _season = season.CurrentValue;
         }
 
@@ -99,5 +101,15 @@ namespace Football.Api.Controllers
         {
             return Ok(await _fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason));
         }
+
+        [HttpGet("matchup-rankings")]
+        [ProducesResponseType(typeof(List<MatchupRanking>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<MatchupRanking>> GetMatchupRankings(string position)
+        {
+            return position != null ? Ok(await _matchupAnalysisService.PositionalMatchupRankings(position))
+                            : BadRequest("Bad Request");
+        }
+
     }
 }

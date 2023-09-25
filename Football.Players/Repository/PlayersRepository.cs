@@ -108,6 +108,14 @@ namespace Football.Players.Repository
 
             return (await _dbConnection.QueryAsync<PlayerTeam>(query, new { season, playerId })).FirstOrDefault();
         }
+        public async Task<List<PlayerTeam>> GetPlayersByTeam(string team)
+        {
+            var query = $@"SELECT [PlayerId], [Name], [Season], [Team]
+                        FROM [dbo].PlayerTeam
+                        WHERE [Team] = @team";
+
+            return (await _dbConnection.QueryAsync<PlayerTeam>(query, new { team })).ToList();
+        }
         public async Task<int> GetTeamId(string teamName)
         {
             var query = $@"SELECT [TeamId] FROM [dbo].TeamMap
@@ -157,6 +165,14 @@ namespace Football.Players.Repository
                         WHERE [Season] = @season
                         AND [Week] = @week";
             return (await _dbConnection.QueryAsync<Schedule>(query, new {season, week})).ToList();
+        }
+        public async Task<List<Schedule>> GetTeamGames(int teamId, int season)
+        {
+            var query = $@"SELECT [Season], [TeamId], [Team], [Week], [OpposingTeamId], [OpposingTeam]
+                        FROM [dbo].Schedule
+                        WHERE [TeamId] = @teamId
+                            AND [Season] = @season";
+            return (await _dbConnection.QueryAsync<Schedule>(query, new { teamId, season })).ToList();
         }
     }
 }

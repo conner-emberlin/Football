@@ -42,6 +42,7 @@ namespace Football.Players.Services
         public async Task<double> GetEPA(int playerId, int season) => await _playersRepository.GetEPA(playerId, season);
         public async Task<double> GetSeasonProjection(int season, int playerId) => await _playersRepository.GetSeasonProjection(season, playerId);
         public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId) => await _playersRepository.GetPlayerTeam(season, playerId);
+        public async Task<List<PlayerTeam>> GetPlayersByTeam(string team) => await _playersRepository.GetPlayersByTeam(team);
         public async Task<int> GetTeamId(string teamName) => await _playersRepository.GetTeamId(teamName);
         public async Task<int> GetTeamId(int playerId) => await _playersRepository.GetTeamId(playerId);
         public async Task<int> GetTeamIdFromDescription(string teamDescription) => await _playersRepository.GetTeamIdFromDescription(teamDescription);
@@ -56,6 +57,7 @@ namespace Football.Players.Services
             else { return new List<Schedule>(); }
         }
         public async Task<List<Schedule>> GetGames(int season, int week) => await _playersRepository.GetGames(season, week);
+        public async Task<List<Schedule>> GetTeamGames(int teamId) => await _playersRepository.GetTeamGames(teamId, _season.CurrentSeason);
         public async Task<List<TeamMap>> GetAllTeams() => await _playersRepository.GetAllTeams();
         private List<Player> RetrieveFromCache() =>
                      _cache.TryGetValue("AllPlayers", out List<Player> cachedPlayers) ? cachedPlayers
