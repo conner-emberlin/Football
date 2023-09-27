@@ -12,48 +12,48 @@ namespace Football.Data.Repository
         {
             _dbConnection = dbConnection;
         }
-        public async Task<int> UploadWeeklyQBData(List<WeeklyDataQB> players)
+        public async Task<int> UploadWeeklyQBData(List<WeeklyDataQB> players, List<int> ignoreList)
         {
             var query = $@"INSERT INTO [dbo].WeeklyQBData (Season, Week, PlayerId, Name, Completions, Attempts, Yards, TD, Int, Sacks, RushingAttempts, RushingYards, RushingTD, Fumbles)
                         VALUES (@Season, @week, @PlayerId, @Name, @Completions, @Attempts, @Yards, @TD, @Int, @Sacks, @RushingAttempts, @RushingYards, @RushingTD, @Fumbles)";
             var count = 0;
             foreach(var player in players)
             {
-                count += await _dbConnection.ExecuteAsync(query, player);
+                count += ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
 
         }
-        public async Task<int> UploadWeeklyRBData(List<WeeklyDataRB> players)
+        public async Task<int> UploadWeeklyRBData(List<WeeklyDataRB> players, List<int> ignoreList)
         {
             var query = $@"INSERT INTO [dbo].WeeklyRBData (Season, Week, PlayerId, Name, RushingAtt, RushingYds, RushingTD, Receptions, Targets, Yards, ReceivingTD, Fumbles)
                             VALUES(@Season, @Week, @PlayerId, @Name, @RushingAtt, @RushingYds, @RushingTD, @Receptions, @Targets, @Yards, @ReceivingTD, @Fumbles)";
             var count = 0;
             foreach (var player in players)
             {
-                count += await _dbConnection.ExecuteAsync(query, player);
+                count += ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
         }
-        public async Task<int> UploadWeeklyWRData(List<WeeklyDataWR> players)
+        public async Task<int> UploadWeeklyWRData(List<WeeklyDataWR> players, List<int> ignoreList)
         {
             var query = $@"INSERT INTO [dbo].WeeklyWRData (Season, Week, PlayerId, Name, Receptions, Targets, Yards, Long, TD, RushingAtt, RushingYds, RushingTD, Fumbles)
                         VALUES (@Season, @Week, @PlayerId, @Name, @Receptions, @Targets, @Yards, @Long, @TD, @RushingAtt, @RushingYds, @RushingTD, @Fumbles)";
             var count = 0;
             foreach (var player in players)
             {
-                count += await _dbConnection.ExecuteAsync(query, player);
+                count += ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
         }
-        public async Task<int> UploadWeeklyTEData(List<WeeklyDataTE> players)
+        public async Task<int> UploadWeeklyTEData(List<WeeklyDataTE> players, List<int> ignoreList)
         {
             var query = $@"INSERT INTO [dbo].WeeklyTEData (Season, Week, PlayerId, Name, Receptions, Targets, Yards, Long, TD, RushingAtt, RushingYds, RushingTD, Fumbles)
                         VALUES (@Season, @Week, @PlayerId, @Name, @Receptions, @Targets, @Yards, @Long, @TD, @RushingAtt, @RushingYds, @RushingTD, @Fumbles)";
             var count = 0;
             foreach (var player in players)
             {
-                count += await _dbConnection.ExecuteAsync(query, player);
+                count += ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
 
