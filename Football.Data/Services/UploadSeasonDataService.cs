@@ -30,25 +30,25 @@ namespace Football.Data.Services
         {
             var url = _scraperService.FantasyProsURLFormatter("QB", season.ToString());
             var players = await SeasonDataQB(_scraperService.ParseFantasyProsQBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
-            return await _uploadSeasonDataRepository.UploadSeasonQBData(players);
+            return await _uploadSeasonDataRepository.UploadSeasonQBData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonRBData(int season)
         {
             var url = _scraperService.FantasyProsURLFormatter("RB", season.ToString());
             var players = await SeasonDataRB(_scraperService.ParseFantasyProsRBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
-            return await _uploadSeasonDataRepository.UploadSeasonRBData(players);
+            return await _uploadSeasonDataRepository.UploadSeasonRBData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonWRData(int season)
         {
             var url = _scraperService.FantasyProsURLFormatter("WR", season.ToString());
             var players = await SeasonDataWR(_scraperService.ParseFantasyProsWRData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
-            return await _uploadSeasonDataRepository.UploadSeasonWRData(players);
+            return await _uploadSeasonDataRepository.UploadSeasonWRData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonTEData(int season)
         {
             var url = _scraperService.FantasyProsURLFormatter("TE", season.ToString());
             var players = await SeasonDataTE(_scraperService.ParseFantasyProsTEData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
-            return await _uploadSeasonDataRepository.UploadSeasonTEData(players);
+            return await _uploadSeasonDataRepository.UploadSeasonTEData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonDSTData(int season)
         {

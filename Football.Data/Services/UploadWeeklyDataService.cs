@@ -27,25 +27,25 @@ namespace Football.Data.Services
         {
             var url = _scraperService.FantasyProsURLFormatter("QB", season.ToString(), week.ToString());
             var players = await WeeklyDataQB(_scraperService.ParseFantasyProsQBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyQBData(players);
+            return await _uploadWeeklyDataRepository.UploadWeeklyQBData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyRBData(int season, int week)
         {
             var url = _scraperService.FantasyProsURLFormatter("RB", season.ToString(), week.ToString());
             var players = await WeeklyDataRB(_scraperService.ParseFantasyProsRBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyRBData(players);
+            return await _uploadWeeklyDataRepository.UploadWeeklyRBData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyWRData(int season, int week)
         {
             var url = _scraperService.FantasyProsURLFormatter("WR", season.ToString(), week.ToString());
             var players = await WeeklyDataWR(_scraperService.ParseFantasyProsWRData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyWRData(players);
+            return await _uploadWeeklyDataRepository.UploadWeeklyWRData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyTEData(int season, int week)
         {
             var url = _scraperService.FantasyProsURLFormatter("TE", season.ToString(), week.ToString());
             var players = await WeeklyDataTE(_scraperService.ParseFantasyProsTEData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyTEData(players);
+            return await _uploadWeeklyDataRepository.UploadWeeklyTEData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyDSTData(int season, int week)
         {
