@@ -318,211 +318,73 @@ namespace Football.Projections.Services
                 throw;
             }
         }
-        public WeeklyFantasy CalculateWeeklyAverage(List<WeeklyFantasy> weeks)
-        {
-            _logger.Information("Calculating Weekly fantasy averages for player {playerId}", weeks.First().PlayerId);
-            var recentWeight = weeks.Count > 1 ? _weeklyTunings.RecentWeekWeight : 1;
-            var recentWeek = weeks.Max(w => w.Week);
-            var previousWeeks = weeks.Count - 1;
-            var previousWeight = weeks.Count > 1 ? ((1 - _weeklyTunings.RecentWeekWeight) * ((double)1 / previousWeeks)) : 0;
-
-            double ftp = 0;
-            foreach (var w in weeks)
-            {
-                ftp += w.Week == recentWeek ? recentWeight * w.FantasyPoints : previousWeight * w.FantasyPoints;
-            }
-            return new WeeklyFantasy
+        public WeeklyFantasy CalculateWeeklyAverage(List<WeeklyFantasy> weeks) => new()    
             {
                 PlayerId = weeks.First().PlayerId,
                 Season = _season.CurrentSeason,
-                Week = recentWeek + 1,
+                Week = weeks.Max(w => w.Week) + 1,
                 Games = 1,
                 Name = weeks.First().Name,
                 Position = weeks.First().Position,
-                FantasyPoints = ftp
-            };
-
-        }
-        public WeeklyDataQB CalculateWeeklyAverage(List<WeeklyDataQB> weeks)
-        {
-            _logger.Information("Calculating Weekly averages for player {playerId}", weeks.First().PlayerId);
-            var recentWeight = weeks.Count > 1 ? _weeklyTunings.RecentWeekWeight : 1;
-            var recentWeek = weeks.Max(w => w.Week);
-            var previousWeeks = weeks.Count - 1;
-            var previousWeight = weeks.Count > 1 ? ((1 - _weeklyTunings.RecentWeekWeight) * ((double)1 / previousWeeks)) : 0;
-
-            double avgComp = 0;
-            double avgAtt = 0;
-            double avgYd = 0;
-            double avgTD = 0;
-            double avgInt = 0;
-            double avgSacks = 0;
-            double avgRAtt = 0;
-            double avgRYd = 0;
-            double avgRTD = 0;
-            double avgFum = 0;
-
-            foreach (var w in weeks)
-            {
-                avgComp += w.Week == recentWeek ? recentWeight * w.Completions : previousWeight * w.Completions;
-                avgAtt += w.Week == recentWeek ? recentWeight * w.Attempts : previousWeight * w.Attempts;
-                avgYd += w.Week == recentWeek ? recentWeight * w.Yards : previousWeight * w.Yards;
-                avgTD += w.Week == recentWeek ? recentWeight * w.TD : previousWeight * w.TD;
-                avgInt += w.Week == recentWeek ? recentWeight * w.Int : previousWeight * w.Int;
-                avgSacks += w.Week == recentWeek ? recentWeight * w.Sacks : previousWeight * w.Sacks;
-                avgRAtt += w.Week == recentWeek ? recentWeight * w.RushingAttempts : previousWeight * w.RushingAttempts;
-                avgRYd += w.Week == recentWeek ? recentWeight * w.RushingYards : previousWeight * w.RushingYards;
-                avgRTD += w.Week == recentWeek ? recentWeight * w.RushingTD : previousWeight * w.RushingTD;
-                avgFum += w.Week == recentWeek ? recentWeight * w.Fumbles : previousWeight * w.Fumbles;
-            }
-
-            return new WeeklyDataQB
+                FantasyPoints = weeks.Average(w => w.FantasyPoints)
+            };        
+        public WeeklyDataQB CalculateWeeklyAverage(List<WeeklyDataQB> weeks) => new()
             {
                 PlayerId = weeks.First().PlayerId,
                 Season = weeks.First().Season,
-                Week = recentWeek + 1,
-                Completions = avgComp,
-                Attempts = avgAtt,
-                Yards = avgYd,
-                TD = avgTD,
-                Int = avgInt,
-                Sacks = avgSacks,
-                RushingAttempts = avgRAtt,
-                RushingYards = avgRYd,
-                RushingTD = avgRTD,
-                Fumbles = avgFum
+                Week = weeks.Max(w => w.Week) + 1,
+                Completions = weeks.Average(w => w.Completions),
+                Attempts = weeks.Average(w => w.Attempts),
+                Yards = weeks.Average(w => w.Yards),
+                TD = weeks.Average(w => w.TD),
+                Int = weeks.Average(w => w.Int),
+                Sacks = weeks.Average(w => w.Sacks),
+                RushingAttempts = weeks.Average(w => w.RushingAttempts),
+                RushingYards = weeks.Average(w => w.RushingYards),
+                RushingTD = weeks.Average(w => w.RushingTD),
+                Fumbles = weeks.Average(w => w.Fumbles)
             };
-        }
-
-        public WeeklyDataRB CalculateWeeklyAverage(List<WeeklyDataRB> weeks)
-        {
-            _logger.Information("Calculating Weekly averages for player {playerId}", weeks.First().PlayerId);
-            var recentWeight = weeks.Count > 1 ? _weeklyTunings.RecentWeekWeight : 1;
-            var recentWeek = weeks.Max(w => w.Week);
-            var previousWeeks = weeks.Count - 1;
-            var previousWeight = weeks.Count > 1 ? ((1 - _weeklyTunings.RecentWeekWeight) * ((double)1 / previousWeeks)) : 0;
-
-            double avgRAtt = 0;
-            double avgRYd = 0;
-            double avgRTD = 0;
-            double avgRec = 0;
-            double avgTgt = 0;
-            double avgYds = 0;
-            double avgRecTD = 0;
-            double avgFum = 0;
-
-            foreach (var w in weeks)
-            {
-                avgRAtt += w.Week == recentWeek ? recentWeight * w.RushingAtt : previousWeight * w.RushingAtt;
-                avgRYd += w.Week == recentWeek ? recentWeight * w.RushingYds : previousWeight * w.RushingYds;
-                avgRTD += w.Week == recentWeek ? recentWeight * w.RushingTD : previousWeight * w.RushingTD;
-                avgRec += w.Week == recentWeek ? recentWeight * w.Receptions : previousWeight * w.Receptions;
-                avgTgt += w.Week == recentWeek ? recentWeight * w.Targets : previousWeight * w.Targets;
-                avgYds += w.Week == recentWeek ? recentWeight * w.Yards : previousWeight * w.Yards;
-                avgRecTD += w.Week == recentWeek ? recentWeight * w.ReceivingTD : previousWeight * w.ReceivingTD;
-                avgFum += w.Week == recentWeek ? recentWeight * w.Fumbles : previousWeight * w.Fumbles;
-            }
-
-            return new WeeklyDataRB
+        public WeeklyDataRB CalculateWeeklyAverage(List<WeeklyDataRB> weeks) => new()
             {
                 PlayerId = weeks.First().PlayerId,
                 Season = weeks.First().Season,
-                Week = recentWeek + 1,
-                RushingAtt = avgRAtt,
-                RushingYds = avgRYd,
-                RushingTD = avgRTD,
-                Receptions = avgRec,
-                Targets = avgTgt,
-                Yards = avgYds,
-                ReceivingTD = avgRecTD,
-                Fumbles = avgFum
+                Week = weeks.Max(w => w.Week) + 1,
+                RushingAtt = weeks.Average(w => w.RushingAtt),
+                RushingYds = weeks.Average(w => w.RushingYds),
+                RushingTD = weeks.Average(w => w.RushingTD),
+                Receptions = weeks.Average(w => w.Receptions),
+                Targets = weeks.Average(w => w.Targets),
+                Yards = weeks.Average(w => w.Yards),
+                ReceivingTD = weeks.Average(w => w.ReceivingTD),
+                Fumbles = weeks.Average(w => w.Fumbles)
             };
-        }
-        public WeeklyDataWR CalculateWeeklyAverage(List<WeeklyDataWR> weeks)
-        {
-            _logger.Information("Calculating Weekly averages for player {playerId}", weeks.First().PlayerId);
-            var recentWeight = weeks.Count > 1 ? _weeklyTunings.RecentWeekWeight : 1;
-            var recentWeek = weeks.Max(w => w.Week);
-            var previousWeeks = weeks.Count - 1;
-            var previousWeight = weeks.Count > 1 ? ((1 - _weeklyTunings.RecentWeekWeight) * ((double)1 / previousWeeks)) : 0;
-
-            double avgRec = 0;
-            double avgTgt = 0;
-            double avgYds = 0;
-            double avgTD = 0;
-            double avgRAtt = 0;
-            double avgRYd = 0;
-            double avgRTD = 0;
-            double avgFum = 0;
-
-            foreach (var w in weeks)
-            {
-                avgRec += w.Week == recentWeek ? recentWeight * w.Receptions : previousWeight * w.Receptions;
-                avgTgt += w.Week == recentWeek ? recentWeight * w.Targets : previousWeight * w.Targets;
-                avgYds += w.Week == recentWeek ? recentWeight * w.Yards : previousWeight * w.Yards;
-                avgTD += w.Week == recentWeek ? recentWeight * w.TD : previousWeight * w.TD;
-                avgRAtt += w.Week == recentWeek ? recentWeight * w.RushingAtt : previousWeight * w.RushingAtt;
-                avgRYd += w.Week == recentWeek ? recentWeight * w.RushingYds : previousWeight * w.RushingYds;
-                avgRTD += w.Week == recentWeek ? recentWeight * w.RushingTD : previousWeight * w.RushingTD;
-                avgFum += w.Week == recentWeek ? recentWeight * w.Fumbles : previousWeight * w.Fumbles;
-            }
-            return new WeeklyDataWR
+        public WeeklyDataWR CalculateWeeklyAverage(List<WeeklyDataWR> weeks) => new()
             {
                 PlayerId = weeks.First().PlayerId,
                 Season = weeks.First().Season,
-                Week = recentWeek + 1,
-                Receptions = avgRec,
-                Targets = avgTgt,
-                Yards = avgYds,
-                TD = avgTD,
-                RushingAtt = avgRAtt,
-                RushingYds = avgRYd,
-                RushingTD = avgRTD,
-                Fumbles = avgFum
+                Week = weeks.Max(w => w.Week) + 1,
+                Receptions = weeks.Average(w => w.Receptions),
+                Targets = weeks.Average(w => w.Targets),
+                Yards = weeks.Average(w => w.Yards),
+                TD = weeks.Average(w => w.TD),
+                RushingAtt = weeks.Average(w => w.RushingAtt),
+                RushingYds = weeks.Average(w => w.RushingYds),
+                RushingTD = weeks.Average(w => w.RushingTD),
+                Fumbles = weeks.Average(w => w.Fumbles)
             };
-        }
-        public WeeklyDataTE CalculateWeeklyAverage(List<WeeklyDataTE> weeks)
-        {
-            _logger.Information("Calculating Weekly averages for player {playerId}", weeks.First().PlayerId);
-            var recentWeight = weeks.Count > 1 ? _weeklyTunings.RecentWeekWeight : 1;
-            var recentWeek = weeks.Max(w => w.Week);
-            var previousWeeks = weeks.Count - 1;
-            var previousWeight = weeks.Count > 1 ? ((1 - _weeklyTunings.RecentWeekWeight) * ((double)1 / previousWeeks)) : 0;
-
-            double avgRec = 0;
-            double avgTgt = 0;
-            double avgYds = 0;
-            double avgTD = 0;
-            double avgRAtt = 0;
-            double avgRYd = 0;
-            double avgRTD = 0;
-            double avgFum = 0;
-
-            foreach (var w in weeks)
-            {
-                avgRec += w.Week == recentWeek ? recentWeight * w.Receptions : previousWeight * w.Receptions;
-                avgTgt += w.Week == recentWeek ? recentWeight * w.Targets : previousWeight * w.Targets;
-                avgYds += w.Week == recentWeek ? recentWeight * w.Yards : previousWeight * w.Yards;
-                avgTD += w.Week == recentWeek ? recentWeight * w.TD : previousWeight * w.TD;
-                avgRAtt += w.Week == recentWeek ? recentWeight * w.RushingAtt : previousWeight * w.RushingAtt;
-                avgRYd += w.Week == recentWeek ? recentWeight * w.RushingYds : previousWeight * w.RushingYds;
-                avgRTD += w.Week == recentWeek ? recentWeight * w.RushingTD : previousWeight * w.RushingTD;
-                avgFum += w.Week == recentWeek ? recentWeight * w.Fumbles : previousWeight * w.Fumbles;
-            }
-            return new WeeklyDataTE
+        public WeeklyDataTE CalculateWeeklyAverage(List<WeeklyDataTE> weeks) => new()
             {
                 PlayerId = weeks.First().PlayerId,
                 Season = weeks.First().Season,
-                Week = recentWeek + 1,
-                Receptions = avgRec,
-                Targets = avgTgt,
-                Yards = avgYds,
-                TD = avgTD,
-                RushingAtt = avgRAtt,
-                RushingYds = avgRYd,
-                RushingTD = avgRTD,
-                Fumbles = avgFum
+                Week = weeks.Max(w => w.Week) + 1,
+                Receptions = weeks.Average(w => w.Receptions),
+                Targets = weeks.Average(w => w.Targets),
+                Yards = weeks.Average(w => w.Yards),
+                TD = weeks.Average(w => w.TD),
+                RushingAtt = weeks.Average(w => w.RushingAtt),
+                RushingYds = weeks.Average(w => w.RushingYds),
+                RushingTD = weeks.Average(w => w.RushingTD),
+                Fumbles = weeks.Average(w => w.Fumbles)
             };
-        }
     }
 }
