@@ -3,6 +3,7 @@ using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Football.Fantasy.Services
 {
@@ -11,47 +12,63 @@ namespace Football.Fantasy.Services
         private readonly IPlayersService _playersService;
         private readonly IFantasyDataService _fastaDataService;
         private readonly Season _season;
+        private readonly IMemoryCache _cache;
 
-        public MatchupAnalysisService(IPlayersService playersService, IFantasyDataService fantasyDataService, IOptionsMonitor<Season> season)
+        public MatchupAnalysisService(IPlayersService playersService, IFantasyDataService fantasyDataService, 
+            IOptionsMonitor<Season> season, IMemoryCache cache)
         {
             _playersService = playersService;
             _fastaDataService = fantasyDataService;
             _season = season.CurrentValue;
+            _cache = cache;
         }
         public async Task<List<MatchupRanking>> PositionalMatchupRankings(string position)
         {
-            List<MatchupRanking> rankings = new();
-            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
-            foreach (var team in await _playersService.GetAllTeams())
+            if (RetrieveFromCache(position).Any())
             {
-                double fpTotal = 0;
-                var games = await _playersService.GetTeamGames(team.TeamId);
-                foreach (var game in games.Where(g => g.Week < currentWeek).ToList())
+                return RetrieveFromCache(position);
+            }
+            else
+            {
+                List<MatchupRanking> rankings = new();
+                var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
+                foreach (var team in await _playersService.GetAllTeams())
                 {
-                    var opposingPlayers = await _playersService.GetPlayersByTeam(game.OpposingTeam);
-                    foreach (var op in opposingPlayers)
+                    double fpTotal = 0;
+                    var games = await _playersService.GetTeamGames(team.TeamId);
+                    foreach (var game in games.Where(g => g.Week < currentWeek).ToList())
                     {
-                        var player = await _playersService.GetPlayer(op.PlayerId);
-                        if (player.Position == position)
+                        var opposingPlayers = await _playersService.GetPlayersByTeam(game.OpposingTeam);
+                        foreach (var op in opposingPlayers)
                         {
-                            var weeklyFantasy = (await _fastaDataService.GetWeeklyFantasy(player.PlayerId)).Where(w => w.Week == game.Week).FirstOrDefault();
-                            if(weeklyFantasy != null)
+                            var player = await _playersService.GetPlayer(op.PlayerId);
+                            if (player.Position == position)
                             {
-                                fpTotal += weeklyFantasy.FantasyPoints; 
+                                var weeklyFantasy = (await _fastaDataService.GetWeeklyFantasy(player.PlayerId)).Where(w => w.Week == game.Week).FirstOrDefault();
+                                if (weeklyFantasy != null)
+                                {
+                                    fpTotal += weeklyFantasy.FantasyPoints;
+                                }
                             }
                         }
                     }
+                    rankings.Add(new MatchupRanking
+                    {
+                        Team = team,
+                        GamesPlayed = currentWeek - 1,
+                        Position = position,
+                        PointsAllowed = Math.Round(fpTotal, 2),
+                        AvgPointsAllowed = currentWeek > 1 ? Math.Round(fpTotal / (currentWeek - 1), 2) : 0
+                    });
                 }
-                rankings.Add(new MatchupRanking
-                {
-                    Team = team,
-                    GamesPlayed = currentWeek - 1,
-                    Position = position,
-                    PointsAllowed = Math.Round(fpTotal, 2),
-                    AvgPointsAllowed = currentWeek > 1 ? Math.Round(fpTotal/(currentWeek - 1),2) : 0
-                });
+                var matchupRanks = rankings.OrderBy(r => r.PointsAllowed).ToList();
+                _cache.Set("MatchupRanking" + position, matchupRanks);
+                return matchupRanks;
             }
-            return rankings.OrderBy(r => r.PointsAllowed).ToList();
         }
+
+        private List<MatchupRanking> RetrieveFromCache(string position) =>
+            _cache.TryGetValue("MatchupRanking" + position, out List<MatchupRanking> rankings) ? rankings
+            : Enumerable.Empty<MatchupRanking>().ToList();
     }
 }

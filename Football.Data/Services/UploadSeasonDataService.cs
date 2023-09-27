@@ -5,8 +5,6 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
-using static System.Net.WebRequestMethods;
-using System.Text.RegularExpressions;
 
 namespace Football.Data.Services
 {

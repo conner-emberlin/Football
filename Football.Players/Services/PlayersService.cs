@@ -59,6 +59,7 @@ namespace Football.Players.Services
         public async Task<List<Schedule>> GetGames(int season, int week) => await _playersRepository.GetGames(season, week);
         public async Task<List<Schedule>> GetTeamGames(int teamId) => await _playersRepository.GetTeamGames(teamId, _season.CurrentSeason);
         public async Task<List<TeamMap>> GetAllTeams() => await _playersRepository.GetAllTeams();
+        public async Task<List<int>> GetIgnoreList() => await _playersRepository.GetIgnoreList();
         private List<Player> RetrieveFromCache() =>
                      _cache.TryGetValue("AllPlayers", out List<Player> cachedPlayers) ? cachedPlayers
                      : Enumerable.Empty<Player>().ToList();

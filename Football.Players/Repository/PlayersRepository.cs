@@ -2,6 +2,7 @@
 using System.Data;
 using Dapper;
 using Football.Players.Interfaces;
+using System.Net;
 
 namespace Football.Players.Repository
 {
@@ -173,6 +174,11 @@ namespace Football.Players.Repository
                         WHERE [TeamId] = @teamId
                             AND [Season] = @season";
             return (await _dbConnection.QueryAsync<Schedule>(query, new { teamId, season })).ToList();
+        }
+        public async Task<List<int>> GetIgnoreList()
+        {
+            var query = $@"SELECT [PlayerId] FROM [dbo].IgnoreList";
+            return (await _dbConnection.QueryAsync<int>(query)).ToList();
         }
     }
 }

@@ -14,16 +14,13 @@
             <TextBoxPosition @bind-Position="this.WeeklyUploadPosition"/>
             <button class="button-22" type="submit">Submit</button>
         </EditForm>
-        @if(recordsAdded > 0 && weeklyUploadData)
+        @if(recordsAdded > 0 && !badRequestError && weeklyUploadData)
         {
             <text>@recordsAdded added</text>
-            weeklyUploadData = false;
-            recordsAdded = 0;
         }
-        else if ((badRequestError || recordsAdded == 0) && weeklyUploadData)
+        else if (badRequestError && weeklyUploadData && !loading)
         {
             <text>Something went wrong.</text>
-            weeklyUploadData = false;
         }
     </div>
     <div>
@@ -34,16 +31,13 @@
             <TextBoxPosition @bind-Position="this.WeeklyUploadPositionF" />
             <button class="button-22" type="submit">Submit</button>
         </EditForm>
-        @if (recordsAdded > 0 && weeklyFantasy)
+        @if (recordsAdded > 0 && weeklyFantasy && !badRequestError)
         {
             <text>@recordsAdded added</text>
-            weeklyFantasy = false;
-            recordsAdded = 0;
         }
-        else if ((badRequestError || recordsAdded == 0) && weeklyFantasy)
+        else if (badRequestError && weeklyFantasy && !loading)
         {
             <text>Something went wrong.</text>
-            weeklyFantasy = false;
         }
     </div>
     <div>
@@ -53,13 +47,11 @@
             <TextBoxPosition @bind-Position="this.SeasonUploadPosition" />
             <button class="button-22" type="submit">Submit</button>
         </EditForm>
-        @if (recordsAdded > 0 && seasonUploadData)
+        @if (recordsAdded > 0 && seasonUploadData && !badRequestError)
         {
             <text>@recordsAdded added</text>
-            seasonUploadData = false;
-            recordsAdded = 0;
         }
-        else if ((badRequestError || recordsAdded == 0) && seasonUploadData)
+        else if (badRequestError  && seasonUploadData && !loading)
         {
             <text>Something went wrong.</text>
             seasonUploadData = false;
@@ -72,20 +64,22 @@
             <TextBoxPosition @bind-Position="this.SeasonUploadPositionF" />
             <button class="button-22" type="submit">Submit</button>
         </EditForm>
-        @if (recordsAdded > 0 && weeklyFantasy)
+        @if (recordsAdded > 0 && weeklyFantasy && !badRequestError)
         {
             <text>@recordsAdded added</text>
-            weeklyFantasy = false;
-            recordsAdded = 0;
         }
-        else if ((badRequestError || recordsAdded == 0) && seasonFantasy)
+        else if (badRequestError && seasonFantasy && !loading)
         {
             <text>Something went wrong.</text>
-            seasonFantasy = false;
         }
     </div>
-
 </div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@if (loading)
+{
+    <div class="spinner"></div>
+}
 
 
 
@@ -105,15 +99,18 @@
     public string SeasonUploadPositionF { get; set; } = "";
 
     public bool badRequestError = false;
-    public bool weeklyUploadData = false;
+    public bool weeklyUploadData;
     public bool seasonUploadData = false;
     public bool weeklyFantasy = false;
     public bool seasonFantasy = false;
     public int recordsAdded;
 
+    public bool loading = false;
+
     public async Task UploadWeeklyData()
     {
         weeklyUploadData = true;
+        recordsAdded = 0;
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/UploadData/" + this.WeeklyUploadPosition + "/" + this.WeeklyUploadSeason + "/" + this.WeeklyUploadWeek);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
@@ -155,6 +152,7 @@
     public async Task PostWeeklyFantasy()
     {
         weeklyFantasy = true;
+        loading = true;
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Fantasy/data/" + this.WeeklyUploadPositionF + "/" + this.WeeklyUploadSeasonF + "/" + this.WeeklyUploadWeekF);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
@@ -169,6 +167,7 @@
         {
             badRequestError = true;
         }
+        loading = false;
         StateHasChanged();
 
     }

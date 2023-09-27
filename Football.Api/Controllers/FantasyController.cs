@@ -56,60 +56,39 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<SeasonFantasy>>> GetSeasonFantasy(int playerId)
         {
-            if (playerId > 0)
-            {
-                return Ok(await _fantasyDataService.GetSeasonFantasy(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
+            return playerId > 0 ? Ok(await _fantasyDataService.GetSeasonFantasy(playerId))
+                            : BadRequest("Bad Request");
         }
         [HttpGet("data/weekly/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyFantasy>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<WeeklyFantasy>>> GetWeeklyFantasy(int playerId)
         {
-            if (playerId > 0)
-            {
-                return Ok(await _fantasyDataService.GetWeeklyFantasy(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
+            return playerId > 0 ? Ok(await _fantasyDataService.GetWeeklyFantasy(playerId))
+                : BadRequest("Bad Request");
+
         }
         [HttpGet("data/weekly/leaders/{week}")]
         [ProducesResponseType(typeof(List<WeeklyFantasy>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<WeeklyFantasy>>> GetWeeklyFantasyLeaders(int week)
         {
-            if (week > 0)
-            {
-                return Ok(await _fantasyDataService.GetWeeklyFantasy(_season.CurrentSeason, week));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
+            return week > 0 ? Ok(await _fantasyDataService.GetWeeklyFantasy(_season.CurrentSeason, week))
+                        : BadRequest("Bad Request");
         }
 
         [HttpGet("season-totals")]
         [ProducesResponseType(typeof(List<SeasonFantasy>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonFantasy>>> GetCurrentFantasyTotals()
-        {
-            return Ok(await _fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason));
-        }
+        public async Task<ActionResult<List<SeasonFantasy>>> GetCurrentFantasyTotals() => Ok(await _fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason));
 
         [HttpGet("matchup-rankings")]
         [ProducesResponseType(typeof(List<MatchupRanking>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<MatchupRanking>> GetMatchupRankings(string position)
-        {
-            return position != null ? Ok(await _matchupAnalysisService.PositionalMatchupRankings(position))
-                            : BadRequest("Bad Request");
-        }
+        public async Task<ActionResult<MatchupRanking>> GetMatchupRankings(string position) => position != null ? 
+            Ok(await _matchupAnalysisService.PositionalMatchupRankings(position)) : BadRequest("Bad Request");
+
+
 
     }
 }

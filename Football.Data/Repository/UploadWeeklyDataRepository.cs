@@ -1,10 +1,7 @@
 ﻿using Football.Data.Interfaces;
-using Dapper;
 using Football.Data.Models;
+using Dapper;
 using System.Data;
-using Football.Models;
-using Serilog.Core;
-using System.Reflection;
 
 namespace Football.Data.Repository
 {
