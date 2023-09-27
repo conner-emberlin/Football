@@ -1,4 +1,5 @@
-﻿using Football.Models;
+﻿using Football.Fantasy.Interfaces;
+using Football.Models;
 using Football.Players.Interfaces;
 using Football.Projections.Models;
 using Football.Projections.Interfaces;
@@ -10,13 +11,15 @@ namespace Football.Projections.Services
     public class AdjustmentService : IAdjustmentService
     {
         private readonly IPlayersService _playersService;
+        private readonly IMatchupAnalysisService _matchupAnalysisService;
         private readonly ILogger _logger;
         private readonly Season _season;
         private readonly Tunings _tunings;
 
-        public AdjustmentService(IPlayersService playerService, ILogger logger, IOptionsMonitor<Season> season, IOptionsMonitor<Tunings> tunings)
+        public AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, ILogger logger, IOptionsMonitor<Season> season, IOptionsMonitor<Tunings> tunings)
         {
             _playersService = playerService;
+            _matchupAnalysisService = mathupAnalysisService;
             _logger = logger;
             _season = season.CurrentValue;
             _tunings = tunings.CurrentValue;
@@ -35,6 +38,12 @@ namespace Football.Projections.Services
             }
 
             return seasonProjections;
+        }
+        public async Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections)
+        {
+            _logger.Information("Calculating adjustments");
+            weekProjections = await MatchupAdjustment(weekProjections);
+            return weekProjections;
         }
 
         private async Task<List<SeasonProjection>> InjuryAdjustment(List<SeasonProjection> seasonProjections)
@@ -81,6 +90,36 @@ namespace Football.Projections.Services
             }
             return seasonProjections;
         }
+
+        private async Task<List<WeekProjection>> MatchupAdjustment(List<WeekProjection> weekProjections)
+        {
+            var matchupRanks = await _matchupAnalysisService.PositionalMatchupRankings(weekProjections.First().Position);
+            var avgMatchup = matchupRanks.ElementAt((int)Math.Round((double)(matchupRanks.Count/2)));
+            foreach (var w in weekProjections)
+            {
+                var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, w.PlayerId);
+                if (team != null) 
+                {
+                    var teamId = await _playersService.GetTeamId(team.Team);
+                    var matchup = (await _playersService.GetTeamGames(teamId)).Where(m => m.Week == w.Week).First();
+                    if (matchup.OpposingTeam != "BYE")
+                    {
+                        var opponentRank = matchupRanks.Where(mr => mr.Team.TeamId == matchup.OpposingTeamId).FirstOrDefault();
+                        if (opponentRank != null)
+                        {
+                            var ratio = opponentRank.AvgPointsAllowed / avgMatchup.AvgPointsAllowed;
+                            w.ProjectedPoints = w.ProjectedPoints * (ratio + 1) / 2;
+                        }
+                    }
+                    else
+                    {
+                        w.ProjectedPoints = 0;
+                    }
+                }
+            }
+            return weekProjections;
+        }
+
         private double EPARatio(double previousEPA, double currentEPA) => previousEPA == 0 ? 1
                    : previousEPA > currentEPA ? Math.Max(_tunings.NewQBFloor, currentEPA / previousEPA)
                    : Math.Min(_tunings.NewQBCeiling, currentEPA / previousEPA);               

@@ -177,6 +177,7 @@ namespace Football.Projections.Services
             else if (position == "QB")
             {
                 var projections = await CalculateWeeklyProjections(await QBWeeklyProjectionModel());
+                projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
                 var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.QBProjections);
                 _cache.Set("QBWeeklyProjections", formattedProjections);
                 return formattedProjections;
@@ -184,6 +185,7 @@ namespace Football.Projections.Services
             else if (position == "RB")
             {
                 var projections = await CalculateWeeklyProjections(await RBWeeklyProjectionModel());
+                projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
                 var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.RBProjections);
                 _cache.Set("RBWeeklyProjections", formattedProjections);
                 return formattedProjections;
@@ -191,6 +193,7 @@ namespace Football.Projections.Services
             else if (position == "WR")
             {
                 var projections = await CalculateWeeklyProjections(await WRWeeklyProjectionModel());
+                projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
                 var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.WRProjections);
                 _cache.Set("WRWeeklyProjections", formattedProjections);
                 return formattedProjections;
@@ -198,6 +201,7 @@ namespace Football.Projections.Services
             else if (position == "TE")
             {
                 var projections = await CalculateWeeklyProjections(await TEWeeklyProjectionModel());
+                projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
                 var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.TEProjections);
                 _cache.Set("TEWeeklyProjections", formattedProjections);
                 return formattedProjections;
