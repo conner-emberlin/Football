@@ -66,5 +66,7 @@
     {
         public double RecentWeekWeight { get; set; }
         public double ProjectionWeight { get; set; }
+        public double TamperedMin { get; set; }
+        public double TamperedMax { get; set; } 
     }
 }

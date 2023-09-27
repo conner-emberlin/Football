@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Football.Enums;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
 
@@ -21,13 +22,14 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<SeasonProjection>>> GetSeasonProjections(string position)
         {
-            if (position == "FLEX")
+            if(Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
             {
-                return Ok(await _projectionService.SeasonFlexRankings());
+                return positionEnum == PositionEnum.FLEX ? Ok(await _projectionService.SeasonFlexRankings())
+                                      : Ok(await _projectionService.GetSeasonProjections(position));
             }
             else
             {
-                return Ok(await _projectionService.GetSeasonProjections(position));
+                return BadRequest("Bad Request");
             }
         }
         [HttpGet("season/player/{playerId}")]

@@ -15,14 +15,17 @@ namespace Football.Projections.Services
         private readonly ILogger _logger;
         private readonly Season _season;
         private readonly Tunings _tunings;
+        private readonly WeeklyTunings _weeklyTunings;
 
-        public AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, ILogger logger, IOptionsMonitor<Season> season, IOptionsMonitor<Tunings> tunings)
+        public AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, ILogger logger, IOptionsMonitor<Season> season, 
+            IOptionsMonitor<Tunings> tunings, IOptionsMonitor<WeeklyTunings> weeklyTunings)
         {
             _playersService = playerService;
             _matchupAnalysisService = mathupAnalysisService;
             _logger = logger;
             _season = season.CurrentValue;
             _tunings = tunings.CurrentValue;
+            _weeklyTunings = weeklyTunings.CurrentValue;
         }
 
         public async Task<List<SeasonProjection>> AdjustmentEngine(List<SeasonProjection> seasonProjections)
@@ -108,7 +111,8 @@ namespace Football.Projections.Services
                         if (opponentRank != null)
                         {
                             var ratio = opponentRank.AvgPointsAllowed / avgMatchup.AvgPointsAllowed;
-                            w.ProjectedPoints = w.ProjectedPoints * (ratio + 1) / 2;
+                            var tamperedRatio = ratio > 1 ? Math.Min(ratio, _weeklyTunings.TamperedMax) : Math.Max(ratio, _weeklyTunings.TamperedMin);
+                            w.ProjectedPoints = w.ProjectedPoints * (tamperedRatio + 1) / 2;
                         }
                     }
                     else
