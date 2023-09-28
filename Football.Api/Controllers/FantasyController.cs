@@ -51,7 +51,6 @@ namespace Football.Api.Controllers
             }
         }
 
-
         [HttpGet("data/season/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonFantasy>), 200)]
         [ProducesResponseType(typeof(string), 400)]
@@ -88,8 +87,5 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<MatchupRanking>> GetMatchupRankings(string position) => Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum) ? 
             Ok(await _matchupAnalysisService.PositionalMatchupRankings(positionEnum)) : BadRequest("Bad Request");
-
-
-
     }
 }

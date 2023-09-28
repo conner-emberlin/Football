@@ -67,7 +67,6 @@ namespace Football.Fantasy.Services
                 return matchupRanks;
             }
         }
-
         private List<MatchupRanking> RetrieveFromCache(string position) =>
             _cache.TryGetValue("MatchupRanking" + position, out List<MatchupRanking> rankings) ? rankings
             : Enumerable.Empty<MatchupRanking>().ToList();
