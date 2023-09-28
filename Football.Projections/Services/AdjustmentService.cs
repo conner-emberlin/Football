@@ -5,6 +5,7 @@ using Football.Projections.Models;
 using Football.Projections.Interfaces;
 using Serilog;
 using Microsoft.Extensions.Options;
+using Football.Enums;
 
 namespace Football.Projections.Services
 {
@@ -96,7 +97,8 @@ namespace Football.Projections.Services
 
         private async Task<List<WeekProjection>> MatchupAdjustment(List<WeekProjection> weekProjections)
         {
-            var matchupRanks = await _matchupAnalysisService.PositionalMatchupRankings(weekProjections.First().Position);
+            var t = Enum.TryParse(weekProjections.First().Position, out PositionEnum position);
+            var matchupRanks = await _matchupAnalysisService.PositionalMatchupRankings(position);
             var avgMatchup = matchupRanks.ElementAt((int)Math.Round((double)(matchupRanks.Count/2)));
             foreach (var w in weekProjections)
             {

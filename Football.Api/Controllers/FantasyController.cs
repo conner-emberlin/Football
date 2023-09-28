@@ -1,4 +1,5 @@
 ﻿using Football.Models;
+using Football.Enums;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -26,9 +27,9 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> PostSeasonFantasy( int season, string position)
         {
-            if (season > 0 && position != null)
+            if (season > 0 && Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
             {
-                return Ok(await _fantasyDataService.PostSeasonFantasy(season, position.Trim().ToUpper()));
+                return Ok(await _fantasyDataService.PostSeasonFantasy(season, positionEnum));
             }
             else
             {
@@ -40,9 +41,9 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> PostWeeklyFantasy(int season, int week, string position)
         {
-            if (season > 0 && week > 0 && position != null)
+            if (season > 0 && week > 0 && Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
             {
-                return Ok(await _fantasyDataService.PostWeeklyFantasy(season, week, position.Trim().ToUpper()));
+                return Ok(await _fantasyDataService.PostWeeklyFantasy(season, week, positionEnum));
             }
             else
             {
@@ -85,8 +86,8 @@ namespace Football.Api.Controllers
         [HttpGet("matchup-rankings")]
         [ProducesResponseType(typeof(List<MatchupRanking>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<MatchupRanking>> GetMatchupRankings(string position) => position != null ? 
-            Ok(await _matchupAnalysisService.PositionalMatchupRankings(position)) : BadRequest("Bad Request");
+        public async Task<ActionResult<MatchupRanking>> GetMatchupRankings(string position) => Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum) ? 
+            Ok(await _matchupAnalysisService.PositionalMatchupRankings(positionEnum)) : BadRequest("Bad Request");
 
 
 

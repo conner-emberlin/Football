@@ -2,6 +2,7 @@
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.Models;
+using Football.Enums;
 using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Services
@@ -26,7 +27,7 @@ namespace Football.Fantasy.Services
                 Games = stat.Games,
                 FantasyPoints = points,
                 Name = stat.Name,
-                Position = "QB"
+                Position = PositionEnum.QB.ToString()
             };
         }
         public WeeklyFantasy CalculateQBFantasy(WeeklyDataQB stat)
@@ -42,7 +43,7 @@ namespace Football.Fantasy.Services
                 Games = 1,
                 FantasyPoints = points,
                 Name = stat.Name,
-                Position = "QB"
+                Position = PositionEnum.QB.ToString()
             };
         }
         public SeasonFantasy CalculateRBFantasy(SeasonDataRB stat)
@@ -57,7 +58,7 @@ namespace Football.Fantasy.Services
                 Games = stat.Games,
                 FantasyPoints = points,
                 Name = stat.Name,
-                Position = "RB"
+                Position = PositionEnum.RB.ToString()
             };
         }
         public WeeklyFantasy CalculateRBFantasy(WeeklyDataRB stat)
@@ -73,7 +74,7 @@ namespace Football.Fantasy.Services
                 Games = 1,
                 FantasyPoints = points,
                 Name = stat.Name,
-                Position = "RB"
+                Position = PositionEnum.RB.ToString()
             };
         }
         public SeasonFantasy CalculateWRFantasy(SeasonDataWR stat)
@@ -88,7 +89,7 @@ namespace Football.Fantasy.Services
                 Games = stat.Games,
                 FantasyPoints = points,
                 Name = stat.Name,
-                Position = "WR"
+                Position = PositionEnum.WR.ToString()
             };
         }
         public WeeklyFantasy CalculateWRFantasy(WeeklyDataWR stat)
@@ -104,7 +105,7 @@ namespace Football.Fantasy.Services
                 Games = 1,
                 FantasyPoints = points,
                 Name = stat.Name,
-                Position = "WR"
+                Position = PositionEnum.WR.ToString()
             };
         }
         public SeasonFantasy CalculateTEFantasy(SeasonDataTE stat)
@@ -119,7 +120,7 @@ namespace Football.Fantasy.Services
                 Games = stat.Games,
                 FantasyPoints = points,
                 Name = stat.Name,
-                Position = "TE"
+                Position = PositionEnum.TE.ToString()
             };
         }
         public WeeklyFantasy CalculateTEFantasy(WeeklyDataTE stat)
@@ -135,12 +136,12 @@ namespace Football.Fantasy.Services
                 Games = 1,
                 FantasyPoints = points,
                 Name = stat.Name,
-                Position = "TE"
+                Position = PositionEnum.TE.ToString()
             };
         }
         public WeeklyFantasy CalculateDSTFantasy(WeeklyDataDST stat, WeeklyDataDST opponentStat, GameResult result, int teamId)
         {
-            var pointsAllowed = result.WinnerId == teamId ? result.LoserPoints - 6 * opponentStat.DefensiveTD 
+            var pointsAllowed = result.WinnerId == teamId ? result.LoserPoints - _scoring.PointsPerTouchdown * opponentStat.DefensiveTD 
                                 : result.WinnerPoints - 6 * opponentStat.DefensiveTD;
 
             var pointsAllowedFantasy = pointsAllowed == 0 ? _scoring.ZeroPointsAllowed
@@ -167,7 +168,7 @@ namespace Football.Fantasy.Services
                 Games = stat.Games,
                 FantasyPoints = fantasyPoints,
                 Name = stat.Name,
-                Position = "DST"
+                Position = PositionEnum.DST.ToString()
             };
         }
 

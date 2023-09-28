@@ -1,4 +1,5 @@
-﻿using Football.Fantasy.Models;
+﻿using Football.Enums;
+using Football.Fantasy.Models;
 using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
 using Serilog;
@@ -26,36 +27,36 @@ namespace Football.Fantasy.Services
         }
         public async Task<SeasonFantasy> GetSeasonFantasy(int playerId, int season) => await _fantasyData.GetSeasonFantasy(playerId, season);
         public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId) => await _fantasyData.GetSeasonFantasy(playerId);
-        public async Task<int> PostSeasonFantasy(int season, string position)
+        public async Task<int> PostSeasonFantasy(int season, PositionEnum position)
         {
             List<SeasonFantasy> seasonFantasy = new();
             switch (position)
             {
-                case "QB": 
+                case PositionEnum.QB: 
                     foreach(var data in await _statisticsService.GetSeasonDataQBBySeason(season))
                     {
                         seasonFantasy.Add(_calculator.CalculateQBFantasy(data));
                     }
                     break;
-                case "RB":
+                case PositionEnum.RB:
                     foreach (var data in await _statisticsService.GetSeasonDataRBBySeason(season))
                     {
                         seasonFantasy.Add(_calculator.CalculateRBFantasy(data));
                     }
                     break;
-                case "WR":
+                case PositionEnum.WR:
                     foreach (var data in await _statisticsService.GetSeasonDataWRBySeason(season))
                     {
                         seasonFantasy.Add(_calculator.CalculateWRFantasy(data));
                     }
                     break;
-                case "TE":
+                case PositionEnum.TE:
                     foreach (var data in await _statisticsService.GetSeasonDataTEBySeason(season))
                     {
                         seasonFantasy.Add(_calculator.CalculateTEFantasy(data));
                     }
                     break;
-                default: _logger.Error("Invalid position {position}", position); break;
+                default: _logger.Error("Invalid position {position}", position.ToString()); break;
             }
             var count = 0;
             foreach(var fp in seasonFantasy)
@@ -64,36 +65,36 @@ namespace Football.Fantasy.Services
             }
             return count;
         }
-        public async Task<int> PostWeeklyFantasy(int season, int week, string position)
+        public async Task<int> PostWeeklyFantasy(int season, int week, PositionEnum position)
         {
             List<WeeklyFantasy> weeklyFantasy = new();
             switch (position)
             {
-                case "QB": 
+                case PositionEnum.QB: 
                     foreach(var data in await _statisticsService.GetWeeklyDataQB(season, week))
                     {
                         weeklyFantasy.Add(_calculator.CalculateQBFantasy(data));
                     }
                     break;
-                case "RB":
+                case PositionEnum.RB:
                     foreach (var data in await _statisticsService.GetWeeklyDataRB(season, week))
                     {
                         weeklyFantasy.Add(_calculator.CalculateRBFantasy(data));
                     }
                     break;
-                case "WR":
+                case PositionEnum.WR:
                     foreach (var data in await _statisticsService.GetWeeklyDataWR(season, week))
                     {
                         weeklyFantasy.Add(_calculator.CalculateWRFantasy(data));
                     }
                     break;
-                case "TE":
+                case PositionEnum.TE:
                     foreach (var data in await _statisticsService.GetWeeklyDataTE(season, week))
                     {
                         weeklyFantasy.Add(_calculator.CalculateTEFantasy(data));
                     }
                     break;
-                case "DST":
+                case PositionEnum.DST:
                     var stats = await _statisticsService.GetWeeklyDataDST(season, week);
                     var teams = await _playersService.GetAllTeams();
                     foreach (var data in stats)
@@ -110,7 +111,7 @@ namespace Football.Fantasy.Services
                         }
                     }
                     break;
-                default: _logger.Error("Invalid position {position}", position); break;
+                default: _logger.Error("Invalid position {position}", position.ToString()); break;
             }
             var count = 0;
             foreach(var fp in weeklyFantasy)
