@@ -35,17 +35,8 @@ namespace Football.Api.Controllers
         [HttpGet("season/player/{playerId}")]
         [ProducesResponseType(typeof(SeasonProjection), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<SeasonProjection>> GetSeasonProjections(int playerId)
-        {
-            if(playerId > 0)
-            {
-                return Ok(await _projectionService.GetSeasonProjection(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<SeasonProjection>> GetSeasonProjections(int playerId) => playerId > 0 ? 
+            Ok(await _projectionService.GetSeasonProjection(playerId)) : BadRequest("Bad Request");
 
         [HttpPost("season/{position}")]
         [ProducesResponseType(typeof(int), 200)]
