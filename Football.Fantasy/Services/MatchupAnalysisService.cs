@@ -4,6 +4,7 @@ using Football.Fantasy.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
+using Football.Enums;
 
 namespace Football.Fantasy.Services
 {
@@ -22,11 +23,11 @@ namespace Football.Fantasy.Services
             _season = season.CurrentValue;
             _cache = cache;
         }
-        public async Task<List<MatchupRanking>> PositionalMatchupRankings(string position)
+        public async Task<List<MatchupRanking>> PositionalMatchupRankings(PositionEnum position)
         {
-            if (RetrieveFromCache(position).Any())
+            if (RetrieveFromCache(position.ToString()).Any())
             {
-                return RetrieveFromCache(position);
+                return RetrieveFromCache(position.ToString());
             }
             else
             {
@@ -42,7 +43,7 @@ namespace Football.Fantasy.Services
                         foreach (var op in opposingPlayers)
                         {
                             var player = await _playersService.GetPlayer(op.PlayerId);
-                            if (player.Position == position)
+                            if (player.Position == position.ToString())
                             {
                                 var weeklyFantasy = (await _fastaDataService.GetWeeklyFantasy(player.PlayerId)).Where(w => w.Week == game.Week).FirstOrDefault();
                                 if (weeklyFantasy != null)
@@ -56,13 +57,13 @@ namespace Football.Fantasy.Services
                     {
                         Team = team,
                         GamesPlayed = currentWeek - 1,
-                        Position = position,
+                        Position = position.ToString(),
                         PointsAllowed = Math.Round(fpTotal, 2),
                         AvgPointsAllowed = currentWeek > 1 ? Math.Round(fpTotal / (currentWeek - 1), 2) : 0
                     });
                 }
                 var matchupRanks = rankings.OrderBy(r => r.PointsAllowed).ToList();
-                _cache.Set("MatchupRanking" + position, matchupRanks);
+                _cache.Set("MatchupRanking" + position.ToString(), matchupRanks);
                 return matchupRanks;
             }
         }

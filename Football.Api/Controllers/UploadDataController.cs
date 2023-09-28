@@ -1,4 +1,5 @@
 ﻿using Football.Data.Interfaces;
+using Football.Enums;
 using Football.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -27,55 +28,17 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadWeeklyData(string position, int season, int week)
         {
-            return position.Trim().ToLower() switch
+            if (Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
             {
-                "qb" => Ok(await _weeklyDataService.UploadWeeklyQBData(season, week)),
-                "rb" => Ok(await _weeklyDataService.UploadWeeklyRBData(season, week)),
-                "wr" => Ok(await _weeklyDataService.UploadWeeklyWRData(season, week)),
-                "te" => Ok(await _weeklyDataService.UploadWeeklyTEData(season, week)),
-                "dst" => Ok(await _weeklyDataService.UploadWeeklyDSTData(season, week)),
-                _ => BadRequest(),
-            };
-        }
-        [HttpPost("{position}/{season}")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadSeasonData(string position, int season)
-        {
-            return position.Trim().ToLower() switch
-            {
-                "qb" => Ok(await _seasonDataService.UploadSeasonQBData(season)),
-                "rb"=> Ok(await _seasonDataService.UploadSeasonRBData(season)),
-                "wr" => Ok(await _seasonDataService.UploadSeasonWRData(season)),
-                "te" => Ok(await _seasonDataService.UploadSeasonTEData(season)),
-                "dst" => Ok(await _seasonDataService.UploadSeasonDSTData(season)),
-                _ => BadRequest(),
-            };
-        }
-
-        [HttpPost("headshots/{position}")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> DownloadHeadShots(string position)
-        {
-            return Ok(await _scraperService.DownloadHeadShots(position));
-        }
-        [HttpPost("logos")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> DownloadTeamLogos()
-        {
-            return Ok(await _scraperService.DownloadTeamLogos());
-        }
-
-        [HttpPost("teams/{position}")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadCurrentTeams(string position)
-        {
-            if (!string.IsNullOrEmpty(position))
-            {
-                return Ok(await _seasonDataService.UploadCurrentTeams(_season.CurrentSeason, position));
+                return positionEnum switch
+                {
+                    PositionEnum.QB => Ok(await _weeklyDataService.UploadWeeklyQBData(season, week)),
+                    PositionEnum.RB => Ok(await _weeklyDataService.UploadWeeklyRBData(season, week)),
+                    PositionEnum.WR => Ok(await _weeklyDataService.UploadWeeklyWRData(season, week)),
+                    PositionEnum.TE => Ok(await _weeklyDataService.UploadWeeklyTEData(season, week)),
+                    PositionEnum.DST => Ok(await _weeklyDataService.UploadWeeklyDSTData(season, week)),
+                    _ => BadRequest()
+                };
             }
             else
             {
@@ -83,21 +46,53 @@ namespace Football.Api.Controllers
             }
         }
 
+        [HttpPost("{position}/{season}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UploadSeasonData(string position, int season)
+        {
+            if (Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
+            {
+                return positionEnum switch
+                {
+                    PositionEnum.QB => Ok(await _seasonDataService.UploadSeasonQBData(season)),
+                    PositionEnum.RB => Ok(await _seasonDataService.UploadSeasonRBData(season)),
+                    PositionEnum.WR => Ok(await _seasonDataService.UploadSeasonWRData(season)),
+                    PositionEnum.TE => Ok(await _seasonDataService.UploadSeasonTEData(season)),
+                    PositionEnum.DST => Ok(await _seasonDataService.UploadSeasonDSTData(season)),
+                    _ => BadRequest(),
+                };
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
+
+        [HttpPost("headshots/{position}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> DownloadHeadShots(string position) => Ok(await _scraperService.DownloadHeadShots(position));
+
+        [HttpPost("logos")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> DownloadTeamLogos() => Ok(await _scraperService.DownloadTeamLogos());
+  
+        [HttpPost("teams/{position}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UploadCurrentTeams(string position) => !string.IsNullOrEmpty(position) ?
+            Ok(await _seasonDataService.UploadCurrentTeams(_season.CurrentSeason, position)) : BadRequest("Bad Request");
+
         [HttpPost("schedule")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadSchedule()
-        {
-            return Ok(await _seasonDataService.UploadSchedule(_season.CurrentSeason));
-        }
+        public async Task<ActionResult<int>> UploadSchedule() => Ok(await _seasonDataService.UploadSchedule(_season.CurrentSeason));
 
         [HttpPost("game-results/{season}/{week}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadWeeklyGameResults(int season, int week)
-        {
-            return Ok(await _weeklyDataService.UploadWeeklyGameResults(season, week));
-        }
-
+        public async Task<ActionResult<int>> UploadWeeklyGameResults(int season, int week) => Ok(await _weeklyDataService.UploadWeeklyGameResults(season, week));
     }
 }

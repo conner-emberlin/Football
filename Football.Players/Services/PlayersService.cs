@@ -1,4 +1,5 @@
-﻿using Football.Models;
+﻿using Football.Enums;
+using Football.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Caching.Memory;
@@ -32,7 +33,7 @@ namespace Football.Players.Services
         }
         public async Task<int> GetPlayerId(string name) => await _playersRepository.GetPlayerId(name);
         public async Task<int> CreatePlayer(Player player) => await _playersRepository.CreatePlayer(player);
-        public async Task<List<Player>> GetPlayersByPosition(string position) => await _playersRepository.GetPlayersByPosition(position);        
+        public async Task<List<Player>> GetPlayersByPosition(PositionEnum position) => await _playersRepository.GetPlayersByPosition(position.ToString());        
         public async Task<Player> GetPlayer(int playerId) => await _playersRepository.GetPlayer(playerId);
         public async Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position) => await _playersRepository.GetHistoricalRookies(currentSeason, position);
         public async Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position) => await _playersRepository.GetCurrentRookies(currentSeason, position);

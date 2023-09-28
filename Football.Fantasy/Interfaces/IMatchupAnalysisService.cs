@@ -1,9 +1,10 @@
-﻿using Football.Fantasy.Models;
+﻿using Football.Enums;
+using Football.Fantasy.Models;
 
 namespace Football.Fantasy.Interfaces
 {
     public interface IMatchupAnalysisService
     {
-        public Task<List<MatchupRanking>> PositionalMatchupRankings(string position);
+        public Task<List<MatchupRanking>> PositionalMatchupRankings(PositionEnum position);
     }
 }
