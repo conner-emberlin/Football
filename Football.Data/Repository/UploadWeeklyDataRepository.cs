@@ -19,7 +19,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach(var player in players)
             {
-                count += ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
 
@@ -31,7 +31,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
         }
@@ -42,7 +42,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
         }
@@ -53,7 +53,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
 
