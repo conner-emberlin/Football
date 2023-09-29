@@ -143,6 +143,14 @@ namespace Football.Players.Repository
                         ";
             return (await _dbConnection.QueryAsync<TeamMap>(query)).ToList();
         }
+        public async Task<TeamMap> GetTeam(int teamId)
+        {
+            var query = $@"SELECT [TeamId], [Team], [TeamDescription], [PlayerId]
+                        FROM [dbo].TeamMap
+                        WHERE [TeamId] = @teamId";
+            return (await _dbConnection.QueryAsync<TeamMap>(query, new { teamId })).First();
+
+        }
         public async Task<int> GetCurrentWeek(int season)
         {
             var query = $@"SELECT Max(Week) + 1 

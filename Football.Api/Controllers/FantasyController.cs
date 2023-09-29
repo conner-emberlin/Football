@@ -98,5 +98,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<MarketShare>>> GetMarketShare(string position) => Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum) ?
             Ok(await _marketShareService.GetMarketShare(positionEnum)) : BadRequest("Bad Request");
+
+        [HttpGet("targetshare/{teamId}")]
+        [ProducesResponseType(typeof(TargetShare), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<TargetShare>> GetTargetShare(int teamId) => teamId > 0 ? Ok(await _marketShareService.GetTargetShare(teamId)) : BadRequest("Bad Request");
     }
 }
