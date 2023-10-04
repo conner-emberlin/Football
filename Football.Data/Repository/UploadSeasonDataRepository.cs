@@ -3,6 +3,8 @@ using Football.Data.Models;
 using Football.Players.Models;
 using System.Data;
 using Dapper;
+using Football.Models;
+using System.Xml.Linq;
 
 namespace Football.Data.Repository
 {
@@ -90,6 +92,18 @@ namespace Football.Data.Repository
             foreach (var s in schedules)
             {
                 count += await _dbConnection.ExecuteAsync(query, s);
+            }
+            return count;
+        }
+
+        public async Task<int> UploadADP(List<SeasonADP> adp)
+        {
+            var query = $@"INSERT INTO [dbo].ADP (Season, PlayerId, Name, Position, PositionADP, OverallADP)
+                            VALUES (@Season, @PlayerId, @Name, @Position, @PositionADP, @OverallADP)";
+            var count = 0;
+            foreach (var a in adp)
+            {
+                count += await _dbConnection.ExecuteAsync(query, a);
             }
             return count;
         }

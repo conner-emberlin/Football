@@ -1,0 +1,53 @@
+﻿@page "/Games"
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Data.Models;
+@using Football.Fantasy.Models;
+@using Football.Players.Models;
+@inject IHttpClientFactory ClientFactory
+
+<h3>Games</h3>
+
+@if (currentWeekGames.Any())
+{
+    foreach (var game in currentWeekGames)
+    {
+        <div class="matchup-container">
+            <row>
+            <div class="matchup-team">
+                @game.Team
+            </div>
+            <div class="matchup-opponent">
+                @game.OpposingTeam
+            </div>
+            </row>
+        </div>
+    }
+}
+
+@code {
+    List<Schedule> currentWeekGames { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCurrentWeekGames();
+
+    }
+
+    public async Task GetCurrentWeekGames()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/schedule/weekly");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            currentWeekGames = await JsonSerializer.DeserializeAsync<List<Schedule>>(responseStream, options);
+        }
+    }
+
+
+
+}

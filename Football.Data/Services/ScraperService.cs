@@ -336,6 +336,36 @@ namespace Football.Data.Services
             return t;
         }
 
+        public async Task<List<FantasyProsADP>> ScrapeADP(string position)
+        {
+            var t = await Task.Run(() =>
+            {
+                var url = string.Format("{0}{1}.php", "https://www.fantasypros.com/nfl/adp/", position.Trim().ToLower());
+                var xpath = "//*[@id=\"data\"]/tbody";
+                var data = ScrapeData(url, xpath);
+                var colCount = position.Trim().ToLower() == "qb" ? 9 : 7;
+                List<FantasyProsADP> adp = new();
+                for (int i = 0; i < data.Length - colCount; i += colCount)
+                {
+                    adp.Add(new FantasyProsADP
+                    {
+                        PositionADP = double.TryParse(data[i], out var pAdp) ? pAdp : 999,
+                        OverallADP = double.TryParse(data[i + 1], out var oAdp) ? oAdp : 999,
+                        Name = FormatName(data[i + 2])
+                    });
+                }
+                foreach (var a in adp)
+                {
+                    if (a.Name.LastIndexOf(" ") > 1)
+                    {
+                        a.Name = a.Name[0..a.Name.LastIndexOf(" ")];
+                    }
+                }
+                return adp;
+            });
+            return t;
+        }
+
         private static string FormatName(string name) => Regex.Replace(Regex.Replace(name, @"[\d-]", string.Empty), @"\(.*\)", string.Empty).Trim();
     }
 }

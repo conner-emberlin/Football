@@ -204,5 +204,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<Schedule>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<Schedule>>> GetGames() => Ok(await _playersService.GetGames(_season.CurrentSeason, await _playersService.GetCurrentWeek(_season.CurrentSeason)));
+
+        [HttpGet("current-week")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> GetCurrentWeek() => Ok(await _playersService.GetCurrentWeek(_season.CurrentSeason));
     }
 }

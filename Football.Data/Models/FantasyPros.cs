@@ -71,6 +71,13 @@
         public double Games { get; set; }
     }
 
+    public class FantasyProsADP
+    {
+        public string Name { get; set; } = "";
+        public double PositionADP { get; set; }
+        public double OverallADP { get; set; }
+    }
+
 
 
 

@@ -26,5 +26,11 @@
         public int Season { get; set; }
         public int PlayerId { get; set; }
     }
+    public class SeasonADP : FantasyProsADP
+    {
+        public int Season { get; set;}
+        public int PlayerId { get; set; }
+        public string Position { get; set; } = "";
+    }
 
 }

@@ -83,6 +83,8 @@ namespace Football.Data.Services
             return await _uploadSeasonDataRepository.UploadSchedule(schedules);
         }
 
+        public async Task<int> UploadADP(int season, string position) => await _uploadSeasonDataRepository.UploadADP(await SeasonADP(await _scraperService.ScrapeADP(position), season));
+        
         private async Task<List<SeasonDataQB>> SeasonDataQB(List<FantasyProsStringParseQB> players, int season)
         {
             List<SeasonDataQB> seasonData = new();
@@ -276,6 +278,28 @@ namespace Football.Data.Services
             return seasonData;
         }
 
+        private async Task<List<SeasonADP>> SeasonADP(List<FantasyProsADP> adp, int season)
+        {
+            List<SeasonADP> seasonADP = new();
+            foreach (var a in adp)
+            {
+                var playerId = await _playerService.GetPlayerId(a.Name);
+                if (playerId > 0)
+                {
+                    var player = await _playerService.GetPlayer(playerId);
+                    seasonADP.Add(new SeasonADP
+                    {
+                        Season = season,
+                        PlayerId = playerId,
+                        Name = a.Name,
+                        Position = player.Position,
+                        OverallADP = a.OverallADP,
+                        PositionADP = a.PositionADP
+                    });
+                }
+            }
+            return seasonADP;
+        }
     }
 }
 

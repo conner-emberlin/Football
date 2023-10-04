@@ -94,5 +94,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadWeeklyGameResults(int season, int week) => Ok(await _weeklyDataService.UploadWeeklyGameResults(season, week));
+
+        [HttpPost("adp/{position}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> ScrapeADP(string position) => Ok(await _seasonDataService.UploadADP(_season.CurrentSeason, position));
     }
 }

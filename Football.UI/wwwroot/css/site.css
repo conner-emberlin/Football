@@ -12,8 +12,6 @@ a, .btn-link {
     color: #0071c1;
 }
 
-
-/* CSS */
 .button-40 {
     background-color: #111827;
     border: 1px solid transparent;
@@ -60,6 +58,40 @@ a, .btn-link {
     border-color: #1861ac;
 }
 
+.button-22 {
+    align-items: center;
+    appearance: button;
+    background-color: #0276FF;
+    border-radius: 8px;
+    border-style: none;
+    box-shadow: rgba(255, 255, 255, 0.26) 0 1px 2px inset;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    font-family: "RM Neue",sans-serif;
+    font-size: 100%;
+    line-height: 1.15;
+    margin: 0;
+    padding: 10px 21px;
+    text-align: center;
+    text-transform: none;
+    transition: color .13s ease-in-out,background .13s ease-in-out,opacity .13s ease-in-out,box-shadow .13s ease-in-out;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+    .button-22:active {
+        background-color: #006AE8;
+    }
+
+    .button-22:hover {
+        background-color: #1C84FF;
+    }
+
 .content {
     padding-top: 1.1rem;
 }
@@ -105,41 +137,6 @@ a, .btn-link {
         content: "An error has occurred."
     }
 
-
-.button-22 {
-    align-items: center;
-    appearance: button;
-    background-color: #0276FF;
-    border-radius: 8px;
-    border-style: none;
-    box-shadow: rgba(255, 255, 255, 0.26) 0 1px 2px inset;
-    box-sizing: border-box;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    flex-shrink: 0;
-    font-family: "RM Neue",sans-serif;
-    font-size: 100%;
-    line-height: 1.15;
-    margin: 0;
-    padding: 10px 21px;
-    text-align: center;
-    text-transform: none;
-    transition: color .13s ease-in-out,background .13s ease-in-out,opacity .13s ease-in-out,box-shadow .13s ease-in-out;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-}
-
-.button-22:active {
-    background-color: #006AE8;
-}
-
-.button-22:hover {
-    background-color: #1C84FF;
-}
-
 table.boostrap4_table_head_dark_striped_rounded_with_shadow {
     font-size: 1rem;
     font-weight: 400;
@@ -154,19 +151,19 @@ table.boostrap4_table_head_dark_striped_rounded_with_shadow {
     border-radius: 10px;
 }
 
-    table.boostrap4_table_head_dark_striped_rounded_with_shadow thead th {
-        font-size: 1rem;
-        line-height: 1.5;
-        border-collapse: collapse;
-        box-sizing: border-box;
-        text-align: inherit;
-        padding: .75rem;
-        vertical-align: bottom;
-        border-bottom: 2px solid #dee2e6;
-        color: black;
-        background-color: #DFDFF0;
-        border-color: #32383e;
-    }
+table.boostrap4_table_head_dark_striped_rounded_with_shadow thead th {
+    font-size: 1rem;
+    line-height: 1.5;
+    border-collapse: collapse;
+    box-sizing: border-box;
+    text-align: inherit;
+    padding: .75rem;
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    color: black;
+    background-color: #DFDFF0;
+    border-color: #32383e;
+ }
 
 table.boostrap4_table_head_dark_striped_rounded_with_shadow td {
     font-size: 1rem;
@@ -200,11 +197,11 @@ table.boostrap4_table_head_dark_striped_rounded_with_shadow tr:last-of-type td:l
     border-bottom-right-radius: 10px;
 }
 
+
 input[type="radio"] {
     margin: 0 10px 0 10px;
     margin-right: 0;
 }
-
 
 a.editstats {
     background-color: red;
@@ -236,23 +233,22 @@ a.editstats {
     }
 }
 
-
 .autocomplete {
     position: relative;
 }
 
-    .autocomplete .options {
-        position: absolute;
-        top: 40px;
-        left: 0;
-        background: white;
-        width: 100%;
-        padding: 0;
-        z-index: 10;
-        border: 1px solid #ced4da;
-        border-radius: 0.5rem;
-        box-shadow: 0 30px 25px 8px rgba(0, 0, 0, 0.1);
-    }
+.autocomplete .options {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    background: white;
+    width: 100%;
+    padding: 0;
+    z-index: 10;
+    border: 1px solid #ced4da;
+    border-radius: 0.5rem;
+    box-shadow: 0 30px 25px 8px rgba(0, 0, 0, 0.1);
+ }
 
     .autocomplete .option {
         display: block;
@@ -302,4 +298,35 @@ a.page-links {
     padding: 0.5rem 0.5rem;
     vertical-align: middle;
 }
+
+div.matchup-container {
+    border: 1px solid black;
+    border-radius:3px;
+    padding: 0.5rem 0.5rem;
+    vertical-align: middle;
+    margin: 0 auto;
+    width: 1000px;
+    height: 200px;
+}
+
+div.matchup-team{
+    text-align: left;
+    font-weight:bolder;
+    font-size:20px;
+    margin: 0 auto;
+    width:500px;
+    display:inline-block;
+}
+
+div.matchup-opponent {
+    text-align: right;
+    font-weight: bolder;
+    font-size: 20px;
+    margin: 0 auto;
+    width:500px;
+    display:inline-block;
+}
+
+
+
 
