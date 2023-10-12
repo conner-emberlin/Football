@@ -69,4 +69,17 @@
         public double TamperedMin { get; set; }
         public double TamperedMax { get; set; } 
     }
+
+    public class MockDraftSettings
+    {
+        public int QBStarters { get; set; }
+        public int RBStarters { get; set; }
+        public int WRStarters { get; set; }
+        public int TEStarters { get; set; }
+        public int QBLimit { get; set; }
+        public int RBLimit { get; set; }
+        public int WRLimit { get; set; }
+        public int TELimit { get; set; }
+        public int BenchSpots { get; set; }
+    }
 }

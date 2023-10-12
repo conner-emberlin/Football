@@ -1,0 +1,166 @@
+﻿@using Football.Fantasy.MockDraft.Models;
+@using Football.Data.Models;
+@using Football.Enums;
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using System.Text;
+@inject IHttpClientFactory ClientFactory
+
+@page "/MockDraft/"
+<h3>Mock Draft</h3>
+
+<EditForm model="this" OnSubmit="CreateMockDraft">
+    <TextBoxTeamName @bind-TeamName="this.teamName" />
+    <TextBoxTeamCount @bind-TeamCount="this.teamCount" />
+    <TextBoxDraftPosition @bind-DraftPosition="this.userPosition" />
+    <button class="button-22" type="submit">Submit</button>
+</EditForm>
+
+@if (mock != null && youTriedToMock && !badRequestError)
+{
+    @for (int i = 1; i < 2; i++)
+    {
+        <div class="parent">
+        @for (int j = 0; j < int.Parse(teamCount) - 1; j++)
+        {
+            if (mock.Teams.ElementAt(j).DraftPosition != int.Parse(userPosition))
+            {   <div class="child">
+                        <text>ok</text>
+                </div>
+            }
+            else
+            {
+                playerId = "";
+                    <div class="child">
+                <TexBoxPlayerId @bind-PlayerId="this.playerId"></TexBoxPlayerId>
+                    <button class="button-22" type="button" onclick=@(() => PostUserPick(i, mock.Teams.ElementAt(j)))></button>
+                    @if (playerAdded)
+                    {
+                        <text>Player Added</text>
+                    }
+                    </div>
+            }
+                
+        }
+        </div>
+    }       
+}
+
+@code {
+    public string userPosition { get; set; } = "";
+    public string teamName { get; set; } = "";
+    public string teamCount { get; set; } = "";
+    public string playerId { get; set; } = "";
+
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+    public bool badRequestError { get; set; } = false;
+    public bool youTriedToMock { get; set; } = false;
+    public bool draftStarted { get; set; } = false;
+    public bool playerAdded { get; set; } = false;
+
+    public bool nextRound { get; set; } = false;
+    public bool nextPlayer { get; set; } = false;
+
+
+    public Mock? mock { get; set; } = new();
+
+
+    public void CreateMockDraft()
+    {
+        youTriedToMock = true;
+        var param = new MockDraftParameters
+            {
+                UserPosition = int.Parse(userPosition),
+                TeamCount = int.Parse(teamCount),
+                TeamName = teamName
+            };
+        var json = JsonSerializer.Serialize(param);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var client = ClientFactory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/MockDraft/create")
+            {
+                Content = content
+            };
+        var response = client.Send(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = response.Content.ReadAsStream();
+            mock = JsonSerializer.Deserialize<Mock>(responseStream, options);
+            if (mock != null)
+            {
+                mock.Teams = mock.Teams.OrderBy(t => t.DraftPosition).ToList();
+            }
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        shouldRender = true;
+    }
+
+    public MockDraftResults MockDraftEngine(int round, FantasyTeam team)
+    {
+        var needs = GetTeamNeeds(team);
+
+
+        return null;
+    }
+
+
+    public List<PositionEnum> GetTeamNeeds(FantasyTeam team)
+    {
+        var client = ClientFactory.CreateClient();
+        var content = new StringContent(JsonSerializer.Serialize(team), Encoding.UTF8, "application/json");
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/MockDraft/team-needs") { Content = content };
+        var response = client.Send(request);
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        using var responseStream = response.Content.ReadAsStream();
+        return JsonSerializer.Deserialize<List<PositionEnum>>(responseStream, options);
+    }
+
+    public List<SeasonADP> GetAvailablePlayers()
+    {
+        return null;
+    }
+
+    public void PostUserPick(int round, FantasyTeam team)
+    {
+        if (mock != null)
+        {
+            playerAdded = false;
+            var result = new MockDraftResults
+                {
+                    MockDraftId = mock.MockDraftId,
+                    Round = round,
+                    FantasyTeamId = team.FantasyTeamId,
+                    Pick = round * team.DraftPosition,
+                    PlayerId = int.Parse(playerId)
+                };
+            var client = ClientFactory.CreateClient();
+            var content = new StringContent(JsonSerializer.Serialize(result), Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/MockDraft/add-player") { Content = content };
+            var response = client.Send(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                using var responseStream = response.Content.ReadAsStream();
+                var count = JsonSerializer.Deserialize<int>(responseStream, options);
+                if (count > 0)
+                {
+                    playerAdded = true;
+                }
+                else{ playerAdded = false; }
+            }
+            else
+            {
+                playerAdded = false;
+            }
+        }
+    }
+
+    }
+
+    
+
