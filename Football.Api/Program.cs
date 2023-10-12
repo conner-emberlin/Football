@@ -6,6 +6,8 @@ using Football.Data.Services;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Repository;
 using Football.Fantasy.Services;
+using Football.Fantasy.MockDraft.Interfaces;
+using Football.Fantasy.MockDraft.Services;
 using Football.News.Interfaces;
 using Football.News.Models;
 using Football.News.Services;
@@ -20,6 +22,7 @@ using Serilog;
 using System.Data;
 using System.Data.SqlClient;
 using Football;
+using Football.Fantasy.MockDraft.Repository;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -63,6 +66,8 @@ builder.Services.AddScoped<IProjectionRepository, ProjectionRepository>();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<IMatchupAnalysisService, MatchupAnalysisService>();
 builder.Services.AddScoped<IMarketShareService, MarketShareService>();
+builder.Services.AddScoped<IMockDraftService, MockDraftService>();
+builder.Services.AddScoped<IMockDraftRepository, MockDraftRepository>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
@@ -77,6 +82,7 @@ builder.Services.Configure<Tunings>(builder.Configuration.GetSection("Tunings"))
 builder.Services.Configure<WeeklyTunings>(builder.Configuration.GetSection("WeeklyTunings"));
 builder.Services.Configure<WeeklyScraping>(builder.Configuration.GetSection("Scraping"));
 builder.Services.Configure<ESPN>(builder.Configuration.GetSection("ESPN"));
+builder.Services.Configure<MockDraftSettings>(builder.Configuration.GetSection("MockDraftSettings"));
 
 var app = builder.Build();
 
