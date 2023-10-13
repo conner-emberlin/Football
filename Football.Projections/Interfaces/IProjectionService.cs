@@ -9,6 +9,7 @@ namespace Football.Projections.Interfaces
         public Task<List<SeasonFlex>> SeasonFlexRankings();
         public Task<IEnumerable<SeasonProjection>> GetSeasonProjections(PositionEnum position);
         public Task<IEnumerable<WeekProjection>> GetWeeklyProjections(PositionEnum position);
+        public bool GetWeeklyProjectionsFromSQL(PositionEnum position, int week, out IEnumerable<WeekProjection> projections);
         public Task<IEnumerable<SeasonProjection>> CalculateSeasonProjections<T>(List<T> model, PositionEnum position);
         public Task<IEnumerable<WeekProjection>> CalculateWeeklyProjections(List<QBModelWeek> model);
         public Task<IEnumerable<WeekProjection>> CalculateWeeklyProjections(List<RBModelWeek> model);

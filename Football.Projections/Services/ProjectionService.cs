@@ -174,9 +174,14 @@ namespace Football.Projections.Services
         }
         public async Task<IEnumerable<WeekProjection>> GetWeeklyProjections(PositionEnum position)
         {
+            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
             if (RetrieveWeeklyFromCache(position.ToString()).Any())
             {
                 return RetrieveWeeklyFromCache(position.ToString());
+            }
+            else if (GetWeeklyProjectionsFromSQL(position, currentWeek, out var projectionsSQL))
+            {
+                return projectionsSQL;
             }
             else if (position == PositionEnum.QB)
             {
@@ -215,6 +220,11 @@ namespace Football.Projections.Services
                 _logger.Error("Unable to retrieve projections");
                 return Enumerable.Empty<WeekProjection>(); 
             }
+        }
+        public bool GetWeeklyProjectionsFromSQL(PositionEnum position, int week, out IEnumerable<WeekProjection> projections) 
+        {
+            projections = _projectionRepository.GetWeeklyProjectionsFromSQL(position, week);
+            return projections.Any();
         }
         public async Task<IEnumerable<SeasonProjection>> CalculateSeasonProjections<T>(List<T> model, PositionEnum position)
         {
@@ -337,13 +347,29 @@ namespace Football.Projections.Services
         }
         public async Task<Vector<double>> PerformRegression( Matrix<double> regressorMatrix, PositionEnum position)
         {
-            var dependentVector = _matrixCalculator.PopulateDependentVector(await SeasonFantasyProjectionModel(position));
-            return _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
+            try
+            {
+                var dependentVector = _matrixCalculator.PopulateDependentVector(await SeasonFantasyProjectionModel(position));
+                return _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.ToString(), ex.StackTrace);
+                throw;
+            }
         }
         public async Task<Vector<double>> PerformWeeklyRegression(Matrix<double> regressorMatrix, PositionEnum position)
         {
-            var dependentVector = _matrixCalculator.PopulateDependentVector(await WeeklyFantasyProjectionModel(position));
-            return _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
+            try
+            {
+                var dependentVector = _matrixCalculator.PopulateDependentVector(await WeeklyFantasyProjectionModel(position));
+                return _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
+            }
+            catch(Exception ex)
+            {
+                _logger.Error(ex.ToString(), ex.StackTrace);
+                throw;
+            }
         }
         public Vector<double> PerformProjection(Matrix<double> model, Vector<double> coeff) => model * coeff;
 
@@ -511,7 +537,6 @@ namespace Football.Projections.Services
         }
         private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) => seasonProjection > 0 ?
             (_weeklyTunings.ProjectionWeight / week) * seasonProjection + (1 - (_weeklyTunings.ProjectionWeight / week)) * weeklyProjection
-            : weeklyProjection;
-        
+            : weeklyProjection;     
     }
 }

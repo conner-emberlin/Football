@@ -2,6 +2,7 @@
 using Football.Projections.Models;
 using Dapper;
 using System.Data;
+using Football.Enums;
 
 namespace Football.Projections.Repository
 {
@@ -34,6 +35,14 @@ namespace Football.Projections.Repository
                         FROM [dbo].SeasonProjections
                         WHERE [PlayerId] = @playerId";
             return (await _dbConnection.QueryAsync<SeasonProjection>(query, new { playerId })).FirstOrDefault();
+        }
+        public IEnumerable<WeekProjection> GetWeeklyProjectionsFromSQL(PositionEnum position, int week)
+        {
+            var pos = position.ToString();
+            var query = $@"SELECT * FROM [dbo].WeeklyProjections
+                        WHERE [Position] = @pos
+                            AND [Week] = @week";
+            return  _dbConnection.Query<WeekProjection>(query, new { pos, week });
         }
     }
 }

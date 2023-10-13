@@ -9,36 +9,42 @@
 @page "/MockDraft/"
 <h3>Mock Draft</h3>
 
+@if(!youTriedToMock){
 <EditForm model="this" OnSubmit="CreateMockDraft">
     <TextBoxTeamName @bind-TeamName="this.teamName" />
     <TextBoxTeamCount @bind-TeamCount="this.teamCount" />
     <TextBoxDraftPosition @bind-DraftPosition="this.userPosition" />
     <button class="button-22" type="submit">Submit</button>
 </EditForm>
+}
 
 @if (mock != null && youTriedToMock && !badRequestError)
 {
     @for (int i = 1; i < 2; i++)
     {
         <div class="parent">
-        @for (int j = 0; j < int.Parse(teamCount) - 1; j++)
+        @for (int j = 0; j < int.Parse(teamCount); j++)
         {
             if (mock.Teams.ElementAt(j).DraftPosition != int.Parse(userPosition))
             {   <div class="child">
                         <text>ok</text>
-                </div>
-            }
-            else
-            {
-                playerId = "";
-                    <div class="child">
-                <TexBoxPlayerId @bind-PlayerId="this.playerId"></TexBoxPlayerId>
-                    <button class="button-22" type="button" onclick=@(() => PostUserPick(i, mock.Teams.ElementAt(j)))></button>
-                    @if (playerAdded)
-                    {
-                        <text>Player Added</text>
-                    }
                     </div>
+                }
+                else
+                {
+                    while (!playerAdded)
+                    {
+                        <div class="child">
+                            <EditForm model="this" OnSubmit="@(() => PostUserPick(i, mock.Teams.ElementAt(j)))">
+                                <TextBoxPlayerId @bind-PlayerId="this.playerId" />
+                                <button class="button-22" type="submit">Submit</button>
+                            </EditForm>
+                            @if (playerAdded)
+                            {
+                                <text>Player Added</text>
+                            }
+                        </div>
+                    }
             }
                 
         }
@@ -50,7 +56,7 @@
     public string userPosition { get; set; } = "";
     public string teamName { get; set; } = "";
     public string teamCount { get; set; } = "";
-    public string playerId { get; set; } = "";
+    public string? playerId { get; set; }
 
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
@@ -127,7 +133,7 @@
 
     public void PostUserPick(int round, FantasyTeam team)
     {
-        if (mock != null)
+        if (mock != null && !String.IsNullOrWhiteSpace(playerId))
         {
             playerAdded = false;
             var result = new MockDraftResults
