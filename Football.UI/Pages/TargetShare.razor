@@ -1,0 +1,91 @@
+﻿@page "/TargetShare"
+<PageTitle>Target Share</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Projections.Models;
+@using Football.Players.Models;
+@using Football.Fantasy.Models;
+@using Football.Enums;
+@inject IHttpClientFactory ClientFactory
+
+<h3>Target Share</h3>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+@if (badRequestError)
+{
+    <p>Unexpected Error. Please try again.</p>
+}
+
+@if (targetShare.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>RBTarget%</th>
+                    <th>RBComp%</th>
+                    <th>WRTarget%</th>
+                    <th>WRComp%</th>
+                    <th>TETarget%</th>
+                    <th>TEComp%</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in targetShare){
+                <tr>
+                    <td>@t.Team.TeamDescription</td>
+                    <td>@Math.Round(t.RBTargetShare*100, 1)</td>
+                    <td>@Math.Round(t.RBCompShare*100, 1)</td>
+                    <td>@Math.Round(t.WRTargetShare*100, 1)</td>
+                    <td>@Math.Round(t.WRCompShare*100, 1)</td>
+                    <td>@Math.Round(t.TETargetShare*100, 1)</td>
+                    <td>@Math.Round(t.TECompShare*100, 1)</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    public List<Football.Fantasy.Models.TargetShare> targetShare = new();
+
+    public bool loading { get; set; } = false;
+    public bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+       await GetTargetShare();
+    }
+
+    public async Task GetTargetShare()
+    {
+        loading = true;
+        targetShare.Clear();
+        shouldRender = true;
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/targetshares/");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            targetShare = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Models.TargetShare>>(responseStream, options);
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        loading = false;
+        shouldRender = true;
+    }
+}
