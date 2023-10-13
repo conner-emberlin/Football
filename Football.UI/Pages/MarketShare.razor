@@ -1,0 +1,126 @@
+﻿@page "/MarketShare"
+<PageTitle>Market Share</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Projections.Models;
+@using Football.Players.Models;
+@using Football.Fantasy.Models;
+@using Football.Enums;
+@inject IHttpClientFactory ClientFactory
+
+<h3>Market Share</h3>
+
+<div>
+    @foreach (var position in Positions)
+    {
+
+        <input type="radio" name="players" id=" @position" value="@position"
+        @onchange="SetPosition"
+               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+        <label for="@position ">@position</label>
+
+    }
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="GetMarketShare">
+    Submit
+</button>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+@if (badRequestError)
+{
+    <p>Unexpected Error. Please try again.</p>
+}
+
+@if (marketShare.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Team</th>                 
+                    <th>@positionEnum.ToString()Fantasy%</th>
+                    <th>RushAtt%</th>
+                    <th>RushYd%</th>
+                    <th>RushTd%</th>
+                    <th>Tgt%</th>
+                    <th>Rec%</th>
+                    <th>RecYd%</th>
+                    <th>RecTd%</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i <= marketShare.Count; i++)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@marketShare.ElementAt(i-1).Player.Name</td>
+                        <td>@marketShare.ElementAt(i-1).PlayerTeam.Team</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).FantasyShare * 100, 1) </td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).RushAttShare *100,1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).RushYdShare *100,1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).RushTDShare *100,1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).TargetShare * 100, 1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).ReceptionShare * 100, 1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).RecYdShare * 100, 1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).RecTDShare * 100, 1)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<string> Positions = new() {"Runningback", "Wide Receiver", "Tight End" };
+    public string Position { get; set; } = "Runningback";
+    public PositionEnum positionEnum { get; set; } = PositionEnum.RB;
+    public List<Football.Fantasy.Models.MarketShare> marketShare = new();
+
+    public bool loading { get; set; } = false;
+    public bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    public void SetPosition(ChangeEventArgs args)
+    {
+        Position = args.Value.ToString();
+        positionEnum = Position switch
+        {
+            "Runningback" => PositionEnum.RB,
+            "Wide Receiver" => PositionEnum.WR,
+            "Tight End" => PositionEnum.TE,
+            _ => PositionEnum.RB
+        };
+    }
+    public async Task GetMarketShare()
+    {
+        loading = true;
+        marketShare.Clear();
+        shouldRender = true;
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/marketshare/" + positionEnum.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            marketShare = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Models.MarketShare>>(responseStream, options);
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        loading = false;
+        shouldRender = true;
+    }
+}

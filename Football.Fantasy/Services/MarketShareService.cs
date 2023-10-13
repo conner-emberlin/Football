@@ -83,7 +83,7 @@ namespace Football.Fantasy.Services
         public async Task<List<MarketShare>> GetMarketShare(PositionEnum position)
         {
             List<MarketShare> share = new();
-            var players = await _playersService.GetPlayersByPosition(position);
+            var players = (await _playersService.GetPlayersByPosition(position)).Where(p => p.Active == 1).ToList();
             var teamTotals = await GetTeamTotals();
             foreach (var player in players)
             {
@@ -94,63 +94,72 @@ namespace Football.Fantasy.Services
                     if (position == PositionEnum.RB)
                     {
                         var stats = await _statisticsService.GetWeeklyDataRB(player.PlayerId);
-                        share.Add(new MarketShare
+                        if (stats.Any())
                         {
-                            Player = player,
-                            PlayerTeam = team,
-                            Games = teamTotals.First().Games,
-                            TotalFantasy = fantasy.Sum(f => f.FantasyPoints),
-                            FantasyShare = teamTotal.TotalFantasyRB > 0 ? fantasy.Sum(f => f.FantasyPoints) /teamTotal.TotalFantasyRB : 0,
-                            RushAttShare = teamTotal.TotalRushAtt > 0 ? stats.Sum(s => s.RushingAtt)/ teamTotal.TotalRushAtt : 0,
-                            RushYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.RushingYds)/ teamTotal.TotalRecYds : 0,
-                            RushTDShare = teamTotal.TotalRushTd > 0 ? stats.Sum(s => s.RushingTD) / teamTotal.TotalRushTd : 0,
-                            TargetShare = teamTotal.TotalTargets > 0 ? stats.Sum(s => s.Targets) / teamTotal.TotalTargets : 0,
-                            ReceptionShare = teamTotal.TotalReceptions > 0 ? stats.Sum(s => s.Receptions) / teamTotal.TotalReceptions : 0,
-                            RecYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.Yards) / teamTotal.TotalRecYds : 0,
-                            RecTDShare = teamTotal.TotalRecTd > 0 ? stats.Sum(s => s.ReceivingTD) / teamTotal.TotalRecTd : 0
-                        });
+                            share.Add(new MarketShare
+                            {
+                                Player = player,
+                                PlayerTeam = team,
+                                Games = teamTotals.First().Games,
+                                TotalFantasy = fantasy.Sum(f => f.FantasyPoints),
+                                FantasyShare = teamTotal.TotalFantasyRB > 0 ? fantasy.Sum(f => f.FantasyPoints) / teamTotal.TotalFantasyRB : 0,
+                                RushAttShare = teamTotal.TotalRushAtt > 0 ? stats.Sum(s => s.RushingAtt) / teamTotal.TotalRushAtt : 0,
+                                RushYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.RushingYds) / teamTotal.TotalRecYds : 0,
+                                RushTDShare = teamTotal.TotalRushTd > 0 ? stats.Sum(s => s.RushingTD) / teamTotal.TotalRushTd : 0,
+                                TargetShare = teamTotal.TotalTargets > 0 ? stats.Sum(s => s.Targets) / teamTotal.TotalTargets : 0,
+                                ReceptionShare = teamTotal.TotalReceptions > 0 ? stats.Sum(s => s.Receptions) / teamTotal.TotalReceptions : 0,
+                                RecYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.Yards) / teamTotal.TotalRecYds : 0,
+                                RecTDShare = teamTotal.TotalRecTd > 0 ? stats.Sum(s => s.ReceivingTD) / teamTotal.TotalRecTd : 0
+                            });
+                        }
                     }
                     else if (position == PositionEnum.WR)
                     {
                         var stats = await _statisticsService.GetWeeklyDataWR(player.PlayerId);
-                        share.Add(new MarketShare
+                        if (stats.Any())
                         {
-                            Player = player,
-                            PlayerTeam = team,
-                            Games = teamTotals.First().Games,
-                            TotalFantasy = fantasy.Sum(f => f.FantasyPoints),
-                            FantasyShare = teamTotal.TotalFantasyWR > 0 ? fantasy.Sum(f => f.FantasyPoints) / teamTotal.TotalFantasyWR : 0,
-                            RushAttShare = teamTotal.TotalRushAtt > 0 ? stats.Sum(s => s.RushingAtt) / teamTotal.TotalRushAtt : 0,
-                            RushYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.RushingYds) / teamTotal.TotalRecYds : 0,
-                            RushTDShare = teamTotal.TotalRushTd > 0 ? stats.Sum(s => s.RushingTD) / teamTotal.TotalRushTd : 0,
-                            TargetShare = teamTotal.TotalTargets > 0 ? stats.Sum(s => s.Targets) / teamTotal.TotalTargets : 0,
-                            ReceptionShare = teamTotal.TotalReceptions > 0 ? stats.Sum(s => s.Receptions) / teamTotal.TotalReceptions : 0,
-                            RecYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.Yards) / teamTotal.TotalRecYds : 0,
-                            RecTDShare = teamTotal.TotalRecTd > 0 ? stats.Sum(s => s.TD) / teamTotal.TotalRecTd : 0
-                        });
+                            share.Add(new MarketShare
+                            {
+                                Player = player,
+                                PlayerTeam = team,
+                                Games = teamTotals.First().Games,
+                                TotalFantasy = fantasy.Sum(f => f.FantasyPoints),
+                                FantasyShare = teamTotal.TotalFantasyWR > 0 ? fantasy.Sum(f => f.FantasyPoints) / teamTotal.TotalFantasyWR : 0,
+                                RushAttShare = teamTotal.TotalRushAtt > 0 ? stats.Sum(s => s.RushingAtt) / teamTotal.TotalRushAtt : 0,
+                                RushYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.RushingYds) / teamTotal.TotalRecYds : 0,
+                                RushTDShare = teamTotal.TotalRushTd > 0 ? stats.Sum(s => s.RushingTD) / teamTotal.TotalRushTd : 0,
+                                TargetShare = teamTotal.TotalTargets > 0 ? stats.Sum(s => s.Targets) / teamTotal.TotalTargets : 0,
+                                ReceptionShare = teamTotal.TotalReceptions > 0 ? stats.Sum(s => s.Receptions) / teamTotal.TotalReceptions : 0,
+                                RecYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.Yards) / teamTotal.TotalRecYds : 0,
+                                RecTDShare = teamTotal.TotalRecTd > 0 ? stats.Sum(s => s.TD) / teamTotal.TotalRecTd : 0
+                            });
+                        }
                     }
                     else if (position == PositionEnum.TE)
                     {
                         var stats = await _statisticsService.GetWeeklyDataTE(player.PlayerId);
-                        share.Add(new MarketShare
+                        if (stats.Any())
                         {
-                            Player = player,
-                            PlayerTeam = team,
-                            Games = teamTotals.First().Games,
-                            TotalFantasy = fantasy.Sum(f => f.FantasyPoints),
-                            FantasyShare = teamTotal.TotalFantasyTE > 0 ? fantasy.Sum(f => f.FantasyPoints) / teamTotal.TotalFantasyTE : 0,
-                            RushAttShare = teamTotal.TotalRushAtt > 0 ? stats.Sum(s => s.RushingAtt) / teamTotal.TotalRushAtt : 0,
-                            RushYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.RushingYds) / teamTotal.TotalRecYds : 0,
-                            RushTDShare = teamTotal.TotalRushTd > 0 ? stats.Sum(s => s.RushingTD) / teamTotal.TotalRushTd : 0,
-                            TargetShare = teamTotal.TotalTargets > 0 ? stats.Sum(s => s.Targets) / teamTotal.TotalTargets : 0,
-                            ReceptionShare = teamTotal.TotalReceptions > 0 ? stats.Sum(s => s.Receptions) / teamTotal.TotalReceptions : 0,
-                            RecYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.Yards) / teamTotal.TotalRecYds : 0,
-                            RecTDShare = teamTotal.TotalRecTd > 0 ? stats.Sum(s => s.TD) / teamTotal.TotalRecTd : 0
-                        }); 
+                            share.Add(new MarketShare
+                            {
+                                Player = player,
+                                PlayerTeam = team,
+                                Games = teamTotals.First().Games,
+                                TotalFantasy = fantasy.Sum(f => f.FantasyPoints),
+                                FantasyShare = teamTotal.TotalFantasyTE > 0 ? fantasy.Sum(f => f.FantasyPoints) / teamTotal.TotalFantasyTE : 0,
+                                RushAttShare = teamTotal.TotalRushAtt > 0 ? stats.Sum(s => s.RushingAtt) / teamTotal.TotalRushAtt : 0,
+                                RushYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.RushingYds) / teamTotal.TotalRecYds : 0,
+                                RushTDShare = teamTotal.TotalRushTd > 0 ? stats.Sum(s => s.RushingTD) / teamTotal.TotalRushTd : 0,
+                                TargetShare = teamTotal.TotalTargets > 0 ? stats.Sum(s => s.Targets) / teamTotal.TotalTargets : 0,
+                                ReceptionShare = teamTotal.TotalReceptions > 0 ? stats.Sum(s => s.Receptions) / teamTotal.TotalReceptions : 0,
+                                RecYdShare = teamTotal.TotalRecYds > 0 ? stats.Sum(s => s.Yards) / teamTotal.TotalRecYds : 0,
+                                RecTDShare = teamTotal.TotalRecTd > 0 ? stats.Sum(s => s.TD) / teamTotal.TotalRecTd : 0
+                            });
+                        }
                     }
                 }
             }
-            return share.OrderByDescending(s => s.TotalFantasy).ThenByDescending(s => s.FantasyShare).ToList();
+            return share.Where(s => s.TotalFantasy > 0).OrderByDescending(s => s.FantasyShare).ToList();
         }
 
         public async Task<List<TeamTotals>> GetTeamTotals()
