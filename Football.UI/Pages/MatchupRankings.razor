@@ -1,0 +1,120 @@
+﻿@page "/MatchupRankings"
+<PageTitle>Matchup Rankings</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Projections.Models;
+@using Football.Players.Models;
+@using Football.Fantasy.Models;
+@using Football.Enums;
+@inject IHttpClientFactory ClientFactory
+
+<h3>Matchup Rankings</h3>
+
+<div>
+    @foreach (var position in Positions)
+    {
+
+        <input type="radio" name="players" id=" @position" value="@position"
+        @onchange="SetPosition"
+               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+        <label for="@position ">@position</label>
+
+    }
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="GetMatchupRankings">
+    Submit
+</button>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+@if (badRequestError)
+{
+    <p>Unexpected Error. Please try again.</p>
+}
+
+@if (Rankings.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Position</th>
+                    <th>Team</th>
+                    <th>Games</th>
+                    <th>Total Pts</th>
+                    <th>Avg Pts</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i <= Rankings.Count; i++)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@Rankings.ElementAt(i-1).Position</td>
+                        <td>@Rankings.ElementAt(i-1).Team.TeamDescription</td>
+                        <td>@Rankings.ElementAt(i-1).GamesPlayed</td>
+                        <td>@Math.Round((double)Rankings.ElementAt(i-1).PointsAllowed,2)</td>
+                        <td>@Math.Round((double)Rankings.ElementAt(i-1).AvgPointsAllowed,2)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+
+
+@code {
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
+    public string Position { get; set; } = "Quarterback";
+    public PositionEnum positionEnum { get; set; }
+    public List<MatchupRanking> Rankings = new();
+
+    public bool loading { get; set; } = false;
+    public bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    public void SetPosition(ChangeEventArgs args)
+    {
+        Position = args.Value.ToString();
+        positionEnum = Position switch
+        {
+            "Quarterback" => PositionEnum.QB,
+            "Runningback" => PositionEnum.RB,
+            "Wide Receiver" => PositionEnum.WR,
+            "Tight End" => PositionEnum.TE,
+            _ => PositionEnum.QB
+        };
+    }
+    public async Task GetMatchupRankings()
+    {
+        loading = true;
+        Rankings.Clear();
+        shouldRender = true;
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/matchup-rankings/" + positionEnum.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            Rankings = await JsonSerializer.DeserializeAsync<List<MatchupRanking>>(responseStream, options);
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        loading = false;
+        shouldRender = true;
+    }
+}

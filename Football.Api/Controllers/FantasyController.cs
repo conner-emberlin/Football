@@ -82,7 +82,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<SeasonFantasy>>> GetCurrentFantasyTotals() => Ok(await _fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason));
 
-        [HttpGet("matchup-rankings")]
+        [HttpGet("matchup-rankings/{position}")]
         [ProducesResponseType(typeof(List<MatchupRanking>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<MatchupRanking>> GetMatchupRankings(string position) => Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum) ? 
