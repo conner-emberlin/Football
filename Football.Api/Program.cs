@@ -83,6 +83,7 @@ builder.Services.Configure<WeeklyTunings>(builder.Configuration.GetSection("Week
 builder.Services.Configure<WeeklyScraping>(builder.Configuration.GetSection("Scraping"));
 builder.Services.Configure<ESPN>(builder.Configuration.GetSection("ESPN"));
 builder.Services.Configure<MockDraftSettings>(builder.Configuration.GetSection("MockDraftSettings"));
+builder.Services.Configure<Keys>(builder.Configuration.GetSection("Keys"));
 
 var app = builder.Build();
 

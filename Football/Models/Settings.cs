@@ -82,4 +82,9 @@
         public int TELimit { get; set; }
         public int BenchSpots { get; set; }
     }
+
+    public class Keys
+    {
+        public string WeatherAPIKey { get; set; } = "";
+    }
 }

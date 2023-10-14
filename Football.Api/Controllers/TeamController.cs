@@ -25,5 +25,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<PlayerTeam>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<Player>>> GetPlayersByTeam(string team) => Ok(await _playersService.GetPlayersByTeam(team));
+
+        [HttpGet("location/{teamId}")]
+        [ProducesResponseType(typeof(TeamLocation), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<TeamLocation>> GetTeamLocation(int teamId) => Ok(await _playersService.GetTeamLocation(teamId));
     }
 }

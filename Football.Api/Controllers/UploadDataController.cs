@@ -90,6 +90,11 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadSchedule() => Ok(await _seasonDataService.UploadSchedule(_season.CurrentSeason));
 
+        [HttpPost("schedule-details")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UploadScheduleDetails() => Ok(await _seasonDataService.UploadScheduleDetails(_season.CurrentSeason));
+
         [HttpPost("game-results/{season}/{week}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]

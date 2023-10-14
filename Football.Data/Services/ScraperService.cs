@@ -324,10 +324,10 @@ namespace Football.Data.Services
                             Winner = split[4],
                             HomeIndicator = split[5],
                             Loser = split[6],
-                            WinnerPoints = int.Parse(split[8]),
-                            LoserPoints = int.Parse(split[9]),
-                            WinnerYards = int.Parse(split[10]),
-                            LoserYards = int.Parse(split[12])
+                            WinnerPoints = int.TryParse(split[8], out var wp) ? wp : 0,
+                            LoserPoints = int.TryParse(split[9], out var lp) ? lp : 0,
+                            WinnerYards = int.TryParse(split[10], out var wy) ? wy : 0,
+                            LoserYards = int.TryParse(split[12], out var ly) ? ly : 0
                         });
                     }
                 }

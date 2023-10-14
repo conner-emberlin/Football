@@ -9,8 +9,8 @@
        public Task<int> UploadSeasonDSTData(int season);
        public Task<int> UploadCurrentTeams(int season, string position);
        public Task<int> UploadSchedule(int season);
-
-        public Task<int> UploadADP(int season, string position);
+       public Task<int> UploadScheduleDetails(int season);
+       public Task<int> UploadADP(int season, string position);
     }
 }
 

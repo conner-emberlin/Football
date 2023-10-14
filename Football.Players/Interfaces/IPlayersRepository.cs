@@ -28,5 +28,6 @@ namespace Football.Players.Interfaces
         public Task<List<Schedule>> GetGames(int season, int week);
         public Task<List<Schedule>> GetTeamGames(int teamId, int season);
         public Task<List<int>> GetIgnoreList();
+        public Task<TeamLocation> GetTeamLocation(int teamId);
     }
 }

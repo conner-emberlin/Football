@@ -95,7 +95,12 @@ namespace Football.Data.Repository
             }
             return count;
         }
-
+        public async Task<int> UploadScheduleDetails(List<ScheduleDetails> scheduleDetails)
+        {
+            var query = $@"INSERT INTO [dbo].ScheduleDetails (Season, Week, Day, Date, Time, HomeTeamId, AwayTeamId)
+                            VALUES (@Season, @Week, @Day, @Date, @Time, @HomeTeamId, @AwayTeamId)";
+            return await _dbConnection.ExecuteAsync(query, scheduleDetails);
+        }
         public async Task<int> UploadADP(List<SeasonADP> adp)
         {
             var query = $@"INSERT INTO [dbo].ADP (Season, PlayerId, Name, Position, PositionADP, OverallADP)

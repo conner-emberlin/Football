@@ -12,6 +12,7 @@ namespace Football.Data.Interfaces
         public Task<int> UploadSeasonDSTData(List<SeasonDataDST> players);
         public Task<int> UploadCurrentTeams(List<PlayerTeam> teams);
         public Task<int> UploadSchedule(List<Schedule> schedules);
+        public Task<int> UploadScheduleDetails(List<ScheduleDetails> scheduleDetails);
         public Task<int> UploadADP(List<SeasonADP> adp);
     }
 }

@@ -82,6 +82,16 @@ namespace Football.Data.Services
             var schedules = await _scraperService.ParseFantasyProsSeasonSchedule(str);
             return await _uploadSeasonDataRepository.UploadSchedule(schedules);
         }
+        public async Task<int> UploadScheduleDetails(int season)
+        {
+            var count = 0;
+            for (int i = 1; i <= _season.Games + 1; i++)
+            {
+                var details = await ScheduleDetails(await _scraperService.ScrapeGameScores(i), season);
+                count += await _uploadSeasonDataRepository.UploadScheduleDetails(details);
+            }
+            return count;
+        }
 
         public async Task<int> UploadADP(int season, string position) => await _uploadSeasonDataRepository.UploadADP(await SeasonADP(await _scraperService.ScrapeADP(position), season));
         
@@ -299,6 +309,40 @@ namespace Football.Data.Services
                 }
             }
             return seasonADP;
+        }
+
+        private async Task<List<ScheduleDetails>> ScheduleDetails(List<ProFootballReferenceGameScores> schedule, int season)
+        {
+            List<ScheduleDetails> scheduleDetails = new();
+            foreach (var s in schedule)
+            {
+                var homeTeamId = 0;
+                var awayTeamId = 0;
+                if (s.HomeIndicator == "@") {
+                    homeTeamId = await _playerService.GetTeamIdFromDescription(s.Winner);
+                    awayTeamId = await _playerService.GetTeamIdFromDescription(s.Loser);
+                }
+                else
+                {
+                    homeTeamId = await _playerService.GetTeamIdFromDescription(s.Loser);
+                    awayTeamId = await _playerService.GetTeamIdFromDescription(s.Winner);
+                }
+
+                if (awayTeamId > 0 && homeTeamId > 0)
+                {
+                    scheduleDetails.Add(new Players.Models.ScheduleDetails
+                    {
+                        Season = season,
+                        Week = s.Week,
+                        Day = s.Day,
+                        Date = s.Date,
+                        Time = s.Time,
+                        HomeTeamId = homeTeamId,
+                        AwayTeamId = awayTeamId
+                    });
+                }
+            }
+            return scheduleDetails;
         }
     }
 }

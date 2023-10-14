@@ -188,5 +188,11 @@ namespace Football.Players.Repository
             var query = $@"SELECT [PlayerId] FROM [dbo].IgnoreList";
             return (await _dbConnection.QueryAsync<int>(query)).ToList();
         }
+        public async Task<TeamLocation> GetTeamLocation(int teamId)
+        {
+            var query = $@"SELECT * FROM [dbo].TeamLocation
+                            WHERE [TeamId] = @teamId";
+            return (await _dbConnection.QueryAsync<TeamLocation>(query, new { teamId })).First();
+        }
     }
 }
