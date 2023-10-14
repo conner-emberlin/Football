@@ -365,3 +365,4 @@ FodyWeavers.xsd
 
 **/wwwroot/lib
 *.png
+/Football.Api/appsettings.json
