@@ -1,0 +1,103 @@
+﻿@page "/Teams/{id?}"
+<PageTitle>Teams</PageTitle>
+
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Data.Models;
+@using Football.Fantasy.Models;
+@using Football.Players.Models;
+@inject IHttpClientFactory ClientFactory
+
+<h3>Teams</h3>
+
+@if (!badRequestError && teams.Any())
+{
+    <div class="autocomplete w-25">
+        <input @bind=selectedTeam @oninput=HandleInput class="form-control filter" placeholder="Team..." />
+        @if (filteredTeams is not null)
+        {
+            <ul class="options">
+                @if (filteredTeams.Any())
+                {
+                    @foreach (var t in filteredTeams)
+                    {
+                        <li class="option" @onclick=@(_ => SelectTeam(t.TeamId))>
+                            <span class="option-text">@t.TeamDescription</span>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="disabled option">No results</li>
+                }
+            </ul>
+        }
+    </div>
+}
+else if (youTried && badRequestError)
+{
+    <p>Bad Request</p>
+}
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@code {
+    public List<TeamMap> teams = new();
+    public List<TeamMap>? filteredTeams { get; set; }
+    public bool teamSelected { get; set; } = false;
+    public string selectedTeam { get; set; } = "";
+
+    public bool badRequestError { get; set; } = false;
+    public bool youTried { get; set; } = false;
+
+    [Parameter]
+    public string id { get; set; } = "";
+
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/teams");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            teams = await JsonSerializer.DeserializeAsync<List<TeamMap>>(responseStream, options);
+            badRequestError = false;
+            youTried = true;
+
+            if (!String.IsNullOrEmpty(id))
+            {
+                SelectTeam(int.Parse(id));
+                id = "";
+            }
+        }
+        else
+        {
+            badRequestError = true;
+            youTried = true;
+        }
+        shouldRender = true;
+    }
+
+    private void HandleInput(ChangeEventArgs e)
+    {
+        var filter = e.Value?.ToString();
+        if (filter?.Length > 1)
+        {
+            filteredTeams = teams.Where(t => t.TeamDescription.ToLower().Contains(filter.ToLower())).ToList();
+        }
+        else
+        {
+            filteredTeams = null;
+        }
+    }
+
+    private async void SelectTeam(int tid)
+    {
+        
+    }
+}

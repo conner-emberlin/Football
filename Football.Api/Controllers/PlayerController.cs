@@ -28,7 +28,7 @@ namespace Football.Api.Controllers
         {
             return Ok(await _playersService.GetAllPlayers());
         }
-
+ 
         [HttpGet("data/qb/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataQB>), 200)]
         [ProducesResponseType(typeof(string), 400)]

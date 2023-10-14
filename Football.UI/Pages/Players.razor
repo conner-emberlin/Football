@@ -652,7 +652,7 @@ else if (youTried && badRequestError)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            weeklyQBData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataQB>>(responseStream, options)).OrderByDescending(d => d.Week).ToList();
+            weeklyQBData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataQB>>(responseStream, options)).OrderBy(d => d.Week).ToList();
         }
         else
         {
@@ -687,7 +687,7 @@ else if (youTried && badRequestError)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            weeklyRBData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataRB>>(responseStream, options)).OrderByDescending(d => d.Week).ToList();
+            weeklyRBData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataRB>>(responseStream, options)).OrderBy(d => d.Week).ToList();
         }
         else
         {
@@ -721,7 +721,7 @@ else if (youTried && badRequestError)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            weeklyWRData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataWR>>(responseStream, options)).OrderByDescending(d => d.Week).ToList();
+            weeklyWRData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataWR>>(responseStream, options)).OrderBy(d => d.Week).ToList();
         }
         else
         {
@@ -755,7 +755,7 @@ else if (youTried && badRequestError)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            weeklyTEData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataTE>>(responseStream, options)).OrderByDescending(d => d.Week).ToList();
+            weeklyTEData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataTE>>(responseStream, options)).OrderBy(d => d.Week).ToList();
         }
         else
         {
@@ -814,7 +814,7 @@ else if (youTried && badRequestError)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            weeklyDSTData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataDST>>(responseStream, options)).OrderByDescending(d => d.Week).ToList();
+            weeklyDSTData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataDST>>(responseStream, options)).OrderBy(d => d.Week).ToList();
         }
         else
         {
