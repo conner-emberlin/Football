@@ -1,7 +1,8 @@
 ﻿using Football.Players.Interfaces;
+using Football.Models;
 using Football.Players.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Football.Api.Controllers
 {
@@ -10,10 +11,11 @@ namespace Football.Api.Controllers
     public class TeamController : ControllerBase
     {
         private readonly IPlayersService _playersService;
-
-        public TeamController(IPlayersService playersService)
+        private readonly Season _season;
+        public TeamController(IPlayersService playersService, IOptionsMonitor<Season> season)
         {
             _playersService = playersService;
+            _season = season.CurrentValue;
         }
 
         [HttpGet("teams")]
@@ -30,5 +32,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(TeamLocation), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<TeamLocation>> GetTeamLocation(int teamId) => Ok(await _playersService.GetTeamLocation(teamId));
+
+        [HttpGet("schedule-details/{week}")]
+        [ProducesResponseType(typeof(List<ScheduleDetails>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<ScheduleDetails>>> GetScheduleDetails(int week) => Ok(await _playersService.GetScheduleDetails(_season.CurrentSeason, week));
     }
 }

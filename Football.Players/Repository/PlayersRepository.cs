@@ -194,5 +194,12 @@ namespace Football.Players.Repository
                             WHERE [TeamId] = @teamId";
             return (await _dbConnection.QueryAsync<TeamLocation>(query, new { teamId })).First();
         }
+        public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week)
+        {
+            var query = $@"SELECT * FROM [dbo].ScheduleDetails
+                            WHERE [Season] = @season
+                                AND [Week] = @week";
+            return (await _dbConnection.QueryAsync<ScheduleDetails>(query, new {season, week})).ToList();
+        }
     }
 }
