@@ -15,3 +15,8 @@ Preseason
 4. Upload schedule: POST /api/uploaddata/schedule
 5. Upload new player teams: POST /api/uploaddata/teams/{position}
 6. Run and upload season projections: GET/POST /api/projection/season/{position} 
+
+External APIs
+WeatherAPI: https://www.weatherapi.com/docs/
+BettingOdds: https://the-odds-api.com/liveapi/guides/v4/#overview
+ESPN: https://gist.github.com/akeaswaran/b48b02f1c94f873c6655e7129910fc3b
