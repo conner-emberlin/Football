@@ -2,6 +2,7 @@
 using Football.Enums;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
+using Football.News.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -14,15 +15,17 @@ namespace Football.Api.Controllers
         private readonly IFantasyDataService _fantasyDataService;
         private readonly IMatchupAnalysisService _matchupAnalysisService;
         private readonly IMarketShareService _marketShareService;
+        private readonly IStartOrSitService _startOrSitService;
         private readonly Season _season;
 
         public FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMarketShareService marketShareService,
-            IOptionsMonitor<Season> season)
+            IOptionsMonitor<Season> season, IStartOrSitService startOrSitService)
         {
             _fantasyDataService = fantasyDataService;
             _matchupAnalysisService = matchupAnalysisService;
             _marketShareService = marketShareService;
             _season = season.CurrentValue;
+            _startOrSitService = startOrSitService;
         }
 
         [HttpPost("data/{position}/{season}")]
@@ -103,5 +106,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(TargetShare), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<TargetShare>> GetTargetShares() =>  Ok(await _marketShareService.GetTargetShares());
+
+        [HttpGet("forecast/{playerId}")]
+        [ProducesResponseType(typeof(Hour), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<Hour>> GetGamedayForecast(int playerId) => Ok(await _startOrSitService.GetGamedayForecast(playerId));
     }
 }

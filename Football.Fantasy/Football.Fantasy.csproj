@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Football.Data\Football.Data.csproj" />
+    <ProjectReference Include="..\Football.News\Football.News.csproj" />
     <ProjectReference Include="..\Football.Players\Football.Players.csproj" />
   </ItemGroup>
 

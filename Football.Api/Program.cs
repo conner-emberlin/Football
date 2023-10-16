@@ -68,6 +68,7 @@ builder.Services.AddScoped<IMatchupAnalysisService, MatchupAnalysisService>();
 builder.Services.AddScoped<IMarketShareService, MarketShareService>();
 builder.Services.AddScoped<IMockDraftService, MockDraftService>();
 builder.Services.AddScoped<IMockDraftRepository, MockDraftRepository>();
+builder.Services.AddScoped<IStartOrSitService, StartOrSitService>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
