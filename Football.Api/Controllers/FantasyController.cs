@@ -111,5 +111,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(Hour), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<Hour>> GetGamedayForecast(int playerId) => Ok(await _startOrSitService.GetGamedayForecast(playerId));
+
+        [HttpGet("lines/{playerId}")]
+        [ProducesResponseType(typeof(MatchLines), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<MatchLines>> GetMatchLines(int playerId) => Ok(await _startOrSitService.GetMatchLines(playerId));
     }
 }

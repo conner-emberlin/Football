@@ -1,10 +1,14 @@
 ﻿using Football.Models;
+using Football.Enums;
 using Football.News.Interfaces;
 using Football.News.Models;
 using Football.Players.Interfaces;
 using Football.Fantasy.Interfaces;
 using Microsoft.Extensions.Options;
 using Serilog;
+using System.Net.Http.Headers;
+using Football.Fantasy.Models;
+using Football.Players.Models;
 
 namespace Football.Fantasy.Services
 {
@@ -14,12 +18,14 @@ namespace Football.Fantasy.Services
         private readonly IPlayersService _playersService;
         private readonly ILogger _logger;
         private readonly Season _season;
-        public StartOrSitService(INewsService newsService, IPlayersService playersService, IOptionsMonitor<Season> season, ILogger logger)
+        private readonly NFLOddsAPI _oddsAPI;
+        public StartOrSitService(INewsService newsService, IPlayersService playersService, IOptionsMonitor<Season> season, ILogger logger, IOptionsMonitor<NFLOddsAPI> oddsAPI)
         {
             _newsService = newsService;
             _playersService = playersService;
             _season = season.CurrentValue;
             _logger = logger;
+            _oddsAPI = oddsAPI.CurrentValue;
         }
 
         public async Task<Hour> GetGamedayForecast(int playerId)
@@ -52,6 +58,66 @@ namespace Football.Fantasy.Services
                 _logger.Information("{0} is not assigned to a team. Unable to retrieve forecast.", playerId);
                 return new Hour { };
             }
+        }
+
+        public async Task<MatchLines> GetMatchLines(int playerId)
+        {
+            var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+            if (team != null)
+            {
+                var teamId = await _playersService.GetTeamId(team.Team);
+                var teamMap = await _playersService.GetTeam(teamId);
+                var odds = await _newsService.GetNFLOdds();
+                var teamOdds = odds.Where(o => o.home_team == teamMap.TeamDescription || o.away_team == teamMap.TeamDescription).FirstOrDefault();
+                if (teamOdds != null)
+                {
+                    var bookmaker = teamOdds.bookmakers.Where(b => b.key == _oddsAPI.DefaultBookmaker).FirstOrDefault();
+                    return bookmaker != null ? MatchLines(bookmaker, teamMap) : new MatchLines { };
+                }
+                else
+                {
+                    return new MatchLines { };
+                }
+            }
+            else
+            {
+                return new MatchLines { };
+            }
+        }
+
+        private static MatchLines MatchLines(Bookmaker bookMaker, TeamMap teamMap)
+        {
+            MatchLines matchLines = new();
+            foreach (var market in bookMaker.markets)
+            {
+               if (Enum.TryParse(market.key, out MarketsEnum marketEnum))
+                {
+                    switch (marketEnum)
+                    {
+                        case MarketsEnum.spreads: 
+                            foreach (var outcome in market.outcomes)
+                            {
+                                if (outcome.name == teamMap.TeamDescription)
+                                {
+                                    matchLines.Line = outcome.point;
+                                }
+                            }                                                      
+                        break;
+                        case MarketsEnum.totals: 
+                            if (market.outcomes.Any())
+                            {
+                                matchLines.OverUnder = market.outcomes.First().point;
+                            }   
+                        break;
+                        default: break;
+                    }
+                }
+            }
+            if (matchLines.OverUnder != null && matchLines.Line != null)
+            {
+                matchLines.ImpliedTeamTotal = matchLines.OverUnder / 2 - matchLines.Line / 2;
+            }
+            return matchLines;
         }
 
         private static string FormatTime(string time, string date)

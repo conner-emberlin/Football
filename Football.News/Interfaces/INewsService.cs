@@ -6,5 +6,6 @@ namespace Football.News.Interfaces {
     {
         public Task<EspnNews> GetEspnNews();
         public Task<WeatherAPIRoot> GetWeatherAPI(string zip);
+        public Task<List<NFLOddsRoot>> GetNFLOdds();
     }
 }

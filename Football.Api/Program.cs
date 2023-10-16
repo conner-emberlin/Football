@@ -85,6 +85,7 @@ builder.Services.Configure<WeeklyScraping>(builder.Configuration.GetSection("Scr
 builder.Services.Configure<ESPN>(builder.Configuration.GetSection("ESPN"));
 builder.Services.Configure<MockDraftSettings>(builder.Configuration.GetSection("MockDraftSettings"));
 builder.Services.Configure<WeatherAPI>(builder.Configuration.GetSection("WeatherAPI"));
+builder.Services.Configure<NFLOddsAPI>(builder.Configuration.GetSection("NFLOddsAPI"));
 
 var app = builder.Build();
 

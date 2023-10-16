@@ -24,5 +24,11 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<WeatherAPIRoot>> GetWeatherAPI(string zip) => Ok(await _newsService.GetWeatherAPI(zip));
 
+        [HttpGet("nfl-odds")]
+        [ProducesResponseType(typeof(List<NFLOddsRoot>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<NFLOddsRoot>>> GetNFLOdds() => Ok(await _newsService.GetNFLOdds());
+
+
     }
 }

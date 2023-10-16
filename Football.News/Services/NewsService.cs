@@ -9,11 +9,13 @@ namespace Football.News.Services
     {
         private readonly ESPN _espn;
         private readonly WeatherAPI _weatherAPI;
+        private readonly NFLOddsAPI _nflOdds;
 
-        public NewsService(IOptionsMonitor<ESPN> espn, IOptionsMonitor<WeatherAPI> weatherAPI)
+        public NewsService(IOptionsMonitor<ESPN> espn, IOptionsMonitor<WeatherAPI> weatherAPI, IOptionsMonitor<NFLOddsAPI> nflOdds)
         {
             _espn = espn.CurrentValue;
             _weatherAPI = weatherAPI.CurrentValue;
+            _nflOdds = nflOdds.CurrentValue;
         }
         public async Task<EspnNews> GetEspnNews()
         {
@@ -43,7 +45,28 @@ namespace Football.News.Services
                 using var responseStream = await response.Content.ReadAsStreamAsync();
                 return await JsonSerializer.DeserializeAsync<WeatherAPIRoot>(responseStream, options);
             }
-            return new WeatherAPIRoot { };
+            else
+            {
+                return new WeatherAPIRoot { };
+            }
+        }
+        public async Task<List<NFLOddsRoot>> GetNFLOdds()
+        {
+            var url = string.Format("{0}&apiKey={1}", _nflOdds.NFLOddsAPIURL, _nflOdds.NFLOddsAPIKey);
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("Accept", "application/json");
+            var client = new HttpClient();
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                return await JsonSerializer.DeserializeAsync<List<NFLOddsRoot>>(responseStream, options);
+            }
+            else
+            {
+                return Enumerable.Empty<NFLOddsRoot>().ToList();
+            }
         }
     }
 }
