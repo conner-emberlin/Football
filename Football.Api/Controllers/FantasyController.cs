@@ -107,14 +107,19 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<TargetShare>> GetTargetShares() =>  Ok(await _marketShareService.GetTargetShares());
 
-        [HttpGet("forecast/{playerId}")]
-        [ProducesResponseType(typeof(Hour), 200)]
+        [HttpGet("weather/{playerId}")]
+        [ProducesResponseType(typeof(Weather), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<Hour>> GetGamedayForecast(int playerId) => Ok(await _startOrSitService.GetGamedayForecast(playerId));
+        public async Task<ActionResult<Weather>> GetWeather(int playerId) => Ok(await _startOrSitService.GetWeather(playerId));
 
         [HttpGet("lines/{playerId}")]
         [ProducesResponseType(typeof(MatchLines), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<MatchLines>> GetMatchLines(int playerId) => Ok(await _startOrSitService.GetMatchLines(playerId));
+
+        [HttpPost("start-or-sit")]
+        [ProducesResponseType(typeof(List<StartOrSit>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<StartOrSit>>> GetStartOrSit([FromBody] List<int> playerIds) => Ok(await _startOrSitService.GetStartOrSits(playerIds));
     }
 }

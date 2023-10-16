@@ -100,6 +100,16 @@ namespace Football.Players.Repository
                             AND [Season] = @season";
             return (await _dbConnection.QueryAsync<double>(query, new { season, playerId })).FirstOrDefault(); 
         }
+
+        public async Task<double> GetWeeklyProjection(int season, int week, int playerId)
+        {
+            var query = $@"SELECT [ProjectedPoints]
+                            FROM [dbo].WeeklyProjections
+                            WHERE [Season] = @season
+                                AND [Week] = @week
+                                AND [PlayerId] = @playerId";
+            return (await _dbConnection.QueryAsync<double>(query, new { season, week, playerId })).FirstOrDefault();
+        }
         public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId)
         {
             var query = $@"SELECT [PlayerId], [Name], [Season], [Team]

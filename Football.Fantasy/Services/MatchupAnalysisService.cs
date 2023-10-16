@@ -37,7 +37,8 @@ namespace Football.Fantasy.Services
                 {
                     double fpTotal = 0;
                     var games = await _playersService.GetTeamGames(team.TeamId);
-                    foreach (var game in games.Where(g => g.Week < currentWeek).ToList())
+                    var filteredGames = games.Where(g => g.Week < currentWeek && g.OpposingTeamId > 0).ToList();
+                    foreach (var game in filteredGames)
                     {
                         var opposingPlayers = await _playersService.GetPlayersByTeam(game.OpposingTeam);
                         foreach (var op in opposingPlayers)
@@ -56,15 +57,35 @@ namespace Football.Fantasy.Services
                     rankings.Add(new MatchupRanking
                     {
                         Team = team,
-                        GamesPlayed = currentWeek - 1,
+                        GamesPlayed = filteredGames.Count,
                         Position = position.ToString(),
                         PointsAllowed = Math.Round(fpTotal, 2),
-                        AvgPointsAllowed = currentWeek > 1 ? Math.Round(fpTotal / (currentWeek - 1), 2) : 0
+                        AvgPointsAllowed = filteredGames.Count > 1 ? Math.Round(fpTotal / filteredGames.Count, 2) : 0
                     });
                 }
-                var matchupRanks = rankings.OrderBy(r => r.PointsAllowed).ToList();
+                var matchupRanks = rankings.OrderBy(r => r.AvgPointsAllowed).ToList();
                 _cache.Set("MatchupRanking" + position.ToString(), matchupRanks);
                 return matchupRanks;
+            }
+        }
+
+        public async Task<int> GetMatchupRanking(int playerId)
+        {
+            var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+            if (team != null)
+            {
+                var teamId = await _playersService.GetTeamId(team.Team);
+                var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
+                var opponentId = (await _playersService.GetTeamGames(teamId)).Where(g => g.Week == currentWeek).First().OpposingTeamId;
+                var player = await _playersService.GetPlayer(playerId);
+                _ = Enum.TryParse(player.Position, out PositionEnum position);
+                var matchupRankings = await PositionalMatchupRankings(position);
+                var matchupRanking = matchupRankings.FindIndex(m => m.Team.TeamId == opponentId) + 1;
+                return matchupRanking;
+            }
+            else
+            {
+                return 0;
             }
         }
         private List<MatchupRanking> RetrieveFromCache(string position) =>

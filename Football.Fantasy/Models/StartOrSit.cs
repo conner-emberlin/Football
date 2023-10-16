@@ -1,15 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Football.Players.Models;
 
 namespace Football.Fantasy.Models
 {
     public class StartOrSit
     {
+        public Player Player { get; set; } = new();
+        public TeamMap? TeamMap { get; set; }
+        public ScheduleDetails? ScheduleDetails { get; set; }
         public MatchLines? MatchLines { get; set; }
-
+        public Weather? Weather { get; set; }
+        public int? MatchupRanking { get; set; }
+        public double? ProjectedPoints { get; set; }
+        public bool Start { get; set; }
     }
 
     public class MatchLines
@@ -17,5 +19,16 @@ namespace Football.Fantasy.Models
         public double? OverUnder { get; set; }
         public double? Line { get; set; }
         public double? ImpliedTeamTotal { get; set; }
+    }
+
+    public class Weather
+    {
+        public string GameTime { get; set; } = "";
+        public string Temperature { get; set; } = "";
+        public string Condition { get; set; } = "";
+        public string ConditionURL { get; set; } = "";
+        public string Wind { get; set; } = "";
+        public string RainChance { get; set; } = "";
+        public string SnowChance { get; set; } = "";
     }
 }

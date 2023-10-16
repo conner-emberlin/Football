@@ -6,7 +6,6 @@ using Football.Players.Interfaces;
 using Football.Fantasy.Interfaces;
 using Microsoft.Extensions.Options;
 using Serilog;
-using System.Net.Http.Headers;
 using Football.Fantasy.Models;
 using Football.Players.Models;
 
@@ -16,19 +15,62 @@ namespace Football.Fantasy.Services
     {
         private readonly INewsService _newsService;
         private readonly IPlayersService _playersService;
+        private readonly IMatchupAnalysisService _matchupAnalysisService;
         private readonly ILogger _logger;
         private readonly Season _season;
         private readonly NFLOddsAPI _oddsAPI;
-        public StartOrSitService(INewsService newsService, IPlayersService playersService, IOptionsMonitor<Season> season, ILogger logger, IOptionsMonitor<NFLOddsAPI> oddsAPI)
+        public StartOrSitService(INewsService newsService, IPlayersService playersService, IMatchupAnalysisService matchupAnalysisService, 
+            IOptionsMonitor<Season> season, ILogger logger, IOptionsMonitor<NFLOddsAPI> oddsAPI)
         {
             _newsService = newsService;
             _playersService = playersService;
+            _matchupAnalysisService = matchupAnalysisService;
             _season = season.CurrentValue;
             _logger = logger;
             _oddsAPI = oddsAPI.CurrentValue;
         }
+        public async Task<List<StartOrSit>> GetStartOrSits(List<int> playerIds)
+        {
+            List<StartOrSit> startOrSits = new();
+            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
+            foreach (var playerId in playerIds)
+            {               
+                var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+                if (team != null)
+                {
+                    var schedule = await _playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
+                    var teamId = await _playersService.GetTeamId(team.Team);                   
+                    startOrSits.Add(new StartOrSit { 
+                        Player = await _playersService.GetPlayer(playerId),                    
+                        TeamMap = await _playersService.GetTeam(teamId),                    
+                        ScheduleDetails = schedule.Where(s => s.AwayTeamId == teamId || s.HomeTeamId == teamId).FirstOrDefault(),
+                        MatchLines = await GetMatchLines(playerId),
+                        Weather = await GetWeather(playerId),
+                        MatchupRanking = await _matchupAnalysisService.GetMatchupRanking(playerId),
+                        ProjectedPoints = await _playersService.GetWeeklyProjection(_season.CurrentSeason, currentWeek, playerId)
+                        });
+                }
+                else
+                {
+                    _logger.Information("PlayerId {0} has not been assigned a team.", playerId);
+                }
+            }
+            if (startOrSits.Any())
+            {
+                var starter = startOrSits.Where(s => s.ProjectedPoints == startOrSits.Max(s => s.ProjectedPoints)).First().Player.PlayerId;
+                foreach (var startOrSit in startOrSits)
+                {
+                    startOrSit.Start = startOrSit.Player.PlayerId == starter;
+                }
+                return startOrSits;
+            }
+            else
+            {
+                return Enumerable.Empty<StartOrSit>().ToList();
+            }
+        }
 
-        public async Task<Hour> GetGamedayForecast(int playerId)
+        public async Task<Weather> GetWeather(int playerId)
         {
             var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
             var playerTeam = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
@@ -41,22 +83,29 @@ namespace Football.Fantasy.Services
                 var forecast = await _newsService.GetWeatherAPI(homeLocation.Zip);
                 if(forecast != null)
                 {
-                    var forecastDay = forecast.forecast.forecastday.Where(f => f.date == scheduleDetail.Date).First();
-                    var time = FormatTime(scheduleDetail.Time, scheduleDetail.Date);
-                    var forecastHour = forecastDay.hour.Where(h => h.time == time).First();
-                    return forecastHour ?? new Hour { };
+                    var forecastDay = forecast.forecast.forecastday.Where(f => f.date == scheduleDetail.Date).FirstOrDefault();
+                    if (forecastDay != null)
+                    {
+                        var time = FormatTime(scheduleDetail.Time, scheduleDetail.Date);
+                        var forecastHour = forecastDay.hour.Where(h => h.time == time).First();
+                        return forecastHour != null ? Weather(forecastHour) : new Weather { };
+                    }
+                    else
+                    {
+                        return new Weather { };
+                    }
                 }
                 else
                 {
                     _logger.Information("Unable to find forecast for zip {0}", homeLocation.Zip);
-                    return new Hour { };
+                    return new Weather { };
                 }
 
             }
             else
             {
                 _logger.Information("{0} is not assigned to a team. Unable to retrieve forecast.", playerId);
-                return new Hour { };
+                return new Weather { };
             }
         }
 
@@ -119,6 +168,17 @@ namespace Football.Fantasy.Services
             }
             return matchLines;
         }
+
+        private static Weather Weather(Hour hour) =>
+            new() {
+                GameTime = hour.time,
+                Temperature = string.Format("{0}°F", hour.temp_f),
+                Condition = hour.condition.text,
+                ConditionURL = string.Format("https{0}", hour.condition.icon),
+                Wind = string.Format("{0} mph winds", hour.wind_mph),
+                RainChance = string.Format("{0}% chance of rain", hour.chance_of_rain),
+                SnowChance = string.Format("{0}% chance of snow", hour.chance_of_snow)
+                };
 
         private static string FormatTime(string time, string date)
         {
