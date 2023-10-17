@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Football.Enums;
+using Football.Models;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
-
+using Football.Players.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace Football.Api.Controllers
 {
@@ -11,10 +13,17 @@ namespace Football.Api.Controllers
     public class ProjectionController : ControllerBase
     {
         private readonly IProjectionService _projectionService;
+        private readonly IPlayersService _playersService;
+        private readonly IProjectionAnalysisService _analysisService;
+        private readonly Season _season;
 
-        public ProjectionController(IProjectionService projectionService)
+        public ProjectionController(IProjectionService projectionService, IPlayersService playersService, 
+            IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season)
         {
             _projectionService = projectionService;
+            _playersService = playersService;
+            _analysisService = analysisService;
+            _season = season.CurrentValue;
         }
 
         [HttpGet("season/{position}")]
@@ -84,5 +93,34 @@ namespace Football.Api.Controllers
             }
         }
 
+        [HttpGet("weekly-analysis/{position}")]
+        [ProducesResponseType(typeof(List<WeeklyProjectionAnalysis>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyProjectionAnalysis>>> GetWeeklyProjectionAnalysis(string position)
+        {
+            if (Enum.TryParse(position, out PositionEnum positionEnum))
+            {
+                List<WeeklyProjectionAnalysis> projectionAnalyses = new();
+                var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
+                for (int i = 2; i < currentWeek; i++)
+                {
+                    projectionAnalyses.Add(await _analysisService.GetWeeklyProjectionAnalysis(positionEnum, i));
+                }
+                return Ok(projectionAnalyses);
+            }
+            else return BadRequest("Bad Request");
+        }
+
+        [HttpGet("weekly-error/{position}/{week}")]
+        [ProducesResponseType(typeof(List<WeeklyProjectionError>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyProjectionError>>> GetWeeklyProjectionError(string position, int week)
+        {
+            if (Enum.TryParse(position, out PositionEnum positionEnum))
+            {
+                return Ok(await _analysisService.GetWeeklyProjectionError(positionEnum, week));
+            }
+            else return BadRequest("Bad Request");
+        }
     }
 }
