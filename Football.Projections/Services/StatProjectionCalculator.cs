@@ -318,21 +318,21 @@ namespace Football.Projections.Services
                 throw;
             }
         }
-        public WeeklyFantasy CalculateWeeklyAverage(List<WeeklyFantasy> weeks) => new()    
+        public WeeklyFantasy CalculateWeeklyAverage(List<WeeklyFantasy> weeks, int currentWeek) => new()    
             {
                 PlayerId = weeks.First().PlayerId,
                 Season = _season.CurrentSeason,
-                Week = weeks.Max(w => w.Week) + 1,
+                Week = currentWeek,
                 Games = 1,
                 Name = weeks.First().Name,
                 Position = weeks.First().Position,
                 FantasyPoints = weeks.Average(w => w.FantasyPoints)
             };        
-        public WeeklyDataQB CalculateWeeklyAverage(List<WeeklyDataQB> weeks) => new()
+        public WeeklyDataQB CalculateWeeklyAverage(List<WeeklyDataQB> weeks, int currentWeek) => new()
             {
                 PlayerId = weeks.First().PlayerId,
                 Season = weeks.First().Season,
-                Week = weeks.Max(w => w.Week) + 1,
+                Week = currentWeek,
                 Completions = weeks.Average(w => w.Completions),
                 Attempts = weeks.Average(w => w.Attempts),
                 Yards = weeks.Average(w => w.Yards),
@@ -344,11 +344,11 @@ namespace Football.Projections.Services
                 RushingTD = weeks.Average(w => w.RushingTD),
                 Fumbles = weeks.Average(w => w.Fumbles)
             };
-        public WeeklyDataRB CalculateWeeklyAverage(List<WeeklyDataRB> weeks) => new()
+        public WeeklyDataRB CalculateWeeklyAverage(List<WeeklyDataRB> weeks, int currentWeek) => new()
             {
                 PlayerId = weeks.First().PlayerId,
                 Season = weeks.First().Season,
-                Week = weeks.Max(w => w.Week) + 1,
+                Week = currentWeek,
                 RushingAtt = weeks.Average(w => w.RushingAtt),
                 RushingYds = weeks.Average(w => w.RushingYds),
                 RushingTD = weeks.Average(w => w.RushingTD),
@@ -358,11 +358,11 @@ namespace Football.Projections.Services
                 ReceivingTD = weeks.Average(w => w.ReceivingTD),
                 Fumbles = weeks.Average(w => w.Fumbles)
             };
-        public WeeklyDataWR CalculateWeeklyAverage(List<WeeklyDataWR> weeks) => new()
+        public WeeklyDataWR CalculateWeeklyAverage(List<WeeklyDataWR> weeks, int currentWeek) => new()
             {
                 PlayerId = weeks.First().PlayerId,
                 Season = weeks.First().Season,
-                Week = weeks.Max(w => w.Week) + 1,
+                Week = currentWeek,
                 Receptions = weeks.Average(w => w.Receptions),
                 Targets = weeks.Average(w => w.Targets),
                 Yards = weeks.Average(w => w.Yards),
@@ -372,11 +372,11 @@ namespace Football.Projections.Services
                 RushingTD = weeks.Average(w => w.RushingTD),
                 Fumbles = weeks.Average(w => w.Fumbles)
             };
-        public WeeklyDataTE CalculateWeeklyAverage(List<WeeklyDataTE> weeks) => new()
+        public WeeklyDataTE CalculateWeeklyAverage(List<WeeklyDataTE> weeks, int currentWeek) => new()
             {
                 PlayerId = weeks.First().PlayerId,
                 Season = weeks.First().Season,
-                Week = weeks.Max(w => w.Week) + 1,
+                Week = currentWeek,
                 Receptions = weeks.Average(w => w.Receptions),
                 Targets = weeks.Average(w => w.Targets),
                 Yards = weeks.Average(w => w.Yards),

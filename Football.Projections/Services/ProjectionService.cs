@@ -193,7 +193,7 @@ namespace Football.Projections.Services
             }
             else if (position == PositionEnum.QB)
             {
-                var projections = await CalculateWeeklyProjections(await QBWeeklyProjectionModel());
+                var projections = await CalculateWeeklyProjections(await QBWeeklyProjectionModel(currentWeek));
                 projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
                 var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.QBProjections);
                 _cache.Set("QBWeeklyProjections", formattedProjections);
@@ -201,7 +201,7 @@ namespace Football.Projections.Services
             }
             else if (position == PositionEnum.RB)
             {
-                var projections = await CalculateWeeklyProjections(await RBWeeklyProjectionModel());
+                var projections = await CalculateWeeklyProjections(await RBWeeklyProjectionModel(currentWeek));
                 projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
                 var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.RBProjections);
                 _cache.Set("RBWeeklyProjections", formattedProjections);
@@ -209,7 +209,7 @@ namespace Football.Projections.Services
             }
             else if (position == PositionEnum.WR)
             {
-                var projections = await CalculateWeeklyProjections(await WRWeeklyProjectionModel());
+                var projections = await CalculateWeeklyProjections(await WRWeeklyProjectionModel(currentWeek));
                 projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
                 var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.WRProjections);
                 _cache.Set("WRWeeklyProjections", formattedProjections);
@@ -217,7 +217,7 @@ namespace Football.Projections.Services
             }
             else if (position == PositionEnum.TE)
             {
-                var projections = await CalculateWeeklyProjections(await TEWeeklyProjectionModel());
+                var projections = await CalculateWeeklyProjections(await TEWeeklyProjectionModel(currentWeek));
                 projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
                 var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_projections.TEProjections);
                 _cache.Set("TEWeeklyProjections", formattedProjections);
@@ -261,7 +261,7 @@ namespace Football.Projections.Services
         {
             List<WeekProjection> projections = new();
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
-            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, PositionEnum.QB));
+            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, PositionEnum.QB, model.First().Week));
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = model[i].PlayerId;
@@ -285,7 +285,7 @@ namespace Football.Projections.Services
         {
             List<WeekProjection> projections = new();
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
-            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, PositionEnum.RB));
+            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, PositionEnum.RB, model.First().Week));
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = model[i].PlayerId;
@@ -309,7 +309,7 @@ namespace Football.Projections.Services
         {
             List<WeekProjection> projections = new();
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
-            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, PositionEnum.WR));
+            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, PositionEnum.WR, model.First().Week));
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = model[i].PlayerId;
@@ -333,7 +333,7 @@ namespace Football.Projections.Services
         {
             List<WeekProjection> projections = new();
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
-            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, PositionEnum.TE));
+            var results = PerformProjection(regressorMatrix, await PerformWeeklyRegression(regressorMatrix, PositionEnum.TE, model.First().Week));
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = model[i].PlayerId;
@@ -366,11 +366,11 @@ namespace Football.Projections.Services
                 throw;
             }
         }
-        public async Task<Vector<double>> PerformWeeklyRegression(Matrix<double> regressorMatrix, PositionEnum position)
+        public async Task<Vector<double>> PerformWeeklyRegression(Matrix<double> regressorMatrix, PositionEnum position, int currentWeek)
         {
             try
             {
-                var dependentVector = _matrixCalculator.PopulateDependentVector(await WeeklyFantasyProjectionModel(position));
+                var dependentVector = _matrixCalculator.PopulateDependentVector(await WeeklyFantasyProjectionModel(position, currentWeek));
                 return _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
             }
             catch(Exception ex)
@@ -396,7 +396,7 @@ namespace Football.Projections.Services
             }
             return seasonFantasy;
         }
-        private async Task<List<WeeklyFantasy>> WeeklyFantasyProjectionModel(PositionEnum position)
+        private async Task<List<WeeklyFantasy>> WeeklyFantasyProjectionModel(PositionEnum position, int currentWeek)
         {
             var players = await _playersService.GetPlayersByPosition(position);
             List<WeeklyFantasy> weeklyFantasy = new();
@@ -405,7 +405,7 @@ namespace Football.Projections.Services
                 var weeklyResults = await _fantasyService.GetWeeklyFantasy(player.PlayerId);
                 if (weeklyResults.Any())
                 {
-                    weeklyFantasy.Add(_statCalculator.CalculateWeeklyAverage(weeklyResults));
+                    weeklyFantasy.Add(_statCalculator.CalculateWeeklyAverage(weeklyResults, currentWeek));
                 }
             }
             return weeklyFantasy;
@@ -425,7 +425,7 @@ namespace Football.Projections.Services
             }
             return qbModel;
         }
-        private async Task<List<QBModelWeek>> QBWeeklyProjectionModel()
+        private async Task<List<QBModelWeek>> QBWeeklyProjectionModel(int currentWeek)
         {
             var players = await _playersService.GetPlayersByPosition(PositionEnum.QB);
             List<QBModelWeek> qbModel = new();
@@ -434,7 +434,7 @@ namespace Football.Projections.Services
                 var stats = await _statisticsService.GetWeeklyDataQB(player.PlayerId);
                 if (stats.Any())
                 {
-                    qbModel.Add(await _regressionService.QBModelWeek(_statCalculator.CalculateWeeklyAverage(stats)));
+                    qbModel.Add(await _regressionService.QBModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
                 }
             }
             return qbModel;
@@ -454,7 +454,7 @@ namespace Football.Projections.Services
             return rbModel;
         }
 
-        private async Task<List<RBModelWeek>> RBWeeklyProjectionModel()
+        private async Task<List<RBModelWeek>> RBWeeklyProjectionModel(int currentWeek)
         {
             var players = await _playersService.GetPlayersByPosition(PositionEnum.RB);
             List<RBModelWeek> rbModel = new();
@@ -463,7 +463,7 @@ namespace Football.Projections.Services
                 var stats = await _statisticsService.GetWeeklyDataRB(player.PlayerId);
                 if (stats.Any())
                 {
-                    rbModel.Add(await _regressionService.RBModelWeek(_statCalculator.CalculateWeeklyAverage(stats)));
+                    rbModel.Add(await _regressionService.RBModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
                 }
             }
             return rbModel;
@@ -482,7 +482,7 @@ namespace Football.Projections.Services
             }
             return wrModel;
         }
-        private async Task<List<WRModelWeek>> WRWeeklyProjectionModel()
+        private async Task<List<WRModelWeek>> WRWeeklyProjectionModel(int currentWeek)
         {
             var players = await _playersService.GetPlayersByPosition(PositionEnum.WR);
             List<WRModelWeek> wrModel = new();
@@ -491,7 +491,7 @@ namespace Football.Projections.Services
                 var stats = await _statisticsService.GetWeeklyDataWR(player.PlayerId);
                 if (stats.Any())
                 {
-                    wrModel.Add(await _regressionService.WRModelWeek(_statCalculator.CalculateWeeklyAverage(stats)));
+                    wrModel.Add(await _regressionService.WRModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
                 }
             }
             return wrModel;
@@ -510,7 +510,7 @@ namespace Football.Projections.Services
             }
             return teModel;
         }
-        private async Task<List<TEModelWeek>> TEWeeklyProjectionModel()
+        private async Task<List<TEModelWeek>> TEWeeklyProjectionModel(int currentWeek)
         {
             var players = await _playersService.GetPlayersByPosition(PositionEnum.TE);
             List<TEModelWeek> teModel = new();
@@ -519,7 +519,7 @@ namespace Football.Projections.Services
                 var stats = await _statisticsService.GetWeeklyDataTE(player.PlayerId);
                 if (stats.Any())
                 {
-                    teModel.Add(await _regressionService.TEModelWeek(_statCalculator.CalculateWeeklyAverage(stats)));
+                    teModel.Add(await _regressionService.TEModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
                 }
             }
             return teModel;

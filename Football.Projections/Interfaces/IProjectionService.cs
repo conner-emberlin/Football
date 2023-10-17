@@ -16,7 +16,7 @@ namespace Football.Projections.Interfaces
         public Task<IEnumerable<WeekProjection>> CalculateWeeklyProjections(List<WRModelWeek> model);
         public Task<IEnumerable<WeekProjection>> CalculateWeeklyProjections(List<TEModelWeek> model);
         public Task<Vector<double>> PerformRegression(Matrix<double> regressorMatrix, PositionEnum position);
-        public Task<Vector<double>> PerformWeeklyRegression(Matrix<double> regressorMatrix, PositionEnum position);
+        public Task<Vector<double>> PerformWeeklyRegression(Matrix<double> regressorMatrix, PositionEnum position, int currentWeek);
         public Vector<double> PerformProjection(Matrix<double> model, Vector<double> coeff);
         public Task<List<SeasonProjection>> RookieSeasonProjections(PositionEnum position);
         public Task<int> PostSeasonProjections(List<SeasonProjection> projections);
