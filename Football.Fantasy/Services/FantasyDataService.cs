@@ -144,7 +144,7 @@ namespace Football.Fantasy.Services
                                     {
                                         PlayerId = gw.Key,
                                         Season = season,
-                                        Games = currentWeek - 1,
+                                        Games = gw.Count(),
                                         FantasyPoints = Math.Round(gw.Sum(f => f.FantasyPoints), 2),
                                         Name = gw.Select(g => g.Name).First(),
                                         Position = gw.Select(g => g.Position).First()
