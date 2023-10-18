@@ -36,9 +36,7 @@ namespace Football.Data.Services
         public List<FantasyProsRosterPercent> ParseFantasyProsRosterPercent(string[] strings, string position)
         {
             List<FantasyProsRosterPercent> rosterPercent = new();
-            var len = position == "QB" || position == "RB" ? 16
-                     :position == "TE" || position == "WR" ? 15
-                     : 0;
+            var len = GetFantasyProsTableLength(position);
             for(int i = 0; i < strings.Length - len; i+=len)
             {
                 rosterPercent.Add(new FantasyProsRosterPercent
@@ -228,9 +226,7 @@ namespace Football.Data.Services
         }
         public List<PlayerTeam> ParseFantasyProsPlayerTeam(string[] strings, string position)
         {
-            var len = position == "QB" || position == "RB" ? 16
-                    : position == "TE" || position == "WR" ? 15
-                    : 0;
+            var len = GetFantasyProsTableLength(position);
             List<PlayerTeam> playerTeams = new();
             for (int i = 0; i < strings.Length - len; i += len)
             {
@@ -384,5 +380,17 @@ namespace Football.Data.Services
         }
 
         private static string FormatName(string name) => Regex.Replace(Regex.Replace(name, @"[\d-]", string.Empty), @"\(.*\)", string.Empty).Trim();
+
+        private static int GetFantasyProsTableLength(string position)
+        {
+            return position.ToUpper() switch{
+
+                "QB" => 16,
+                "RB" => 16,
+                "WR" => 15,
+                "TE" => 15,
+                _ => 0
+            };
+        }
     }
 }
