@@ -17,28 +17,28 @@ namespace Football.Players.Repository
 
         public async Task<int> GetPlayerId(string name)
         {
-            var query = $@"SELECT [PlayerId] FROM [dbo].TempPlayer
+            var query = $@"SELECT [PlayerId] FROM [dbo].Players
                             WHERE [Name] = @name
                             ORDER BY [Active] DESC";
             return (await _dbConnection.QueryAsync<int>(query, new { name })).FirstOrDefault();
         }
         public async Task<int> CreatePlayer(Player player)
         {
-            var query = $@"INSERT INTO [dbo].TempPlayer (Name, Position, Active)
+            var query = $@"INSERT INTO [dbo].Players (Name, Position, Active)
                         VALUES (@Name, @Position, @Active)";
             return await _dbConnection.ExecuteAsync(query, player);
         }
         public async Task<List<Player>> GetAllPlayers()
         {
             var query = $@"SELECT [PlayerId], [Name], [Position], [Active]
-                        FROM [dbo].TempPlayer   
+                        FROM [dbo].Players  
                         ";
             return (await _dbConnection.QueryAsync<Player>(query)).ToList();
         }
         public async Task<List<Player>> GetPlayersByPosition(string position)
         {
             var query = $@"SELECT [PlayerId], [Name], [Position], [Active]
-                            FROM [dbo].TempPlayer
+                            FROM [dbo].Players
                             WHERE [Position] = @position";
             return (await _dbConnection.QueryAsync<Player>(query, new { position })).ToList();
         }
@@ -46,7 +46,7 @@ namespace Football.Players.Repository
         public async Task<Player> GetPlayer(int playerId)
         {
             var query = $@"SELECT [PlayerId], [Name], [Position], [Active]
-                        FROM [dbo].TempPlayer
+                        FROM [dbo].Players
                         WHERE [PlayerId] = @playerId";
             return (await _dbConnection.QueryAsync<Player>(query, new { playerId })).First();
         }
