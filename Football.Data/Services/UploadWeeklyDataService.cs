@@ -58,7 +58,35 @@ namespace Football.Data.Services
             var results = await GameResult(await _scraperService.ScrapeGameScores(week), season);
             return await _uploadWeeklyDataRepository.UploadWeeklyGameResults(results);
         }
+        public async Task<int> UploadWeeklyRosterPercentages(int season, int week, string position)
+        {
+            var url = _scraperService.FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
+            var data = _scraperService.ParseFantasyProsRosterPercent(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position);
+            var rosterPercentages = await WeeklyRosterPercent(data, season, week);
+            return await _uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages);
+        }
 
+        private async Task<List<WeeklyRosterPercent>> WeeklyRosterPercent(List<FantasyProsRosterPercent> rosterPercents, int season, int week)
+        {
+            List<WeeklyRosterPercent> rosterPercentages = new();
+            foreach (var rp in rosterPercents)
+            {
+                var playerId = await _playerService.GetPlayerId(rp.Name);
+                if (playerId > 0)
+                {
+                    rosterPercentages.Add(new WeeklyRosterPercent
+                    {
+                        Season = season,
+                        Week = week,
+                        PlayerId = playerId,
+                        Name = rp.Name,
+                        RosterPercent = rp.RosterPercent
+                        
+                    });
+                }
+            }
+            return rosterPercentages;
+        }
         private async Task<List<WeeklyDataQB>> WeeklyDataQB(List<FantasyProsStringParseQB> players, int season, int week)
         {
             List<WeeklyDataQB> weeklyData = new();

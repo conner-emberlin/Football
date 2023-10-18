@@ -87,5 +87,12 @@ namespace Football.Data.Repository
             }
             return count;
         }
+
+        public async Task<int> UploadWeeklyRosterPercentages(List<WeeklyRosterPercent> rosterPercentages)
+        {
+            var query = $@"INSERT INTO [dbo].WeeklyRosterPercentages (Season, Week, PlayerId, Name, RosterPercent)
+                            VALUES (@Season, @Week, @PlayerId, @Name, @RosterPercent)";
+            return await _dbConnection.ExecuteAsync(query, rosterPercentages);
+        }
     }
 }

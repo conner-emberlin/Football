@@ -32,6 +32,23 @@ namespace Football.Data.Services
             return doc.DocumentNode.SelectNodes(xpath)[0].InnerText.Split(new string[] { "\r\n", "\r", "\n" },
                     StringSplitOptions.RemoveEmptyEntries); 
         }
+
+        public List<FantasyProsRosterPercent> ParseFantasyProsRosterPercent(string[] strings, string position)
+        {
+            List<FantasyProsRosterPercent> rosterPercent = new();
+            var len = position == "QB" || position == "RB" ? 16
+                     :position == "TE" || position == "WR" ? 15
+                     : 0;
+            for(int i = 0; i < strings.Length - len; i+=len)
+            {
+                rosterPercent.Add(new FantasyProsRosterPercent
+                {
+                    Name = FormatName(strings[i]),
+                    RosterPercent = double.Parse(strings[i + len - 1][0 ..strings[i + len - 1].IndexOf("%")])
+                }); 
+            }
+            return rosterPercent;
+        }
         public List<FantasyProsStringParseWR> ParseFantasyProsWRData(string[] strings)
         {
             List<FantasyProsStringParseWR> players = new();

@@ -78,6 +78,12 @@
         public double OverallADP { get; set; }
     }
 
+    public class FantasyProsRosterPercent
+    {
+        public string Name { get; set; } = "";
+        public double RosterPercent { get; set; }
+    }
+
 
 
 

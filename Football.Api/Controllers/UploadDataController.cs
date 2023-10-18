@@ -45,6 +45,20 @@ namespace Football.Api.Controllers
                 return BadRequest("Bad Request");
             }
         }
+        [HttpPost("roster-percent/{position}/{season}/{week}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UploadWeeklyRosterPercentages(string position, int season, int week)
+        {
+            if (!string.IsNullOrWhiteSpace(position) && season > 0 && week > 0)
+            {
+                return Ok(await _weeklyDataService.UploadWeeklyRosterPercentages(season, week, position));
+            }
+            else
+            {
+                return BadRequest("Bad Request");
+            }
+        }
 
         [HttpPost("{position}/{season}")]
         [ProducesResponseType(typeof(int), 200)]
@@ -104,5 +118,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> ScrapeADP(string position) => Ok(await _seasonDataService.UploadADP(_season.CurrentSeason, position));
+
+
     }
 }
