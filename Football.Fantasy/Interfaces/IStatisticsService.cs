@@ -25,6 +25,7 @@ namespace Football.Fantasy.Interfaces
         public Task<List<WeeklyDataTE>> GetWeeklyDataTE(int playerId);
         public Task<List<WeeklyDataDST>> GetWeeklyDataDST(int playerId);
         public Task<List<GameResult>> GetGameResults(int season, int week);
+        public Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week);
        
     }
 }

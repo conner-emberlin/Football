@@ -31,6 +31,7 @@ namespace Football.Fantasy.Services
         public async Task<List<WeeklyDataTE>> GetWeeklyDataTE(int playerId) => await _statisticsRepository.GetWeeklyDataTE(playerId);
         public async Task<List<WeeklyDataDST>> GetWeeklyDataDST(int playerId) => await _statisticsRepository.GetWeeklyDataDST(playerId);
         public async Task<List<GameResult>> GetGameResults(int season, int week) => await _statisticsRepository.GetGameResults(season, week);
+        public async Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week) => await _statisticsRepository.GetWeeklyRosterPercentages(season, week);
 
     }
 }

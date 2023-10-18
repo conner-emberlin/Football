@@ -453,5 +453,13 @@ namespace Football.Fantasy.Repository
                         AND [Week] = @week";
             return (await _dbConnection.QueryAsync<GameResult>(query, new { season, week })).ToList();
         }
+
+        public async Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week)
+        {
+            var query = $@"SELECT * FROM [dbo].WeeklyRosterPercentages
+                            WHERE [Season] = @season
+                                AND [Week] = @week";
+            return (await _dbConnection.QueryAsync<WeeklyRosterPercent>(query, new { season, week })).ToList();
+        }
     }
 }
