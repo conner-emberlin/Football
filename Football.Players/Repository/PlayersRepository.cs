@@ -211,5 +211,19 @@ namespace Football.Players.Repository
                                 AND [Week] = @week";
             return (await _dbConnection.QueryAsync<ScheduleDetails>(query, new {season, week})).ToList();
         }
+        public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season)
+        {
+            var query = $@"SELECT * FROM [dbo].InSeasonInjuries
+                            WHERE [Season] = @season
+                                AND [InjuryEndWeek] = 0";
+            return (await _dbConnection.QueryAsync<InSeasonInjury>(query, new { season })).ToList();                                          
+        }
+
+        public async Task<int> PostInSeasonInjury(InSeasonInjury injury)
+        {
+            var query = $@"INSERT INTO [dbo].InSeasonInjuries (Season, PlayerId, InjuryStartWeek, InjuryEndWeek, Description)
+                            VALUES (@Season, @PlayerId, @InjuryStartWeek, @InjuryEndWeek, @Description)";
+            return await _dbConnection.ExecuteAsync(query, injury);
+        }
     }
 }

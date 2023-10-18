@@ -4,6 +4,7 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using System.Net;
 
 namespace Football.Players.Services
 {
@@ -65,6 +66,8 @@ namespace Football.Players.Services
         public async Task<List<int>> GetIgnoreList() => await _playersRepository.GetIgnoreList();
         public async Task<TeamLocation> GetTeamLocation(int teamId) => await _playersRepository.GetTeamLocation(teamId);
         public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => await _playersRepository.GetScheduleDetails(season, week);
+        public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => await _playersRepository.GetActiveInSeasonInjuries(season);
+        public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await _playersRepository.PostInSeasonInjury(injury);
         private List<Player> RetrieveFromCache() =>
                      _cache.TryGetValue("AllPlayers", out List<Player> cachedPlayers) ? cachedPlayers
                      : Enumerable.Empty<Player>().ToList();

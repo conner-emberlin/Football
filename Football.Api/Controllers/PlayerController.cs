@@ -24,181 +24,67 @@ namespace Football.Api.Controllers
         [HttpGet("data/players")]
         [ProducesResponseType(typeof(List<Player>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<Player>>> GetAllPlayers()
-        {
-            return Ok(await _playersService.GetAllPlayers());
-        }
- 
+        public async Task<ActionResult<List<Player>>> GetAllPlayers() => Ok(await _playersService.GetAllPlayers());
+
         [HttpGet("data/qb/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataQB>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonDataQB>>> GetSeasonDataQB(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _statisticsService.GetSeasonDataQB(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<SeasonDataQB>>> GetSeasonDataQB(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonDataQB(playerId)) : BadRequest();
+
         [HttpGet("data/rb/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataRB>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonDataRB>>> GetSeasonDataRB(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _statisticsService.GetSeasonDataRB(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<SeasonDataRB>>> GetSeasonDataRB(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonDataRB(playerId)) : BadRequest();
+
         [HttpGet("data/wr/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataWR>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonDataWR>>> GetSeasonDataWR(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _statisticsService.GetSeasonDataWR(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<SeasonDataWR>>> GetSeasonDataWR(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonDataWR(playerId)) : BadRequest();
+
         [HttpGet("data/te/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataTE>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonDataTE>>> GetSeasonDataTE(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _statisticsService.GetSeasonDataTE(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<SeasonDataTE>>> GetSeasonDataTE(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonDataTE(playerId)) : BadRequest();
+
         [HttpGet("data/dst/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataDST>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonDataDST>>> GetSeasonDataDST(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _statisticsService.GetSeasonDataDST(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<SeasonDataDST>>> GetSeasonDataDST(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonDataDST(playerId)) : BadRequest();
+
         [HttpGet("data/weekly/qb/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataQB>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataQB>>> GetWeeklyDataQB(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _statisticsService.GetWeeklyDataQB(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<WeeklyDataQB>>> GetWeeklyDataQB(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetWeeklyDataQB(playerId)) : BadRequest();
+
         [HttpGet("data/weekly/rb/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataRB>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataRB>>> GetWeeklyDataRB(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _statisticsService.GetWeeklyDataRB(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<WeeklyDataRB>>> GetWeeklyDataRB(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetWeeklyDataRB(playerId)) : BadRequest();
+
         [HttpGet("data/weekly/wr/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataWR>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataWR>>> GetWeeklyDataWR(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _statisticsService.GetWeeklyDataWR(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<WeeklyDataWR>>> GetWeeklyDataWR(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetWeeklyDataWR(playerId)) : BadRequest();
+
         [HttpGet("data/weekly/te/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataTE>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataTE>>> GetWeeklyDataTE(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _statisticsService.GetWeeklyDataTE(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<WeeklyDataTE>>> GetWeeklyDataTE(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetWeeklyDataTE(playerId)) : BadRequest();
+
         [HttpGet("data/weekly/dst/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataDST>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataDST>>> GetWeeklyDataDST(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _statisticsService.GetWeeklyDataDST(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<WeeklyDataDST>>> GetWeeklyDataDST(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetWeeklyDataDST(playerId)) : BadRequest();
 
         [HttpGet("team/{playerId}")]
         [ProducesResponseType(typeof(PlayerTeam), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<PlayerTeam>> GetPlayerTeam(int playerId)
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<PlayerTeam>> GetPlayerTeam(int playerId) => playerId > 0 ? Ok(await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId)) : BadRequest();
 
         [HttpGet("schedule/{playerId}")]
         [ProducesResponseType(typeof(List<Schedule>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<Schedule>>> GetUpcomingGames(int playerId) 
-        {
-            if (playerId > 0)
-            {
-                return Ok(await _playersService.GetUpcomingGames(playerId));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
+        public async Task<ActionResult<List<Schedule>>> GetUpcomingGames(int playerId) => playerId > 0 ? Ok(await _playersService.GetUpcomingGames(playerId)) : BadRequest();
 
         [HttpGet("schedule/weekly")]
         [ProducesResponseType(typeof(List<Schedule>), 200)]
@@ -209,5 +95,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> GetCurrentWeek() => Ok(await _playersService.GetCurrentWeek(_season.CurrentSeason));
+
+        [HttpPost("injury")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> PostInSeasonInjury([FromBody] InSeasonInjury injury) => injury != null ? Ok(await _playersService.PostInSeasonInjury(injury)) : BadRequest();
     }
 }

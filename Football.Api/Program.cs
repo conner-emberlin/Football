@@ -70,6 +70,7 @@ builder.Services.AddScoped<IMockDraftService, MockDraftService>();
 builder.Services.AddScoped<IMockDraftRepository, MockDraftRepository>();
 builder.Services.AddScoped<IStartOrSitService, StartOrSitService>();
 builder.Services.AddScoped<IProjectionAnalysisService, ProjectionAnalysisService>();
+builder.Services.AddScoped<IWaiverWireService, WaiverWireService>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
@@ -87,6 +88,7 @@ builder.Services.Configure<ESPN>(builder.Configuration.GetSection("ESPN"));
 builder.Services.Configure<MockDraftSettings>(builder.Configuration.GetSection("MockDraftSettings"));
 builder.Services.Configure<WeatherAPI>(builder.Configuration.GetSection("WeatherAPI"));
 builder.Services.Configure<NFLOddsAPI>(builder.Configuration.GetSection("NFLOddsAPI"));
+builder.Services.Configure<WaiverWireSettings>(builder.Configuration.GetSection("WaiverWireSettings"));
 
 var app = builder.Build();
 

@@ -1,10 +1,13 @@
 ﻿using Football.Models;
 using Football.Enums;
+using Football.Data.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.News.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Net.WebSockets;
+using Football.Players.Interfaces;
 
 namespace Football.Api.Controllers
 {
@@ -16,16 +19,20 @@ namespace Football.Api.Controllers
         private readonly IMatchupAnalysisService _matchupAnalysisService;
         private readonly IMarketShareService _marketShareService;
         private readonly IStartOrSitService _startOrSitService;
+        private readonly IWaiverWireService _waiverWireService;
+        private readonly IPlayersService _playersService;
         private readonly Season _season;
 
         public FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMarketShareService marketShareService,
-            IOptionsMonitor<Season> season, IStartOrSitService startOrSitService)
+            IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService, IPlayersService playersService)
         {
             _fantasyDataService = fantasyDataService;
             _matchupAnalysisService = matchupAnalysisService;
             _marketShareService = marketShareService;
             _season = season.CurrentValue;
             _startOrSitService = startOrSitService;
+            _waiverWireService = waiverWireService;
+            _playersService = playersService;
         }
 
         [HttpPost("data/{position}/{season}")]
@@ -121,5 +128,14 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<StartOrSit>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<StartOrSit>>> GetStartOrSit([FromBody] List<int> playerIds) => Ok(await _startOrSitService.GetStartOrSits(playerIds));
+
+        [HttpGet("waiver-wire")]
+        [ProducesResponseType(typeof(List<WeeklyRosterPercent>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyRosterPercent>>> GetWaiverWireCandidates() 
+        {
+            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
+            return Ok(await _waiverWireService.GetWaiverWireCandidates(_season.CurrentSeason, currentWeek));
+        }
     }
 }

@@ -82,4 +82,14 @@
         public int TELimit { get; set; }
         public int BenchSpots { get; set; }
     }
+
+    public class WaiverWireSettings
+    {
+        public int RostershipMinimum { get; set; }
+        public int GoodWeekFantasyPointsQB { get; set; }
+        public int GoodWeekFantasyPointsRB { get; set; }
+        public int GoodWeekFantasyPointsWR { get; set; }
+        public int GoodWeekFantasyPointsTE { get; set; }
+        public int GoodWeekMinimum { get; set; }
+    }
 }
