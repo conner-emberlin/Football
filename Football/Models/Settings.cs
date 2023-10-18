@@ -85,7 +85,7 @@
 
     public class WaiverWireSettings
     {
-        public int RostershipMinimum { get; set; }
+        public int RostershipMax { get; set; }
         public int GoodWeekFantasyPointsQB { get; set; }
         public int GoodWeekFantasyPointsRB { get; set; }
         public int GoodWeekFantasyPointsWR { get; set; }
