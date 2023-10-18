@@ -7,6 +7,7 @@ using Serilog;
 using Microsoft.Extensions.Options;
 using Football.Enums;
 
+
 namespace Football.Projections.Services
 {
     public class AdjustmentService : IAdjustmentService
@@ -47,6 +48,7 @@ namespace Football.Projections.Services
         {
             _logger.Information("Calculating adjustments");
             weekProjections = await MatchupAdjustment(weekProjections);
+            weekProjections = await InjuryAdustment(weekProjections);
             return weekProjections;
         }
 
@@ -57,11 +59,25 @@ namespace Football.Projections.Services
                 var gamesInjured = await _playersService.GetPlayerInjuries(s.PlayerId, _season.CurrentSeason);
                 if ( gamesInjured > 0)
                 {
-                    _logger.Information("Injury adjustment of {p} days for player {t}: {v}", gamesInjured, s.PlayerId, s.Name);
+                    _logger.Information("Injury adjustment of {p} weeks for player {t}: {v}", gamesInjured, s.PlayerId, s.Name);
                     s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * gamesInjured;
                 }
             }
             return seasonProjections;
+        }
+
+        private async Task<List<WeekProjection>> InjuryAdustment(List<WeekProjection> weeklyProjections)
+        {
+            var activeInjuries = await _playersService.GetActiveInSeasonInjuries(_season.CurrentSeason);
+            var injuredPlayerProjections = activeInjuries.Join(weeklyProjections, ai => ai.PlayerId, wp => wp.PlayerId, (ai, wp) => new { InSeasonInjury = ai, WeekProjection = wp });
+            foreach (var wp in weeklyProjections)
+            {
+                if (injuredPlayerProjections.Any(ip => ip.WeekProjection.PlayerId == wp.PlayerId))
+                {
+                    wp.ProjectedPoints = 0;
+                }
+            }
+            return weeklyProjections;
         }
 
         private async Task<List<SeasonProjection>> SuspensionAdjustment(List<SeasonProjection> seasonProjections)
