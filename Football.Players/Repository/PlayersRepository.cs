@@ -3,8 +3,6 @@ using Dapper;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 
-
-
 namespace Football.Players.Repository
 {
     
