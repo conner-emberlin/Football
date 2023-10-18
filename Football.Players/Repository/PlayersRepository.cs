@@ -1,8 +1,9 @@
-﻿using Football.Players.Models;
-using System.Data;
+﻿using System.Data;
 using Dapper;
 using Football.Players.Interfaces;
-using System.Net;
+using Football.Players.Models;
+
+
 
 namespace Football.Players.Repository
 {
