@@ -34,25 +34,25 @@ namespace Football.Fantasy.Services
             switch (position)
             {
                 case PositionEnum.QB: 
-                    foreach(var data in await _statisticsService.GetSeasonDataQBBySeason(season))
+                    foreach(var data in await _statisticsService.GetSeasonData<SeasonDataQB>(position, season, false))
                     {
                         seasonFantasy.Add(_calculator.CalculateQBFantasy(data));
                     }
                     break;
                 case PositionEnum.RB:
-                    foreach (var data in await _statisticsService.GetSeasonDataRBBySeason(season))
+                    foreach (var data in await _statisticsService.GetSeasonData<SeasonDataRB>(position, season, false))
                     {
                         seasonFantasy.Add(_calculator.CalculateRBFantasy(data));
                     }
                     break;
                 case PositionEnum.WR:
-                    foreach (var data in await _statisticsService.GetSeasonDataWRBySeason(season))
+                    foreach (var data in await _statisticsService.GetSeasonData<SeasonDataWR>(position, season, false))
                     {
                         seasonFantasy.Add(_calculator.CalculateWRFantasy(data));
                     }
                     break;
                 case PositionEnum.TE:
-                    foreach (var data in await _statisticsService.GetSeasonDataTEBySeason(season))
+                    foreach (var data in await _statisticsService.GetSeasonData<SeasonDataTE>(position, season, false))
                     {
                         seasonFantasy.Add(_calculator.CalculateTEFantasy(data));
                     }

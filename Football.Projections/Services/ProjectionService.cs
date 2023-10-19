@@ -418,7 +418,7 @@ namespace Football.Projections.Services
             List<QBModelSeason> qbModel = new();
             foreach(var player in players)
             {
-                var stats = (await _statisticsService.GetSeasonDataQB(player.PlayerId));
+                var stats = (await _statisticsService.GetSeasonData<SeasonDataQB>(PositionEnum.QB, player.PlayerId, true));
                 if (stats.Any())
                 {
                     qbModel.Add(_regressionService.QBModelSeason(_statCalculator.CalculateStatProjection(stats)));
@@ -446,7 +446,7 @@ namespace Football.Projections.Services
             List<RBModelSeason> rbModel = new();
             foreach (var player in players)
             {
-                var stats = (await _statisticsService.GetSeasonDataRB(player.PlayerId));
+                var stats = (await _statisticsService.GetSeasonData<SeasonDataRB>(PositionEnum.RB, player.PlayerId, true));
                 if (stats.Any())
                 {
                     rbModel.Add(_regressionService.RBModelSeason(_statCalculator.CalculateStatProjection(stats)));
@@ -475,7 +475,7 @@ namespace Football.Projections.Services
             List<WRModelSeason> wrModel = new();
             foreach (var player in players)
             {
-                var stats = (await _statisticsService.GetSeasonDataWR(player.PlayerId));
+                var stats = (await _statisticsService.GetSeasonData<SeasonDataWR>(PositionEnum.WR, player.PlayerId, true));
                 if (stats.Any())
                 {
                     wrModel.Add(_regressionService.WRModelSeason(_statCalculator.CalculateStatProjection(stats)));
@@ -503,7 +503,7 @@ namespace Football.Projections.Services
             List<TEModelSeason> teModel = new();
             foreach (var player in players)
             {
-                var stats = (await _statisticsService.GetSeasonDataTE(player.PlayerId));
+                var stats = (await _statisticsService.GetSeasonData<SeasonDataTE>(PositionEnum.TE, player.PlayerId, true));
                 if (stats.Any())
                 {
                     teModel.Add(_regressionService.TEModelSeason(_statCalculator.CalculateStatProjection(stats)));

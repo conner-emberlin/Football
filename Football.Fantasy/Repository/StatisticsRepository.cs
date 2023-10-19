@@ -15,219 +15,21 @@ namespace Football.Fantasy.Repository
             _dbConnection = dbConnection;
         }
 
-        public async Task<List<SeasonDataQB>> GetSeasonDataQBBySeason(int season)
+        public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int season, int week)
         {
-            var query = $@"SELECT 
-		                     [Season]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Completions]
-                            ,[Attempts]
-                            ,[Yards]
-                            ,[TD]
-                            ,[Int]
-                            ,[Sacks]
-                            ,[RushingAttempts]
-                            ,[RushingYards]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                            ,[Games]
-                        FROM [dbo].SeasonQBData
-                        WHERE 1=1
-                        AND [Season] = @season
-                        ";
-            return (await _dbConnection.QueryAsync<SeasonDataQB>(query, new { season })).ToList();
+            var query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}] WHERE [Season] = @season
+                                        AND [Week] = @week";
+            return (await _dbConnection.QueryAsync<T>(query, new { season, week })).ToList();
         }
-        public async Task<List<SeasonDataQB>> GetSeasonDataQB(int playerId)
+        public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int playerId)
         {
-            var query = $@"SELECT 
-		                     [Season]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Completions]
-                            ,[Attempts]
-                            ,[Yards]
-                            ,[TD]
-                            ,[Int]
-                            ,[Sacks]
-                            ,[RushingAttempts]
-                            ,[RushingYards]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                            ,[Games]
-                        FROM [dbo].SeasonQBData
-                        WHERE 1=1
-                        AND [PlayerId] = @playerId
-                        ";
-            return (await _dbConnection.QueryAsync<SeasonDataQB>(query, new { playerId })).ToList();
+            var query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}] WHERE [PlayerId] = @playerId";
+            return (await _dbConnection.QueryAsync<T>(query, new { playerId })).ToList();
         }
-        public async Task<List<SeasonDataRB>> GetSeasonDataRBBySeason(int season)
+        public async Task<List<T>> GetSeasonData<T>(PositionEnum position, int param, bool isPlayer)
         {
-            var query = $@"SELECT [Season]
-                         ,[PlayerID]
-                         ,[Name]
-                         ,[RushingAtt]
-                         ,[RushingYds]
-                         ,[RushingTD]
-                         ,[Receptions]
-                         ,[Targets]
-                         ,[Yards]
-                         ,[ReceivingTD]
-                         ,[Fumbles]
-                         ,[Games]
-                        FROM [dbo].SeasonRBData
-                        WHERE 1=1
-                        AND [Season] = @season
-                        ";
-            return (await _dbConnection.QueryAsync<SeasonDataRB>(query, new { season })).ToList();
-        }
-        public async Task<List<SeasonDataRB>> GetSeasonDataRB(int playerId)
-        {
-            var query = $@"SELECT [Season]
-                         ,[PlayerID]
-                         ,[Name]
-                         ,[RushingAtt]
-                         ,[RushingYds]
-                         ,[RushingTD]
-                         ,[Receptions]
-                         ,[Targets]
-                         ,[Yards]
-                         ,[ReceivingTD]
-                         ,[Fumbles]
-                         ,[Games]
-                        FROM [dbo].SeasonRBData
-                        WHERE 1=1
-                        AND [PlayerId] = @playerId
-                        ";
-            return (await _dbConnection.QueryAsync<SeasonDataRB>(query, new { playerId })).ToList();
-        }
-        public async Task<List<SeasonDataWR>> GetSeasonDataWRBySeason(int season)
-        {
-            var query = $@"SELECT 
-                            [Season]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Receptions]
-                            ,[Targets]
-                            ,[Yards]
-                            ,[Long]
-                            ,[TD]
-                            ,[RushingAtt]
-                            ,[RushingYds]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                            ,[Games]
-                        FROM [dbo].SeasonWRData
-                        WHERE 1=1
-                        AND [Season] = @season
-                        ";
-            return (await _dbConnection.QueryAsync<SeasonDataWR>(query, new { season })).ToList();
-        }
-        public async Task<List<SeasonDataWR>> GetSeasonDataWR(int playerId)
-        {
-            var query = $@"SELECT 
-                            [Season]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Receptions]
-                            ,[Targets]
-                            ,[Yards]
-                            ,[Long]
-                            ,[TD]
-                            ,[RushingAtt]
-                            ,[RushingYds]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                            ,[Games]
-                        FROM [dbo].SeasonWRData
-                        WHERE 1=1
-                        AND [PlayerId] = @playerId
-                        ";
-            return (await _dbConnection.QueryAsync<SeasonDataWR>(query, new { playerId })).ToList();
-        }
-        public async Task<List<SeasonDataTE>> GetSeasonDataTEBySeason(int season)
-        {
-            var query = $@"SELECT 
-                            [Season]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Receptions]
-                            ,[Targets]
-                            ,[Yards]
-                            ,[Long]
-                            ,[TD]
-                            ,[RushingAtt]
-                            ,[RushingYds]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                            ,[Games]
-                        FROM [dbo].SeasonTEData
-                        WHERE 1=1
-                        AND [Season] = @season
-                        ";
-            return (await _dbConnection.QueryAsync<SeasonDataTE>(query, new { season })).ToList();
-        }
-        public async Task<List<SeasonDataTE>> GetSeasonDataTE(int playerId)
-        {
-            var query = $@"SELECT 
-                            [Season]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Receptions]
-                            ,[Targets]
-                            ,[Yards]
-                            ,[Long]
-                            ,[TD]
-                            ,[RushingAtt]
-                            ,[RushingYds]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                            ,[Games]
-                        FROM [dbo].SeasonTEData
-                        WHERE 1=1
-                        AND [PlayerId] = @playerId
-                        ";
-            return (await _dbConnection.QueryAsync<SeasonDataTE>(query, new { playerId })).ToList();
-        }
-        public async Task<List<SeasonDataDST>> GetSeasonDataDSTBySeason(int season)
-        {
-            var query = $@"SELECT 
-                            [Season]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Sacks]
-                            ,[Ints]
-                            ,[FumblesRecovered]
-                            ,[ForcedFumbles]
-                            ,[DefensiveTD]
-                            ,[Safties]
-                            ,[SpecialTD]
-                            ,[Games]
-                        FROM [dbo].SeasonDSTData
-                        WHERE 1=1
-                        AND [Season] = @season
-                        ";
-            return (await _dbConnection.QueryAsync<SeasonDataDST>(query, new { season })).ToList();
-        }
-        public async Task<List<SeasonDataDST>> GetSeasonDataDST(int playerId)
-        {
-            var query = $@"SELECT 
-                            [Season]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Sacks]
-                            ,[Ints]
-                            ,[FumblesRecovered]
-                            ,[ForcedFumbles]
-                            ,[DefensiveTD]
-                            ,[Safties]
-                            ,[SpecialTD]
-                            ,[Games]
-                        FROM [dbo].SeasonDSTData
-                        WHERE 1=1
-                        AND [PlayerId] = @playerId
-                        ";
-            return (await _dbConnection.QueryAsync<SeasonDataDST>(query, new { playerId })).ToList();
+            var query = $@"SELECT * FROM [dbo].[{GetSeasonTable(position)}] WHERE {GetSeasonQueryWhere(isPlayer)}";
+            return (await _dbConnection.QueryAsync<T>(query, new { param })).ToList();
         }
         
         public async Task<List<GameResult>> GetGameResults(int season, int week)
@@ -261,47 +63,9 @@ namespace Football.Fantasy.Repository
             return (await _dbConnection.QueryAsync<WeeklyRosterPercent>(query, new { season, week })).ToList();
         }
 
-        public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int season, int week)
-        {
-            var query = $@"SELECT * FROM [dbo].[{GetWeeklyDataTable(position)}] WHERE [Season] = @season
-                                        AND [Week] = @week";
-            return (await _dbConnection.QueryAsync<T>(query, new { season, week })).ToList();
-        }
-        public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int playerId)
-        {
-            var query = $@"SELECT * FROM [dbo].[{GetWeeklyDataTable(position)}] WHERE [PlayerId] = @playerId";                                    
-            return (await _dbConnection.QueryAsync<T>(query, new { playerId })).ToList();
-        }
+        private static string GetWeeklyTable(PositionEnum position) => string.Format("Weekly{0}Data", position.ToString());
+        private static string GetSeasonTable(PositionEnum position) => string.Format("Season{0}Data", position.ToString());
+        private static string GetSeasonQueryWhere(bool isPlayer) => isPlayer ? "[PlayerId] = @param" : "[Season] = @param";
 
-        public async Task<List<T>> GetSeasonData<T>(PositionEnum position, int season)
-        {
-            var query = $@"SELECT * FROM [dbo].[{GetSeasonDataTable(position)}] WHERE [Season] = @season";
-            return (await _dbConnection.QueryAsync<T>(query, new { season })).ToList();
-        }
-
-        private static string GetWeeklyDataTable(PositionEnum position)
-        {
-            return position switch
-            {
-                PositionEnum.QB => "WeeklyQBData",
-                PositionEnum.RB => "WeeklyRBData",
-                PositionEnum.WR => "WeeklyWRData",
-                PositionEnum.TE => "WeeklyTEData",
-                PositionEnum.DST => "WeeklyDSTData",
-                _ => ""
-            };
-        }
-        private static string GetSeasonDataTable(PositionEnum position)
-        {
-            return position switch
-            {
-                PositionEnum.QB => "SeasonQBData",
-                PositionEnum.RB => "SeasonRBData",
-                PositionEnum.WR => "SeasonWRData",
-                PositionEnum.TE => "SeasonTEData",
-                PositionEnum.DST => "SeasonDSTData",
-                _ => ""
-            };
-        }
     }
 }

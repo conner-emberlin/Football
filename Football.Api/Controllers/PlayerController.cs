@@ -30,27 +30,27 @@ namespace Football.Api.Controllers
         [HttpGet("data/qb/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataQB>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonDataQB>>> GetSeasonDataQB(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonDataQB(playerId)) : BadRequest();
+        public async Task<ActionResult<List<SeasonDataQB>>> GetSeasonDataQB(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonData<SeasonDataQB>(PositionEnum.QB, playerId, true)) : BadRequest();
 
         [HttpGet("data/rb/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataRB>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonDataRB>>> GetSeasonDataRB(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonDataRB(playerId)) : BadRequest();
+        public async Task<ActionResult<List<SeasonDataRB>>> GetSeasonDataRB(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonData<SeasonDataRB>(PositionEnum.RB, playerId, true)) : BadRequest();
 
         [HttpGet("data/wr/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataWR>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonDataWR>>> GetSeasonDataWR(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonDataWR(playerId)) : BadRequest();
+        public async Task<ActionResult<List<SeasonDataWR>>> GetSeasonDataWR(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonData<SeasonDataWR>(PositionEnum.WR, playerId, true)) : BadRequest();
 
         [HttpGet("data/te/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataTE>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonDataTE>>> GetSeasonDataTE(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonDataTE(playerId)) : BadRequest();
+        public async Task<ActionResult<List<SeasonDataTE>>> GetSeasonDataTE(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonData<SeasonDataTE>(PositionEnum.TE, playerId, true)) : BadRequest();
 
         [HttpGet("data/dst/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataDST>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonDataDST>>> GetSeasonDataDST(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonDataDST(playerId)) : BadRequest();
+        public async Task<ActionResult<List<SeasonDataDST>>> GetSeasonDataDST(int playerId) => playerId > 0 ? Ok(await _statisticsService.GetSeasonData<SeasonDataDST>(PositionEnum.DST, playerId, true)) : BadRequest();
 
         [HttpGet("data/weekly/qb/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataQB>), 200)]
