@@ -1,10 +1,10 @@
 ﻿using Football.Data.Models;
-using Football.Fantasy.Interfaces;
+using Football.Statistics.Interfaces;
 using System.Data;
 using Dapper;
 using Football.Enums;
 
-namespace Football.Fantasy.Repository
+namespace Football.Statistics.Repository
 {
     public class StatisticsRepository : IStatisticsRepository
     {
@@ -31,7 +31,7 @@ namespace Football.Fantasy.Repository
             var query = $@"SELECT * FROM [dbo].[{GetSeasonTable(position)}] WHERE {GetSeasonQueryWhere(isPlayer)}";
             return (await _dbConnection.QueryAsync<T>(query, new { param })).ToList();
         }
-        
+
         public async Task<List<GameResult>> GetGameResults(int season, int week)
         {
             var query = $@"SELECT [Season]
@@ -69,3 +69,4 @@ namespace Football.Fantasy.Repository
 
     }
 }
+
