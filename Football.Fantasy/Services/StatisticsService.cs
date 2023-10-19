@@ -1,15 +1,18 @@
 ﻿using Football.Data.Models;
 using Football.Enums;
 using Football.Fantasy.Interfaces;
+using Football.Players.Interfaces;
 
 namespace Football.Fantasy.Services
 {
     public class StatisticsService : IStatisticsService
     {
         private readonly IStatisticsRepository _statisticsRepository;
-        public StatisticsService(IStatisticsRepository statisticsRepository)
+        private readonly IPlayersService _playersService;
+        public StatisticsService(IStatisticsRepository statisticsRepository, IPlayersService playersService)
         {
             _statisticsRepository = statisticsRepository;
+            _playersService = playersService;
         }
         public async Task<List<SeasonDataQB>> GetSeasonDataQBBySeason(int season) => await _statisticsRepository.GetSeasonDataQBBySeason(season);
         public async Task<List<SeasonDataQB>> GetSeasonDataQB(int playerId) => await _statisticsRepository.GetSeasonDataQB(playerId);
@@ -21,12 +24,8 @@ namespace Football.Fantasy.Services
         public async Task<List<SeasonDataTE>> GetSeasonDataTE(int playerId) => await _statisticsRepository.GetSeasonDataTE(playerId);
         public async Task<List<SeasonDataDST>> GetSeasonDataDSTBySeason( int season) => await _statisticsRepository.GetSeasonDataDSTBySeason(season);
         public async Task<List<SeasonDataDST>> GetSeasonDataDST(int playerId) => await _statisticsRepository.GetSeasonDataDST(playerId);
+        public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int playerId) => await _statisticsRepository.GetWeeklyData<T>(position, playerId);
         public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int season, int week) => await _statisticsRepository.GetWeeklyData<T>(position, season, week);
-        public async Task<List<WeeklyDataQB>> GetWeeklyDataQB(int playerId) => await _statisticsRepository.GetWeeklyDataQB(playerId);
-        public async Task<List<WeeklyDataRB>> GetWeeklyDataRB(int playerId) => await _statisticsRepository.GetWeeklyDataRB(playerId);
-        public async Task<List<WeeklyDataWR>> GetWeeklyDataWR(int playerId) => await _statisticsRepository.GetWeeklyDataWR(playerId);
-        public async Task<List<WeeklyDataTE>> GetWeeklyDataTE(int playerId) => await _statisticsRepository.GetWeeklyDataTE(playerId);
-        public async Task<List<WeeklyDataDST>> GetWeeklyDataDST(int playerId) => await _statisticsRepository.GetWeeklyDataDST(playerId);
         public async Task<List<GameResult>> GetGameResults(int season, int week) => await _statisticsRepository.GetGameResults(season, week);
         public async Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week) => await _statisticsRepository.GetWeeklyRosterPercentages(season, week);
 

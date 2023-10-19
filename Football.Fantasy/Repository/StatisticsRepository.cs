@@ -229,112 +229,7 @@ namespace Football.Fantasy.Repository
                         ";
             return (await _dbConnection.QueryAsync<SeasonDataDST>(query, new { playerId })).ToList();
         }
-
         
-        public async Task<List<WeeklyDataQB>> GetWeeklyDataQB(int playerId)
-        {
-            var query = $@"SELECT 
-		                     [Season]
-                            ,[Week]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Completions]
-                            ,[Attempts]
-                            ,[Yards]
-                            ,[TD]
-                            ,[Int]
-                            ,[Sacks]
-                            ,[RushingAttempts]
-                            ,[RushingYards]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                        FROM [dbo].WeeklyQBData
-                        WHERE 1=1
-                        AND [PlayerId] = @playerId
-                        ";
-            return (await _dbConnection.QueryAsync<WeeklyDataQB>(query, new { playerId })).ToList();
-        }
-
-        
-        public async Task<List<WeeklyDataRB>> GetWeeklyDataRB(int playerId)
-        {
-            var query = $@"SELECT 
-                         [Season]
-                         ,[Week]
-                         ,[PlayerID]
-                         ,[Name]
-                         ,[RushingAtt]
-                         ,[RushingYds]
-                         ,[RushingTD]
-                         ,[Receptions]
-                         ,[Targets]
-                         ,[Yards]
-                         ,[ReceivingTD]
-                         ,[Fumbles]
-                        FROM [dbo].WeeklyRBData
-                        WHERE 1=1
-                        AND [PlayerId] = @playerId
-                        ";
-            return (await _dbConnection.QueryAsync<WeeklyDataRB>(query, new { playerId })).ToList();
-        }
-        public async Task<List<WeeklyDataWR>> GetWeeklyDataWR(int playerId)
-        {
-            var query = $@"SELECT 
-                            [Season]
-                            ,[Week]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Receptions]
-                            ,[Targets]
-                            ,[Yards]
-                            ,[Long]
-                            ,[TD]
-                            ,[RushingAtt]
-                            ,[RushingYds]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                        FROM [dbo].WeeklyWRData
-                        WHERE 1=1
-                        AND [PlayerId] = @playerId
-                        ";
-            return (await _dbConnection.QueryAsync<WeeklyDataWR>(query, new { playerId })).ToList();
-        }
-
-        
-        public async Task<List<WeeklyDataTE>> GetWeeklyDataTE(int playerId)
-        {
-            var query = $@"SELECT 
-                            [Season]
-                            ,[Week]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Receptions]
-                            ,[Targets]
-                            ,[Yards]
-                            ,[Long]
-                            ,[TD]
-                            ,[RushingAtt]
-                            ,[RushingYds]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                        FROM [dbo].WeeklyTEData
-                        WHERE 1=1
-                        AND [PlayerId] = @playerId
-                        ";
-            return (await _dbConnection.QueryAsync<WeeklyDataTE>(query, new { playerId })).ToList();
-        }
-        
-        public async Task<List<WeeklyDataDST>> GetWeeklyDataDST(int playerId)
-        {
-            var query = $@"SELECT
-                            [Season], [Week], [PlayerId], [Name],
-                            [Sacks], [Ints], [FumblesRecovered],
-                            [ForcedFumbles], [DefensiveTD], [Safties], [SpecialTD]
-                            FROM [dbo].WeeklyDSTData
-                            WHERE 1=1
-                                AND [PlayerId] = @playerId";
-            return (await _dbConnection.QueryAsync<WeeklyDataDST>(query, new { playerId})).ToList();
-        }
         public async Task<List<GameResult>> GetGameResults(int season, int week)
         {
             var query = $@"SELECT [Season]
@@ -368,25 +263,31 @@ namespace Football.Fantasy.Repository
 
         public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int season, int week)
         {
-            var query = string.Format($@"SELECT * FROM [dbo].{0} WHERE [Season] = @season
-                                        AND [Week] = @week", GetWeeklyDataTable(position));
+            var query = $@"SELECT * FROM [dbo].[{GetWeeklyDataTable(position)}] WHERE [Season] = @season
+                                        AND [Week] = @week";
             return (await _dbConnection.QueryAsync<T>(query, new { season, week })).ToList();
+        }
+        public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int playerId)
+        {
+            var query = $@"SELECT * FROM [dbo].[{GetWeeklyDataTable(position)}] WHERE [PlayerId] = @playerId";                                    
+            return (await _dbConnection.QueryAsync<T>(query, new { playerId })).ToList();
         }
 
         public async Task<List<T>> GetSeasonData<T>(PositionEnum position, int season)
         {
-            var query = string.Format($@"SELECT * FROM [dbo].{0} WHERE [Season] = @season", GetSeasonDataTable(position));
+            var query = $@"SELECT * FROM [dbo].[{GetSeasonDataTable(position)}] WHERE [Season] = @season";
             return (await _dbConnection.QueryAsync<T>(query, new { season })).ToList();
         }
+
         private static string GetWeeklyDataTable(PositionEnum position)
         {
             return position switch
             {
-                PositionEnum.QB => "WeeklyDataQB",
-                PositionEnum.RB => "WeeklyDataRB",
-                PositionEnum.WR => "WeeklyDataWR",
-                PositionEnum.TE => "WeeklyDataTE",
-                PositionEnum.DST => "WeeklyDataDST",
+                PositionEnum.QB => "WeeklyQBData",
+                PositionEnum.RB => "WeeklyRBData",
+                PositionEnum.WR => "WeeklyWRData",
+                PositionEnum.TE => "WeeklyTEData",
+                PositionEnum.DST => "WeeklyDSTData",
                 _ => ""
             };
         }
@@ -394,11 +295,11 @@ namespace Football.Fantasy.Repository
         {
             return position switch
             {
-                PositionEnum.QB => "SeasonDataQB",
-                PositionEnum.RB => "SeasonDataRB",
-                PositionEnum.WR => "SeasonDataWR",
-                PositionEnum.TE => "SeasonDataTE",
-                PositionEnum.DST => "SeasonDataDST",
+                PositionEnum.QB => "SeasonQBData",
+                PositionEnum.RB => "SeasonRBData",
+                PositionEnum.WR => "SeasonWRData",
+                PositionEnum.TE => "SeasonTEData",
+                PositionEnum.DST => "SeasonDSTData",
                 _ => ""
             };
         }

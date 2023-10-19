@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Football.Fantasy.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Football.Players.Models;
+using Football.Data.Models;
 
 namespace Football.Fantasy.Services
 {
@@ -49,25 +50,25 @@ namespace Football.Fantasy.Services
                     _ = Enum.TryParse((await _playersService.GetPlayer(p.PlayerId)).Position, out PositionEnum position);
                     if (position == PositionEnum.QB)
                     {
-                        var stats = await _statisticsService.GetWeeklyDataQB(p.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(PositionEnum.QB, p.PlayerId);
                         totalAttempts += stats.Sum(s => s.Attempts);
                         totalCompletions += stats.Sum(s => s.Completions);
                     }
                     else if (position == PositionEnum.RB)
                     {
-                        var stats = await _statisticsService.GetWeeklyDataRB(p.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId);
                         RBTargets += stats.Sum(s => s.Targets);
                         RBComps += stats.Sum(s => s.Receptions);
                     }
                     else if (position == PositionEnum.WR)
                     {
-                        var stats = await _statisticsService.GetWeeklyDataWR(p.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId);
                         WRTargets += stats.Sum(s => s.Targets);
                         WRComps += stats.Sum(s => s.Receptions);
                     }
                     else if (position == PositionEnum.TE)
                     {
-                        var stats = await _statisticsService.GetWeeklyDataTE(p.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId);
                         TETargets += stats.Sum(s => s.Targets);
                         TEComps += stats.Sum(s => s.Receptions);
                     }
@@ -98,7 +99,7 @@ namespace Football.Fantasy.Services
                     var teamTotal = teamTotals.Where(t => t.Team.Team == team.Team).First();
                     if (position == PositionEnum.RB)
                     {
-                        var stats = await _statisticsService.GetWeeklyDataRB(player.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId);
                         if (stats.Any())
                         {
                             share.Add(new MarketShare
@@ -120,7 +121,7 @@ namespace Football.Fantasy.Services
                     }
                     else if (position == PositionEnum.WR)
                     {
-                        var stats = await _statisticsService.GetWeeklyDataWR(player.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId);
                         if (stats.Any())
                         {
                             share.Add(new MarketShare
@@ -142,7 +143,7 @@ namespace Football.Fantasy.Services
                     }
                     else if (position == PositionEnum.TE)
                     {
-                        var stats = await _statisticsService.GetWeeklyDataTE(player.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId);
                         if (stats.Any())
                         {
                             share.Add(new MarketShare
@@ -200,7 +201,7 @@ namespace Football.Fantasy.Services
                         var fantasy = await _fantasyService.GetWeeklyFantasy(player.PlayerId);
                         if (position == PositionEnum.QB)
                         {
-                            var stats = await _statisticsService.GetWeeklyDataQB(player.PlayerId);
+                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(PositionEnum.QB, player.PlayerId);
                             totalFantasyQB += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAttempts);
                             totalRushYd += stats.Sum(s => s.RushingYards);
@@ -208,7 +209,7 @@ namespace Football.Fantasy.Services
                         }
                         else if (position == PositionEnum.RB)
                         {
-                            var stats = await _statisticsService.GetWeeklyDataRB(p.PlayerId);
+                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId);
                             totalFantasyRB += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAtt);
                             totalRushYd += stats.Sum(s => s.RushingYds);
@@ -220,7 +221,7 @@ namespace Football.Fantasy.Services
                         }
                         else if (position == PositionEnum.WR)
                         {
-                            var stats = await _statisticsService.GetWeeklyDataWR(p.PlayerId);
+                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId);
                             totalFantasyWR += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAtt);
                             totalRushYd += stats.Sum(s => s.RushingYds);
@@ -232,7 +233,7 @@ namespace Football.Fantasy.Services
                         }
                         else if (position == PositionEnum.TE)
                         {
-                            var stats = await _statisticsService.GetWeeklyDataWR(p.PlayerId);
+                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId);
                             totalFantasyTE += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAtt);
                             totalRushYd += stats.Sum(s => s.RushingYds);

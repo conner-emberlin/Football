@@ -1,4 +1,5 @@
-﻿using Football.Enums;
+﻿using Football.Data.Models;
+using Football.Enums;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.Models;
@@ -431,7 +432,7 @@ namespace Football.Projections.Services
             List<QBModelWeek> qbModel = new();
             foreach(var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyDataQB(player.PlayerId);
+                var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(PositionEnum.QB, player.PlayerId);
                 if (stats.Any())
                 {
                     qbModel.Add(await _regressionService.QBModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
@@ -460,7 +461,7 @@ namespace Football.Projections.Services
             List<RBModelWeek> rbModel = new();
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyDataRB(player.PlayerId);
+                var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(PositionEnum.RB, player.PlayerId);
                 if (stats.Any())
                 {
                     rbModel.Add(await _regressionService.RBModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
@@ -488,7 +489,7 @@ namespace Football.Projections.Services
             List<WRModelWeek> wrModel = new();
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyDataWR(player.PlayerId);
+                var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(PositionEnum.WR, player.PlayerId);
                 if (stats.Any())
                 {
                     wrModel.Add(await _regressionService.WRModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
@@ -516,7 +517,7 @@ namespace Football.Projections.Services
             List<TEModelWeek> teModel = new();
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyDataTE(player.PlayerId);
+                var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(PositionEnum.TE, player.PlayerId);
                 if (stats.Any())
                 {
                     teModel.Add(await _regressionService.TEModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
