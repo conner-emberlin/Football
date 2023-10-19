@@ -3,13 +3,13 @@ using Football.Enums;
 using Football.News.Interfaces;
 using Football.News.Models;
 using Football.Players.Interfaces;
-using Football.Fantasy.Interfaces;
+using Football.Fantasy.Analysis.Interfaces;
 using Microsoft.Extensions.Options;
 using Serilog;
-using Football.Fantasy.Models;
+using Football.Fantasy.Analysis.Models;
 using Football.Players.Models;
 
-namespace Football.Fantasy.Services
+namespace Football.Fantasy.Analysis.Services
 {
     public class StartOrSitService : IStartOrSitService
     {

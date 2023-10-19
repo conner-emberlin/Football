@@ -1,7 +1,6 @@
-﻿using Football.News.Models;
-using Football.Fantasy.Models;
+﻿using Football.Fantasy.Analysis.Models;
 
-namespace Football.Fantasy.Interfaces
+namespace Football.Fantasy.Analysis.Interfaces
 {
     public interface IStartOrSitService
     {

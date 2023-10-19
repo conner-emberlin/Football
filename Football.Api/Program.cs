@@ -6,6 +6,8 @@ using Football.Data.Services;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Repository;
 using Football.Fantasy.Services;
+using Football.Fantasy.Analysis.Interfaces;
+using Football.Fantasy.Analysis.Services;
 using Football.Fantasy.MockDraft.Interfaces;
 using Football.Fantasy.MockDraft.Services;
 using Football.News.Interfaces;
