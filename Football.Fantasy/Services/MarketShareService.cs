@@ -7,6 +7,7 @@ using Football.Fantasy.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Football.Players.Models;
 using Football.Data.Models;
+using Football.Statistics.Interfaces;
 
 namespace Football.Fantasy.Services
 {

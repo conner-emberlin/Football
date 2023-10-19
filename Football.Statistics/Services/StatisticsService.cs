@@ -1,8 +1,8 @@
 ﻿using Football.Data.Models;
 using Football.Enums;
-using Football.Fantasy.Interfaces;
+using Football.Statistics.Interfaces;
 
-namespace Football.Fantasy.Services
+namespace Football.Statistics.Services
 {
     public class StatisticsService : IStatisticsService
     {

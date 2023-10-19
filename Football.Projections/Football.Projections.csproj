@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -10,6 +10,7 @@
     <ProjectReference Include="..\Football.Data\Football.Data.csproj" />
     <ProjectReference Include="..\Football.Fantasy\Football.Fantasy.csproj" />
     <ProjectReference Include="..\Football.Players\Football.Players.csproj" />
+    <ProjectReference Include="..\Football.Statistics\Football.Statistics.csproj" />
   </ItemGroup>
 
 </Project>

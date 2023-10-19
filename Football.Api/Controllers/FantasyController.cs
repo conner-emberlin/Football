@@ -3,10 +3,8 @@ using Football.Enums;
 using Football.Data.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
-using Football.News.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Net.WebSockets;
 using Football.Players.Interfaces;
 
 namespace Football.Api.Controllers

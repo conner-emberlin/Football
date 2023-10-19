@@ -6,6 +6,7 @@ using Football.Models;
 using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
+using Football.Statistics.Interfaces;
 using MathNet.Numerics.LinearAlgebra;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;

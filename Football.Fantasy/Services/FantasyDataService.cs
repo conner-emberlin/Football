@@ -1,6 +1,7 @@
 ﻿using Football.Enums;
 using Football.Fantasy.Models;
 using Football.Fantasy.Interfaces;
+using Football.Statistics.Interfaces;
 using Football.Players.Interfaces;
 using Serilog;
 using Microsoft.Extensions.Caching.Memory;
