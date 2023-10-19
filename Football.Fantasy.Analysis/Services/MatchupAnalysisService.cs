@@ -1,12 +1,13 @@
 ﻿using Football.Models;
 using Football.Fantasy.Interfaces;
-using Football.Fantasy.Models;
+using Football.Fantasy.Analysis.Models;
+using Football.Fantasy.Analysis.Interfaces;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Football.Enums;
 
-namespace Football.Fantasy.Services
+namespace Football.Fantasy.Analysis.Services
 {
     public class MatchupAnalysisService : IMatchupAnalysisService
     {

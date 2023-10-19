@@ -1,5 +1,5 @@
 ﻿using Football.Players.Models;
-namespace Football.Fantasy.Models
+namespace Football.Fantasy.Analysis.Models
 {
     public class MarketShare
     {

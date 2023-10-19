@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.Fantasy.MockDraft"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.Statistics", "Football.Statistics\Football.Statistics.csproj", "{6B999E64-AB2B-4793-AF85-60561C7AC920}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.Fantasy.Analysis", "Football.Fantasy.Analysis\Football.Fantasy.Analysis.csproj", "{A65029F9-BA4E-44C3-A17C-A202D30D958C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,6 +78,10 @@ Global
 		{6B999E64-AB2B-4793-AF85-60561C7AC920}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B999E64-AB2B-4793-AF85-60561C7AC920}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B999E64-AB2B-4793-AF85-60561C7AC920}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A65029F9-BA4E-44C3-A17C-A202D30D958C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A65029F9-BA4E-44C3-A17C-A202D30D958C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A65029F9-BA4E-44C3-A17C-A202D30D958C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A65029F9-BA4E-44C3-A17C-A202D30D958C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

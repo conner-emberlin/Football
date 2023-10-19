@@ -3,10 +3,11 @@ using Football.Data.Models;
 using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
 using Football.Statistics.Interfaces;
+using Football.Fantasy.Analysis.Interfaces;
 using Microsoft.Extensions.Options;
 using Football.Enums;
 
-namespace Football.Fantasy.Services
+namespace Football.Fantasy.Analysis.Services
 {
     public class WaiverWireService : IWaiverWireService
     {

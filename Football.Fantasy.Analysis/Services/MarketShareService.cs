@@ -3,13 +3,14 @@ using Football.Enums;
 using Football.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
-using Football.Fantasy.Models;
+using Football.Fantasy.Analysis.Models;
+using Football.Fantasy.Analysis.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Football.Players.Models;
 using Football.Data.Models;
 using Football.Statistics.Interfaces;
 
-namespace Football.Fantasy.Services
+namespace Football.Fantasy.Analysis.Services
 {
     public class MarketShareService : IMarketShareService
     {
