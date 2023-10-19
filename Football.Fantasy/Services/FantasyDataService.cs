@@ -4,6 +4,7 @@ using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
 using Serilog;
 using Microsoft.Extensions.Caching.Memory;
+using Football.Data.Models;
 
 namespace Football.Fantasy.Services
 {
@@ -71,31 +72,31 @@ namespace Football.Fantasy.Services
             switch (position)
             {
                 case PositionEnum.QB: 
-                    foreach(var data in await _statisticsService.GetWeeklyDataQB(season, week))
+                    foreach(var data in await _statisticsService.GetWeeklyData<WeeklyDataQB>(position, season, week))
                     {
                         weeklyFantasy.Add(_calculator.CalculateQBFantasy(data));
                     }
                     break;
                 case PositionEnum.RB:
-                    foreach (var data in await _statisticsService.GetWeeklyDataRB(season, week))
+                    foreach (var data in await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, season, week))
                     {
                         weeklyFantasy.Add(_calculator.CalculateRBFantasy(data));
                     }
                     break;
                 case PositionEnum.WR:
-                    foreach (var data in await _statisticsService.GetWeeklyDataWR(season, week))
+                    foreach (var data in await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, season, week))
                     {
                         weeklyFantasy.Add(_calculator.CalculateWRFantasy(data));
                     }
                     break;
                 case PositionEnum.TE:
-                    foreach (var data in await _statisticsService.GetWeeklyDataTE(season, week))
+                    foreach (var data in await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, season, week))
                     {
                         weeklyFantasy.Add(_calculator.CalculateTEFantasy(data));
                     }
                     break;
                 case PositionEnum.DST:
-                    var stats = await _statisticsService.GetWeeklyDataDST(season, week);
+                    var stats = await _statisticsService.GetWeeklyData<WeeklyDataDST>(position, season, week);
                     var teams = await _playersService.GetAllTeams();
                     foreach (var data in stats)
                     {

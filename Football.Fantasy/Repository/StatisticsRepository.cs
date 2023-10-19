@@ -2,6 +2,7 @@
 using Football.Fantasy.Interfaces;
 using System.Data;
 using Dapper;
+using Football.Enums;
 
 namespace Football.Fantasy.Repository
 {
@@ -229,30 +230,7 @@ namespace Football.Fantasy.Repository
             return (await _dbConnection.QueryAsync<SeasonDataDST>(query, new { playerId })).ToList();
         }
 
-        public async Task<List<WeeklyDataQB>> GetWeeklyDataQB(int season, int week)
-        {
-            var query = $@"SELECT 
-		                     [Season]
-                            ,[Week]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Completions]
-                            ,[Attempts]
-                            ,[Yards]
-                            ,[TD]
-                            ,[Int]
-                            ,[Sacks]
-                            ,[RushingAttempts]
-                            ,[RushingYards]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                        FROM [dbo].WeeklyQBData
-                        WHERE 1=1
-                        AND [Season] = @season
-                        AND [Week] = @week
-                        ";
-            return (await _dbConnection.QueryAsync<WeeklyDataQB>(query, new { season, week })).ToList();
-        }
+        
         public async Task<List<WeeklyDataQB>> GetWeeklyDataQB(int playerId)
         {
             var query = $@"SELECT 
@@ -276,28 +254,8 @@ namespace Football.Fantasy.Repository
                         ";
             return (await _dbConnection.QueryAsync<WeeklyDataQB>(query, new { playerId })).ToList();
         }
-        public async Task<List<WeeklyDataRB>> GetWeeklyDataRB(int season, int week)
-        {
-            var query = $@"SELECT 
-                         [Season]
-                         ,[Week]
-                         ,[PlayerID]
-                         ,[Name]
-                         ,[RushingAtt]
-                         ,[RushingYds]
-                         ,[RushingTD]
-                         ,[Receptions]
-                         ,[Targets]
-                         ,[Yards]
-                         ,[ReceivingTD]
-                         ,[Fumbles]
-                        FROM [dbo].WeeklyRBData
-                        WHERE 1=1
-                        AND [Season] = @season
-                        AND [Week] = @week
-                        ";
-            return (await _dbConnection.QueryAsync<WeeklyDataRB>(query, new { season, week })).ToList();
-        }
+
+        
         public async Task<List<WeeklyDataRB>> GetWeeklyDataRB(int playerId)
         {
             var query = $@"SELECT 
@@ -318,29 +276,6 @@ namespace Football.Fantasy.Repository
                         AND [PlayerId] = @playerId
                         ";
             return (await _dbConnection.QueryAsync<WeeklyDataRB>(query, new { playerId })).ToList();
-        }
-        public async Task<List<WeeklyDataWR>> GetWeeklyDataWR(int season, int week)
-        {
-            var query = $@"SELECT 
-                            [Season]
-                            ,[Week]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Receptions]
-                            ,[Targets]
-                            ,[Yards]
-                            ,[Long]
-                            ,[TD]
-                            ,[RushingAtt]
-                            ,[RushingYds]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                        FROM [dbo].WeeklyWRData
-                        WHERE 1=1
-                        AND [Season] = @season
-                        AND [Week] = @week
-                        ";
-            return (await _dbConnection.QueryAsync<WeeklyDataWR>(query, new { season, week })).ToList();
         }
         public async Task<List<WeeklyDataWR>> GetWeeklyDataWR(int playerId)
         {
@@ -364,29 +299,8 @@ namespace Football.Fantasy.Repository
                         ";
             return (await _dbConnection.QueryAsync<WeeklyDataWR>(query, new { playerId })).ToList();
         }
-        public async Task<List<WeeklyDataTE>> GetWeeklyDataTE(int season, int week)
-        {
-            var query = $@"SELECT 
-                            [Season]
-                            ,[Week]
-                            ,[PlayerID]
-                            ,[Name]
-                            ,[Receptions]
-                            ,[Targets]
-                            ,[Yards]
-                            ,[Long]
-                            ,[TD]
-                            ,[RushingAtt]
-                            ,[RushingYds]
-                            ,[RushingTD]
-                            ,[Fumbles]
-                        FROM [dbo].WeeklyTEData
-                        WHERE 1=1
-                        AND [Season] = @season
-                        AND [Week] = @week
-                        ";
-            return (await _dbConnection.QueryAsync<WeeklyDataTE>(query, new { season, week })).ToList();
-        }
+
+        
         public async Task<List<WeeklyDataTE>> GetWeeklyDataTE(int playerId)
         {
             var query = $@"SELECT 
@@ -409,17 +323,7 @@ namespace Football.Fantasy.Repository
                         ";
             return (await _dbConnection.QueryAsync<WeeklyDataTE>(query, new { playerId })).ToList();
         }
-        public async Task<List<WeeklyDataDST>> GetWeeklyDataDST(int season, int week)
-        {
-            var query = $@"SELECT
-                            [Season], [Week], [PlayerId], [Name],
-                            [Sacks], [Ints], [FumblesRecovered],
-                            [ForcedFumbles], [DefensiveTD], [Safties], [SpecialTD]
-                            FROM [dbo].WeeklyDSTData
-                            WHERE [Season] = @season
-                                AND [Week] = @week";
-            return (await _dbConnection.QueryAsync<WeeklyDataDST>(query, new {season, week})).ToList();
-        }
+        
         public async Task<List<WeeklyDataDST>> GetWeeklyDataDST(int playerId)
         {
             var query = $@"SELECT
@@ -460,6 +364,43 @@ namespace Football.Fantasy.Repository
                             WHERE [Season] = @season
                                 AND [Week] = @week";
             return (await _dbConnection.QueryAsync<WeeklyRosterPercent>(query, new { season, week })).ToList();
+        }
+
+        public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int season, int week)
+        {
+            var query = string.Format($@"SELECT * FROM [dbo].{0} WHERE [Season] = @season
+                                        AND [Week] = @week", GetWeeklyDataTable(position));
+            return (await _dbConnection.QueryAsync<T>(query, new { season, week })).ToList();
+        }
+
+        public async Task<List<T>> GetSeasonData<T>(PositionEnum position, int season)
+        {
+            var query = string.Format($@"SELECT * FROM [dbo].{0} WHERE [Season] = @season", GetSeasonDataTable(position));
+            return (await _dbConnection.QueryAsync<T>(query, new { season })).ToList();
+        }
+        private static string GetWeeklyDataTable(PositionEnum position)
+        {
+            return position switch
+            {
+                PositionEnum.QB => "WeeklyDataQB",
+                PositionEnum.RB => "WeeklyDataRB",
+                PositionEnum.WR => "WeeklyDataWR",
+                PositionEnum.TE => "WeeklyDataTE",
+                PositionEnum.DST => "WeeklyDataDST",
+                _ => ""
+            };
+        }
+        private static string GetSeasonDataTable(PositionEnum position)
+        {
+            return position switch
+            {
+                PositionEnum.QB => "SeasonDataQB",
+                PositionEnum.RB => "SeasonDataRB",
+                PositionEnum.WR => "SeasonDataWR",
+                PositionEnum.TE => "SeasonDataTE",
+                PositionEnum.DST => "SeasonDataDST",
+                _ => ""
+            };
         }
     }
 }
