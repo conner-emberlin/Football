@@ -10,6 +10,7 @@ namespace Football.Enums
     {
         PlayerId,
         Season,
-        Week
+        Week,
+        ProjectedPoints
     }
 }

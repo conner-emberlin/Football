@@ -2,7 +2,6 @@
 using Football.Players.Models;
 using Football.Enums;
 using Football.Projections.Interfaces;
-using Football.Projections.Models;
 using MathNet.Numerics.LinearAlgebra;
 using Serilog;
 
@@ -15,51 +14,6 @@ namespace Football.Projections.Services
         {
             _logger = logger;
         }
-        public Matrix<double> RegressorMatrix(List<TEModelWeek> model)
-        {
-            var columnCount = 7;
-            var rowCount = model.Count;
-            var rows = new List<Vector<double>>();
-            foreach (var m in model)
-            {
-                rows.Add(TransformWeeklyModelTE(m));
-            }
-            return CreateMatrix(rows, rowCount, columnCount);
-        }
-        public Matrix<double> RegressorMatrix(List<WRModelWeek> model)
-        {
-            var columnCount = 7;
-            var rowCount = model.Count;
-            var rows = new List<Vector<double>>();
-            foreach (var m in model)
-            {
-                rows.Add(TransformWeeklyModelWR(m));
-            }
-            return CreateMatrix(rows, rowCount, columnCount);
-        }
-        public Matrix<double> RegressorMatrix(List<QBModelWeek> model)
-        {
-            var columnCount = 9;
-            var rowCount = model.Count;
-            var rows = new List<Vector<double>>();
-            foreach (var m in model)
-            {
-                rows.Add(TransformWeeklyModelQB(m));
-            }
-            return CreateMatrix(rows, rowCount, columnCount);
-        }
-        public Matrix<double> RegressorMatrix(List<RBModelWeek> model)
-        {
-            var columnCount = 9;
-            var rowCount = model.Count;
-            var rows = new List<Vector<double>>();
-            foreach (var m in model)
-            {
-                rows.Add(TransformWeeklyModelRB(m));
-            }
-            return CreateMatrix(rows, rowCount, columnCount);
-        }
-
         public Matrix<double> RegressorMatrix<T>(List<T> model)
         {
             try
@@ -165,72 +119,6 @@ namespace Football.Projections.Services
                 _logger.Error(ex.Message, ex);
                 throw;
             }
-        }
-
-        private Vector<double> TransformWeeklyModelQB(QBModelWeek model)
-        {
-            try
-            {
-                var columnCount = 9;
-                var vec = Vector<double>.Build.Dense(columnCount);
-                vec[0] = 1;
-                vec[1] = model.ProjectedPoints;
-                vec[2] = model.PassingAttemptsPerGame;
-                vec[3] = model.PassingYardsPerGame;
-                vec[4] = model.PassingTouchdownsPerGame;
-                vec[5] = model.RushingAttemptsPerGame;
-                vec[6] = model.RushingYardsPerGame;
-                vec[7] = model.RushingTouchdownsPerGame;
-                vec[8] = model.SacksPerGame;
-                return vec;
-
-            }
-            catch(Exception ex)
-            {
-                _logger.Error(ex.ToString(), ex.StackTrace, ex);
-                throw;
-            }
-        }
-        private Vector<double> TransformWeeklyModelRB(RBModelWeek model)
-        {
-            var columnCount = 9;
-            var vec = Vector<double>.Build.Dense(columnCount);
-            vec[0] = 1;
-            vec[1] = model.ProjectedPoints;
-            vec[2] = model.RushingAttemptsPerGame;
-            vec[3] = model.RushingYardsPerGame;
-            vec[4] = model.RushingYardsPerAttempt;
-            vec[5] = model.RushingTouchdownsPerGame;
-            vec[6] = model.ReceptionsPerGame;
-            vec[7] = model.ReceivingYardsPerGame;
-            vec[8] = model.ReceivingTouchdownsPerGame;
-            return vec;              
-        }
-        private Vector<double> TransformWeeklyModelWR(WRModelWeek model)
-        {
-            var columnCount = 7;
-            var vec = Vector<double>.Build.Dense(columnCount);
-            vec[0] = 1;
-            vec[1] = model.ProjectedPoints;
-            vec[2] = model.TargetsPerGame;
-            vec[3] = model.ReceptionsPerGame;
-            vec[4] = model.YardsPerGame;
-            vec[5] = model.YardsPerReception;
-            vec[6] = model.TouchdownsPerGame;
-            return vec;
-        }
-        private Vector<double> TransformWeeklyModelTE(TEModelWeek model)
-        {
-            var columnCount = 7;
-            var vec = Vector<double>.Build.Dense(columnCount);
-            vec[0] = 1;
-            vec[1] = model.ProjectedPoints;
-            vec[2] = model.TargetsPerGame;
-            vec[3] = model.ReceptionsPerGame;
-            vec[4] = model.YardsPerGame;
-            vec[5] = model.YardsPerReception;
-            vec[6] = model.TouchdownsPerGame;
-            return vec;
         }
         private static Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount)
         {

@@ -14,19 +14,19 @@ namespace Football.Projections.Repository
         {
             _dbConnection = dbConnection;
         }
-        public async Task<int> PostSeasonProjections(SeasonProjection projection)
+        public async Task<int> PostSeasonProjections(List<SeasonProjection> projections)
         {
             var query = $@"INSERT INTO [dbo].SeasonProjections (PlayerId, Season, Name, Position, ProjectedPoints)
                         VALUES (@PlayerId, @Season, @Name, @Position, @ProjectedPoints)";
 
-            return await _dbConnection.ExecuteAsync(query, projection);
+            return await _dbConnection.ExecuteAsync(query, projections);
         }
 
-        public async Task<int> PostWeeklyProjections(WeekProjection projection)
+        public async Task<int> PostWeeklyProjections(List<WeekProjection> projections)
         {
             var query = $@"INSERT INTO [dbo].WeeklyProjections (PlayerId, Season, Week, Name, Position, ProjectedPoints)
                         VALUES (@PlayerId, @Season, @Week, @Name, @Position, @ProjectedPoints)";
-            return await _dbConnection.ExecuteAsync(query, projection);
+            return await _dbConnection.ExecuteAsync(query, projections);
         }
 
         public async Task<SeasonProjection?> GetSeasonProjection(int playerId)
