@@ -21,10 +21,12 @@ namespace Football.Api.Controllers
         private readonly IStartOrSitService _startOrSitService;
         private readonly IWaiverWireService _waiverWireService;
         private readonly IPlayersService _playersService;
+        private readonly IBoomBustService _boomBustService;
         private readonly Season _season;
 
         public FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMarketShareService marketShareService,
-            IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService, IPlayersService playersService)
+            IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService, 
+            IPlayersService playersService, IBoomBustService boomBustService)
         {
             _fantasyDataService = fantasyDataService;
             _matchupAnalysisService = matchupAnalysisService;
@@ -33,6 +35,7 @@ namespace Football.Api.Controllers
             _startOrSitService = startOrSitService;
             _waiverWireService = waiverWireService;
             _playersService = playersService;
+            _boomBustService = boomBustService;
         }
 
         [HttpPost("data/{position}/{season}")]
@@ -137,5 +140,15 @@ namespace Football.Api.Controllers
             var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
             return Ok(await _waiverWireService.GetWaiverWireCandidates(_season.CurrentSeason, currentWeek));
         }
+
+        [HttpGet("boom-busts/{position}")]
+        [ProducesResponseType(typeof(List<BoomBust>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<BoomBust>>> GetBoomBusts([FromRoute] string position) => Enum.TryParse(position, out PositionEnum posEnum) ? Ok(await _boomBustService.GetBoomBusts(posEnum)) : BadRequest();
+
+        [HttpGet("weekly-boom-busts/{playerId}")]
+        [ProducesResponseType(typeof(List<BoomBustByWeek>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<BoomBustByWeek>> GetBoomBustByWeek([FromRoute] int playerId) => playerId > 0 ? Ok(await _boomBustService.GetBoomBustsByWeek(playerId)) : BadRequest();
     }
 }

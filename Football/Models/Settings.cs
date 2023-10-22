@@ -92,4 +92,16 @@
         public int GoodWeekFantasyPointsTE { get; set; }
         public int GoodWeekMinimum { get; set; }
     }
+
+    public class BoomBustSettings
+    {
+        public double QBBoom { get; set; }
+        public double QBBust { get; set; }
+        public double RBBoom { get; set; }
+        public double RBBust { get; set; }
+        public double WRBoom { get; set; }
+        public double WRBust { get; set;}
+        public double TEBoom { get; set; }
+        public double TEBust { get; set;}
+    }
 }

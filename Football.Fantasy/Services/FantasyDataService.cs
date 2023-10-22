@@ -6,6 +6,8 @@ using Football.Players.Interfaces;
 using Serilog;
 using Microsoft.Extensions.Caching.Memory;
 using Football.Data.Models;
+using Football.Models;
+using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Services
 {
@@ -17,8 +19,10 @@ namespace Football.Fantasy.Services
         private readonly IPlayersService _playersService;
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
+        private readonly Season _season;
         public FantasyDataService(IFantasyDataRepository fantasyData, IFantasyCalculator calculator, 
-            IStatisticsService statistics, IPlayersService playersService, ILogger logger, IMemoryCache cache)
+            IStatisticsService statistics, IPlayersService playersService, ILogger logger, 
+            IMemoryCache cache, IOptionsMonitor<Season> season)
         {
             _fantasyData = fantasyData;
             _calculator = calculator;
@@ -26,6 +30,7 @@ namespace Football.Fantasy.Services
             _playersService = playersService;
             _logger = logger;
             _cache = cache;
+            _season = season.CurrentValue;
         }
         public async Task<SeasonFantasy> GetSeasonFantasy(int playerId, int season) => await _fantasyData.GetSeasonFantasy(playerId, season);
         public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId) => await _fantasyData.GetSeasonFantasy(playerId);
@@ -124,6 +129,22 @@ namespace Football.Fantasy.Services
         }
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId) => await _fantasyData.GetWeeklyFantasy(playerId);
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => await _fantasyData.GetWeeklyFantasy(season, week);
+        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(PositionEnum position)
+        {
+            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
+            List<WeeklyFantasy> weeklyFantasy = new();
+            for (int i = 1; i < currentWeek; i++)
+            {
+                foreach (var s in await GetWeeklyFantasy(_season.CurrentSeason, i))
+                {
+                    if (s.Position == position.ToString())
+                    {
+                        weeklyFantasy.Add(s);
+                    }                   
+                }
+            }
+            return weeklyFantasy;
+        }
         public async Task<List<SeasonFantasy>> GetCurrentFantasyTotals(int season)
         {
             if (RetrieveFromCache().Any())
