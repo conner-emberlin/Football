@@ -65,7 +65,7 @@ namespace Football.Projections.Services
             try
             {
                 var rowCount = model.Count;
-                var columnCount = typeof(T).GetProperties().Length - 1;
+                var columnCount = GetPropertiesFromModel<T>().Count + 1;
                 var rows = new List<Vector<double>>();
                 foreach (var m in model)
                 {
@@ -130,13 +130,16 @@ namespace Football.Projections.Services
         {
             try
             {
-                var properties = typeof(T).GetProperties();
-                var columnCount = properties.Length - 1;
+                var properties = GetPropertiesFromModel<T>();
+                var columnCount = properties.Count + 1;
                 var vec = Vector<double>.Build.Dense(columnCount);
                 vec[0] = 1;
-                for (int i = 2; i <= columnCount; i++)
+                var index = 1;
+                foreach (var property in properties)
                 {
-                    vec[i - 1] = (double)properties[i].GetValue(modelItem);
+                    var value = Convert.ToDouble(property.GetValue(modelItem));
+                    vec[index] = value;
+                    index++;
                 }
                 return vec;
             }
@@ -244,13 +247,11 @@ namespace Football.Projections.Services
             return matrix;
         }
 
-        private static int GetColumnCountFromModel<T>()
+        private static List<System.Reflection.PropertyInfo> GetPropertiesFromModel<T>()
         {
-            var count = typeof(T).GetProperties().Where(p => p.ToString() != Model.PlayerId.ToString()
+            return typeof(T).GetProperties().Where(p => p.ToString() != Model.PlayerId.ToString()
                                                         && p.ToString() != Model.Season.ToString()
-                                                        && p.ToString() != Model.Week.ToString()).Count();
-            //add 1 to account for constant term
-            return count + 1;
+                                                        && p.ToString() != Model.Week.ToString()).ToList();
         }
     }
 }
