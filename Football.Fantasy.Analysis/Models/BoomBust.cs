@@ -17,6 +17,6 @@ namespace Football.Fantasy.Analysis.Models
         public int Week { get; set; }
         public bool Boom { get; set; }
         public bool Bust { get; set; }
-        public double FantasyPoints { get; set }
+        public double FantasyPoints { get; set; }
     }
 }

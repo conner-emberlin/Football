@@ -1,5 +1,6 @@
 ﻿using Football.Fantasy.Models;
 using Football.Players.Models;
+using Football.Enums;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using MathNet.Numerics.LinearAlgebra;
@@ -241,6 +242,15 @@ namespace Football.Projections.Services
                 }
             }
             return matrix;
+        }
+
+        private static int GetColumnCountFromModel<T>()
+        {
+            var count = typeof(T).GetProperties().Where(p => p.ToString() != Model.PlayerId.ToString()
+                                                        && p.ToString() != Model.Season.ToString()
+                                                        && p.ToString() != Model.Week.ToString()).Count();
+            //add 1 to account for constant term
+            return count + 1;
         }
     }
 }

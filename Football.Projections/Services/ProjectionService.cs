@@ -239,22 +239,25 @@ namespace Football.Projections.Services
         public async Task<IEnumerable<SeasonProjection>> CalculateSeasonProjections<T>(List<T> model, PositionEnum position)
         {
             List<SeasonProjection> projections = new();
-            var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
+            var regressorMatrix = _matrixCalculator.RegressorMatrix<T>(model);
             var results = PerformProjection(regressorMatrix, await PerformRegression(regressorMatrix, position));
             for (int i = 0; i < results.Count; i++)
             {
-                var playerId = (int)typeof(T).GetProperties()[0].GetValue(model[i]);
-                var player = await _playersService.GetPlayer(playerId);
-                if (player.Active == 1)
+                var playerId = GetPlayerIdFromModel<T>(model[i]);
+                if (playerId > 0)
                 {
-                    projections.Add(new SeasonProjection
+                    var player = await _playersService.GetPlayer(playerId);
+                    if (player.Active == 1)
                     {
-                        PlayerId = playerId,
-                        Season = _season.CurrentSeason,
-                        Name = player.Name,
-                        Position = player.Position,
-                        ProjectedPoints = results[i]
-                    });
+                        projections.Add(new SeasonProjection
+                        {
+                            PlayerId = playerId,
+                            Season = _season.CurrentSeason,
+                            Name = player.Name,
+                            Position = player.Position,
+                            ProjectedPoints = results[i]
+                        });
+                    }
                 }
             }
             return projections;
@@ -547,6 +550,19 @@ namespace Football.Projections.Services
         }
         private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) => seasonProjection > 0 ?
             (_weeklyTunings.ProjectionWeight / week) * seasonProjection + (1 - (_weeklyTunings.ProjectionWeight / week)) * weeklyProjection
-            : weeklyProjection;     
+            : weeklyProjection;  
+        
+        private static int GetPlayerIdFromModel<T>(T model)
+        {
+            var prop = typeof(T).GetProperty(Model.PlayerId.ToString());
+            if(prop != null)
+            {
+                return Convert.ToInt32(prop.GetValue(model));
+            }
+            else
+            {
+                return 0;
+            }
+        }
     }
 }
