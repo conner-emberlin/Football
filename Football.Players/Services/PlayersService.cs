@@ -57,7 +57,7 @@ namespace Football.Players.Services
         {
             var team = await GetPlayerTeam(_season.CurrentSeason, playerId);
             if (team != null)
-            {
+            {//test
                 return await _playersRepository.GetUpcomingGames(await GetTeamId(team.Team), _season.CurrentSeason, await GetCurrentWeek(_season.CurrentSeason));
             }
             else { return new List<Schedule>(); }
