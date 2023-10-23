@@ -1,15 +1,13 @@
 ﻿using Football.Models;
+using Football.Enums;
+using System.Reflection;
 
 namespace Football
 {
     public interface ISettingsService
     {
-        public Season GetSeason();
-        public ReplacementLevels GetReplacementLevels();
-        public FantasyScoring GetFantasyScoring();
-        public ProjectionLimits GetProjectionLimits();
-        public Starters GetStarters();
-        public Tunings GetTunings();
-        public WeeklyTunings GetWeeklyTunings();
+        public int GetProjectionsCount(PositionEnum position);
+        public double GetValueFromModel<T>(T type, Model model);
+        public List<PropertyInfo> GetPropertiesFromModel<T>();
     }
 }

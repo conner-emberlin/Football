@@ -5,26 +5,34 @@ using Football.Enums;
 using Microsoft.Extensions.Options;
 using Football.Projections.Models;
 using Football.Fantasy.Models;
+using Serilog;
 
 namespace Football.Projections.Services
 {
     public class ProjectionAnalysisService : IProjectionAnalysisService
     {
         private readonly IFantasyDataService _fantasyService;
-        private readonly IProjectionService _projectionService;
+        private readonly IProjectionService<SeasonProjection> _seasonProjection;
+        private readonly IProjectionService<WeekProjection> _weekProjection;
         private readonly Season _season;
+        private readonly Starters _starters;
+        private readonly ILogger _logger;
 
-        public ProjectionAnalysisService(IFantasyDataService fantasyService, IProjectionService projectionService, 
-            IOptionsMonitor<Season> season)
+        public ProjectionAnalysisService(IFantasyDataService fantasyService, 
+            IOptionsMonitor<Season> season, IProjectionService<SeasonProjection> seasonProjection,
+            IProjectionService<WeekProjection> weekProjection, ILogger logger, IOptionsMonitor<Starters> starters)
         {
-            _fantasyService = fantasyService;
-            _projectionService = projectionService;
+            _fantasyService = fantasyService;;
             _season = season.CurrentValue;
+            _seasonProjection = seasonProjection;
+            _weekProjection = weekProjection;
+            _logger = logger;
+            _starters = starters.CurrentValue;
         }
 
         public async Task<List<WeeklyProjectionError>> GetWeeklyProjectionError(PositionEnum position, int week)
         {
-            var projectionsExist = (_projectionService.GetWeeklyProjectionsFromSQL(position, week, out var projections));
+            var projectionsExist = (_weekProjection.GetProjectionsFromSQL(position, week, out var projections));
             if (projectionsExist)
             {
                 List<WeeklyProjectionError> weeklyProjectionErrors = new();
@@ -54,7 +62,7 @@ namespace Football.Projections.Services
 
         public async Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(PositionEnum position, int week)
         {
-            var projectionsExist = (_projectionService.GetWeeklyProjectionsFromSQL(position, week, out var projections));
+            var projectionsExist = (_weekProjection.GetProjectionsFromSQL(position, week, out var projections));
             if (projectionsExist)
             {
                 var weeklyFantasy = (await _fantasyService.GetWeeklyFantasy(_season.CurrentSeason, week)).Where(w => w.Position == position.ToString());
@@ -77,6 +85,38 @@ namespace Football.Projections.Services
                     Week = week,
                     Position = position.ToString()
                 };
+            }
+        }
+        public async Task<List<SeasonFlex>> SeasonFlexRankings()
+        {
+            List<SeasonFlex> flexRankings = new();
+            var qbProjections = (await _seasonProjection.GetProjections(PositionEnum.QB)).ToList();
+            var rbProjections = (await _seasonProjection.GetProjections(PositionEnum.RB)).ToList();
+            var wrProjections = (await _seasonProjection.GetProjections(PositionEnum.WR)).ToList();
+            var teProjections = (await _seasonProjection.GetProjections(PositionEnum.TE)).ToList();
+            try
+            {
+                var rankings = qbProjections.Concat(rbProjections).Concat(wrProjections).Concat(teProjections).ToList();
+                foreach (var rank in rankings)
+                {
+                    if (Enum.TryParse(rank.Position, out PositionEnum position))
+                    {
+                        flexRankings.Add(new SeasonFlex
+                        {
+                            PlayerId = rank.PlayerId,
+                            Name = rank.Name,
+                            Position = rank.Position,
+                            ProjectedPoints = rank.ProjectedPoints,
+                            Vorp = rank.ProjectedPoints - await GetReplacementPoints(position)
+                        });
+                    }
+                }
+                return flexRankings.OrderByDescending(f => f.Vorp).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.ToString() + Environment.NewLine + ex.StackTrace);
+                throw;
             }
         }
         private static double GetMeanSquaredError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
@@ -149,6 +189,17 @@ namespace Football.Projections.Services
                 }
             }
             return count > 0 ? (sumOfError/count)*100 : 0;
-        }        
+        }
+        private async Task<double> GetReplacementPoints(PositionEnum position)
+        {
+            return position switch
+            {
+                PositionEnum.QB => (await _seasonProjection.GetProjections(position)).ElementAt(_starters.QBStarters - 1).ProjectedPoints,
+                PositionEnum.RB => (await _seasonProjection.GetProjections(position)).ElementAt(_starters.RBStarters - 1).ProjectedPoints,
+                PositionEnum.WR => (await _seasonProjection.GetProjections(position)).ElementAt(_starters.WRStarters - 1).ProjectedPoints,
+                PositionEnum.TE => (await _seasonProjection.GetProjections(position)).ElementAt(_starters.TEStarters - 1).ProjectedPoints,
+                _ => 0,
+            };
+        }
     }
 }

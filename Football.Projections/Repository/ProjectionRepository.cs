@@ -29,12 +29,17 @@ namespace Football.Projections.Repository
             return await _dbConnection.ExecuteAsync(query, projections);
         }
 
-        public async Task<SeasonProjection?> GetSeasonProjection(int playerId)
+        public async Task<IEnumerable<SeasonProjection?>> GetSeasonProjection(int playerId)
         {
             var query = $@"SELECT [PlayerId], [Season], [Name], [Position], [ProjectedPoints]
                         FROM [dbo].SeasonProjections
                         WHERE [PlayerId] = @playerId";
-            return (await _dbConnection.QueryAsync<SeasonProjection>(query, new { playerId })).FirstOrDefault();
+            return await _dbConnection.QueryAsync<SeasonProjection>(query, new { playerId });
+        }
+        public async Task<IEnumerable<WeekProjection>?> GetWeeklyProjection(int playerId)
+        {
+            var query = $@"SELECT * FROM [dbo].WeeklyProjections WHERE [PlayerId] = @playerId";
+            return await _dbConnection.QueryAsync<WeekProjection>(query, new { playerId});
         }
         public IEnumerable<WeekProjection> GetWeeklyProjectionsFromSQL(PositionEnum position, int week)
         {
@@ -43,6 +48,14 @@ namespace Football.Projections.Repository
                         WHERE [Position] = @pos
                             AND [Week] = @week";
             return  _dbConnection.Query<WeekProjection>(query, new { pos, week });
+        }
+        public IEnumerable<SeasonProjection> GetSeasonProjectionsFromSQL(PositionEnum position, int season)
+        {
+            var pos = position.ToString();
+            var query = $@"SELECT * FROM [dbo].SeasonProjections
+                        WHERE [Position] = @pos
+                            AND [Season] = @season";
+            return _dbConnection.Query<SeasonProjection>(query, new { pos, season });
         }
     }
 }

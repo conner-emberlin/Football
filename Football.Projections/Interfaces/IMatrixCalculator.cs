@@ -7,8 +7,6 @@ namespace Football.Projections.Interfaces
     public interface IMatrixCalculator
     {
         public Matrix<double> RegressorMatrix<T>(List<T> model);
-        public Matrix<double> RegressorMatrix(List<Rookie> rookies);
-        public Vector<double> PopulateDependentVector(List<SeasonFantasy> totalPoints);
-        public Vector<double> PopulateDependentVector(List<WeeklyFantasy> weeklyPoints);
+        public Vector<double> DependentVector<T>(List<T> fantasyPoints);
     }
 }

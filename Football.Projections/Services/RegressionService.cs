@@ -36,7 +36,7 @@ namespace Football.Projections.Services
                 rookieSeasons.Add(await _fantasyService.GetSeasonFantasy(rookie.PlayerId, rookie.RookieSeason));
             }
 
-            return CholeskyDecomposition(_matrixCalculator.RegressorMatrix(rookies), _matrixCalculator.PopulateDependentVector(rookieSeasons));
+            return CholeskyDecomposition(_matrixCalculator.RegressorMatrix(rookies), _matrixCalculator.DependentVector(rookieSeasons));
         }
 
         public QBModelSeason QBModelSeason(SeasonDataQB stat)

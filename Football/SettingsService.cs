@@ -1,4 +1,6 @@
 ﻿using Football.Models;
+using Football.Enums;
+using System.Reflection;
 using Microsoft.Extensions.Options;
 
 namespace Football
@@ -25,13 +27,42 @@ namespace Football
             _weeklyTunings = weeklyTunings.CurrentValue;
         }
 
-        public Season GetSeason() => _season;
-        public ReplacementLevels GetReplacementLevels() => _replacementLevels;
-        public FantasyScoring GetFantasyScoring() => _fantasyScoring;
-        public ProjectionLimits GetProjectionLimits() => _projectionLimits;
-        public Starters GetStarters() => _starters;
-        public Tunings GetTunings() => _tunings;
-        public WeeklyTunings GetWeeklyTunings() => _weeklyTunings;
+        public int GetProjectionsCount(PositionEnum position) => position switch
+        {
+
+            PositionEnum.QB => _projectionLimits.QBProjections,
+            PositionEnum.RB => _projectionLimits.RBProjections,
+            PositionEnum.WR => _projectionLimits.WRProjections,
+            PositionEnum.TE => _projectionLimits.TEProjections,
+            _ => 0
+        };
+
+        public double GetValueFromModel<T>(T model, Model value)
+        {
+            var prop = typeof(T).GetProperties().Where(p => !string.IsNullOrWhiteSpace(p.ToString()) && p.ToString().Contains(value.ToString())).First();
+            if (prop != null)
+            {
+                return Convert.ToDouble(prop.GetValue(model));
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        public List<PropertyInfo> GetPropertiesFromModel<T>()
+        {
+            return typeof(T).GetProperties().Where(p => !string.IsNullOrWhiteSpace(p.ToString())
+                                            && !p.ToString().Contains(Model.PlayerId.ToString())
+                                            && !p.ToString().Contains(Model.Season.ToString())
+                                            && !p.ToString().Contains(Model.Week.ToString())
+                                            && !p.ToString().Contains(Model.TeamDrafted.ToString())
+                                            && !p.ToString().Contains(Model.RookieSeason.ToString())
+                                            && !p.ToString().Contains(Model.Position.ToString())
+                                            ).ToList();
+        }
+
+
 
     }
 }

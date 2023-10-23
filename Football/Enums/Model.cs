@@ -11,6 +11,10 @@ namespace Football.Enums
         PlayerId,
         Season,
         Week,
-        ProjectedPoints
+        ProjectedPoints,
+        FantasyPoints,
+        TeamDrafted,
+        Position,
+        RookieSeason
     }
 }

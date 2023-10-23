@@ -1,27 +1,17 @@
 ﻿using Football.Enums;
-using Football.Projections.Models;
 using MathNet.Numerics.LinearAlgebra;
 
 namespace Football.Projections.Interfaces
 {
-    public interface IProjectionService
+    public interface IProjectionService<T>
     {
-        
-        public Task<IEnumerable<SeasonProjection>> GetSeasonProjections(PositionEnum position);
-        public Task<IEnumerable<WeekProjection>> GetWeeklyProjections(PositionEnum position);       
-        public Task<IEnumerable<SeasonProjection>> CalculateSeasonProjections<T>(List<T> model, PositionEnum position);
-        public Task<IEnumerable<WeekProjection>> CalculateWeeklyProjections<T>(List<T> model, PositionEnum position);
+        public bool GetProjectionsFromSQL(PositionEnum position, int season, out IEnumerable<T> projections);
+        public bool GetProjectionsFromCache(PositionEnum position, out IEnumerable<T> projections);
+        public Task<IEnumerable<T>?> GetPlayerProjections(int playerId);
+        public Task<IEnumerable<T>> GetProjections(PositionEnum position);
+        public Task<IEnumerable<T>> CalculateProjections<T1>(List<T1> model, PositionEnum position);
         public Task<Vector<double>> PerformRegression(Matrix<double> regressorMatrix, PositionEnum position);
-        public Task<Vector<double>> PerformWeeklyRegression(Matrix<double> regressorMatrix, PositionEnum position, int currentWeek);
-        public Vector<double> PerformProjection(Matrix<double> model, Vector<double> coeff);       
-        public Task<int> PostSeasonProjections(List<SeasonProjection> projections);
-        public Task<int> PostWeeklyProjections(List<WeekProjection> projections);
-
-        public Task<SeasonProjection?> GetSeasonProjection(int playerId);
-        public Task<List<SeasonProjection>> RookieSeasonProjections(PositionEnum position);
-        public bool GetWeeklyProjectionsFromSQL(PositionEnum position, int week, out IEnumerable<WeekProjection> projections);
-
-        public Task<List<SeasonFlex>> SeasonFlexRankings();
-
+        public Vector<double> PerformProjection(Matrix<double> model, Vector<double> coeff);
+        public Task<int> PostProjections(List<T> projections);
     }
 }
