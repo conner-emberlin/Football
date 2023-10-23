@@ -119,6 +119,16 @@ namespace Football.Projections.Services
                 throw;
             }
         }
+
+        public async Task<List<WeekProjection>> WeeklyFlexRankings()
+        {            
+            var qbProjections = (await _weekProjection.GetProjections(PositionEnum.QB)).ToList();
+            var rbProjections = (await _weekProjection.GetProjections(PositionEnum.RB)).ToList();
+            var wrProjections = (await _weekProjection.GetProjections(PositionEnum.WR)).ToList();
+            var teProjections = (await _weekProjection.GetProjections(PositionEnum.TE)).ToList();
+            var rankings = qbProjections.Concat(rbProjections).Concat(wrProjections).Concat(teProjections);
+            return rankings.OrderByDescending(r => r.ProjectedPoints).ToList();
+        }
         private static double GetMeanSquaredError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
         {
             var sumOfSquares = 0.0;

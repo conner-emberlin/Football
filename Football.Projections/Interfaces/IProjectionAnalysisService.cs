@@ -9,5 +9,6 @@ namespace Football.Projections.Interfaces
         public Task<List<WeeklyProjectionError>> GetWeeklyProjectionError(PositionEnum position, int week);
         public Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(PositionEnum position, int week);
         public Task<List<SeasonFlex>> SeasonFlexRankings();
+        public Task<List<WeekProjection>> WeeklyFlexRankings();
     }
 }

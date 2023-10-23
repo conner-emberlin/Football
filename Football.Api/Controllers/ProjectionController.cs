@@ -72,11 +72,12 @@ namespace Football.Api.Controllers
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
             {
-                return Ok(await _weekProjectionService.GetProjections(positionEnum));
+                return positionEnum == PositionEnum.FLEX ? Ok(await _analysisService.WeeklyFlexRankings()) 
+                                                         : Ok(await _weekProjectionService.GetProjections(positionEnum));
             }
             else
             {
-                return BadRequest("Bad Request");
+                return BadRequest();
             }
         }
         [HttpPost("weekly/{position}")]
