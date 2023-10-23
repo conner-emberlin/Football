@@ -12,31 +12,31 @@ namespace Football.Fantasy.Analysis.Services
     public class BoomBustService : IBoomBustService
     {
         private readonly Season _season;
-        private readonly BoomBustSettings _settings;
         private readonly IPlayersService _playersService;
         private readonly IFantasyDataService _fantasyDataService;
+        private readonly ISettingsService _settingsService;
 
-        public BoomBustService(IOptionsMonitor<Season> season, IOptionsMonitor<BoomBustSettings> settings, 
-            IPlayersService playersService, IFantasyDataService fantasyDataService)
+        public BoomBustService(IOptionsMonitor<Season> season, 
+            IPlayersService playersService, IFantasyDataService fantasyDataService, ISettingsService settingsService)
         {
             _season = season.CurrentValue;
-            _settings = settings.CurrentValue;
             _playersService = playersService;
             _fantasyDataService = fantasyDataService;
+            _settingsService = settingsService;
         }
-       public async Task<List<BoomBust>> GetBoomBusts(PositionEnum position)
+        public async Task<List<BoomBust>> GetBoomBusts(PositionEnum position)
         {
             var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(position);
             var playersByPosition = await _playersService.GetPlayersByPosition(position);
-            return  weeklyFantasy.Join(playersByPosition, wf => wf.PlayerId, p => p.PlayerId, 
+            return weeklyFantasy.Join(playersByPosition, wf => wf.PlayerId, p => p.PlayerId, 
                                        (wf, p) => new { WeeklyFantasy = wf, Player = p })
                                                        .GroupBy(wfp => wfp.Player, 
                                                                 wfp => wfp.WeeklyFantasy.FantasyPoints, 
                                                                 (key, f) => new {Player = key, FantasyPoints = f.ToList()})
                                                        .Select(wf => new { 
                                                                             wf.Player, 
-                                                                            BoomCount = (double)wf.FantasyPoints.Where(fp => fp > GetBoomSetting(position)).Count(), 
-                                                                            BustCount = (double)wf.FantasyPoints.Where(fp => fp < GetBustSetting(position)).Count(), 
+                                                                            BoomCount = (double)wf.FantasyPoints.Where(fp => fp > _settingsService.GetBoomSetting(position)).Count(), 
+                                                                            BustCount = (double)wf.FantasyPoints.Where(fp => fp < _settingsService.GetBustSetting(position)).Count(), 
                                                                             WeekCount = (double)wf.FantasyPoints.Count})                                                                        
                                                        .Select(bb => new BoomBust
                                                                 {
@@ -59,8 +59,8 @@ namespace Football.Fantasy.Analysis.Services
                     Season = _season.CurrentSeason,
                     Player = player,
                     Week = wf.Week,
-                    Boom = wf.FantasyPoints > GetBoomSetting(position),
-                    Bust = wf.FantasyPoints < GetBustSetting(position),
+                    Boom = wf.FantasyPoints > _settingsService.GetBoomSetting(position),
+                    Bust = wf.FantasyPoints < _settingsService.GetBustSetting(position),
                     FantasyPoints = wf.FantasyPoints
                 });
                 foreach (var wbb in playerBoomBust)
@@ -70,30 +70,6 @@ namespace Football.Fantasy.Analysis.Services
             }
             return boomBustsByWeek.OrderBy(b => b.Week).ToList();
         }
-        private double GetBoomSetting(PositionEnum position)
-        {
-            return position switch
-            {
-                PositionEnum.QB => _settings.QBBoom,
-                PositionEnum.RB => _settings.RBBoom,
-                PositionEnum.WR => _settings.WRBoom,
-                PositionEnum.TE => _settings.TEBoom,
-                _ => 0
-            };
-        }
-        private double GetBustSetting(PositionEnum position)
-        {
-            return position switch
-            {
-                PositionEnum.QB => _settings.QBBust,
-                PositionEnum.RB => _settings.RBBust,
-                PositionEnum.WR => _settings.WRBust,
-                PositionEnum.TE => _settings.TEBust,
-                _ => 0
-            };
-        }
-
-
 
     }
 }

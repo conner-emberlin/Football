@@ -12,23 +12,25 @@ namespace Football.Players.Services
     {
         private readonly IPlayersRepository _playersRepository;
         private readonly IMemoryCache _cache;
+        private readonly ISettingsService _settingsService;
         private readonly Season _season;
-        public PlayersService(IPlayersRepository playersRepository, IMemoryCache cache, IOptionsMonitor<Season> season)
+        public PlayersService(IPlayersRepository playersRepository, IMemoryCache cache, IOptionsMonitor<Season> season, ISettingsService settingsService)
         {
             _playersRepository = playersRepository;
             _season = season.CurrentValue;
             _cache = cache;
+            _settingsService = settingsService;
         }
         public async Task<List<Player>> GetAllPlayers()
         {
-            if (RetrieveFromCache().Any())
+            if (_settingsService.GetFromCache<Player>(Cache.AllPlayers, out var cachedValues))
             {
-                return RetrieveFromCache();
+                return cachedValues;
             }
             else
             {
                 var players = await _playersRepository.GetAllPlayers();
-                _cache.Set("AllPlayers", players);
+                _cache.Set(Cache.AllPlayers.ToString(), players);
                 return players;
             }
         }
@@ -68,8 +70,6 @@ namespace Football.Players.Services
         public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => await _playersRepository.GetScheduleDetails(season, week);
         public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => await _playersRepository.GetActiveInSeasonInjuries(season);
         public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await _playersRepository.PostInSeasonInjury(injury);
-        private List<Player> RetrieveFromCache() =>
-                     _cache.TryGetValue("AllPlayers", out List<Player> cachedPlayers) ? cachedPlayers
-                     : Enumerable.Empty<Player>().ToList();
+
     }
 }

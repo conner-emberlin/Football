@@ -1,7 +1,5 @@
-﻿using Football.Data.Models;
-using Football.Fantasy.Interfaces;
+﻿using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
-using Football.Players.Models;
 using System.Data;
 using Dapper;
 

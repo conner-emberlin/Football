@@ -18,16 +18,18 @@ namespace Football.Fantasy.Analysis.Services
         private readonly IStatisticsService _statisticsService;
         private readonly IFantasyDataService _fantasyService;
         private readonly IMemoryCache _cache;
+        private readonly ISettingsService _settingsService;
         private readonly Season _season;
 
         public MarketShareService(IPlayersService playersService, IStatisticsService statisticsService, IFantasyDataService fantasyService,
-            IOptionsMonitor<Season> season, IMemoryCache cache)
+            IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settingsService)
         {
             _playersService = playersService;
             _statisticsService = statisticsService;
             _fantasyService = fantasyService;
             _cache = cache;
             _season = season.CurrentValue;
+            _settingsService = settingsService;
         }
         public async Task<List<TargetShare>> GetTargetShares()
         {
@@ -172,9 +174,9 @@ namespace Football.Fantasy.Analysis.Services
 
         public async Task<List<TeamTotals>> GetTeamTotals()
         {
-            if (RetrieveFromCache().Any())
+            if (_settingsService.GetFromCache<TeamTotals>(Cache.TeamTotals, out var cachedTotals))
             {
-                return RetrieveFromCache();
+                return cachedTotals;
             }
             else
             {
@@ -265,11 +267,9 @@ namespace Football.Fantasy.Analysis.Services
                     });
                 }
                 var teamTotals = totals.OrderByDescending(t => t.TotalFantasy).ToList();
-                _cache.Set("TeamTotals", teamTotals);
+                _cache.Set(Cache.TeamTotals.ToString(), teamTotals);
                 return teamTotals;
             }
         }
-
-        private List<TeamTotals> RetrieveFromCache() => _cache.TryGetValue("TeamTotals", out List<TeamTotals> totals) ? totals : Enumerable.Empty<TeamTotals>().ToList();
     }
 }

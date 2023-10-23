@@ -15,20 +15,22 @@ namespace Football.Fantasy.Analysis.Services
         private readonly IFantasyDataService _fastaDataService;
         private readonly Season _season;
         private readonly IMemoryCache _cache;
+        private readonly ISettingsService _settings;
 
         public MatchupAnalysisService(IPlayersService playersService, IFantasyDataService fantasyDataService, 
-            IOptionsMonitor<Season> season, IMemoryCache cache)
+            IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settings)
         {
             _playersService = playersService;
             _fastaDataService = fantasyDataService;
             _season = season.CurrentValue;
             _cache = cache;
+            _settings = settings;
         }
         public async Task<List<MatchupRanking>> PositionalMatchupRankings(PositionEnum position)
         {
-            if (RetrieveFromCache(position.ToString()).Any())
+            if (_settings.GetFromCache<MatchupRanking>(position, Cache.MatchupRankings, out var cachedValues))
             {
-                return RetrieveFromCache(position.ToString());
+                return cachedValues;
             }
             else
             {
@@ -65,7 +67,7 @@ namespace Football.Fantasy.Analysis.Services
                     });
                 }
                 var matchupRanks = rankings.OrderBy(r => r.AvgPointsAllowed).ToList();
-                _cache.Set("MatchupRanking" + position.ToString(), matchupRanks);
+                _cache.Set(position.ToString() + Cache.MatchupRankings, matchupRanks);
                 return matchupRanks;
             }
         }
@@ -89,8 +91,5 @@ namespace Football.Fantasy.Analysis.Services
                 return 0;
             }
         }
-        private List<MatchupRanking> RetrieveFromCache(string position) =>
-            _cache.TryGetValue("MatchupRanking" + position, out List<MatchupRanking> rankings) ? rankings
-            : Enumerable.Empty<MatchupRanking>().ToList();
     }
 }

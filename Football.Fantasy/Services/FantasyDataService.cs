@@ -19,10 +19,11 @@ namespace Football.Fantasy.Services
         private readonly IPlayersService _playersService;
         private readonly ILogger _logger;
         private readonly IMemoryCache _cache;
+        private readonly ISettingsService _settingsService;
         private readonly Season _season;
         public FantasyDataService(IFantasyDataRepository fantasyData, IFantasyCalculator calculator, 
             IStatisticsService statistics, IPlayersService playersService, ILogger logger, 
-            IMemoryCache cache, IOptionsMonitor<Season> season)
+            IMemoryCache cache, IOptionsMonitor<Season> season, ISettingsService settingsService)
         {
             _fantasyData = fantasyData;
             _calculator = calculator;
@@ -31,6 +32,7 @@ namespace Football.Fantasy.Services
             _logger = logger;
             _cache = cache;
             _season = season.CurrentValue;
+            _settingsService = settingsService;
         }
         public async Task<SeasonFantasy> GetSeasonFantasy(int playerId, int season) => await _fantasyData.GetSeasonFantasy(playerId, season);
         public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId) => await _fantasyData.GetSeasonFantasy(playerId);
@@ -147,9 +149,9 @@ namespace Football.Fantasy.Services
         }
         public async Task<List<SeasonFantasy>> GetCurrentFantasyTotals(int season)
         {
-            if (RetrieveFromCache().Any())
+            if (_settingsService.GetFromCache<SeasonFantasy>(Cache.SeasonTotals, out var cachedTotals))
             {
-                return RetrieveFromCache();
+                return cachedTotals;
             }
             else
             {
@@ -172,14 +174,9 @@ namespace Football.Fantasy.Services
                                         Name = gw.Select(g => g.Name).First(),
                                         Position = gw.Select(g => g.Position).First()
                                     }).OrderByDescending(w => w.FantasyPoints).ToList();
-                _cache.Set("SeasonTotals", leaders);
+                _cache.Set(Cache.SeasonTotals.ToString(), leaders);
                 return leaders;
             }
         }
-
-        private List<SeasonFantasy> RetrieveFromCache() =>
-             _cache.TryGetValue("SeasonTotals", out List<SeasonFantasy> cachedTotals) ? cachedTotals
-             : Enumerable.Empty<SeasonFantasy>().ToList();
-
     }
 }

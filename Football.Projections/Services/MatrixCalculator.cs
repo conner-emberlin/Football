@@ -1,7 +1,4 @@
-﻿using Football;
-using Football.Fantasy.Models;
-using Football.Players.Models;
-using Football.Enums;
+﻿using Football.Enums;
 using Football.Projections.Interfaces;
 using MathNet.Numerics.LinearAlgebra;
 using Serilog;
@@ -19,31 +16,24 @@ namespace Football.Projections.Services
         }
         public Matrix<double> RegressorMatrix<T>(List<T> model)
         {
-            try
+            var rowCount = model.Count;
+            var columnCount = _settings.GetPropertiesFromModel<T>().Count + 1;
+            var rows = new List<Vector<double>>();
+            foreach (var m in model)
             {
-                var rowCount = model.Count;
-                var columnCount = _settings.GetPropertiesFromModel<T>().Count + 1;
-                var rows = new List<Vector<double>>();
-                foreach (var m in model)
-                {
-                    rows.Add(TransformModel(m));
-                }
-                return CreateMatrix(rows, rowCount, columnCount);
+                rows.Add(TransformModel(m));
             }
-            catch (Exception ex)
-            {
-                _logger.Error(ex.ToString(), ex.StackTrace, ex);
-                throw;
-            }
+
+            return CreateMatrix(rows, rowCount, columnCount);
         }
-        public Vector<double> DependentVector<T>(List<T> fantasyPoints)
+        public Vector<double> DependentVector<T>(List<T> dependents)
         {
-            var len = fantasyPoints.Count;
-            var fpProp = _settings.GetPropertiesFromModel<T>().First(p => !string.IsNullOrWhiteSpace(p.ToString()) && p.ToString().Contains(Model.FantasyPoints.ToString()));
+            var len = dependents.Count;
+            var fpProp = _settings.GetPropertiesFromModel<T>().First(p => p.ToString()!.Contains(Model.FantasyPoints.ToString()));
             var vec = Vector<double>.Build.Dense(len);
             for (int i = 0; i < len; i++)
             {                
-                vec[i] = Convert.ToDouble(fpProp.GetValue(fantasyPoints[i]));
+                vec[i] = Convert.ToDouble(fpProp.GetValue(dependents[i]));
             }
             return vec;
         }

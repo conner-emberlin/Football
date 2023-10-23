@@ -14,17 +14,19 @@ namespace Football.Fantasy.Analysis.Services
         private readonly IStatisticsService _statisticsService;
         private readonly IFantasyDataService _fantasyService;
         private readonly IPlayersService _playersService;
+        private readonly ISettingsService _settingsService;
         private readonly WaiverWireSettings _settings;
         private readonly Season _season;
 
         public WaiverWireService(IStatisticsService statisticsService, IFantasyDataService fantasyService, 
-            IOptionsMonitor<WaiverWireSettings> settings, IPlayersService playersService, IOptionsMonitor<Season> season)
+            ISettingsService settingsService, IPlayersService playersService, IOptionsMonitor<Season> season, IOptionsMonitor<WaiverWireSettings> settings)
         {
             _statisticsService = statisticsService;
             _fantasyService = fantasyService;
-            _settings = settings.CurrentValue;
+            _settingsService = settingsService;
             _playersService = playersService;
             _season = season.CurrentValue;
+            _settings = settings.CurrentValue;
         }
 
         public async Task<List<WeeklyRosterPercent>> GetWaiverWireCandidates(int season, int week)
@@ -37,11 +39,11 @@ namespace Football.Fantasy.Analysis.Services
                 if (Enum.TryParse(rpPosition, out PositionEnum pos))
                 {
                     var weeklyFantasy = await _fantasyService.GetWeeklyFantasy(rp.PlayerId);
-                    var goodWeekCount = weeklyFantasy.Where(w => w.FantasyPoints > GoodWeek(pos)).Count();
+                    var goodWeekCount = weeklyFantasy.Where(w => w.FantasyPoints > _settingsService.GoodWeek(pos)).Count();
                     var recentWeekFantasy = weeklyFantasy.Where(wf => wf.Week == week - 1).FirstOrDefault();            
                     if(goodWeekCount > _settings.GoodWeekMinimum && recentWeekFantasy != null)
                     {
-                        if (recentWeekFantasy.FantasyPoints > GoodWeek(pos))
+                        if (recentWeekFantasy.FantasyPoints > _settingsService.GoodWeek(pos))
                         {
                             candidates.Add(rp);
                         }                               
@@ -56,18 +58,6 @@ namespace Football.Fantasy.Analysis.Services
                 }
             }
             return candidates.OrderByDescending(c => c.RosterPercent).ToList();
-        }
-
-        private double GoodWeek(PositionEnum position)
-        {
-            return position switch
-            {
-                PositionEnum.QB => _settings.GoodWeekFantasyPointsQB,
-                PositionEnum.RB => _settings.GoodWeekFantasyPointsRB,
-                PositionEnum.WR => _settings.GoodWeekFantasyPointsWR,
-                PositionEnum.TE => _settings.GoodWeekFantasyPointsTE,
-                _ => 0
-            };
         }
         private async Task<bool> InjuryToLeadRB(int playerId, int week)
         {                       

@@ -69,6 +69,11 @@ namespace Football.Projections.Services
             {
                 return cachedProj;
             }
+            else if(GetProjectionsFromSQL(position, _season.CurrentSeason, out var projectionsSQL))
+            {
+                _cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), projectionsSQL);
+                return projectionsSQL;
+            }
             else
             {
                 var projections = position switch
@@ -112,7 +117,6 @@ namespace Football.Projections.Services
             }
             return projections;
         }
-
         public async Task<Vector<double>> PerformRegression(Matrix<double> regressorMatrix, PositionEnum position)
         {
             try
