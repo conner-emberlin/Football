@@ -7,13 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Football.Data\Football.Data.csproj" />
-    <ProjectReference Include="..\Football.Players\Football.Players.csproj" />
-    <ProjectReference Include="..\Football\Football.csproj" />
+    <Compile Remove="Models\**" />
+    <EmbeddedResource Remove="Models\**" />
+    <None Remove="Models\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
+    <ProjectReference Include="..\Football.Data\Football.Data.csproj" />
+    <ProjectReference Include="..\Football.Players\Football.Players.csproj" />
+    <ProjectReference Include="..\Football\Football.csproj" />
   </ItemGroup>
 
 </Project>
