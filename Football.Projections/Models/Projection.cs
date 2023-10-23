@@ -18,10 +18,6 @@
     {
         public int Week { get; set; }
     }
-    public class WeekFlex : WeekProjection
-    {
-        public double Vorp { get; set; }
-    }
 
     public class WeeklyProjectionAnalysis
     {
