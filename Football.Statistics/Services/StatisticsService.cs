@@ -11,7 +11,7 @@ namespace Football.Statistics.Services
         {
             _statisticsRepository = statisticsRepository;
         }
-        public async Task<List<T>> GetSeasonData<T>(PositionEnum position, int param, bool isPlayer) => await _statisticsRepository.GetSeasonData<T>(position, param, isPlayer);
+        public async Task<List<T>> GetSeasonData<T>(PositionEnum position, int queryParam, bool isPlayer) => await _statisticsRepository.GetSeasonData<T>(position, queryParam, isPlayer);
         public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int playerId) => await _statisticsRepository.GetWeeklyData<T>(position, playerId);
         public async Task<List<T>> GetWeeklyData<T>(PositionEnum position, int season, int week) => await _statisticsRepository.GetWeeklyData<T>(position, season, week);
         public async Task<List<GameResult>> GetGameResults(int season, int week) => await _statisticsRepository.GetGameResults(season, week);

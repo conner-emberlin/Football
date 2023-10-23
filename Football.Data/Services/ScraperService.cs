@@ -23,8 +23,8 @@ namespace Football.Data.Services
             _season = season.CurrentValue;
             _logger = logger;
         }
-        public string FantasyProsURLFormatter(string position, string year, string week) => String.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
-        public string FantasyProsURLFormatter(string position, string year) => String.Format("{0}{1}.php?year={2}", _scraping.FantasyProsBaseURL, position.ToLower(), year);        
+        public string FantasyProsURLFormatter(string position, string year, string week) => string.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
+        public string FantasyProsURLFormatter(string position, string year) => string.Format("{0}{1}.php?year={2}", _scraping.FantasyProsBaseURL, position.ToLower(), year);        
         public string[] ScrapeData(string url, string xpath)
         {
             var web = new HtmlWeb();

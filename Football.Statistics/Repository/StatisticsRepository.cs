@@ -26,10 +26,10 @@ namespace Football.Statistics.Repository
             var query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}] WHERE [PlayerId] = @playerId";
             return (await _dbConnection.QueryAsync<T>(query, new { playerId })).ToList();
         }
-        public async Task<List<T>> GetSeasonData<T>(PositionEnum position, int param, bool isPlayer)
+        public async Task<List<T>> GetSeasonData<T>(PositionEnum position, int queryParam, bool isPlayer)
         {
             var query = $@"SELECT * FROM [dbo].[{GetSeasonTable(position)}] WHERE {GetSeasonQueryWhere(isPlayer)}";
-            return (await _dbConnection.QueryAsync<T>(query, new { param })).ToList();
+            return (await _dbConnection.QueryAsync<T>(query, new { queryParam })).ToList();
         }
 
         public async Task<List<GameResult>> GetGameResults(int season, int week)
@@ -65,7 +65,7 @@ namespace Football.Statistics.Repository
 
         private static string GetWeeklyTable(PositionEnum position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(PositionEnum position) => string.Format("Season{0}Data", position.ToString());
-        private static string GetSeasonQueryWhere(bool isPlayer) => isPlayer ? "[PlayerId] = @param" : "[Season] = @param";
+        private static string GetSeasonQueryWhere(bool isPlayer) => isPlayer ? "[PlayerId] = @queryParam" : "[Season] = @queryParam";
 
     }
 }
