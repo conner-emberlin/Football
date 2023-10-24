@@ -50,16 +50,17 @@ namespace Football.Fantasy.Analysis.Services
                     }
                     else if (pos == PositionEnum.RB)
                     {
-                        if (await InjuryToLeadRB(rp.PlayerId, week))
+                        if (await InjuryToLeadRB(rp.PlayerId))
                         {
                             candidates.Add(rp);
                         }
                     }
                 }
             }
+            candidates.ForEach(c => c.Week += 1);
             return candidates.OrderByDescending(c => c.RosterPercent).ToList();
         }
-        private async Task<bool> InjuryToLeadRB(int playerId, int week)
+        private async Task<bool> InjuryToLeadRB(int playerId)
         {                       
             var playerTeam = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);            
             if (playerTeam != null)
@@ -67,8 +68,7 @@ namespace Football.Fantasy.Analysis.Services
 
                 var activeInjuries = await _playersService.GetActiveInSeasonInjuries(_season.CurrentSeason);
                 var otherPlayersOnTeam = (await _playersService.GetPlayersByTeam(playerTeam.Team)).Where(p => p.PlayerId != playerId);
-                var injuredPlayersOnTeam = activeInjuries.Join(otherPlayersOnTeam, ai => ai.PlayerId, op => op.PlayerId, (ai, op) => new { InSeasonInjury = ai, PlayerTeam = op })
-                                                         .Where(ipot => ipot.InSeasonInjury.InjuryStartWeek == week - 1).ToList();
+                var injuredPlayersOnTeam = activeInjuries.Join(otherPlayersOnTeam, ai => ai.PlayerId, op => op.PlayerId, (ai, op) => new { InSeasonInjury = ai, PlayerTeam = op });                                                        
                 if (injuredPlayersOnTeam.Any())
                 {
                     foreach (var injuredPlayer in injuredPlayersOnTeam)
