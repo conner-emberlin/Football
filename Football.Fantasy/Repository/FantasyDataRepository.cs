@@ -12,14 +12,6 @@ namespace Football.Fantasy.Repository
         {
             _dbConnection = dbConnection;
         }
-        public async Task<SeasonFantasy> GetSeasonFantasy(int playerId, int season)
-        {
-            var query = $@"SELECT [PlayerId], [Season], [Games], [FantasyPoints], [Name], [Position]
-                            FROM [dbo].SeasonFantasyData
-                            WHERE [PlayerId] = @playerId
-                            AND [Season] = @season";
-            return (await _dbConnection.QueryAsync<SeasonFantasy>(query, new { playerId, season })).First();
-        }
         public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId)
         {
             var query = $@"SELECT [PlayerId], [Season], [Games], [FantasyPoints], [Name], [Position]
@@ -27,13 +19,13 @@ namespace Football.Fantasy.Repository
                             WHERE [PlayerId] = @playerId";
             return (await _dbConnection.QueryAsync<SeasonFantasy>(query, new { playerId })).ToList();
         }
-        public async Task<int> PostSeasonFantasy(SeasonFantasy data)
+        public async Task<int> PostSeasonFantasy(List<SeasonFantasy> data)
         {
             var query = $@"INSERT INTO [dbo].SeasonFantasyData (PlayerId, Season, Games, FantasyPoints, Name, Position)
                             VALUES (@PlayerId, @Season, @Games, @FantasyPoints, @Name, @Position)";
             return await _dbConnection.ExecuteAsync(query, data);
         }
-        public async Task<int> PostWeeklyFantasy(WeeklyFantasy data)
+        public async Task<int> PostWeeklyFantasy(List<WeeklyFantasy> data)
         {
             var query = $@"INSERT INTO [dbo].WeeklyFantasyData (PlayerId, Name, Position, Season, Week, Games, FantasyPoints)
                         VALUES (@PlayerId, @Name, @Position, @Season, @Week, @Games, @FantasyPoints)";

@@ -13,8 +13,7 @@ namespace Football.Fantasy.Services
         public FantasyCalculator(IOptionsMonitor<FantasyScoring> scoring)
         {
             _scoring = scoring.CurrentValue;
-        }   
-
+        }           
         public SeasonFantasy CalculateQBFantasy(SeasonDataQB stat)
         {
             var points = _scoring.PointsPerPassingTouchdown * stat.TD + _scoring.PointsPerTouchdown * stat.RushingTD
