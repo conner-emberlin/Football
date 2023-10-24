@@ -230,8 +230,8 @@ namespace Football.Projections.Services
             List<SeasonFantasy> rookieSeasons = new();
             foreach (var rookie in historicalRookies)
             {
-                var rookieFantasy = await _fantasyService.GetSeasonFantasy(rookie.PlayerId, rookie.RookieSeason);
-                rookieSeasons.Add(rookieFantasy);
+                var rookieFantasy = await _fantasyService.GetSeasonFantasy(rookie.PlayerId);
+                rookieSeasons.Add(rookieFantasy.First(rf => rf.Season == rookie.RookieSeason));
             }
             return MultipleRegression.NormalEquations(_matrixCalculator.RegressorMatrix(historicalRookies), _matrixCalculator.DependentVector(rookieSeasons));
         }

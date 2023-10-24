@@ -34,7 +34,6 @@ namespace Football.Fantasy.Services
             _season = season.CurrentValue;
             _settingsService = settingsService;
         }
-        public async Task<SeasonFantasy> GetSeasonFantasy(int playerId, int season) => await _fantasyData.GetSeasonFantasy(playerId, season);
         public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId) => await _fantasyData.GetSeasonFantasy(playerId);
         public async Task<int> PostSeasonFantasy(int season, PositionEnum position)
         {
@@ -65,14 +64,9 @@ namespace Football.Fantasy.Services
                         seasonFantasy.Add(_calculator.CalculateTEFantasy(data));
                     }
                     break;
-                default: _logger.Error("Invalid position {position}", position.ToString()); break;
+                default: throw new NotImplementedException();
             }
-            var count = 0;
-            foreach(var fp in seasonFantasy)
-            {
-               count += await  _fantasyData.PostSeasonFantasy(fp);
-            }
-            return count;
+            return await _fantasyData.PostSeasonFantasy(seasonFantasy);
         }
         public async Task<int> PostWeeklyFantasy(int season, int week, PositionEnum position)
         {
@@ -120,14 +114,9 @@ namespace Football.Fantasy.Services
                         }
                     }
                     break;
-                default: _logger.Error("Invalid position {position}", position.ToString()); break;
+                default: throw new NotImplementedException();
             }
-            var count = 0;
-            foreach(var fp in weeklyFantasy)
-            {
-                count += await _fantasyData.PostWeeklyFantasy(fp);
-            }
-            return count;
+            return await _fantasyData.PostWeeklyFantasy(weeklyFantasy);
         }
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId) => await _fantasyData.GetWeeklyFantasy(playerId);
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => await _fantasyData.GetWeeklyFantasy(season, week);
