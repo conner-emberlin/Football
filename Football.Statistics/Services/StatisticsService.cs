@@ -31,7 +31,7 @@ namespace Football.Statistics.Services
                 CurrentWeek = currentWeek,
                 Wins = gameResults.Count(gr => gr.WinnerId == team.TeamId),
                 Losses = gameResults.Count(gr => gr.LoserId == team.TeamId),
-                Ties = gameResults.Count(gr => gr.LoserPoints == gr.WinnerId
+                Ties = gameResults.Count(gr => gr.LoserPoints == gr.WinnerPoints
                                             && (gr.HomeTeamId == team.TeamId || gr.AwayTeamId == team.TeamId))
             }).ToList();
         }
