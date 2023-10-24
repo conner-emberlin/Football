@@ -25,10 +25,10 @@ namespace Football.Fantasy.MockDraft.Services
             return await Task.Run(() =>
             {
                 List<PositionEnum> needs = new();
-                var qbCount = team.Players.Where(p => p.Position == PositionEnum.QB.ToString()).Count();
-                var rbCount = team.Players.Where(p => p.Position == PositionEnum.RB.ToString()).Count();
-                var wrCount = team.Players.Where(p => p.Position == PositionEnum.WR.ToString()).Count();
-                var teCount = team.Players.Where(p => p.Position == PositionEnum.TE.ToString()).Count();
+                var qbCount = team.Players.Count(p => p.Position == PositionEnum.QB.ToString());
+                var rbCount = team.Players.Count(p => p.Position == PositionEnum.RB.ToString());
+                var wrCount = team.Players.Count(p => p.Position == PositionEnum.WR.ToString());
+                var teCount = team.Players.Count(p => p.Position == PositionEnum.TE.ToString());
 
                 if (qbCount < _settings.QBStarters)
                 {

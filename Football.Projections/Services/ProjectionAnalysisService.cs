@@ -39,7 +39,7 @@ namespace Football.Projections.Services
                 var weeklyFantasy = (await _fantasyService.GetWeeklyFantasy(_season.CurrentSeason, week)).Where(w => w.Position == position.ToString());
                 foreach (var projection in projections)
                 {
-                    var fantasy = weeklyFantasy.Where(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId).FirstOrDefault();
+                    var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
                     if (fantasy != null)
                     {
                         weeklyProjectionErrors.Add(new WeeklyProjectionError
@@ -135,7 +135,7 @@ namespace Football.Projections.Services
             var count = 0;
             foreach (var projection in projections)
             {
-                var fantasy = weeklyFantasy.Where(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId).FirstOrDefault();
+                var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
                 if (fantasy != null)
                 {
                     sumOfSquares += Math.Pow(fantasy.FantasyPoints - projection.ProjectedPoints, 2);
@@ -152,7 +152,7 @@ namespace Football.Projections.Services
             var count = 0;
             foreach (var projection in projections)
             {
-                var fantasy = weeklyFantasy.Where(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId).FirstOrDefault();
+                var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
                 if (fantasy != null)
                 {
                     observedFantasyPoints.Add(fantasy.FantasyPoints);
@@ -175,7 +175,7 @@ namespace Football.Projections.Services
             var count = 0;
             foreach (var projection in projections)
             {
-                var fantasy = weeklyFantasy.Where(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId).FirstOrDefault();
+                var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
                 if (fantasy != null)
                 {
                     sumOfAbsDifference += Math.Abs(projection.ProjectedPoints - fantasy.FantasyPoints);
@@ -191,7 +191,7 @@ namespace Football.Projections.Services
             var count = 0;
             foreach (var projection in projections)
             {
-                var fantasy = weeklyFantasy.Where(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId).FirstOrDefault();
+                var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
                 if (fantasy != null && fantasy.FantasyPoints > 0)
                 {
                     sumOfError += Math.Abs((projection.ProjectedPoints - fantasy.FantasyPoints) / fantasy.FantasyPoints);

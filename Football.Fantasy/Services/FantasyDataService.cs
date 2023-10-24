@@ -34,7 +34,7 @@ namespace Football.Fantasy.Services
             _season = season.CurrentValue;
             _settingsService = settingsService;
         }
-        public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId) => await _fantasyData.GetSeasonFantasy(playerId);
+        public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId) => await _fantasyData.GetSeasonFantasy(playerId);       
         public async Task<int> PostSeasonFantasy(int season, PositionEnum position)
         {
             List<SeasonFantasy> seasonFantasy = new();
@@ -43,25 +43,25 @@ namespace Football.Fantasy.Services
                 case PositionEnum.QB: 
                     foreach(var data in await _statisticsService.GetSeasonData<SeasonDataQB>(position, season, false))
                     {
-                        seasonFantasy.Add(_calculator.CalculateQBFantasy(data));
+                        seasonFantasy.Add(_calculator.CalculateFantasy(data));
                     }
                     break;
                 case PositionEnum.RB:
                     foreach (var data in await _statisticsService.GetSeasonData<SeasonDataRB>(position, season, false))
                     {
-                        seasonFantasy.Add(_calculator.CalculateRBFantasy(data));
+                        seasonFantasy.Add(_calculator.CalculateFantasy(data));
                     }
                     break;
                 case PositionEnum.WR:
                     foreach (var data in await _statisticsService.GetSeasonData<SeasonDataWR>(position, season, false))
                     {
-                        seasonFantasy.Add(_calculator.CalculateWRFantasy(data));
+                        seasonFantasy.Add(_calculator.CalculateFantasy(data));
                     }
                     break;
                 case PositionEnum.TE:
                     foreach (var data in await _statisticsService.GetSeasonData<SeasonDataTE>(position, season, false))
                     {
-                        seasonFantasy.Add(_calculator.CalculateTEFantasy(data));
+                        seasonFantasy.Add(_calculator.CalculateFantasy(data));
                     }
                     break;
                 default: throw new NotImplementedException();
@@ -76,25 +76,25 @@ namespace Football.Fantasy.Services
                 case PositionEnum.QB: 
                     foreach(var data in await _statisticsService.GetWeeklyData<WeeklyDataQB>(position, season, week))
                     {
-                        weeklyFantasy.Add(_calculator.CalculateQBFantasy(data));
+                        weeklyFantasy.Add(_calculator.CalculateFantasy(data));
                     }
                     break;
                 case PositionEnum.RB:
                     foreach (var data in await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, season, week))
                     {
-                        weeklyFantasy.Add(_calculator.CalculateRBFantasy(data));
+                        weeklyFantasy.Add(_calculator.CalculateFantasy(data));
                     }
                     break;
                 case PositionEnum.WR:
                     foreach (var data in await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, season, week))
                     {
-                        weeklyFantasy.Add(_calculator.CalculateWRFantasy(data));
+                        weeklyFantasy.Add(_calculator.CalculateFantasy(data));
                     }
                     break;
                 case PositionEnum.TE:
                     foreach (var data in await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, season, week))
                     {
-                        weeklyFantasy.Add(_calculator.CalculateTEFantasy(data));
+                        weeklyFantasy.Add(_calculator.CalculateFantasy(data));
                     }
                     break;
                 case PositionEnum.DST:
@@ -103,14 +103,14 @@ namespace Football.Fantasy.Services
                     foreach (var data in stats)
                     {
                         var teamId = await _playersService.GetTeamId(data.PlayerId);
-                        var gameResult = (await _statisticsService.GetGameResults(season, week)).Where(g => g.WinnerId == teamId || g.LoserId == teamId).First();
+                        var gameResult = (await _statisticsService.GetGameResults(season, week)).First(g => g.WinnerId == teamId || g.LoserId == teamId);
                         var opponent = gameResult.WinnerId == teamId ? gameResult.LoserId : gameResult.WinnerId;
-                        var opponentPID = teams.Where(t => t.TeamId == opponent).First().PlayerId;
-                        var opponentStat = stats.Where(s => s.PlayerId == opponentPID).First();
+                        var opponentPID = teams.First(t => t.TeamId == opponent).PlayerId;
+                        var opponentStat = stats.First(s => s.PlayerId == opponentPID);
 
                         if(teamId > 0 && gameResult != null) 
                         {
-                            weeklyFantasy.Add(_calculator.CalculateDSTFantasy(data, opponentStat, gameResult, teamId));                               
+                            weeklyFantasy.Add(_calculator.CalculateFantasy(data, opponentStat, gameResult, teamId));                               
                         }
                     }
                     break;

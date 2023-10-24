@@ -14,7 +14,7 @@ namespace Football.Fantasy.Services
         {
             _scoring = scoring.CurrentValue;
         }           
-        public SeasonFantasy CalculateQBFantasy(SeasonDataQB stat)
+        public SeasonFantasy CalculateFantasy(SeasonDataQB stat)
         {
             var points = _scoring.PointsPerPassingTouchdown * stat.TD + _scoring.PointsPerTouchdown * stat.RushingTD
                         + _scoring.PointsPerPassingYard * stat.Yards + _scoring.PointsPerYard * stat.RushingYards
@@ -29,7 +29,7 @@ namespace Football.Fantasy.Services
                 Position = PositionEnum.QB.ToString()
             };
         }
-        public WeeklyFantasy CalculateQBFantasy(WeeklyDataQB stat)
+        public WeeklyFantasy CalculateFantasy(WeeklyDataQB stat)
         {
             var points = _scoring.PointsPerPassingTouchdown * stat.TD + _scoring.PointsPerTouchdown * stat.RushingTD
                         + _scoring.PointsPerPassingYard * stat.Yards + _scoring.PointsPerYard * stat.RushingYards
@@ -45,7 +45,7 @@ namespace Football.Fantasy.Services
                 Position = PositionEnum.QB.ToString()
             };
         }
-        public SeasonFantasy CalculateRBFantasy(SeasonDataRB stat)
+        public SeasonFantasy CalculateFantasy(SeasonDataRB stat)
         {
             var points = _scoring.PointsPerYard * stat.RushingYds + _scoring.PointsPerTouchdown * stat.RushingTD
                         + _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerTouchdown * stat.ReceivingTD
@@ -60,7 +60,7 @@ namespace Football.Fantasy.Services
                 Position = PositionEnum.RB.ToString()
             };
         }
-        public WeeklyFantasy CalculateRBFantasy(WeeklyDataRB stat)
+        public WeeklyFantasy CalculateFantasy(WeeklyDataRB stat)
         {
             var points = _scoring.PointsPerYard * stat.RushingYds + _scoring.PointsPerTouchdown * stat.RushingTD
                         + _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerTouchdown * stat.ReceivingTD
@@ -76,7 +76,7 @@ namespace Football.Fantasy.Services
                 Position = PositionEnum.RB.ToString()
             };
         }
-        public SeasonFantasy CalculateWRFantasy(SeasonDataWR stat)
+        public SeasonFantasy CalculateFantasy(SeasonDataWR stat)
         {
             var points = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
                         + _scoring.PointsPerTouchdown * stat.TD + _scoring.PointsPerYard * stat.RushingYds
@@ -91,7 +91,7 @@ namespace Football.Fantasy.Services
                 Position = PositionEnum.WR.ToString()
             };
         }
-        public WeeklyFantasy CalculateWRFantasy(WeeklyDataWR stat)
+        public WeeklyFantasy CalculateFantasy(WeeklyDataWR stat)
         {
             var points = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
                         + _scoring.PointsPerTouchdown * stat.TD + _scoring.PointsPerYard * stat.RushingYds
@@ -107,7 +107,7 @@ namespace Football.Fantasy.Services
                 Position = PositionEnum.WR.ToString()
             };
         }
-        public SeasonFantasy CalculateTEFantasy(SeasonDataTE stat)
+        public SeasonFantasy CalculateFantasy(SeasonDataTE stat)
         {
             var points = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
                         + _scoring.PointsPerTouchdown * stat.TD + _scoring.PointsPerYard * stat.RushingYds
@@ -122,7 +122,7 @@ namespace Football.Fantasy.Services
                 Position = PositionEnum.TE.ToString()
             };
         }
-        public WeeklyFantasy CalculateTEFantasy(WeeklyDataTE stat)
+        public WeeklyFantasy CalculateFantasy(WeeklyDataTE stat)
         {
             var points = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
                         + _scoring.PointsPerTouchdown * stat.TD + _scoring.PointsPerYard * stat.RushingYds
@@ -138,7 +138,7 @@ namespace Football.Fantasy.Services
                 Position = PositionEnum.TE.ToString()
             };
         }
-        public WeeklyFantasy CalculateDSTFantasy(WeeklyDataDST stat, WeeklyDataDST opponentStat, GameResult result, int teamId)
+        public WeeklyFantasy CalculateFantasy(WeeklyDataDST stat, WeeklyDataDST opponentStat, GameResult result, int teamId)
         {
             var pointsAllowed = result.WinnerId == teamId ? result.LoserPoints - _scoring.PointsPerTouchdown * opponentStat.DefensiveTD 
                                 : result.WinnerPoints - 6 * opponentStat.DefensiveTD;

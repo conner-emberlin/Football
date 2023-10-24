@@ -37,7 +37,7 @@ namespace Football.Projections.Services
             seasonProjections = await SuspensionAdjustment(seasonProjections);
 
             var position = seasonProjections.First().Position;
-            if (position == "WR")
+            if (position == PositionEnum.WR.ToString())
             {
                 seasonProjections = await QuarterbackChangeAdjustment(seasonProjections);
             }
@@ -69,7 +69,10 @@ namespace Football.Projections.Services
         private async Task<List<WeekProjection>> InjuryAdustment(List<WeekProjection> weeklyProjections)
         {
             var activeInjuries = await _playersService.GetActiveInSeasonInjuries(_season.CurrentSeason);
-            var injuredPlayerProjections = activeInjuries.Join(weeklyProjections, ai => ai.PlayerId, wp => wp.PlayerId, (ai, wp) => new { InSeasonInjury = ai, WeekProjection = wp });
+            var injuredPlayerProjections = activeInjuries.Join(weeklyProjections, 
+                                                                ai => ai.PlayerId, 
+                                                                wp => wp.PlayerId, 
+                                                                (ai, wp) => new { InSeasonInjury = ai, WeekProjection = wp });
             foreach (var wp in weeklyProjections)
             {
                 if (injuredPlayerProjections.Any(ip => ip.WeekProjection.PlayerId == wp.PlayerId))
@@ -100,7 +103,7 @@ namespace Football.Projections.Services
             {
                 if (qbChanges.Any(q => q.PlayerId == s.PlayerId))
                 {                   
-                    var changeRecord = qbChanges.Where(q => q.PlayerId == s.PlayerId).First();
+                    var changeRecord = qbChanges.First(q => q.PlayerId == s.PlayerId);
                     _logger.Information("QB Change found for player {p}: {n}. The New QB is {q}.", s.PlayerId, s.Name, changeRecord.CurrentQB);
                     var previousEPA = await _playersService.GetEPA(changeRecord.PreviousQB, _season.CurrentSeason - 1);
                     var currentEPA = await _playersService.GetEPA(changeRecord.CurrentQB, _season.CurrentSeason - 1);
@@ -122,10 +125,10 @@ namespace Football.Projections.Services
                 if (team != null) 
                 {
                     var teamId = await _playersService.GetTeamId(team.Team);
-                    var matchup = (await _playersService.GetTeamGames(teamId)).Where(m => m.Week == w.Week).First();
+                    var matchup = (await _playersService.GetTeamGames(teamId)).First(m => m.Week == w.Week);
                     if (matchup.OpposingTeam != "BYE")
                     {
-                        var opponentRank = matchupRanks.Where(mr => mr.Team.TeamId == matchup.OpposingTeamId).FirstOrDefault();
+                        var opponentRank = matchupRanks.FirstOrDefault(mr => mr.Team.TeamId == matchup.OpposingTeamId);
                         if (opponentRank != null)
                         {
                             var ratio = opponentRank.AvgPointsAllowed / avgMatchup.AvgPointsAllowed;
