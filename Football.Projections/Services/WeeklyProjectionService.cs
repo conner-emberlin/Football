@@ -97,9 +97,13 @@ namespace Football.Projections.Services
         public async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, PositionEnum position)
         {
             List<WeekProjection> projections = new();
+            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
-            var week = (int)_settingsService.GetValueFromModel(model.First(), Model.Week);
-            var results = PerformProjection(regressorMatrix, await PerformRegression(regressorMatrix, position));
+            var fantasyModel = await FantasyProjectionModel(model, currentWeek);
+            var dependentVector = _matrixCalculator.DependentVector(fantasyModel);
+            var coefficients = _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
+            var results = regressorMatrix * coefficients;
+            
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = (int)_settingsService.GetValueFromModel(model[i], Model.PlayerId);
@@ -114,42 +118,30 @@ namespace Football.Projections.Services
                         {
                             PlayerId = playerId,
                             Season = _season.CurrentSeason,
-                            Week = week,
+                            Week = currentWeek,
                             Name = player.Name,
                             Position = player.Position,
-                            ProjectedPoints = WeightedWeeklyProjection(projectedPoints / _season.Games, results[i], week - 1)
+                            ProjectedPoints = WeightedWeeklyProjection(projectedPoints / _season.Games, results[i], currentWeek - 1)
                         }); ;
                     }
                 }
             }
             return projections;
         }
-        public async Task<Vector<double>> PerformRegression(Matrix<double> regressorMatrix, PositionEnum position)
+        private async Task<List<WeeklyFantasy>> FantasyProjectionModel<T>(List<T> statsModel, int currentWeek)
         {
-            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
-            try
-            {
-                var dependentVector = _matrixCalculator.DependentVector(await FantasyProjectionModel(position, currentWeek));
-                return _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex.ToString(), ex.StackTrace);
-                throw;
-            }
-        }
-        public Vector<double> PerformProjection(Matrix<double> model, Vector<double> coeff) => model * coeff;
-
-        private async Task<List<WeeklyFantasy>> FantasyProjectionModel(PositionEnum position, int currentWeek)
-        {
-            var players = await _playersService.GetPlayersByPosition(position);
             List<WeeklyFantasy> weeklyFantasy = new();
-            foreach (var player in players)
+            foreach (var stat in statsModel)
             {
-                var weeklyResults = await _fantasyService.GetWeeklyFantasy(player.PlayerId);
-                if (weeklyResults.Any())
+                var playerId = (int)_settingsService.GetValueFromModel(stat, Model.PlayerId);
+                if (playerId > 0)
                 {
-                    weeklyFantasy.Add(_statCalculator.CalculateWeeklyAverage(weeklyResults, currentWeek));
+                    var weeklyResults = await _fantasyService.GetWeeklyFantasy(playerId);
+                    if (weeklyResults.Any())
+                    {
+                        var weeklyAverage = _statCalculator.CalculateWeeklyAverage(weeklyResults, currentWeek);
+                        weeklyFantasy.Add(weeklyAverage);
+                    }
                 }
             }
             return weeklyFantasy;

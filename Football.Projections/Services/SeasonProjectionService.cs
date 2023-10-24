@@ -7,7 +7,6 @@ using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using Football.Statistics.Interfaces;
-using MathNet.Numerics.LinearAlgebra;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -94,8 +93,12 @@ namespace Football.Projections.Services
         public async Task<IEnumerable<SeasonProjection>> CalculateProjections<T1>(List<T1> model, PositionEnum position)
         {
             List<SeasonProjection> projections = new();
-            var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
-            var results = PerformProjection(regressorMatrix, await PerformRegression(regressorMatrix, position));
+            var regressorMatrix = _matrixCalculator.RegressorMatrix(model);            
+            var fantasyModel = await FantasyProjectionModel(model);
+            var dependentVector = _matrixCalculator.DependentVector(fantasyModel);
+            var coefficients = _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
+            var results = regressorMatrix * coefficients;
+
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = (int)_settingsService.GetValueFromModel(model[i], Model.PlayerId);
@@ -117,32 +120,20 @@ namespace Football.Projections.Services
             }
             return projections;
         }
-        public async Task<Vector<double>> PerformRegression(Matrix<double> regressorMatrix, PositionEnum position)
+        private async Task<List<SeasonFantasy>> FantasyProjectionModel<T>(List<T> statsModel)
         {
-            try
-            {
-                var dependentVector = _matrixCalculator.DependentVector(await SeasonFantasyProjectionModel(position));
-                return _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex.ToString(), ex.StackTrace);
-                throw;
-            }
-        }
-
-        public Vector<double> PerformProjection(Matrix<double> model, Vector<double> coeff) => model * coeff;
-
-        private async Task<List<SeasonFantasy>> SeasonFantasyProjectionModel(PositionEnum position)
-        {
-            var players = await _playersService.GetPlayersByPosition(position);
             List<SeasonFantasy> seasonFantasy = new();
-            foreach (var player in players)
+            foreach (var stat in statsModel)
             {
-                var seasonFantasyResults = await _fantasyService.GetSeasonFantasy(player.PlayerId);
-                if (seasonFantasyResults.Any())
+                var playerId = (int)_settingsService.GetValueFromModel(stat, Model.PlayerId);
+                if (playerId > 0)
                 {
-                    seasonFantasy.Add(_statCalculator.CalculateStatProjection(seasonFantasyResults));
+                    var seasonFantasyResults = await _fantasyService.GetSeasonFantasy(playerId);
+                    if (seasonFantasyResults.Any())
+                    {
+                        var seasonAverage = _statCalculator.CalculateStatProjection(seasonFantasyResults);
+                        seasonFantasy.Add(seasonAverage);
+                    }
                 }
             }
             return seasonFantasy;
@@ -212,7 +203,7 @@ namespace Football.Projections.Services
                 var coeff = await _regressionService.PerformRegression(historicalRookies);
                 var currentRookies = await _playersService.GetCurrentRookies(_season.CurrentSeason, position.ToString());
                 var model = _matrixCalculator.RegressorMatrix(currentRookies);
-                var predictions = PerformProjection(model, coeff).ToList();
+                var predictions = (model * coeff).ToList();
 
                 for (int i = 0; i < predictions.Count; i++)
                 {
