@@ -62,7 +62,7 @@ builder.Services.AddScoped<IFantasyDataService, FantasyDataService>();
 builder.Services.AddScoped<IStatisticsRepository, StatisticsRepository>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IMatrixCalculator, MatrixCalculator>();
-builder.Services.AddScoped<IRegressionService, RegressionService>();
+builder.Services.AddScoped<IRegressionModelService, RegressionModelService>();
 builder.Services.AddScoped<IStatProjectionCalculator, StatProjectionCalculator>();
 builder.Services.AddScoped<IPlayersService, PlayersService>();
 builder.Services.AddScoped<IPlayersRepository, PlayersRepository>();

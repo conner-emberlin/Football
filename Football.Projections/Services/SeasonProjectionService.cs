@@ -4,11 +4,14 @@ using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.Models;
 using Football.Players.Interfaces;
+using Football.Players.Models;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using Football.Statistics.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using MathNet.Numerics.LinearRegression;
+using MathNet.Numerics.LinearAlgebra;
 using Serilog;
 
 namespace Football.Projections.Services
@@ -22,13 +25,13 @@ namespace Football.Projections.Services
         private readonly IStatisticsService _statisticsService;
         private readonly IMatrixCalculator _matrixCalculator;
         private readonly IStatProjectionCalculator _statCalculator;
-        private readonly IRegressionService _regressionService;
+        private readonly IRegressionModelService _regressionService;
         private readonly IAdjustmentService _adjustmentService;
         private readonly IPlayersService _playersService;
         private readonly IProjectionRepository _projectionRepository;
         private readonly ISettingsService _settingsService;
 
-        public SeasonProjectionService(IRegressionService regressionService, IFantasyDataService fantasyService,
+        public SeasonProjectionService(IRegressionModelService regressionService, IFantasyDataService fantasyService,
         IMemoryCache cache, ILogger logger, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
         IStatisticsService statisticsService, IOptionsMonitor<Season> season, IPlayersService playersService, 
         IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService)
@@ -96,7 +99,7 @@ namespace Football.Projections.Services
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);            
             var fantasyModel = await FantasyProjectionModel(model);
             var dependentVector = _matrixCalculator.DependentVector(fantasyModel);
-            var coefficients = _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
+            var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
             var results = regressorMatrix * coefficients;
 
             for (int i = 0; i < results.Count; i++)
@@ -194,13 +197,14 @@ namespace Football.Projections.Services
             }
             return teModel;
         }
+
         private async Task<List<SeasonProjection>> RookieSeasonProjections(PositionEnum position)
         {
             List<SeasonProjection> rookieProjections = new();
             var historicalRookies = await _playersService.GetHistoricalRookies(_season.CurrentSeason, position.ToString());
             if (historicalRookies.Any())
             {
-                var coeff = await _regressionService.PerformRegression(historicalRookies);
+                var coeff = await HistoricalRookieRegression(historicalRookies);
                 var currentRookies = await _playersService.GetCurrentRookies(_season.CurrentSeason, position.ToString());
                 var model = _matrixCalculator.RegressorMatrix(currentRookies);
                 var predictions = (model * coeff).ToList();
@@ -219,6 +223,17 @@ namespace Football.Projections.Services
                 }
             }
             return rookieProjections;
+        }
+
+        private async Task<Vector<double>> HistoricalRookieRegression(List<Rookie> historicalRookies)
+        {
+            List<SeasonFantasy> rookieSeasons = new();
+            foreach (var rookie in historicalRookies)
+            {
+                var rookieFantasy = await _fantasyService.GetSeasonFantasy(rookie.PlayerId, rookie.RookieSeason);
+                rookieSeasons.Add(rookieFantasy);
+            }
+            return MultipleRegression.NormalEquations(_matrixCalculator.RegressorMatrix(historicalRookies), _matrixCalculator.DependentVector(rookieSeasons));
         }
     }
 }

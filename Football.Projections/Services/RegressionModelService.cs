@@ -1,44 +1,22 @@
 ﻿using Football.Models;
 using Football.Data.Models;
-using Football.Fantasy.Models;
-using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
-using Football.Players.Models;
-using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearRegression;
 using Microsoft.Extensions.Options;
 
 namespace Football.Projections.Services
 {
-    public class RegressionService : IRegressionService
+    public class RegressionModelService : IRegressionModelService
     {
-        private readonly IMatrixCalculator _matrixCalculator;
-        private readonly IFantasyDataService _fantasyService;
         private readonly IPlayersService _playerService;
         private readonly Season _season;
 
-        public RegressionService(IMatrixCalculator matrixCalculator, IFantasyDataService fantasyService, IPlayersService playerService, IOptionsMonitor<Season> season)
+        public RegressionModelService(IPlayersService playerService, IOptionsMonitor<Season> season)
         {
-            _matrixCalculator = matrixCalculator;
-            _fantasyService = fantasyService;
             _playerService = playerService;
             _season = season.CurrentValue;
         }
-
-        public Vector<double> CholeskyDecomposition(Matrix<double> regressors, Vector<double> dependents) => MultipleRegression.NormalEquations(regressors, dependents);
-        public async Task<Vector<double>> PerformRegression(List<Rookie> rookies)
-        {
-            List<SeasonFantasy> rookieSeasons = new();
-            foreach (var rookie in rookies)
-            {
-                rookieSeasons.Add(await _fantasyService.GetSeasonFantasy(rookie.PlayerId, rookie.RookieSeason));
-            }
-
-            return CholeskyDecomposition(_matrixCalculator.RegressorMatrix(rookies), _matrixCalculator.DependentVector(rookieSeasons));
-        }
-
         public QBModelSeason QBModelSeason(SeasonDataQB stat)
         {
             return new QBModelSeason

@@ -8,7 +8,7 @@ using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using Football.Statistics.Interfaces;
-using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearRegression;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -25,13 +25,13 @@ namespace Football.Projections.Services
         private readonly IStatisticsService _statisticsService;
         private readonly IMatrixCalculator _matrixCalculator;
         private readonly IStatProjectionCalculator _statCalculator;
-        private readonly IRegressionService _regressionService;
+        private readonly IRegressionModelService _regressionService;
         private readonly IAdjustmentService _adjustmentService;
         private readonly IPlayersService _playersService;
         private readonly IProjectionRepository _projectionRepository;
         private readonly ISettingsService _settingsService;
 
-        public WeeklyProjectionService(IRegressionService regressionService, IFantasyDataService fantasyService, 
+        public WeeklyProjectionService(IRegressionModelService regressionService, IFantasyDataService fantasyService, 
         IMemoryCache cache, ILogger logger, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
         IStatisticsService statisticsService, IOptionsMonitor<Season> season,
         IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, 
@@ -101,7 +101,7 @@ namespace Football.Projections.Services
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
             var fantasyModel = await FantasyProjectionModel(model, currentWeek);
             var dependentVector = _matrixCalculator.DependentVector(fantasyModel);
-            var coefficients = _regressionService.CholeskyDecomposition(regressorMatrix, dependentVector);
+            var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
             var results = regressorMatrix * coefficients;
             
             for (int i = 0; i < results.Count; i++)
