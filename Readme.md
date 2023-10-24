@@ -3,6 +3,7 @@ Weekly Operations
 2. Upload weekly game results: POST /api/uploaddata/game-results/{season}/{week}
 3. Upload weekly fantasy: POST /api/fantasy/data/{position}/{season}/{week}
 4. Run and upload weekly projections: GET/POST /api/projection/weekly/{position}
+5. Upload weekly roster percentages: POST /api/uploaddata/roster-percent/{position}/{season}/{week}
 
 As Needed
 1. Update player headshots: POST /api/uploaddata/headshots/{position}
