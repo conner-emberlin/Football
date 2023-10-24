@@ -7,6 +7,7 @@
         public string FantasyProsXPath { get; set; } = "";
         public string UploadScheduleURL { get; set; } = "";
         public string UploadScheduleXPath { get; set; } = "";
-        public int CurrentWeek { get; set; }
+        public string RedZoneURL { get; set; } = "";
+        public string RedZoneXPath { get; set; } = "";
     }
 }

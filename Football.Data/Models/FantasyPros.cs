@@ -84,7 +84,4 @@
         public double RosterPercent { get; set; }
     }
 
-
-
-
 }
