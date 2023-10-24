@@ -1,7 +1,5 @@
 ﻿using Football.Data.Models;
 using Football.Projections.Models;
-using Football.Players.Models;
-using MathNet.Numerics.LinearAlgebra;
 
 namespace Football.Projections.Interfaces
 {
