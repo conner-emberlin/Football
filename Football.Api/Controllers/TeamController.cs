@@ -1,4 +1,6 @@
 ﻿using Football.Players.Interfaces;
+using Football.Statistics.Models;
+using Football.Statistics.Interfaces;
 using Football.Models;
 using Football.Players.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +13,12 @@ namespace Football.Api.Controllers
     public class TeamController : ControllerBase
     {
         private readonly IPlayersService _playersService;
+        private readonly IStatisticsService _statisticsService;
         private readonly Season _season;
-        public TeamController(IPlayersService playersService, IOptionsMonitor<Season> season)
+        public TeamController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season)
         {
             _playersService = playersService;
+            _statisticsService = statisticsService;
             _season = season.CurrentValue;
         }
 
@@ -37,5 +41,11 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<ScheduleDetails>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<ScheduleDetails>>> GetScheduleDetails(int week) => Ok(await _playersService.GetScheduleDetails(_season.CurrentSeason, week));
+
+        [HttpGet("team-records/{season}")]
+        [ProducesResponseType(typeof(List<TeamRecord>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<TeamRecord>> GetTeamRecords([FromRoute] int season) => Ok(await _statisticsService.GetTeamRecords(season));
+
     }
 }

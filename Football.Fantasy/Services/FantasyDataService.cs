@@ -103,7 +103,7 @@ namespace Football.Fantasy.Services
                     foreach (var data in stats)
                     {
                         var teamId = await _playersService.GetTeamId(data.PlayerId);
-                        var gameResult = (await _statisticsService.GetGameResults(season, week)).First(g => g.WinnerId == teamId || g.LoserId == teamId);
+                        var gameResult = (await _statisticsService.GetGameResults(season)).First(g => g.Week == week && (g.WinnerId == teamId || g.LoserId == teamId));
                         var opponent = gameResult.WinnerId == teamId ? gameResult.LoserId : gameResult.WinnerId;
                         var opponentPID = teams.First(t => t.TeamId == opponent).PlayerId;
                         var opponentStat = stats.First(s => s.PlayerId == opponentPID);

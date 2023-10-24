@@ -32,27 +32,10 @@ namespace Football.Statistics.Repository
             return (await _dbConnection.QueryAsync<T>(query, new { queryParam })).ToList();
         }
 
-        public async Task<List<GameResult>> GetGameResults(int season, int week)
+        public async Task<List<GameResult>> GetGameResults(int season)
         {
-            var query = $@"SELECT [Season]
-                                ,[WinnerId]
-                                ,[LoserId]
-                                ,[HomeTeamId]
-                                ,[AwayTeamId]
-                                ,[Week]
-                                ,[Day]
-                                ,[Date]
-                                ,[Time]
-                                ,[Winner]
-                                ,[Loser]
-                                ,[WinnerPoints]
-                                ,[LoserPoints]
-                                ,[WinnerYards]
-                                ,[LoserYards]
-                        FROM [dbo].GameResults
-                        WHERE [Season] = @season
-                        AND [Week] = @week";
-            return (await _dbConnection.QueryAsync<GameResult>(query, new { season, week })).ToList();
+            var query = $@"SELECT * FROM [dbo].GameResults WHERE [Season] = @season";                                               
+            return (await _dbConnection.QueryAsync<GameResult>(query, new { season})).ToList();
         }
 
         public async Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week)
