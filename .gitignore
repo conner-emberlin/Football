@@ -363,6 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /Football.Api/LOG.txt
 
-**/wwwroot/lib
-*.png
+
 /Football.Api/appsettings.json
