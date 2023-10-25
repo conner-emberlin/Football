@@ -57,7 +57,7 @@ namespace Football.Fantasy.Analysis.Services
             }
             if (startOrSits.Any())
             {
-                var starter = startOrSits.Where(s => s.ProjectedPoints == startOrSits.Max(s => s.ProjectedPoints)).First().Player.PlayerId;
+                var starter = startOrSits.First(s => s.ProjectedPoints == startOrSits.Max(s => s.ProjectedPoints)).Player.PlayerId;
                 startOrSits.ForEach(s => s.Start = s.Player.PlayerId == starter);
                 return startOrSits;
             }
@@ -114,10 +114,10 @@ namespace Football.Fantasy.Analysis.Services
                 var teamId = await _playersService.GetTeamId(team.Team);
                 var teamMap = await _playersService.GetTeam(teamId);
                 var odds = await _newsService.GetNFLOdds();
-                var teamOdds = odds.Where(o => o.home_team == teamMap.TeamDescription || o.away_team == teamMap.TeamDescription).FirstOrDefault();
+                var teamOdds = odds.FirstOrDefault(o => o.home_team == teamMap.TeamDescription || o.away_team == teamMap.TeamDescription);
                 if (teamOdds != null)
                 {
-                    var bookmaker = teamOdds.bookmakers.Where(b => b.key == _oddsAPI.DefaultBookmaker).FirstOrDefault();
+                    var bookmaker = teamOdds.bookmakers.FirstOrDefault(b => b.key == _oddsAPI.DefaultBookmaker);
                     return bookmaker != null ? MatchLines(bookmaker, teamMap) : new MatchLines { };
                 }
                 else

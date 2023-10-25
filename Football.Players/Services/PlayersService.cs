@@ -4,7 +4,6 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using System.Net;
 
 namespace Football.Players.Services
 {
@@ -58,9 +57,11 @@ namespace Football.Players.Services
             var team = await GetPlayerTeam(_season.CurrentSeason, playerId);
             if (team != null)
             {
-                return await _playersRepository.GetUpcomingGames(await GetTeamId(team.Team), _season.CurrentSeason, await GetCurrentWeek(_season.CurrentSeason));
+                var teamId = await GetTeamId(team.Team);
+                var currentWeek = await GetCurrentWeek(_season.CurrentSeason);
+                return await _playersRepository.GetUpcomingGames(teamId, _season.CurrentSeason, currentWeek);
             }
-            else { return new List<Schedule>(); }
+            else return new List<Schedule>();
         }
         public async Task<List<Schedule>> GetGames(int season, int week) => await _playersRepository.GetGames(season, week);
         public async Task<List<Schedule>> GetTeamGames(int teamId) => await _playersRepository.GetTeamGames(teamId, _season.CurrentSeason);

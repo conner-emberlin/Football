@@ -88,11 +88,16 @@ namespace Football.Data.Repository
             return count;
         }
 
-        public async Task<int> UploadWeeklyRosterPercentages(List<WeeklyRosterPercent> rosterPercentages)
+        public async Task<int> UploadWeeklyRosterPercentages(List<WeeklyRosterPercent> rosterPercentages, List<int> ignoreList)
         {
             var query = $@"INSERT INTO [dbo].WeeklyRosterPercentages (Season, Week, PlayerId, Name, RosterPercent)
                             VALUES (@Season, @Week, @PlayerId, @Name, @RosterPercent)";
-            return await _dbConnection.ExecuteAsync(query, rosterPercentages);
+            var count = 0;
+            foreach (var rp in rosterPercentages)
+            {
+                count += !ignoreList.Contains(rp.PlayerId) ? await _dbConnection.ExecuteAsync(query, rp) : 0;
+            }
+            return count;
         }
     }
 }

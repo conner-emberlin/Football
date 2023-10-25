@@ -35,8 +35,8 @@ namespace Football.Fantasy.Analysis.Services
                                                                 (key, f) => new {Player = key, FantasyPoints = f.ToList()})
                                                        .Select(wf => new { 
                                                                             wf.Player, 
-                                                                            BoomCount = (double)wf.FantasyPoints.Where(fp => fp > _settingsService.GetBoomSetting(position)).Count(), 
-                                                                            BustCount = (double)wf.FantasyPoints.Where(fp => fp < _settingsService.GetBustSetting(position)).Count(), 
+                                                                            BoomCount = (double)wf.FantasyPoints.Count(fp => fp > _settingsService.GetBoomSetting(position)), 
+                                                                            BustCount = (double)wf.FantasyPoints.Count(fp => fp < _settingsService.GetBustSetting(position)), 
                                                                             WeekCount = (double)wf.FantasyPoints.Count})                                                                        
                                                        .Select(bb => new BoomBust
                                                                 {
@@ -49,26 +49,21 @@ namespace Football.Fantasy.Analysis.Services
 
         public async Task<List<BoomBustByWeek>> GetBoomBustsByWeek(int playerId)
         {
-            List<BoomBustByWeek> boomBustsByWeek = new();
             var player = await _playersService.GetPlayer(playerId);
             var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
             if (Enum.TryParse(player.Position, out Position position))
             {
-                var playerBoomBust = weeklyFantasy.Select(wf => new BoomBustByWeek
-                {
+                 return weeklyFantasy.Select(wf => new BoomBustByWeek
+                 {
                     Season = _season.CurrentSeason,
                     Player = player,
                     Week = wf.Week,
                     Boom = wf.FantasyPoints > _settingsService.GetBoomSetting(position),
                     Bust = wf.FantasyPoints < _settingsService.GetBustSetting(position),
                     FantasyPoints = wf.FantasyPoints
-                });
-                foreach (var wbb in playerBoomBust)
-                {
-                    boomBustsByWeek.Add(wbb);
-                }
+                 }).OrderBy(b => b.Week).ToList();
             }
-            return boomBustsByWeek.OrderBy(b => b.Week).ToList();
+            else return Enumerable.Empty<BoomBustByWeek>().ToList();
         }
 
     }

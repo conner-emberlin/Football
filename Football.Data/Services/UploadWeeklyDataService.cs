@@ -64,7 +64,7 @@ namespace Football.Data.Services
             var url = _scraperService.FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
             var data = _scraperService.ParseFantasyProsRosterPercent(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position);
             var rosterPercentages = await WeeklyRosterPercent(data, season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages);
+            return await _uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages, await _playerService.GetIgnoreList());
         }
 
         private async Task<List<WeeklyRosterPercent>> WeeklyRosterPercent(List<FantasyProsRosterPercent> rosterPercents, int season, int week)
