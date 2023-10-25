@@ -115,7 +115,7 @@
     }
 
 
-    public List<PositionEnum> GetTeamNeeds(FantasyTeam team)
+    public List<Position> GetTeamNeeds(FantasyTeam team)
     {
         var client = ClientFactory.CreateClient();
         var content = new StringContent(JsonSerializer.Serialize(team), Encoding.UTF8, "application/json");
@@ -123,7 +123,7 @@
         var response = client.Send(request);
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         using var responseStream = response.Content.ReadAsStream();
-        return JsonSerializer.Deserialize<List<PositionEnum>>(responseStream, options);
+        return JsonSerializer.Deserialize<List<Position>>(responseStream, options);
     }
 
     public List<SeasonADP> GetAvailablePlayers()

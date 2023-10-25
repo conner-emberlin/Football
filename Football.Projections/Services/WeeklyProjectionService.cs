@@ -53,12 +53,12 @@ namespace Football.Projections.Services
         }
         public async Task<IEnumerable<WeekProjection>?> GetPlayerProjections(int playerId) => await _projectionRepository.GetWeeklyProjection(playerId);
         public async Task<int> PostProjections(List<WeekProjection> projections) => await _projectionRepository.PostWeeklyProjections(projections);
-        public bool GetProjectionsFromSQL(PositionEnum position, int week, out IEnumerable<WeekProjection> projections)
+        public bool GetProjectionsFromSQL(Position position, int week, out IEnumerable<WeekProjection> projections)
         {
             projections = _projectionRepository.GetWeeklyProjectionsFromSQL(position, week);
             return projections.Any();
         }
-        public bool GetProjectionsFromCache(PositionEnum position, out IEnumerable<WeekProjection> cachedValues)
+        public bool GetProjectionsFromCache(Position position, out IEnumerable<WeekProjection> cachedValues)
         {
             if (_cache.TryGetValue(position.ToString() + Cache.WeeklyProjections.ToString(), out cachedValues))
             {
@@ -66,7 +66,7 @@ namespace Football.Projections.Services
             }
             else return false;
         }
-        public async Task<IEnumerable<WeekProjection>> GetProjections(PositionEnum position)
+        public async Task<IEnumerable<WeekProjection>> GetProjections(Position position)
         {
             var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
             if (GetProjectionsFromCache(position, out var cachedValues))
@@ -82,10 +82,10 @@ namespace Football.Projections.Services
             {
                 var projections = position switch
                 {
-                    PositionEnum.QB => await CalculateProjections(await QBProjectionModel(currentWeek), position),
-                    PositionEnum.RB => await CalculateProjections(await RBProjectionModel(currentWeek), position),
-                    PositionEnum.WR => await CalculateProjections(await WRProjectionModel(currentWeek), position),
-                    PositionEnum.TE => await CalculateProjections(await TEProjectionModel(currentWeek), position),
+                    Position.QB => await CalculateProjections(await QBProjectionModel(currentWeek), position),
+                    Position.RB => await CalculateProjections(await RBProjectionModel(currentWeek), position),
+                    Position.WR => await CalculateProjections(await WRProjectionModel(currentWeek), position),
+                    Position.TE => await CalculateProjections(await TEProjectionModel(currentWeek), position),
                     _ => throw new NotImplementedException()
                 };
                 projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
@@ -94,7 +94,7 @@ namespace Football.Projections.Services
                 return formattedProjections;
             }
         }
-        public async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, PositionEnum position)
+        public async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, Position position)
         {
             List<WeekProjection> projections = new();
             var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
@@ -148,11 +148,11 @@ namespace Football.Projections.Services
         }
         private async Task<List<QBModelWeek>> QBProjectionModel(int currentWeek)
         {
-            var players = await _playersService.GetPlayersByPosition(PositionEnum.QB);
+            var players = await _playersService.GetPlayersByPosition(Position.QB);
             List<QBModelWeek> qbModel = new();
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(PositionEnum.QB, player.PlayerId);
+                var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId);
                 if (stats.Any())
                 {
                     qbModel.Add(await _regressionService.QBModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
@@ -162,11 +162,11 @@ namespace Football.Projections.Services
         }
         private async Task<List<RBModelWeek>> RBProjectionModel(int currentWeek)
         {
-            var players = await _playersService.GetPlayersByPosition(PositionEnum.RB);
+            var players = await _playersService.GetPlayersByPosition(Position.RB);
             List<RBModelWeek> rbModel = new();
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(PositionEnum.RB, player.PlayerId);
+                var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, player.PlayerId);
                 if (stats.Any())
                 {
                     rbModel.Add(await _regressionService.RBModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
@@ -176,11 +176,11 @@ namespace Football.Projections.Services
         }
         private async Task<List<WRModelWeek>> WRProjectionModel(int currentWeek)
         {
-            var players = await _playersService.GetPlayersByPosition(PositionEnum.WR);
+            var players = await _playersService.GetPlayersByPosition(Position.WR);
             List<WRModelWeek> wrModel = new();
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(PositionEnum.WR, player.PlayerId);
+                var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, player.PlayerId);
                 if (stats.Any())
                 {
                     wrModel.Add(await _regressionService.WRModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
@@ -190,11 +190,11 @@ namespace Football.Projections.Services
         }
         private async Task<List<TEModelWeek>> TEProjectionModel(int currentWeek)
         {
-            var players = await _playersService.GetPlayersByPosition(PositionEnum.TE);
+            var players = await _playersService.GetPlayersByPosition(Position.TE);
             List<TEModelWeek> teModel = new();
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(PositionEnum.TE, player.PlayerId);
+                var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, player.PlayerId);
                 if (stats.Any())
                 {
                     teModel.Add(await _regressionService.TEModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));

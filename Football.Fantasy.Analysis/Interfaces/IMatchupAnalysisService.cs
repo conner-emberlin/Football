@@ -5,7 +5,7 @@ namespace Football.Fantasy.Analysis.Interfaces
 {
     public interface IMatchupAnalysisService
     {
-        public Task<List<MatchupRanking>> PositionalMatchupRankings(PositionEnum position);
+        public Task<List<MatchupRanking>> PositionalMatchupRankings(Position position);
         public Task<int> GetMatchupRanking(int playerId);
     }
 }

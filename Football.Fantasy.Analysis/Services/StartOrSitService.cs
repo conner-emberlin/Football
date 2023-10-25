@@ -136,11 +136,11 @@ namespace Football.Fantasy.Analysis.Services
             MatchLines matchLines = new();
             foreach (var market in bookMaker.markets)
             {
-               if (Enum.TryParse(market.key, out MarketsEnum marketEnum))
+               if (Enum.TryParse(market.key, out Markets marketEnum))
                 {
                     switch (marketEnum)
                     {
-                        case MarketsEnum.spreads: 
+                        case Markets.spreads: 
                             foreach (var outcome in market.outcomes)
                             {
                                 if (outcome.name == teamMap.TeamDescription)
@@ -149,7 +149,7 @@ namespace Football.Fantasy.Analysis.Services
                                 }
                             }                                                      
                         break;
-                        case MarketsEnum.totals: 
+                        case Markets.totals: 
                             if (market.outcomes.Any())
                             {
                                 matchLines.OverUnder = market.outcomes.First().point;

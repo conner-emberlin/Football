@@ -28,9 +28,9 @@ namespace Football.Api.Controllers
         public async Task<ActionResult<List<SeasonADP>>> GetAvailablePlayers([FromBody] Mock mock) => Ok(await _mockDraftService.GetAvailablePlayers(mock));
 
         [HttpPost("team-needs")]
-        [ProducesResponseType(typeof(List<PositionEnum>), 200)]
+        [ProducesResponseType(typeof(List<Position>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<PositionEnum>>> GetTeamNeeds([FromBody] FantasyTeam team) => Ok(await _mockDraftService.GetTeamNeeds(team));
+        public async Task<ActionResult<List<Position>>> GetTeamNeeds([FromBody] FantasyTeam team) => Ok(await _mockDraftService.GetTeamNeeds(team));
 
         [HttpPost("choose-player")]
         [ProducesResponseType(typeof(SeasonADP), 200)]

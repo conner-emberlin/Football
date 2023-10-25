@@ -20,37 +20,37 @@ namespace Football.Fantasy.MockDraft.Services
             _season = season.CurrentValue;
         }
 
-        public async Task<List<PositionEnum>> GetTeamNeeds(FantasyTeam team)
+        public async Task<List<Position>> GetTeamNeeds(FantasyTeam team)
         {
             return await Task.Run(() =>
             {
-                List<PositionEnum> needs = new();
-                var qbCount = team.Players.Count(p => p.Position == PositionEnum.QB.ToString());
-                var rbCount = team.Players.Count(p => p.Position == PositionEnum.RB.ToString());
-                var wrCount = team.Players.Count(p => p.Position == PositionEnum.WR.ToString());
-                var teCount = team.Players.Count(p => p.Position == PositionEnum.TE.ToString());
+                List<Position> needs = new();
+                var qbCount = team.Players.Count(p => p.Position == Position.QB.ToString());
+                var rbCount = team.Players.Count(p => p.Position == Position.RB.ToString());
+                var wrCount = team.Players.Count(p => p.Position == Position.WR.ToString());
+                var teCount = team.Players.Count(p => p.Position == Position.TE.ToString());
 
                 if (qbCount < _settings.QBStarters)
                 {
-                    needs.Add(PositionEnum.QB);
+                    needs.Add(Position.QB);
                 }
                 if (rbCount < _settings.RBStarters)
                 {
-                    needs.Add(PositionEnum.RB);
+                    needs.Add(Position.RB);
                 }
                 if (wrCount < _settings.WRStarters)
                 {
-                    needs.Add(PositionEnum.WR);
+                    needs.Add(Position.WR);
                 }
                 if (teCount < _settings.TEStarters)
                 {
-                    needs.Add(PositionEnum.TE);
+                    needs.Add(Position.TE);
                 }
                 return needs;
             });
         }
 
-        public async Task<List<SeasonADP>> GetPlayerChoices(List<PositionEnum> teamNeeds, List<SeasonADP> availablePlayers)
+        public async Task<List<SeasonADP>> GetPlayerChoices(List<Position> teamNeeds, List<SeasonADP> availablePlayers)
         {
             var t = await Task.Run(() =>
             {

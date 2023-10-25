@@ -29,31 +29,31 @@ namespace Football.Data.Services
         }
         public async Task<int> UploadSeasonQBData(int season)
         {
-            var url = _scraperService.FantasyProsURLFormatter(PositionEnum.QB.ToString(), season.ToString());
+            var url = _scraperService.FantasyProsURLFormatter(Position.QB.ToString(), season.ToString());
             var players = await SeasonDataQB(_scraperService.ParseFantasyProsQBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await _uploadSeasonDataRepository.UploadSeasonQBData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonRBData(int season)
         {
-            var url = _scraperService.FantasyProsURLFormatter(PositionEnum.RB.ToString(), season.ToString());
+            var url = _scraperService.FantasyProsURLFormatter(Position.RB.ToString(), season.ToString());
             var players = await SeasonDataRB(_scraperService.ParseFantasyProsRBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await _uploadSeasonDataRepository.UploadSeasonRBData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonWRData(int season)
         {
-            var url = _scraperService.FantasyProsURLFormatter(PositionEnum.WR.ToString(), season.ToString());
+            var url = _scraperService.FantasyProsURLFormatter(Position.WR.ToString(), season.ToString());
             var players = await SeasonDataWR(_scraperService.ParseFantasyProsWRData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await _uploadSeasonDataRepository.UploadSeasonWRData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonTEData(int season)
         {
-            var url = _scraperService.FantasyProsURLFormatter(PositionEnum.TE.ToString(), season.ToString());
+            var url = _scraperService.FantasyProsURLFormatter(Position.TE.ToString(), season.ToString());
             var players = await SeasonDataTE(_scraperService.ParseFantasyProsTEData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await _uploadSeasonDataRepository.UploadSeasonTEData(players, await _playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonDSTData(int season)
         {
-            var url = _scraperService.FantasyProsURLFormatter(PositionEnum.DST.ToString(), season.ToString());
+            var url = _scraperService.FantasyProsURLFormatter(Position.DST.ToString(), season.ToString());
             var players = await SeasonDataDST(_scraperService.ParseFantasyProsDSTData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await _uploadSeasonDataRepository.UploadSeasonDSTData(players);
         }
@@ -102,7 +102,7 @@ namespace Football.Data.Services
                 var playerId = await _playerService.GetPlayerId(p.Name);
                 if(playerId == 0)
                 {
-                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = PositionEnum.QB.ToString(), Active = 1 });
+                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.QB.ToString(), Active = 1 });
                     _logger.Information("New player created: {p}", p.Name);
                     playerId = await _playerService.GetPlayerId(p.Name);
                 }
@@ -143,7 +143,7 @@ namespace Football.Data.Services
                 var playerId = await _playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = PositionEnum.RB.ToString(), Active = 1 });
+                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.RB.ToString(), Active = 1 });
                     _logger.Information("New player created: {p}", p.Name);
                     playerId = await _playerService.GetPlayerId(p.Name);
                 }
@@ -180,7 +180,7 @@ namespace Football.Data.Services
                 var playerId = await _playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = PositionEnum.WR.ToString(), Active = 1 });
+                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.WR.ToString(), Active = 1 });
                     _logger.Information("New player created: {p}", p.Name);
                     playerId = await _playerService.GetPlayerId(p.Name);
                 }
@@ -219,7 +219,7 @@ namespace Football.Data.Services
                 var playerId = await _playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = PositionEnum.TE.ToString(), Active = 1 });
+                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.TE.ToString(), Active = 1 });
                     _logger.Information("New player created: {p}", p.Name);
                     playerId = await _playerService.GetPlayerId(p.Name);
                 }
@@ -258,7 +258,7 @@ namespace Football.Data.Services
                 var playerId = await _playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = PositionEnum.DST.ToString(), Active = 1 });
+                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.DST.ToString(), Active = 1 });
                     _logger.Information("New player created: {p}", p.Name);
                     playerId = await _playerService.GetPlayerId(p.Name);
                 }

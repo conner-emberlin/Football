@@ -8,8 +8,8 @@ namespace Football.Fantasy.MockDraft.Interfaces
 {
     public interface IMockDraftService
     {
-        public Task<List<PositionEnum>> GetTeamNeeds(FantasyTeam team);
-        public Task<List<SeasonADP>> GetPlayerChoices(List<PositionEnum> teamNeeds, List<SeasonADP> availablePlayers);
+        public Task<List<Position>> GetTeamNeeds(FantasyTeam team);
+        public Task<List<SeasonADP>> GetPlayerChoices(List<Position> teamNeeds, List<SeasonADP> availablePlayers);
         public Task<SeasonADP> ChoosePlayer(List<SeasonADP> players);
         public Task<List<SeasonADP>> GetAvailablePlayers(Mock mock);
         public Task<int> AddPlayerToTeam(MockDraftResults result);

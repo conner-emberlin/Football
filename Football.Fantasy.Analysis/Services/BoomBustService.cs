@@ -24,7 +24,7 @@ namespace Football.Fantasy.Analysis.Services
             _fantasyDataService = fantasyDataService;
             _settingsService = settingsService;
         }
-        public async Task<List<BoomBust>> GetBoomBusts(PositionEnum position)
+        public async Task<List<BoomBust>> GetBoomBusts(Position position)
         {
             var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(position);
             var playersByPosition = await _playersService.GetPlayersByPosition(position);
@@ -52,7 +52,7 @@ namespace Football.Fantasy.Analysis.Services
             List<BoomBustByWeek> boomBustsByWeek = new();
             var player = await _playersService.GetPlayer(playerId);
             var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
-            if (Enum.TryParse(player.Position, out PositionEnum position))
+            if (Enum.TryParse(player.Position, out Position position))
             {
                 var playerBoomBust = weeklyFantasy.Select(wf => new BoomBustByWeek
                 {

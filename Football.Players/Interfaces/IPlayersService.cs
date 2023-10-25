@@ -8,7 +8,7 @@ namespace Football.Players.Interfaces
         public Task<int> GetPlayerId(string name);
         public Task<int> CreatePlayer(Player player);
         public Task<List<Player>> GetAllPlayers();
-        public Task<List<Player>> GetPlayersByPosition(PositionEnum position);
+        public Task<List<Player>> GetPlayersByPosition(Position position);
         public Task<Player> GetPlayer(int playerId);
         public Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position);
         public Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position);

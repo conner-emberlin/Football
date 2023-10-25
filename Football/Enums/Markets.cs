@@ -1,6 +1,6 @@
 ﻿namespace Football.Enums
 {
-    public enum MarketsEnum
+    public enum Markets
     {
         spreads,
         totals

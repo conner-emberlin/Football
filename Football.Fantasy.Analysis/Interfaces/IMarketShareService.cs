@@ -5,7 +5,7 @@ namespace Football.Fantasy.Analysis.Interfaces
 {
     public interface IMarketShareService
     {
-        public Task<List<MarketShare>> GetMarketShare(PositionEnum position);
+        public Task<List<MarketShare>> GetMarketShare(Position position);
         public Task<List<TargetShare>> GetTargetShares();
         public Task<List<TeamTotals>> GetTeamTotals();
 

@@ -1,6 +1,6 @@
 ﻿namespace Football.Enums
 {
-    public enum PositionEnum
+    public enum Position
     {
         QB,
         RB,

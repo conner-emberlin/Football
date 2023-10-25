@@ -43,7 +43,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> PostSeasonFantasy( int season, string position)
         {
-            if (season > 0 && Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
+            if (season > 0 && Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
                 return Ok(await _fantasyDataService.PostSeasonFantasy(season, positionEnum));
             }
@@ -57,7 +57,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> PostWeeklyFantasy(int season, int week, string position)
         {
-            if (season > 0 && week > 0 && Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
+            if (season > 0 && week > 0 && Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
                 return Ok(await _fantasyDataService.PostWeeklyFantasy(season, week, positionEnum));
             }
@@ -98,7 +98,7 @@ namespace Football.Api.Controllers
         [HttpGet("matchup-rankings/{position}")]
         [ProducesResponseType(typeof(List<MatchupRanking>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<MatchupRanking>> GetMatchupRankings(string position) => Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum) ? 
+        public async Task<ActionResult<MatchupRanking>> GetMatchupRankings(string position) => Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum) ? 
             Ok(await _matchupAnalysisService.PositionalMatchupRankings(positionEnum)) : BadRequest("Bad Request");
 
         [HttpGet("team-totals")]
@@ -109,7 +109,7 @@ namespace Football.Api.Controllers
         [HttpGet("marketshare/{position}")]
         [ProducesResponseType(typeof(List<TeamTotals>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<MarketShare>>> GetMarketShare(string position) => Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum) ?
+        public async Task<ActionResult<List<MarketShare>>> GetMarketShare(string position) => Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum) ?
             Ok(await _marketShareService.GetMarketShare(positionEnum)) : BadRequest("Bad Request");
 
         [HttpGet("targetshares")]
@@ -144,7 +144,7 @@ namespace Football.Api.Controllers
         [HttpGet("boom-busts/{position}")]
         [ProducesResponseType(typeof(List<BoomBust>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<BoomBust>>> GetBoomBusts([FromRoute] string position) => Enum.TryParse(position, out PositionEnum posEnum) ? Ok(await _boomBustService.GetBoomBusts(posEnum)) : BadRequest();
+        public async Task<ActionResult<List<BoomBust>>> GetBoomBusts([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await _boomBustService.GetBoomBusts(posEnum)) : BadRequest();
 
         [HttpGet("weekly-boom-busts/{playerId}")]
         [ProducesResponseType(typeof(List<BoomBustByWeek>), 200)]
