@@ -58,10 +58,7 @@ namespace Football.Fantasy.Analysis.Services
             if (startOrSits.Any())
             {
                 var starter = startOrSits.Where(s => s.ProjectedPoints == startOrSits.Max(s => s.ProjectedPoints)).First().Player.PlayerId;
-                foreach (var startOrSit in startOrSits)
-                {
-                    startOrSit.Start = startOrSit.Player.PlayerId == starter;
-                }
+                startOrSits.ForEach(s => s.Start = s.Player.PlayerId == starter);
                 return startOrSits;
             }
             else

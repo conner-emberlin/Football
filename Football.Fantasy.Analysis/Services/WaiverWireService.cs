@@ -39,8 +39,8 @@ namespace Football.Fantasy.Analysis.Services
                 if (Enum.TryParse(rpPosition, out PositionEnum pos))
                 {
                     var weeklyFantasy = await _fantasyService.GetWeeklyFantasy(rp.PlayerId);
-                    var goodWeekCount = weeklyFantasy.Where(w => w.FantasyPoints > _settingsService.GoodWeek(pos)).Count();
-                    var recentWeekFantasy = weeklyFantasy.Where(wf => wf.Week == week - 1).FirstOrDefault();            
+                    var goodWeekCount = weeklyFantasy.Count(w => w.FantasyPoints > _settingsService.GoodWeek(pos));
+                    var recentWeekFantasy = weeklyFantasy.FirstOrDefault(wf => wf.Week == week - 1);            
                     if(goodWeekCount > _settings.GoodWeekMinimum && recentWeekFantasy != null)
                     {
                         if (recentWeekFantasy.FantasyPoints > _settingsService.GoodWeek(pos))

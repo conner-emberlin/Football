@@ -100,7 +100,7 @@ namespace Football.Fantasy.Analysis.Services
                 var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, player.PlayerId);
                 if (team != null) {
                     var fantasy = await _fantasyService.GetWeeklyFantasy(player.PlayerId);
-                    var teamTotal = teamTotals.Where(t => t.Team.Team == team.Team).First();
+                    var teamTotal = teamTotals.First(t => t.Team.Team == team.Team);
                     if (position == PositionEnum.RB)
                     {
                         var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId);

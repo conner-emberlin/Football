@@ -1,17 +1,14 @@
 ﻿using Football.Enums;
 using Football.Projections.Interfaces;
 using MathNet.Numerics.LinearAlgebra;
-using Serilog;
 
 namespace Football.Projections.Services
 {
     public class MatrixCalculator : IMatrixCalculator
     {
-        private readonly ILogger _logger;
         private readonly ISettingsService _settings;
-        public MatrixCalculator(ILogger logger, ISettingsService settings)
+        public MatrixCalculator(ISettingsService settings)
         {
-            _logger = logger;
             _settings = settings;
         }
         public Matrix<double> RegressorMatrix<T>(List<T> model)
@@ -39,26 +36,18 @@ namespace Football.Projections.Services
         }
         private Vector<double> TransformModel<T>(T modelItem)
         {
-            try
+            var properties = _settings.GetPropertiesFromModel<T>();
+            var columnCount = properties.Count + 1;
+            var vec = Vector<double>.Build.Dense(columnCount);
+            vec[0] = 1;
+            var index = 1;
+            foreach (var property in properties)
             {
-                var properties = _settings.GetPropertiesFromModel<T>();
-                var columnCount = properties.Count + 1;
-                var vec = Vector<double>.Build.Dense(columnCount);
-                vec[0] = 1;
-                var index = 1;
-                foreach (var property in properties)
-                {
-                    var value = Convert.ToDouble(property.GetValue(modelItem));
-                    vec[index] = value;
-                    index++;
-                }
-                return vec;
+                var value = Convert.ToDouble(property.GetValue(modelItem));
+                vec[index] = value;
+                index++;
             }
-            catch(Exception ex)
-            {
-                _logger.Error(ex.ToString(), ex.StackTrace, ex);
-                throw;
-            }
+            return vec;
         }
         private static Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount)
         {

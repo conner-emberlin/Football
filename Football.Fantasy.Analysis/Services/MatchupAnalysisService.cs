@@ -86,10 +86,7 @@ namespace Football.Fantasy.Analysis.Services
                 var matchupRanking = matchupRankings.FindIndex(m => m.Team.TeamId == opponentId) + 1;
                 return matchupRanking;
             }
-            else
-            {
-                return 0;
-            }
+            else return 0;
         }
     }
 }
