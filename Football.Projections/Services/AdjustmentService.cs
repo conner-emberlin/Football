@@ -37,7 +37,7 @@ namespace Football.Projections.Services
             seasonProjections = await SuspensionAdjustment(seasonProjections);
 
             var position = seasonProjections.First().Position;
-            if (position == PositionEnum.WR.ToString())
+            if (position == Position.WR.ToString())
             {
                 seasonProjections = await QuarterbackChangeAdjustment(seasonProjections);
             }
@@ -116,7 +116,7 @@ namespace Football.Projections.Services
 
         private async Task<List<WeekProjection>> MatchupAdjustment(List<WeekProjection> weekProjections)
         {
-            var t = Enum.TryParse(weekProjections.First().Position, out PositionEnum position);
+            var t = Enum.TryParse(weekProjections.First().Position, out Position position);
             var matchupRanks = await _matchupAnalysisService.PositionalMatchupRankings(position);
             var avgMatchup = matchupRanks.ElementAt((int)Math.Round((double)(matchupRanks.Count/2)));
             foreach (var w in weekProjections)

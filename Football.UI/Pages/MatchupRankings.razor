@@ -75,7 +75,7 @@
 @code {
     private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
     public string Position { get; set; } = "Quarterback";
-    public PositionEnum positionEnum { get; set; }
+    public Position positionEnum { get; set; }
     public List<MatchupRanking> Rankings = new();
 
     public bool loading { get; set; } = false;
@@ -86,13 +86,13 @@
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
-        positionEnum = Position switch
+            positionEnum = Position switch
         {
-            "Quarterback" => PositionEnum.QB,
-            "Runningback" => PositionEnum.RB,
-            "Wide Receiver" => PositionEnum.WR,
-            "Tight End" => PositionEnum.TE,
-            _ => PositionEnum.QB
+            "Quarterback" => Enums.Position.QB,
+            "Runningback" => Enums.Position.RB,
+            "Wide Receiver" => Enums.Position.WR,
+            "Tight End" => Enums.Position.TE,
+            _ => Enums.Position.QB
         };
     }
     public async Task GetMatchupRankings()

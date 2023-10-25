@@ -28,15 +28,15 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadWeeklyData(string position, int season, int week)
         {
-            if (Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
+            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
                 return positionEnum switch
                 {
-                    PositionEnum.QB => Ok(await _weeklyDataService.UploadWeeklyQBData(season, week)),
-                    PositionEnum.RB => Ok(await _weeklyDataService.UploadWeeklyRBData(season, week)),
-                    PositionEnum.WR => Ok(await _weeklyDataService.UploadWeeklyWRData(season, week)),
-                    PositionEnum.TE => Ok(await _weeklyDataService.UploadWeeklyTEData(season, week)),
-                    PositionEnum.DST => Ok(await _weeklyDataService.UploadWeeklyDSTData(season, week)),
+                    Position.QB => Ok(await _weeklyDataService.UploadWeeklyQBData(season, week)),
+                    Position.RB => Ok(await _weeklyDataService.UploadWeeklyRBData(season, week)),
+                    Position.WR => Ok(await _weeklyDataService.UploadWeeklyWRData(season, week)),
+                    Position.TE => Ok(await _weeklyDataService.UploadWeeklyTEData(season, week)),
+                    Position.DST => Ok(await _weeklyDataService.UploadWeeklyDSTData(season, week)),
                     _ => BadRequest()
                 };
             }
@@ -65,15 +65,15 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadSeasonData(string position, int season)
         {
-            if (Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
+            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
                 return positionEnum switch
                 {
-                    PositionEnum.QB => Ok(await _seasonDataService.UploadSeasonQBData(season)),
-                    PositionEnum.RB => Ok(await _seasonDataService.UploadSeasonRBData(season)),
-                    PositionEnum.WR => Ok(await _seasonDataService.UploadSeasonWRData(season)),
-                    PositionEnum.TE => Ok(await _seasonDataService.UploadSeasonTEData(season)),
-                    PositionEnum.DST => Ok(await _seasonDataService.UploadSeasonDSTData(season)),
+                    Position.QB => Ok(await _seasonDataService.UploadSeasonQBData(season)),
+                    Position.RB => Ok(await _seasonDataService.UploadSeasonRBData(season)),
+                    Position.WR => Ok(await _seasonDataService.UploadSeasonWRData(season)),
+                    Position.TE => Ok(await _seasonDataService.UploadSeasonTEData(season)),
+                    Position.DST => Ok(await _seasonDataService.UploadSeasonDSTData(season)),
                     _ => BadRequest(),
                 };
             }

@@ -33,9 +33,9 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<SeasonProjection>>> GetSeasonProjections(string position)
         {
-            if(Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
+            if(Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
-                return positionEnum == PositionEnum.FLEX ? Ok(await _analysisService.SeasonFlexRankings())
+                return positionEnum == Position.FLEX ? Ok(await _analysisService.SeasonFlexRankings())
                                       : Ok(await _seasonProjectionService.GetProjections(positionEnum));
             }
             else
@@ -54,7 +54,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> PostSeasonProjections(string position)
         {
-            if (Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))  
+            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))  
             {
                 var proj = (await _seasonProjectionService.GetProjections(positionEnum)).ToList();
                 return Ok(await _seasonProjectionService.PostProjections(proj));
@@ -70,9 +70,9 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<WeekProjection>>> GetWeeklyProjections(string position)
         {
-            if (Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
+            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
-                return positionEnum == PositionEnum.FLEX ? Ok(await _analysisService.WeeklyFlexRankings()) 
+                return positionEnum == Position.FLEX ? Ok(await _analysisService.WeeklyFlexRankings()) 
                                                          : Ok(await _weekProjectionService.GetProjections(positionEnum));
             }
             else
@@ -85,7 +85,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> PostWeeklyProjections(string position)
         {
-            if (Enum.TryParse(position.Trim().ToUpper(), out PositionEnum positionEnum))
+            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
                 var proj = (await _weekProjectionService.GetProjections(positionEnum)).ToList();
                 return Ok(await _weekProjectionService.PostProjections(proj));
@@ -101,7 +101,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<WeeklyProjectionAnalysis>>> GetWeeklyProjectionAnalysis(string position)
         {
-            if (Enum.TryParse(position, out PositionEnum positionEnum))
+            if (Enum.TryParse(position, out Position positionEnum))
             {
                 List<WeeklyProjectionAnalysis> projectionAnalyses = new();
                 var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
@@ -119,7 +119,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<WeeklyProjectionError>>> GetWeeklyProjectionError(string position, int week)
         {
-            if (Enum.TryParse(position, out PositionEnum positionEnum))
+            if (Enum.TryParse(position, out Position positionEnum))
             {
                 return Ok(await _analysisService.GetWeeklyProjectionError(positionEnum, week));
             }

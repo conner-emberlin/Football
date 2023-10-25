@@ -36,7 +36,7 @@ namespace Football.Fantasy.Analysis.Services
             foreach (var rp in rosterPercentages)
             {
                 var rpPosition = (await _playersService.GetPlayer(rp.PlayerId)).Position;
-                if (Enum.TryParse(rpPosition, out PositionEnum pos))
+                if (Enum.TryParse(rpPosition, out Position pos))
                 {
                     var weeklyFantasy = await _fantasyService.GetWeeklyFantasy(rp.PlayerId);
                     var goodWeekCount = weeklyFantasy.Count(w => w.FantasyPoints > _settingsService.GoodWeek(pos));
@@ -48,7 +48,7 @@ namespace Football.Fantasy.Analysis.Services
                             candidates.Add(rp);
                         }                               
                     }
-                    else if (pos == PositionEnum.RB)
+                    else if (pos == Position.RB)
                     {
                         if (await InjuryToLeadRB(rp.PlayerId))
                         {
@@ -74,7 +74,7 @@ namespace Football.Fantasy.Analysis.Services
                     foreach (var injuredPlayer in injuredPlayersOnTeam)
                     {
                         var position = (await _playersService.GetPlayer(injuredPlayer.PlayerTeam.PlayerId)).Position;
-                        if (position == PositionEnum.RB.ToString())
+                        if (position == Position.RB.ToString())
                         {
                             return true;
                         }

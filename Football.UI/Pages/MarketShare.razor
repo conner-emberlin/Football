@@ -82,7 +82,7 @@
 @code {
     private List<string> Positions = new() {"Runningback", "Wide Receiver", "Tight End" };
     public string Position { get; set; } = "Runningback";
-    public PositionEnum positionEnum { get; set; } = PositionEnum.RB;
+    public Position positionEnum { get; set; } = Enums.Position.RB;
     public List<Football.Fantasy.Analysis.Models.MarketShare> marketShare = new();
 
     public bool loading { get; set; } = false;
@@ -93,12 +93,12 @@
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
-        positionEnum = Position switch
+            positionEnum = Position switch
         {
-            "Runningback" => PositionEnum.RB,
-            "Wide Receiver" => PositionEnum.WR,
-            "Tight End" => PositionEnum.TE,
-            _ => PositionEnum.RB
+            "Runningback" => Enums.Position.RB,
+            "Wide Receiver" => Enums.Position.WR,
+            "Tight End" => Enums.Position.TE,
+            _ => Enums.Position.RB
         };
     }
     public async Task GetMarketShare()

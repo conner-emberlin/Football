@@ -22,42 +22,42 @@ namespace Football
             _wireSettings = wireSettings.CurrentValue;
         }
 
-        public int GetProjectionsCount(PositionEnum position) => position switch
+        public int GetProjectionsCount(Position position) => position switch
         {
 
-            PositionEnum.QB => _projectionLimits.QBProjections,
-            PositionEnum.RB => _projectionLimits.RBProjections,
-            PositionEnum.WR => _projectionLimits.WRProjections,
-            PositionEnum.TE => _projectionLimits.TEProjections,
+            Position.QB => _projectionLimits.QBProjections,
+            Position.RB => _projectionLimits.RBProjections,
+            Position.WR => _projectionLimits.WRProjections,
+            Position.TE => _projectionLimits.TEProjections,
             _ => 0
         };
 
-        public double GetBoomSetting(PositionEnum position) => position switch
+        public double GetBoomSetting(Position position) => position switch
         {
-            PositionEnum.QB => _boomBust.QBBoom,
-            PositionEnum.RB => _boomBust.RBBoom,
-            PositionEnum.WR => _boomBust.WRBoom,
-            PositionEnum.TE => _boomBust.TEBoom,
+            Position.QB => _boomBust.QBBoom,
+            Position.RB => _boomBust.RBBoom,
+            Position.WR => _boomBust.WRBoom,
+            Position.TE => _boomBust.TEBoom,
             _ => 0
         };
 
-        public double GetBustSetting(PositionEnum position) => position switch
+        public double GetBustSetting(Position position) => position switch
         {
-            PositionEnum.QB => _boomBust.QBBust,
-            PositionEnum.RB => _boomBust.RBBust,
-            PositionEnum.WR => _boomBust.WRBust,
-            PositionEnum.TE => _boomBust.TEBust,
+            Position.QB => _boomBust.QBBust,
+            Position.RB => _boomBust.RBBust,
+            Position.WR => _boomBust.WRBust,
+            Position.TE => _boomBust.TEBust,
             _ => 0
         };
 
-        public double GoodWeek(PositionEnum position)
+        public double GoodWeek(Position position)
         {
             return position switch
             {
-                PositionEnum.QB => _wireSettings.GoodWeekFantasyPointsQB,
-                PositionEnum.RB => _wireSettings.GoodWeekFantasyPointsRB,
-                PositionEnum.WR => _wireSettings.GoodWeekFantasyPointsWR,
-                PositionEnum.TE => _wireSettings.GoodWeekFantasyPointsTE,
+                Position.QB => _wireSettings.GoodWeekFantasyPointsQB,
+                Position.RB => _wireSettings.GoodWeekFantasyPointsRB,
+                Position.WR => _wireSettings.GoodWeekFantasyPointsWR,
+                Position.TE => _wireSettings.GoodWeekFantasyPointsTE,
                 _ => 0
             };
         }
@@ -96,7 +96,7 @@ namespace Football
             else return false;
         }
 
-        public bool GetFromCache<T>(PositionEnum position, Cache cache, out List<T> cachedValues)
+        public bool GetFromCache<T>(Position position, Cache cache, out List<T> cachedValues)
         {
             if (_cache.TryGetValue(position.ToString() + cache.ToString(), out cachedValues))
             {

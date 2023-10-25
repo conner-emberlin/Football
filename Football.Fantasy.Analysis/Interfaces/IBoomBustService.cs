@@ -6,7 +6,7 @@ namespace Football.Fantasy.Analysis.Interfaces
 {
     public interface IBoomBustService
     {
-        public Task<List<BoomBust>> GetBoomBusts(PositionEnum position);
+        public Task<List<BoomBust>> GetBoomBusts(Position position);
         public Task<List<BoomBustByWeek>> GetBoomBustsByWeek(int playerId);
     }
 }

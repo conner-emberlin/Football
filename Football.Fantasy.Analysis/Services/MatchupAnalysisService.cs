@@ -26,7 +26,7 @@ namespace Football.Fantasy.Analysis.Services
             _cache = cache;
             _settings = settings;
         }
-        public async Task<List<MatchupRanking>> PositionalMatchupRankings(PositionEnum position)
+        public async Task<List<MatchupRanking>> PositionalMatchupRankings(Position position)
         {
             if (_settings.GetFromCache<MatchupRanking>(position, Cache.MatchupRankings, out var cachedValues))
             {
@@ -81,7 +81,7 @@ namespace Football.Fantasy.Analysis.Services
                 var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
                 var opponentId = (await _playersService.GetTeamGames(teamId)).Where(g => g.Week == currentWeek).First().OpposingTeamId;
                 var player = await _playersService.GetPlayer(playerId);
-                _ = Enum.TryParse(player.Position, out PositionEnum position);
+                _ = Enum.TryParse(player.Position, out Position position);
                 var matchupRankings = await PositionalMatchupRankings(position);
                 var matchupRanking = matchupRankings.FindIndex(m => m.Team.TeamId == opponentId) + 1;
                 return matchupRanking;

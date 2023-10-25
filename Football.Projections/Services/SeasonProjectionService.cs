@@ -51,12 +51,12 @@ namespace Football.Projections.Services
         }
 
         public async Task<IEnumerable<SeasonProjection>?> GetPlayerProjections(int playerId) => await _projectionRepository.GetSeasonProjection(playerId);
-        public bool GetProjectionsFromSQL(PositionEnum position, int season, out IEnumerable<SeasonProjection> projections)
+        public bool GetProjectionsFromSQL(Position position, int season, out IEnumerable<SeasonProjection> projections)
         {
             projections =  _projectionRepository.GetSeasonProjectionsFromSQL(position, season);
             return projections.Any();
         }
-        public bool GetProjectionsFromCache(PositionEnum position, out IEnumerable<SeasonProjection> cachedValues)
+        public bool GetProjectionsFromCache(Position position, out IEnumerable<SeasonProjection> cachedValues)
         {
             if (_cache.TryGetValue(position.ToString() + Cache.SeasonProjections.ToString(), out cachedValues))
             {
@@ -65,7 +65,7 @@ namespace Football.Projections.Services
             else return false;
         }
         public async Task<int> PostProjections(List<SeasonProjection> projections) => await _projectionRepository.PostSeasonProjections(projections);
-        public async Task<IEnumerable<SeasonProjection>> GetProjections(PositionEnum position)
+        public async Task<IEnumerable<SeasonProjection>> GetProjections(Position position)
         {
             if (GetProjectionsFromCache(position, out var cachedProj))
             {
@@ -80,10 +80,10 @@ namespace Football.Projections.Services
             {
                 var projections = position switch
                 {
-                    PositionEnum.QB => await CalculateProjections(await QBProjectionModel(), position),
-                    PositionEnum.RB => await CalculateProjections(await RBProjectionModel(), position),
-                    PositionEnum.WR => await CalculateProjections(await WRProjectionModel(), position),
-                    PositionEnum.TE => await CalculateProjections(await TEProjectionModel(), position),
+                    Position.QB => await CalculateProjections(await QBProjectionModel(), position),
+                    Position.RB => await CalculateProjections(await RBProjectionModel(), position),
+                    Position.WR => await CalculateProjections(await WRProjectionModel(), position),
+                    Position.TE => await CalculateProjections(await TEProjectionModel(), position),
                     _ => throw new NotImplementedException()
                 };
                 projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
@@ -93,7 +93,7 @@ namespace Football.Projections.Services
                 return formattedProjections;
             }
         }
-        public async Task<IEnumerable<SeasonProjection>> CalculateProjections<T1>(List<T1> model, PositionEnum position)
+        public async Task<IEnumerable<SeasonProjection>> CalculateProjections<T1>(List<T1> model, Position position)
         {
             List<SeasonProjection> projections = new();
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);            
@@ -143,11 +143,11 @@ namespace Football.Projections.Services
         }
         private async Task<List<QBModelSeason>> QBProjectionModel()
         {
-            var players = await _playersService.GetPlayersByPosition(PositionEnum.QB);
+            var players = await _playersService.GetPlayersByPosition(Position.QB);
             List<QBModelSeason> qbModel = new();
             foreach (var player in players)
             {
-                var stats = (await _statisticsService.GetSeasonData<SeasonDataQB>(PositionEnum.QB, player.PlayerId, true));
+                var stats = (await _statisticsService.GetSeasonData<SeasonDataQB>(Position.QB, player.PlayerId, true));
                 if (stats.Any())
                 {
                     qbModel.Add(_regressionService.QBModelSeason(_statCalculator.CalculateStatProjection(stats)));
@@ -157,11 +157,11 @@ namespace Football.Projections.Services
         }
         private async Task<List<RBModelSeason>> RBProjectionModel()
         {
-            var players = await _playersService.GetPlayersByPosition(PositionEnum.RB);
+            var players = await _playersService.GetPlayersByPosition(Position.RB);
             List<RBModelSeason> rbModel = new();
             foreach (var player in players)
             {
-                var stats = (await _statisticsService.GetSeasonData<SeasonDataRB>(PositionEnum.RB, player.PlayerId, true));
+                var stats = (await _statisticsService.GetSeasonData<SeasonDataRB>(Position.RB, player.PlayerId, true));
                 if (stats.Any())
                 {
                     rbModel.Add(_regressionService.RBModelSeason(_statCalculator.CalculateStatProjection(stats)));
@@ -171,11 +171,11 @@ namespace Football.Projections.Services
         }
         private async Task<List<WRModelSeason>> WRProjectionModel()
         {
-            var players = await _playersService.GetPlayersByPosition(PositionEnum.WR);
+            var players = await _playersService.GetPlayersByPosition(Position.WR);
             List<WRModelSeason> wrModel = new();
             foreach (var player in players)
             {
-                var stats = (await _statisticsService.GetSeasonData<SeasonDataWR>(PositionEnum.WR, player.PlayerId, true));
+                var stats = (await _statisticsService.GetSeasonData<SeasonDataWR>(Position.WR, player.PlayerId, true));
                 if (stats.Any())
                 {
                     wrModel.Add(_regressionService.WRModelSeason(_statCalculator.CalculateStatProjection(stats)));
@@ -185,11 +185,11 @@ namespace Football.Projections.Services
         }
         private async Task<List<TEModelSeason>> TEProjectionModel()
         {
-            var players = await _playersService.GetPlayersByPosition(PositionEnum.TE);
+            var players = await _playersService.GetPlayersByPosition(Position.TE);
             List<TEModelSeason> teModel = new();
             foreach (var player in players)
             {
-                var stats = (await _statisticsService.GetSeasonData<SeasonDataTE>(PositionEnum.TE, player.PlayerId, true));
+                var stats = (await _statisticsService.GetSeasonData<SeasonDataTE>(Position.TE, player.PlayerId, true));
                 if (stats.Any())
                 {
                     teModel.Add(_regressionService.TEModelSeason(_statCalculator.CalculateStatProjection(stats)));
@@ -198,7 +198,7 @@ namespace Football.Projections.Services
             return teModel;
         }
 
-        private async Task<List<SeasonProjection>> RookieSeasonProjections(PositionEnum position)
+        private async Task<List<SeasonProjection>> RookieSeasonProjections(Position position)
         {
             List<SeasonProjection> rookieProjections = new();
             var historicalRookies = await _playersService.GetHistoricalRookies(_season.CurrentSeason, position.ToString());

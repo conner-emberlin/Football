@@ -41,7 +41,7 @@ namespace Football.Projections.Repository
             var query = $@"SELECT * FROM [dbo].WeeklyProjections WHERE [PlayerId] = @playerId";
             return await _dbConnection.QueryAsync<WeekProjection>(query, new { playerId});
         }
-        public IEnumerable<WeekProjection> GetWeeklyProjectionsFromSQL(PositionEnum position, int week)
+        public IEnumerable<WeekProjection> GetWeeklyProjectionsFromSQL(Position position, int week)
         {
             var pos = position.ToString();
             var query = $@"SELECT * FROM [dbo].WeeklyProjections
@@ -49,7 +49,7 @@ namespace Football.Projections.Repository
                             AND [Week] = @week";
             return  _dbConnection.Query<WeekProjection>(query, new { pos, week });
         }
-        public IEnumerable<SeasonProjection> GetSeasonProjectionsFromSQL(PositionEnum position, int season)
+        public IEnumerable<SeasonProjection> GetSeasonProjectionsFromSQL(Position position, int season)
         {
             var pos = position.ToString();
             var query = $@"SELECT * FROM [dbo].SeasonProjections
