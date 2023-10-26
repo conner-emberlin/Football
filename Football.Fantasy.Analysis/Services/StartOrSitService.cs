@@ -43,7 +43,7 @@ namespace Football.Fantasy.Analysis.Services
                     startOrSits.Add(new StartOrSit { 
                         Player = await _playersService.GetPlayer(playerId),                    
                         TeamMap = await _playersService.GetTeam(teamId),                    
-                        ScheduleDetails = schedule.Where(s => s.AwayTeamId == teamId || s.HomeTeamId == teamId).FirstOrDefault(),
+                        ScheduleDetails = schedule.FirstOrDefault(s => s.AwayTeamId == teamId || s.HomeTeamId == teamId),
                         MatchLines = await GetMatchLines(playerId),
                         Weather = await GetWeather(playerId),
                         MatchupRanking = await _matchupAnalysisService.GetMatchupRanking(playerId),
@@ -75,27 +75,35 @@ namespace Football.Fantasy.Analysis.Services
             {
                 var playerTeamId = await _playersService.GetTeamId(playerTeam.Team);
                 var allScheduleDetails = await _playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
-                var scheduleDetail = allScheduleDetails.Where(s => s.HomeTeamId == playerTeamId || s.AwayTeamId == playerTeamId).First();
-                var homeLocation = await _playersService.GetTeamLocation(scheduleDetail.HomeTeamId);
-                var forecast = await _newsService.GetWeatherAPI(homeLocation.Zip);
-                if(forecast != null)
+                var scheduleDetail = allScheduleDetails.FirstOrDefault(s => s.HomeTeamId == playerTeamId || s.AwayTeamId == playerTeamId);
+                if (scheduleDetail != null)
                 {
-                    var forecastDay = forecast.forecast.forecastday.Where(f => f.date == scheduleDetail.Date).FirstOrDefault();
-                    if (forecastDay != null)
+                    var homeLocation = await _playersService.GetTeamLocation(scheduleDetail.HomeTeamId);
+                    var forecast = await _newsService.GetWeatherAPI(homeLocation.Zip);
+                    if (forecast != null)
                     {
-                        var time = FormatTime(scheduleDetail.Time, scheduleDetail.Date);
-                        var forecastHour = forecastDay.hour.Where(h => h.time == time).First();
-                        return forecastHour != null ? Weather(forecastHour) : new Weather { };
+                        var forecastDay = forecast.forecast.forecastday.FirstOrDefault(f => f.date == scheduleDetail.Date);
+                        if (forecastDay != null)
+                        {
+                            var time = FormatTime(scheduleDetail.Time, scheduleDetail.Date);
+                            var forecastHour = forecastDay.hour.First(h => h.time == time);
+                            return forecastHour != null ? Weather(forecastHour) : new Weather { };
+                        }
+                        else
+                        {
+                            return new Weather { };
+                        }
                     }
                     else
                     {
+                        _logger.Information("Unable to find forecast for zip {0}", homeLocation.Zip);
                         return new Weather { };
                     }
                 }
-                else
-                {
-                    _logger.Information("Unable to find forecast for zip {0}", homeLocation.Zip);
-                    return new Weather { };
+                else 
+                { 
+                    _logger.Information("Team {0} is on BYE", playerTeam.Team); 
+                    return new Weather { }; 
                 }
 
             }

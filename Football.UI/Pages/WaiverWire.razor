@@ -1,0 +1,75 @@
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Data.Models;
+@using Football.Fantasy.Models;
+@using Football.Players.Models;
+@inject IHttpClientFactory ClientFactory
+@page "/WaiverWire/"
+
+<h3>Waiver Wire</h3>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+@if (candidates.Any())
+{
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Week</th>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Rostered%</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i < candidates.Count; i++)
+                {
+                    <tr>
+                        <td>@candidates.ElementAt(i-1).Week</td>
+                        <td>@i</td>
+                        <td><a class="page-links" href="Players/@candidates.ElementAt(i-1).PlayerId"> @candidates.ElementAt(i-1).Name</a></td>
+                        <td>@candidates.ElementAt(i-1).RosterPercent</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if (youTried && badRequestError)
+{
+    <text>Something Went Wrong.</text>
+}
+
+@code {
+    public List<WeeklyRosterPercent> candidates = new();
+
+    public bool badRequestError = false;
+    public bool youTried = false;
+    private bool shouldRender;
+    private bool loading = false;
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/waiver-wire");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            candidates = await JsonSerializer.DeserializeAsync<List<WeeklyRosterPercent>>(responseStream, options);
+        }
+        loading = false;
+        shouldRender = true;
+    }
+
+}
+
