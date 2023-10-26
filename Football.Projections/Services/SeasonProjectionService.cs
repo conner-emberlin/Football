@@ -98,7 +98,7 @@ namespace Football.Projections.Services
             List<SeasonProjection> projections = new();
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);            
             var fantasyModel = await FantasyProjectionModel(model);
-            var dependentVector = _matrixCalculator.DependentVector(fantasyModel);
+            var dependentVector = _matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
             var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
             var results = regressorMatrix * coefficients;
 
@@ -233,7 +233,7 @@ namespace Football.Projections.Services
                 var rookieFantasy = await _fantasyService.GetSeasonFantasy(rookie.PlayerId);
                 rookieSeasons.Add(rookieFantasy.First(rf => rf.Season == rookie.RookieSeason));
             }
-            return MultipleRegression.NormalEquations(_matrixCalculator.RegressorMatrix(historicalRookies), _matrixCalculator.DependentVector(rookieSeasons));
+            return MultipleRegression.NormalEquations(_matrixCalculator.RegressorMatrix(historicalRookies), _matrixCalculator.DependentVector(rookieSeasons, Model.FantasyPoints));
         }
     }
 }

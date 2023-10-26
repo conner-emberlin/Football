@@ -80,12 +80,7 @@ namespace Football.Data.Repository
                         (@Season, @WinnerId, @LoserId, @HomeTeamId, @AwayTeamId,
                         @Week, @Day, @Date, @Time, @Winner, @Loser, @WinnerPoints, @LoserPoints,
                         @WinnerYards, @LoserYards)";
-            var count = 0;
-            foreach (var r in results)
-            {
-                count += await _dbConnection.ExecuteAsync(query, r);
-            }
-            return count;
+            return await _dbConnection.ExecuteAsync(query, results);
         }
 
         public async Task<int> UploadWeeklyRosterPercentages(List<WeeklyRosterPercent> rosterPercentages, List<int> ignoreList)

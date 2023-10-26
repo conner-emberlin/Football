@@ -70,10 +70,10 @@ namespace Football.Data.Services
         private async Task<List<WeeklyRosterPercent>> WeeklyRosterPercent(List<FantasyProsRosterPercent> rosterPercents, int season, int week)
         {
             List<WeeklyRosterPercent> rosterPercentages = new();
-            foreach (var rp in rosterPercents)
+            foreach (var rp in rosterPercents.Where(rp => rp.RosterPercent > 0.0))
             {
                 var playerId = await _playerService.GetPlayerId(rp.Name);
-                if (playerId > 0)
+                if (playerId > 0 && !rosterPercentages.Any(rp => rp.PlayerId == playerId))
                 {
                     rosterPercentages.Add(new WeeklyRosterPercent
                     {
@@ -100,7 +100,8 @@ namespace Football.Data.Services
                     _logger.Information("New player created: {p}", p.Name);
                     playerId = await _playerService.GetPlayerId(p.Name);
                 }
-                if (p.Games > 0)
+                var player = await _playerService.GetPlayer(playerId);
+                if (p.Games > 0 && player.Position == Position.QB.ToString())
                 {
                     weeklyData.Add(new WeeklyDataQB
                     {
@@ -141,7 +142,8 @@ namespace Football.Data.Services
                     _logger.Information("New player created: {p}", p.Name);
                     playerId = await _playerService.GetPlayerId(p.Name);
                 }
-                if (p.Games > 0)
+                var player = await _playerService.GetPlayer(playerId);
+                if (p.Games > 0 && player.Position == Position.RB.ToString())
                 {
                     weeklyData.Add(new WeeklyDataRB
                     {
@@ -179,7 +181,8 @@ namespace Football.Data.Services
                     _logger.Information("New player created: {p}", p.Name);
                     playerId = await _playerService.GetPlayerId(p.Name);
                 }
-                if (p.Games > 0)
+                var player = await _playerService.GetPlayer(playerId);
+                if (p.Games > 0 && player.Position == Position.WR.ToString())
                 {
                     weeklyData.Add(new WeeklyDataWR
                     {
@@ -219,7 +222,8 @@ namespace Football.Data.Services
                     _logger.Information("New player created: {p}", p.Name);
                     playerId = await _playerService.GetPlayerId(p.Name);
                 }
-                if (p.Games > 0)
+                var player = await _playerService.GetPlayer(playerId);
+                if (p.Games > 0 && player.Position == Position.TE.ToString())
                 {
                     weeklyData.Add(new WeeklyDataTE
                     {

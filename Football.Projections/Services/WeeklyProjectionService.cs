@@ -100,7 +100,7 @@ namespace Football.Projections.Services
             var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
             var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
             var fantasyModel = await FantasyProjectionModel(model, currentWeek);
-            var dependentVector = _matrixCalculator.DependentVector(fantasyModel);
+            var dependentVector = _matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
             var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
             var results = regressorMatrix * coefficients;
             

@@ -23,10 +23,10 @@ namespace Football.Projections.Services
 
             return CreateMatrix(rows, rowCount, columnCount);
         }
-        public Vector<double> DependentVector<T>(List<T> dependents)
+        public Vector<double> DependentVector<T>(List<T> dependents, Model value)
         {
             var len = dependents.Count;
-            var fpProp = _settings.GetPropertiesFromModel<T>().First(p => p.ToString()!.Contains(Model.FantasyPoints.ToString()));
+            var fpProp = _settings.GetPropertiesFromModel<T>().First(p => p.ToString()!.Contains(value.ToString()));
             var vec = Vector<double>.Build.Dense(len);
             for (int i = 0; i < len; i++)
             {                
