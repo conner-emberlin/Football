@@ -28,6 +28,7 @@
         public double RSquared { get; set; }
         public double MAE { get; set; }
         public double MAPE { get; set; }
+        public double AvgError { get; set; }
     }
 
     public class WeeklyProjectionError

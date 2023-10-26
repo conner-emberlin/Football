@@ -74,7 +74,8 @@ namespace Football.Projections.Services
                     MSE = GetMeanSquaredError(projections, weeklyFantasy),
                     RSquared = GetRSquared(projections, weeklyFantasy),
                     MAE = GetMeanAbsoluteError(projections, weeklyFantasy),
-                    MAPE = GetMeanAbsolutePercentageError(projections, weeklyFantasy)
+                    MAPE = GetMeanAbsolutePercentageError(projections, weeklyFantasy),
+                    AvgError = GetAverageError(projections, weeklyFantasy)
                 };
             }
             else
@@ -143,6 +144,22 @@ namespace Football.Projections.Services
                 }
             }
             return count > 0 ? Math.Round(sumOfSquares / count, 3) : 0;
+        }
+
+        private static double GetAverageError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
+        {
+            var count = 0;
+            var totalError = 0.0;
+            foreach (var projection in projections)
+            {
+                var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
+                if (fantasy != null)
+                {
+                    totalError += Math.Abs(projection.ProjectedPoints - fantasy.FantasyPoints);
+                    count++;
+                }
+            }
+            return count > 0 ? Math.Round(totalError / count) : 0;
         }
         private static double GetRSquared(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
         {
