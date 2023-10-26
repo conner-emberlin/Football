@@ -1,0 +1,130 @@
+﻿@page "/ModelAnalysis"
+<PageTitle>Model Analysis</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Projections.Models;
+@inject IHttpClientFactory ClientFactory
+<h4>Model Analysis</h4>
+<div>
+    @foreach (var position in Positions)
+    {
+
+        <input type="radio" name="players" id=" @position" value="@position"
+        @onchange="SetPosition"
+               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+        <label for="@position ">@position</label>
+
+    }
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="GetModelAnalysis">
+    Submit
+</button>
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+@if (badRequestError)
+{
+    <p>Unexpected Error. Please try again.</p>
+}
+
+else if (ProjectionAnalyses.Any())
+{
+
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Season</th>
+                    <th>Week</th>
+                    <th>Position</th>
+                    <th>MSE</th>
+                    <th>RSqrd</th>
+                    <th>MAE</th>
+                    <th>MAPE</th>
+                    <th>AvgError</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in ProjectionAnalyses)
+                {
+                    <tr>
+                        <td>@p.Season</td>
+                        <td>@p.Week</td>
+                        <td>@p.Position</td>
+                        <td>@Math.Round(p.MSE,2)</td>
+                        <td>@Math.Round(p.RSquared,4)</td>
+                        <td>@Math.Round(p.MAE,2)</td>
+                        <td>@Math.Round(p.MAPE,2)</td>
+                        <td>@p.AvgError</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+@code {
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+    private bool badRequestError;
+
+    private List<WeeklyProjectionAnalysis> ProjectionAnalyses = new();
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End"};
+    public string Position { get; set; } = "Quarterback";
+    public string PositionEnum { get; set; } = "1";
+    private bool loading { get; set; }
+    int count = 0;
+
+
+    public void SetPosition(ChangeEventArgs args)
+    {
+        Position = args.Value.ToString();
+    }
+
+    public async Task GetModelAnalysis()
+    {
+        loading = true;
+        shouldRender = true;
+        ProjectionAnalyses.Clear();
+        switch (Position.ToLower())
+        {
+            case "quarterback":
+                PositionEnum = "QB";
+                break;
+            case "runningback":
+                PositionEnum = "RB";
+                break;
+            case "wide receiver":
+                PositionEnum = "WR";
+                break;
+            case "tight end":
+                PositionEnum = "TE";
+                break;
+            default: PositionEnum = "QB"; break;
+        }
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/weekly-analysis/" + @PositionEnum);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            ProjectionAnalyses = await JsonSerializer.DeserializeAsync<List<WeeklyProjectionAnalysis>>(responseStream, options);
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        loading = false;
+        shouldRender = true;
+    }
+}
+
+
