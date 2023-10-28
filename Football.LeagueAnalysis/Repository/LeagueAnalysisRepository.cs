@@ -19,5 +19,10 @@ namespace Football.LeagueAnalysis.Repository
             var query = $@"INSERT INTO [dbo].SleeperPlayerMap (SleeperPlayerId, PlayerId) VALUES (@SleeperPlayerId, @PlayerId)";
             return await _connection.ExecuteAsync(query, playerMap);
         }
+        public async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId)
+        {
+            var query = $@"SELECT * FROM [dbo].SleeperPlayerMap WHERE SleeperPlayerId = @sleeperId";
+            return (await _connection.QueryAsync<SleeperPlayerMap>(query, new { sleeperId })).FirstOrDefault();
+        }
     }
 }

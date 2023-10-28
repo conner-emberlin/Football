@@ -10,5 +10,6 @@ namespace Football.LeagueAnalysis.Interfaces
     public interface ILeagueAnalysisRepository
     {
         public Task<int> UploadSleeperPlayerMap(List<SleeperPlayerMap> playerMap);
+        public Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId);
     }
 }

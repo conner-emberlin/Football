@@ -5,6 +5,7 @@ using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
+using Football.LeagueAnalysis.Interfaces;
 
 namespace Football.Api.Controllers
 {
@@ -16,16 +17,20 @@ namespace Football.Api.Controllers
         private readonly IProjectionAnalysisService _analysisService;
         private readonly IProjectionService<SeasonProjection> _seasonProjectionService;
         private readonly IProjectionService<WeekProjection> _weekProjectionService;
+        private readonly ILeagueAnalysisService _leagueService;
         private readonly Season _season;
 
         public ProjectionController(IPlayersService playersService, 
-            IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season, IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService)
+            IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season, 
+            IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService,
+            ILeagueAnalysisService leagueService)
         {
             _playersService = playersService;
             _analysisService = analysisService;
             _season = season.CurrentValue;
             _seasonProjectionService = seasonProjectionService;
             _weekProjectionService = weekProjectionService;
+            _leagueService = leagueService;
         }
 
         [HttpGet("season/{position}")]
@@ -125,5 +130,11 @@ namespace Football.Api.Controllers
             }
             else return BadRequest("Bad Request");
         }
+
+        [HttpGet("sleeper-projections/{username}")]
+        [ProducesResponseType(typeof(List<WeekProjection>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeekProjection>>> GetSleeperLeagueProjections([FromRoute] string username) => Ok(await _leagueService.GetSleeperLeagueProjections(username));
+
     }
 }

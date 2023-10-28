@@ -6,10 +6,10 @@ using Football.Fantasy.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Football.Players.Interfaces;
+using Football.Players.Models;
 using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Analysis.Models;
 using Football.LeagueAnalysis.Interfaces;
-using Football.LeagueAnalysis.Models;
 
 namespace Football.Api.Controllers
 {
@@ -24,12 +24,12 @@ namespace Football.Api.Controllers
         private readonly IWaiverWireService _waiverWireService;
         private readonly IPlayersService _playersService;
         private readonly IBoomBustService _boomBustService;
-        private readonly ISleeperLeagueService _sleeperService;
+        private readonly ILeagueAnalysisService _leagueService;
         private readonly Season _season;
 
         public FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMarketShareService marketShareService,
             IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService, 
-            IPlayersService playersService, IBoomBustService boomBustService, ISleeperLeagueService sleeperService)
+            IPlayersService playersService, IBoomBustService boomBustService, ILeagueAnalysisService leagueService)
         {
             _fantasyDataService = fantasyDataService;
             _matchupAnalysisService = matchupAnalysisService;
@@ -39,7 +39,7 @@ namespace Football.Api.Controllers
             _waiverWireService = waiverWireService;
             _playersService = playersService;
             _boomBustService = boomBustService;
-            _sleeperService = sleeperService;
+            _leagueService = leagueService;
         }
 
         [HttpPost("data/{position}/{season}")]
