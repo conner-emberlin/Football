@@ -22,6 +22,7 @@ External APIs
 1. WeatherAPI: https://www.weatherapi.com/docs/
 2. BettingOdds: https://the-odds-api.com/liveapi/guides/v4/#overview
 3. ESPN: https://gist.github.com/akeaswaran/b48b02f1c94f873c6655e7129910fc3b
+4. Sleeper: https://docs.sleeper.com/
 
 Adding to a Regression Model
 1. Add variable to corresponding model class: Football.Projections.Models.RegressionModels.cs
