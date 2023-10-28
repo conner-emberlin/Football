@@ -1,5 +1,7 @@
 ﻿using Football.Data.Interfaces;
 using Football.Enums;
+using Football.LeagueAnalysis.Interfaces;
+using Football.LeagueAnalysis.Models;
 using Football.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -13,14 +15,16 @@ namespace Football.Api.Controllers
         private readonly IUploadWeeklyDataService _weeklyDataService;
         private readonly IUploadSeasonDataService _seasonDataService;
         private readonly IScraperService _scraperService;
+        private readonly ILeagueAnalysisService _leagueAnalysisService;
         private readonly Season _season;
         public UploadDataController(IUploadWeeklyDataService weeklyDataService, IUploadSeasonDataService seasonDataService, 
-            IScraperService scraperService, IOptionsMonitor<Season> season)
+            IScraperService scraperService, IOptionsMonitor<Season> season, ILeagueAnalysisService leagueAnalysisService)
         {
             _weeklyDataService = weeklyDataService;
             _seasonDataService = seasonDataService;
             _scraperService = scraperService;
             _season = season.CurrentValue;
+            _leagueAnalysisService = leagueAnalysisService;
         }
 
         [HttpPost("{position}/{season}/{week}")]
@@ -119,6 +123,9 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> ScrapeADP(string position) => Ok(await _seasonDataService.UploadADP(_season.CurrentSeason, position));
 
-
+        [HttpPost("sleeper-map")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await _leagueAnalysisService.UploadSleeperPlayerMap());
     }
 }

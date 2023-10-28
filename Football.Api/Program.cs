@@ -10,6 +10,10 @@ using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Analysis.Services;
 using Football.Fantasy.MockDraft.Interfaces;
 using Football.Fantasy.MockDraft.Services;
+using Football.LeagueAnalysis.Models;
+using Football.LeagueAnalysis.Interfaces;
+using Football.LeagueAnalysis.Repository;
+using Football.LeagueAnalysis.Services;
 using Football.News.Interfaces;
 using Football.News.Models;
 using Football.News.Services;
@@ -29,6 +33,7 @@ using System.Data.SqlClient;
 using Football;
 using Football.Fantasy.MockDraft.Repository;
 using Football.Projections.Models;
+
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -79,6 +84,9 @@ builder.Services.AddScoped<IWaiverWireService, WaiverWireService>();
 builder.Services.AddScoped<IBoomBustService, BoomBustService>();
 builder.Services.AddScoped<IProjectionService<SeasonProjection>, SeasonProjectionService>();
 builder.Services.AddScoped<IProjectionService<WeekProjection>, WeeklyProjectionService>();
+builder.Services.AddScoped<ISleeperLeagueService, SleeperLeagueService>();
+builder.Services.AddScoped<ILeagueAnalysisService, LeagueAnalysisService>();
+builder.Services.AddScoped<ILeagueAnalysisRepository, LeagueAnalysisRepository>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
@@ -98,6 +106,7 @@ builder.Services.Configure<WeatherAPI>(builder.Configuration.GetSection("Weather
 builder.Services.Configure<NFLOddsAPI>(builder.Configuration.GetSection("NFLOddsAPI"));
 builder.Services.Configure<WaiverWireSettings>(builder.Configuration.GetSection("WaiverWireSettings"));
 builder.Services.Configure<BoomBustSettings>(builder.Configuration.GetSection("BoomBustSettings"));
+builder.Services.Configure<SleeperSettings>(builder.Configuration.GetSection("SleeperSettings"));
 
 var app = builder.Build();
 
