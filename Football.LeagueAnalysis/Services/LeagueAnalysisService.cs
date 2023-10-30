@@ -56,31 +56,41 @@ namespace Football.LeagueAnalysis.Services
             }
             return projections;
         }
-
-        private async Task<List<Player>> GetSleeperLeagueStarters(string username)
+        private async Task<Tuple<SleeperUser, SleeperLeague?>?> GetCurrentSleeperLeague(string username)
         {
-            List<Player> sleeperStarters = new();
             var sleeperUser = await _sleeperLeagueService.GetSleeperUser(username);
             if (sleeperUser != null)
             {
                 var userLeagues = await _sleeperLeagueService.GetSleeperLeagues(sleeperUser.UserId);
-                if(userLeagues != null)
+                if (userLeagues != null)
                 {
-                    var currentLeague = userLeagues.FirstOrDefault(u => u.Season == _season.CurrentSeason.ToString() && u.Status == "in_season");
-                    if (currentLeague != null)
+                    var league = userLeagues.FirstOrDefault(u => u.Season == _season.CurrentSeason.ToString() && u.Status == "in_season");
+                    return Tuple.Create(sleeperUser, league);
+                }
+                else return null;
+            }
+            else return null;
+        }
+        private async Task<List<Player>> GetSleeperLeagueStarters(string username)
+        {       
+            List<Player> sleeperStarters = new();
+            var tuple = await GetCurrentSleeperLeague(username);
+            if (tuple != null)
+            {
+                var (sleeperUser, currentLeague) = tuple;
+                if (currentLeague != null)
+                {
+                    var roster = (await _sleeperLeagueService.GetSleeperRosters(currentLeague.LeagueId)).FirstOrDefault(r => r.OwnerId == sleeperUser.UserId);
+                    if (roster != null)
                     {
-                        var roster = (await _sleeperLeagueService.GetSleeperRosters(currentLeague.LeagueId)).FirstOrDefault(r => r.OwnerId == sleeperUser.UserId);
-                        if (roster != null)
+                        foreach (var starter in roster.Starters)
                         {
-                            foreach (var starter in roster.Starters)
+                            if (int.TryParse(starter, out var sleeperId))
                             {
-                                if (int.TryParse(starter, out var sleeperId))
+                                var sleeperMap = await GetSleeperPlayerMap(sleeperId);
+                                if (sleeperMap != null)
                                 {
-                                    var sleeperMap = await GetSleeperPlayerMap(sleeperId);
-                                    if (sleeperMap != null)
-                                    {
-                                        sleeperStarters.Add(await _playersService.GetPlayer(sleeperMap.PlayerId));
-                                    }
+                                    sleeperStarters.Add(await _playersService.GetPlayer(sleeperMap.PlayerId));
                                 }
                             }
                         }
@@ -89,5 +99,6 @@ namespace Football.LeagueAnalysis.Services
             }
             return sleeperStarters;
         }
+
     }
 }

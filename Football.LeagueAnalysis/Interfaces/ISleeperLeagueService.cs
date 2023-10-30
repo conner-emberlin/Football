@@ -8,6 +8,7 @@ namespace Football.LeagueAnalysis.Interfaces
         public Task<List<SleeperLeague>?> GetSleeperLeagues(string userId);
         public Task<SleeperLeague?> GetSleeperLeague(string leagueId);
         public Task<List<SleeperRoster>?> GetSleeperRosters(string leagueId);
+        public Task<List<SleeperMatchup>?> GetSleeperMatchups(string leagueId, int week);
         public Task<List<SleeperPlayer>> GetSleeperPlayers();
         public Task<List<SleeperPlayerMap>> GetSleeperPlayerMap(List<SleeperPlayer> sleeperPlayers);
     }

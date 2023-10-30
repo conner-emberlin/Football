@@ -5,7 +5,6 @@ using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Football.Players.Interfaces;
 using System.Text.Json.Nodes;
-using System.IO;
 
 namespace Football.LeagueAnalysis.Services
 {
@@ -83,6 +82,22 @@ namespace Football.LeagueAnalysis.Services
                 return await JsonSerializer.DeserializeAsync<List<SleeperRoster>>(responseStream, options);
             }
             else return Enumerable.Empty<SleeperRoster>().ToList();
+        }
+
+        public async Task<List<SleeperMatchup>?> GetSleeperMatchups(string leagueId, int week)
+        {
+            var requestUrl = string.Format("{0}/league/{1}/matchups/{2}", _settings.SleeperBaseURL, leagueId, week.ToString());
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            request.Headers.Add("Accept", "application/json");
+            var client = new HttpClient();
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                return await JsonSerializer.DeserializeAsync<List<SleeperMatchup>>(responseStream, options);
+            }
+            else return Enumerable.Empty<SleeperMatchup>().ToList();
         }
 
         public async Task<List<SleeperPlayer>> GetSleeperPlayers()

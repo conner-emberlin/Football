@@ -1,5 +1,4 @@
 ﻿using Football.LeagueAnalysis.Models;
-using Football.Players.Models;
 using Football.Projections.Models;
 
 namespace Football.LeagueAnalysis.Interfaces

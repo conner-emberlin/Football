@@ -141,7 +141,7 @@ namespace Football.Fantasy.Services
         public WeeklyFantasy CalculateFantasy(WeeklyDataDST stat, WeeklyDataDST opponentStat, GameResult result, int teamId)
         {
             var pointsAllowed = result.WinnerId == teamId ? result.LoserPoints - _scoring.PointsPerTouchdown * opponentStat.DefensiveTD 
-                                : result.WinnerPoints - 6 * opponentStat.DefensiveTD;
+                                : result.WinnerPoints - _scoring.PointsPerTouchdown * opponentStat.DefensiveTD;
 
             var pointsAllowedFantasy = pointsAllowed == 0 ? _scoring.ZeroPointsAllowed
                                      : 1 <= pointsAllowed && pointsAllowed <= 6 ? _scoring.OneToSixPointsAllowed
