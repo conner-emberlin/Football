@@ -132,31 +132,6 @@ namespace Football.LeagueAnalysis.Services
             }          
             return sleeperPlayers;
         }
-       
-        public async Task<List<SleeperPlayerMap>> GetSleeperPlayerMap(List<SleeperPlayer> sleeperPlayers)
-        {
-            List<SleeperPlayerMap> playerMap = new();
-            if (sleeperPlayers.Any())
-            {
-                foreach (var sp in sleeperPlayers)
-                {
-                    if (!string.IsNullOrWhiteSpace(sp.PlayerName))
-                    {
-                        var playerId = await _playersService.GetPlayerId(sp.PlayerName);
-                        if (playerId > 0)
-                        {
-                            playerMap.Add(new SleeperPlayerMap
-                            {
-                                SleeperPlayerId = sp.SleeperPlayerId,
-                                PlayerId = playerId
-                            });
-                        }
-                    }
-                }
-                return playerMap;
-            }
-            else throw new NullReferenceException();
-        }
-        
+               
     }
 }

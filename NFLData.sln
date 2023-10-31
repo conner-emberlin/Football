@@ -34,7 +34,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.Fantasy.Analysis",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{E6BF8781-5BB2-4F2C-9458-8AB104929E49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.LeagueAnalysis", "Football.LeagueAnalysis\Football.LeagueAnalysis.csproj", "{58523467-31C5-4120-9A51-C5F0F919CE88}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.League", "Football.LeagueAnalysis\Football.League.csproj", "{58523467-31C5-4120-9A51-C5F0F919CE88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

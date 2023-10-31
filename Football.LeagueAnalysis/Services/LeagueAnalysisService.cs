@@ -5,7 +5,6 @@ using Football.Players.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
 using Football.Projections.Models;
-using Autofac.Core.Lifetime;
 
 namespace Football.LeagueAnalysis.Services
 {
@@ -28,11 +27,9 @@ namespace Football.LeagueAnalysis.Services
         public async Task<int> UploadSleeperPlayerMap()
         {
             var sleeperPlayers =  await _sleeperLeagueService.GetSleeperPlayers();
-            var playerMap = await _sleeperLeagueService.GetSleeperPlayerMap(sleeperPlayers);
+            var playerMap = await GetSleeperPlayerMap(sleeperPlayers);
             return await _leagueAnalysisRepository.UploadSleeperPlayerMap(playerMap);
         }
-
-        public async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => await _leagueAnalysisRepository.GetSleeperPlayerMap(sleeperId);
 
         public async Task<Dictionary<string, List<WeekProjection>>> GetMatchupProjections(string username, int week)
         {
@@ -89,6 +86,7 @@ namespace Football.LeagueAnalysis.Services
             }
             return projections;
         }
+        private async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => await _leagueAnalysisRepository.GetSleeperPlayerMap(sleeperId);
         private async Task<Tuple<SleeperUser, SleeperLeague?>?> GetCurrentSleeperLeague(string username)
         {
             var sleeperUser = await _sleeperLeagueService.GetSleeperUser(username);
@@ -158,6 +156,30 @@ namespace Football.LeagueAnalysis.Services
                 }
             }
             return projections;
+        }
+        private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMap(List<SleeperPlayer> sleeperPlayers)
+        {
+            List<SleeperPlayerMap> playerMap = new();
+            if (sleeperPlayers.Any())
+            {
+                foreach (var sp in sleeperPlayers)
+                {
+                    if (!string.IsNullOrWhiteSpace(sp.PlayerName))
+                    {
+                        var playerId = await _playersService.GetPlayerId(sp.PlayerName);
+                        if (playerId > 0)
+                        {
+                            playerMap.Add(new SleeperPlayerMap
+                            {
+                                SleeperPlayerId = sp.SleeperPlayerId,
+                                PlayerId = playerId
+                            });
+                        }
+                    }
+                }
+                return playerMap;
+            }
+            else throw new NullReferenceException();
         }
     }
 }
