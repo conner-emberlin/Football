@@ -6,6 +6,7 @@ using Football.Projections.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
 using Football.Leagues.Interfaces;
+using Football.Leagues.Models;
 
 namespace Football.Api.Controllers
 {
@@ -137,9 +138,9 @@ namespace Football.Api.Controllers
         public async Task<ActionResult<List<WeekProjection>>> GetSleeperLeagueProjections([FromRoute] string username) => Ok(await _leagueService.GetSleeperLeagueProjections(username));
 
         [HttpGet("sleeper-projections/{username}/matchup")]
-        [ProducesResponseType(typeof(Dictionary<string, List<WeekProjection>>), 200)]
+        [ProducesResponseType(typeof(List<MatchupProjections>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<Dictionary<string, List<WeekProjection>>>> GetMatchupProjections([FromRoute] string username)
+        public async Task<ActionResult<List<MatchupProjections>>> GetMatchupProjections([FromRoute] string username)
         {
             var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
             return Ok(await _leagueService.GetMatchupProjections(username, currentWeek));

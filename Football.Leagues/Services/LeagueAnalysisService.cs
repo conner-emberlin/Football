@@ -31,9 +31,9 @@ namespace Football.Leagues.Services
             return await _leagueAnalysisRepository.UploadSleeperPlayerMap(playerMap);
         }
 
-        public async Task<Dictionary<string, List<WeekProjection>>> GetMatchupProjections(string username, int week)
+        public async Task<List<MatchupProjections>> GetMatchupProjections(string username, int week)
         {
-            Dictionary<string, List<WeekProjection>> matchupProjections = new();
+            List<MatchupProjections> matchupProjections = new();
             var leagueTuple = await GetCurrentSleeperLeague(username);
             if (leagueTuple != null)
             {
@@ -55,8 +55,8 @@ namespace Football.Leagues.Services
                         var opponentRoster = rosterMatchup.Rosters.First(r => r.OwnerId != user.UserId);
                         var opponentProjections = await GetProjectionsFromRoster(opponentRoster, week);
                         var opponent = await _sleeperLeagueService.GetSleeperUser(opponentRoster.OwnerId);
-                        matchupProjections.Add(user.DisplayName, userProjections);
-                        matchupProjections.Add(opponent!.DisplayName, opponentProjections);
+                        matchupProjections.Add( new MatchupProjections { TeamName = user.DisplayName, TeamProjections = userProjections });
+                        matchupProjections.Add(new MatchupProjections { TeamName = opponent!.DisplayName, TeamProjections = opponentProjections });
                     }
                 }
             }
