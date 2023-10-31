@@ -1,5 +1,134 @@
-﻿<h3>Fantasy League Projections</h3>
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Leagues.Models;
+@inject IHttpClientFactory ClientFactory
+@page "/LeagueProjections/"
+
+
+<h3>Fantasy League Projections</h3>
+<EditForm model="this" OnSubmit="Get">
+<TextBoxTeamName @bind-TeamName ="this.teamName"/>
+<button class="button-22" type="submit">Submit</button>
+</EditForm>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+@if(youTried && projections.Any())
+{
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>@userProjections.TeamName</th>
+                    <th>@opponentProjections.TeamName</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i <= Math.Min(userProjections.TeamProjections.Count, opponentProjections.TeamProjections.Count); i++)
+                {
+                    <tr>
+                        <td>
+                            @userProjections.TeamProjections.ElementAt(i-1).Position 
+                            <a class="page-links" href="Players/@userProjections.TeamProjections.ElementAt(i-1).PlayerId">@userProjections.TeamProjections.ElementAt(i-1).Name</a>
+                            : @Math.Round(userProjections.TeamProjections.ElementAt(i-1).ProjectedPoints, 2)
+                        </td>
+                        <td>
+                            @opponentProjections.TeamProjections.ElementAt(i-1).Position
+                            <a class="page-links" href="Players/@opponentProjections.TeamProjections.ElementAt(i-1).PlayerId">@opponentProjections.TeamProjections.ElementAt(i-1).Name</a>
+                            : @Math.Round(opponentProjections.TeamProjections.ElementAt(i-1).ProjectedPoints,2)
+                        </td>
+                    </tr>
+                }
+                @if (userProjections.TeamProjections.Count > opponentProjections.TeamProjections.Count)
+                {
+                    for(int i = opponentProjections.TeamProjections.Count; i < userProjections.TeamProjections.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                @userProjections.TeamProjections.ElementAt(i).Position
+                                <a class="page-links" href="Players/@userProjections.TeamProjections.ElementAt(i-1).PlayerId">@userProjections.TeamProjections.ElementAt(i-1).Name</a>
+                                : @Math.Round(userProjections.TeamProjections.ElementAt(i).ProjectedPoints,2)
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                    }
+                }
+                else if(userProjections.TeamProjections.Count < opponentProjections.TeamProjections.Count)
+                {
+                    for (int i = userProjections.TeamProjections.Count; i < opponentProjections.TeamProjections.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                            </td>
+                            <td>
+                                @opponentProjections.TeamProjections.ElementAt(i).Position
+                                <a class="page-links" href="Players/@opponentProjections.TeamProjections.ElementAt(i-1).PlayerId">@opponentProjections.TeamProjections.ElementAt(i-1).Name</a>
+                                : @Math.Round(opponentProjections.TeamProjections.ElementAt(i).ProjectedPoints,2)
+                            </td>
+                            
+                        </tr>
+                    }
+
+                }
+                <tr>
+                    <td>Total: @Math.Round(userProjections.TeamProjections.Sum(t => t.ProjectedPoints), 2)</td>
+                    <td>Total: @Math.Round(opponentProjections.TeamProjections.Sum(t => t.ProjectedPoints),2)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+}
+else if(youTried && badRequestError)
+{
+    <text>Unable to find team. Try again.</text>
+}
+
 
 @code {
+    public bool loading { get; set; } 
+    public bool badRequestError = false;
+    public bool youTried = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
 
+    public string teamName { get; set; } = "";
+    public List<MatchupProjections> projections = new();
+    public MatchupProjections userProjections { get; set; } = new();
+    public MatchupProjections opponentProjections { get; set; } = new();
+
+    public async Task Get()
+    {
+        loading = true;
+        shouldRender = true;
+        projections.Clear();
+        badRequestError = false;
+        youTried = true;
+
+        var url = string.Format("{0}/{1}/matchup", "https://localhost:7028/api/projection/sleeper-projections", teamName);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            projections = await JsonSerializer.DeserializeAsync<List<MatchupProjections>>(responseStream, options);
+            if (projections != null)
+            {
+                userProjections = projections.First(p => p.TeamName.ToLower().Trim() == teamName.ToLower().Trim());
+                opponentProjections = projections.First(p => p.TeamName.ToLower().Trim() != teamName.ToLower().Trim());
+            }
+            else badRequestError = true;
+        }
+        else { badRequestError = true; }
+
+        loading = false;
+        shouldRender = true;
+    }
 }
