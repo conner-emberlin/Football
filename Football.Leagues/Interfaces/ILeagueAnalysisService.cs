@@ -1,7 +1,7 @@
-﻿using Football.LeagueAnalysis.Models;
+﻿using Football.Leagues.Models;
 using Football.Projections.Models;
 
-namespace Football.LeagueAnalysis.Interfaces
+namespace Football.Leagues.Interfaces
 {
     public interface ILeagueAnalysisService
     {

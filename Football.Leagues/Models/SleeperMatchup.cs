@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Football.LeagueAnalysis.Models
+namespace Football.Leagues.Models
 {
     public class SleeperMatchup
     {

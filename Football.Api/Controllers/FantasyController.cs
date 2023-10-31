@@ -9,7 +9,7 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Analysis.Models;
-using Football.LeagueAnalysis.Interfaces;
+using Football.Leagues.Interfaces;
 
 namespace Football.Api.Controllers
 {

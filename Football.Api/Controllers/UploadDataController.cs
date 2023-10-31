@@ -1,7 +1,7 @@
 ﻿using Football.Data.Interfaces;
 using Football.Enums;
-using Football.LeagueAnalysis.Interfaces;
-using Football.LeagueAnalysis.Models;
+using Football.Leagues.Interfaces;
+using Football.Leagues.Models;
 using Football.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;

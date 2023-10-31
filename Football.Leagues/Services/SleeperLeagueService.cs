@@ -1,12 +1,12 @@
-﻿using Football.LeagueAnalysis.Models;
-using Football.LeagueAnalysis.Interfaces;
-using Football.Models;
+﻿using Football.Models;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Football.Players.Interfaces;
 using System.Text.Json.Nodes;
+using Football.Leagues.Models;
+using Football.Leagues.Interfaces;
 
-namespace Football.LeagueAnalysis.Services
+namespace Football.Leagues.Services
 {
     public class SleeperLeagueService : ISleeperLeagueService
     {
@@ -102,7 +102,7 @@ namespace Football.LeagueAnalysis.Services
 
         public async Task<List<SleeperPlayer>> GetSleeperPlayers()
         {
-            List<SleeperPlayer> sleeperPlayers = new();            
+            List<SleeperPlayer> sleeperPlayers = new();
             var requestUrl = string.Format("{0}/players/nfl", _settings.SleeperBaseURL);
             var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Add("Accept", "application/json");
@@ -129,9 +129,9 @@ namespace Football.LeagueAnalysis.Services
                         }
                     }
                 }
-            }          
+            }
             return sleeperPlayers;
         }
-               
+
     }
 }

@@ -1,12 +1,12 @@
 ﻿using Football.Models;
-using Football.LeagueAnalysis.Interfaces;
-using Football.LeagueAnalysis.Models;
 using Football.Players.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
 using Football.Projections.Models;
+using Football.Leagues.Interfaces;
+using Football.Leagues.Models;
 
-namespace Football.LeagueAnalysis.Services
+namespace Football.Leagues.Services
 {
     public class LeagueAnalysisService : ILeagueAnalysisService
     {
@@ -26,7 +26,7 @@ namespace Football.LeagueAnalysis.Services
 
         public async Task<int> UploadSleeperPlayerMap()
         {
-            var sleeperPlayers =  await _sleeperLeagueService.GetSleeperPlayers();
+            var sleeperPlayers = await _sleeperLeagueService.GetSleeperPlayers();
             var playerMap = await GetSleeperPlayerMap(sleeperPlayers);
             return await _leagueAnalysisRepository.UploadSleeperPlayerMap(playerMap);
         }
@@ -38,7 +38,7 @@ namespace Football.LeagueAnalysis.Services
             if (leagueTuple != null)
             {
                 var (user, league) = leagueTuple;
-                if(league != null)
+                if (league != null)
                 {
                     var rosters = await _sleeperLeagueService.GetSleeperRosters(league.LeagueId);
                     var matchups = await _sleeperLeagueService.GetSleeperMatchups(league.LeagueId, week);
@@ -48,11 +48,11 @@ namespace Football.LeagueAnalysis.Services
                                            .GroupBy(rm => rm.SleeperMatchup.MatchupId,
                                                     rm => rm.SleeperRoster,
                                                     (key, r) => new { MatchupId = key, Rosters = r.ToList() })
-                                           .First(g => g.Rosters.Any(r => r.OwnerId == user.UserId));  
-                       
+                                           .First(g => g.Rosters.Any(r => r.OwnerId == user.UserId));
+
                         var userRoster = rosterMatchup.Rosters.First(r => r.OwnerId == user.UserId);
                         var userProjections = await GetProjectionsFromRoster(userRoster, week);
-                        var opponentRoster = rosterMatchup.Rosters.First(r => r.OwnerId != user.UserId);                        
+                        var opponentRoster = rosterMatchup.Rosters.First(r => r.OwnerId != user.UserId);
                         var opponentProjections = await GetProjectionsFromRoster(opponentRoster, week);
                         var opponent = await _sleeperLeagueService.GetSleeperUser(opponentRoster.OwnerId);
                         matchupProjections.Add(user.DisplayName, userProjections);
@@ -60,13 +60,13 @@ namespace Football.LeagueAnalysis.Services
                     }
                 }
             }
-            return matchupProjections;   
+            return matchupProjections;
         }
 
         public async Task<List<WeekProjection>> GetSleeperLeagueProjections(string username)
         {
-            List<WeekProjection> projections = new();           
-            var sleeperStarters = await GetSleeperLeagueStarters(username);        
+            List<WeekProjection> projections = new();
+            var sleeperStarters = await GetSleeperLeagueStarters(username);
             if (sleeperStarters.Any())
             {
                 var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
@@ -103,7 +103,7 @@ namespace Football.LeagueAnalysis.Services
             else return null;
         }
         private async Task<List<Player>> GetSleeperLeagueStarters(string username)
-        {       
+        {
             List<Player> sleeperStarters = new();
             var tuple = await GetCurrentSleeperLeague(username);
             if (tuple != null)

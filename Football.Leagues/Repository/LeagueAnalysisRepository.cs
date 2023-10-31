@@ -1,9 +1,9 @@
 ﻿using Dapper;
-using Football.LeagueAnalysis.Interfaces;
-using Football.LeagueAnalysis.Models;
+using Football.Leagues.Interfaces;
+using Football.Leagues.Models;
 using System.Data;
 
-namespace Football.LeagueAnalysis.Repository
+namespace Football.Leagues.Repository
 {
     public class LeagueAnalysisRepository : ILeagueAnalysisRepository
     {

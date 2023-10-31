@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Text.Json" Version="6.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Football.Fantasy\Football.Fantasy.csproj" />
+		<ProjectReference Include="..\Football.Players\Football.Players.csproj" />
+		<ProjectReference Include="..\Football.Projections\Football.Projections.csproj" />
+		<ProjectReference Include="..\Football\Football.csproj" />
+	</ItemGroup>
+</Project>

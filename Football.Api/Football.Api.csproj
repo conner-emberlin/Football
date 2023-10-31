@@ -22,7 +22,7 @@
     <ProjectReference Include="..\Football.Fantasy.Analysis\Football.Fantasy.Analysis.csproj" />
     <ProjectReference Include="..\Football.Fantasy.MockDraft\Football.Fantasy.MockDraft.csproj" />
     <ProjectReference Include="..\Football.Fantasy\Football.Fantasy.csproj" />
-    <ProjectReference Include="..\Football.LeagueAnalysis\Football.League.csproj" />
+    <ProjectReference Include="..\Football.Leagues\Football.Leagues.csproj" />
     <ProjectReference Include="..\Football.News\Football.News.csproj" />
     <ProjectReference Include="..\Football.Projections\Football.Projections.csproj" />
     <ProjectReference Include="..\Football.Statistics\Football.Statistics.csproj" />

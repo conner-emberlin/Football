@@ -1,11 +1,6 @@
-﻿using Football.LeagueAnalysis.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Football.Leagues.Models;
 
-namespace Football.LeagueAnalysis.Interfaces
+namespace Football.Leagues.Interfaces
 {
     public interface ILeagueAnalysisRepository
     {

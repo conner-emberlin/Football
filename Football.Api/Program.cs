@@ -10,10 +10,6 @@ using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Analysis.Services;
 using Football.Fantasy.MockDraft.Interfaces;
 using Football.Fantasy.MockDraft.Services;
-using Football.LeagueAnalysis.Models;
-using Football.LeagueAnalysis.Interfaces;
-using Football.LeagueAnalysis.Repository;
-using Football.LeagueAnalysis.Services;
 using Football.News.Interfaces;
 using Football.News.Models;
 using Football.News.Services;
@@ -33,7 +29,10 @@ using System.Data.SqlClient;
 using Football;
 using Football.Fantasy.MockDraft.Repository;
 using Football.Projections.Models;
-
+using Football.Leagues.Services;
+using Football.Leagues.Interfaces;
+using Football.Leagues.Models;
+using Football.Leagues.Repository;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);

@@ -5,7 +5,7 @@ using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
-using Football.LeagueAnalysis.Interfaces;
+using Football.Leagues.Interfaces;
 
 namespace Football.Api.Controllers
 {
