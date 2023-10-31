@@ -25,6 +25,6 @@ namespace Football.LeagueAnalysis.Models
         public double Points { get; set; }
 
         [JsonPropertyName("custom_points")]
-        public int CustomPoints { get; set; }
+        public object CustomPoints { get; set; }
     }
 }

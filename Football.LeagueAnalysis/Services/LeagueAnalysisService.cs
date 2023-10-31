@@ -5,6 +5,7 @@ using Football.Players.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
 using Football.Projections.Models;
+using Autofac.Core.Lifetime;
 
 namespace Football.LeagueAnalysis.Services
 {
@@ -32,6 +33,38 @@ namespace Football.LeagueAnalysis.Services
         }
 
         public async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => await _leagueAnalysisRepository.GetSleeperPlayerMap(sleeperId);
+
+        public async Task<Dictionary<string, List<WeekProjection>>> GetMatchupProjections(string username, int week)
+        {
+            Dictionary<string, List<WeekProjection>> matchupProjections = new();
+            var leagueTuple = await GetCurrentSleeperLeague(username);
+            if (leagueTuple != null)
+            {
+                var (user, league) = leagueTuple;
+                if(league != null)
+                {
+                    var rosters = await _sleeperLeagueService.GetSleeperRosters(league.LeagueId);
+                    var matchups = await _sleeperLeagueService.GetSleeperMatchups(league.LeagueId, week);
+                    if (rosters != null && matchups != null)
+                    {
+                        var rosterMatchup = rosters.Join(matchups, r => r.RosterId, m => m.RosterId, (r, m) => new { SleeperRoster = r, SleeperMatchup = m })
+                                           .GroupBy(rm => rm.SleeperMatchup.MatchupId,
+                                                    rm => rm.SleeperRoster,
+                                                    (key, r) => new { MatchupId = key, Rosters = r.ToList() })
+                                           .First(g => g.Rosters.Any(r => r.OwnerId == user.UserId));  
+                       
+                        var userRoster = rosterMatchup.Rosters.First(r => r.OwnerId == user.UserId);
+                        var userProjections = await GetProjectionsFromRoster(userRoster, week);
+                        var opponentRoster = rosterMatchup.Rosters.First(r => r.OwnerId != user.UserId);                        
+                        var opponentProjections = await GetProjectionsFromRoster(opponentRoster, week);
+                        var opponent = await _sleeperLeagueService.GetSleeperUser(opponentRoster.OwnerId);
+                        matchupProjections.Add(user.DisplayName, userProjections);
+                        matchupProjections.Add(opponent!.DisplayName, opponentProjections);
+                    }
+                }
+            }
+            return matchupProjections;   
+        }
 
         public async Task<List<WeekProjection>> GetSleeperLeagueProjections(string username)
         {
@@ -80,7 +113,8 @@ namespace Football.LeagueAnalysis.Services
                 var (sleeperUser, currentLeague) = tuple;
                 if (currentLeague != null)
                 {
-                    var roster = (await _sleeperLeagueService.GetSleeperRosters(currentLeague.LeagueId)).FirstOrDefault(r => r.OwnerId == sleeperUser.UserId);
+                    var roster = (await _sleeperLeagueService.GetSleeperRosters(currentLeague.LeagueId))!
+                                .FirstOrDefault(r => r.OwnerId == sleeperUser.UserId);
                     if (roster != null)
                     {
                         foreach (var starter in roster.Starters)
@@ -99,6 +133,31 @@ namespace Football.LeagueAnalysis.Services
             }
             return sleeperStarters;
         }
-
+        private async Task<List<WeekProjection>> GetProjectionsFromRoster(SleeperRoster roster, int week)
+        {
+            List<WeekProjection> projections = new();
+            foreach (var starter in roster.Starters)
+            {
+                if (int.TryParse(starter, out var sleeperId))
+                {
+                    var sleeperMap = await GetSleeperPlayerMap(sleeperId);
+                    if (sleeperMap != null)
+                    {
+                        var player = await _playersService.GetPlayer(sleeperMap.PlayerId);
+                        var projection = await _playersService.GetWeeklyProjection(_season.CurrentSeason, week, player.PlayerId);
+                        projections.Add(new WeekProjection
+                        {
+                            PlayerId = player.PlayerId,
+                            Season = _season.CurrentSeason,
+                            Week = week,
+                            Name = player.Name,
+                            Position = player.Position,
+                            ProjectedPoints = projection
+                        });
+                    }
+                }
+            }
+            return projections;
+        }
     }
 }
