@@ -141,6 +141,7 @@ else if (players.Count > 0)
             {
                 p.Team = await GetPlayerTeam(p.PlayerId);
             }
+            players = players.OrderByDescending(p => p.ProjectedPoints).ToList();
             badRequestError = false;
         }
         else
