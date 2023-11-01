@@ -46,7 +46,27 @@ namespace Football.Players.Services
         public async Task<double> GetSeasonProjection(int season, int playerId) => await _playersRepository.GetSeasonProjection(season, playerId);
         public async Task<double> GetWeeklyProjection(int season, int week, int playerId) => await _playersRepository.GetWeeklyProjection(season, week, playerId);
         public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId) => await _playersRepository.GetPlayerTeam(season, playerId);
-        public async Task<List<PlayerTeam>> GetPlayersByTeam(string team) => await _playersRepository.GetPlayersByTeam(team, _season.CurrentSeason);
+        public async Task<List<PlayerTeam>> GetPlayersByTeam(string team) 
+        { 
+            var playerTeams = await _playersRepository.GetPlayersByTeam(team, _season.CurrentSeason);
+            var teamChanges = await GetInSeasonTeamChanges();
+            var newPlayers = teamChanges.Where(t => t.NewTeam == team);
+            if (newPlayers.Any())
+            {
+                foreach (var newPlayer in newPlayers)
+                {
+                    var player = await GetPlayer(newPlayer.PlayerId);
+                    playerTeams.Add(new PlayerTeam
+                    {
+                        PlayerId = player.PlayerId,
+                        Name = player.Name,
+                        Season = _season.CurrentSeason,
+                        Team = team
+                    });
+                }
+            }
+            return playerTeams;
+        } 
         public Task<TeamMap> GetTeam(int teamId) => _playersRepository.GetTeam(teamId);
         public async Task<int> GetTeamId(string teamName) => await _playersRepository.GetTeamId(teamName);
         public async Task<int> GetTeamId(int playerId) => await _playersRepository.GetTeamId(playerId);
