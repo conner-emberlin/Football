@@ -233,5 +233,21 @@ namespace Football.Players.Repository
                            WHERE [Season] = @season";
             return (await _dbConnection.QueryAsync<InSeasonTeamChange>(query, new { season })).ToList();
         }
+
+        public async Task<int> UpdateCurrentTeam(int playerId, string team, int season)
+        {
+            var query = $@"UPDATE [dbo].PlayerTeam
+                           SET [Team] = @team
+                           WHERE [PlayerId] = @playerId
+                                AND [Season] = @season";
+            return await _dbConnection.ExecuteAsync(query, new { playerId, team, season });
+        }
+
+        public async Task<int> PostTeamChange(InSeasonTeamChange teamChange)
+        {
+            var query = $@"INSERT INTO [dbo].InSeasonTeamChanges (Season, PlayerId, PreviousTeam, NewTeam, WeekEffective)
+                           VALUES (@Season, @PlayerId, @PreviousTeam, @NewTeam, @WeekEffective)";
+            return await _dbConnection.ExecuteAsync(query, teamChange);
+        }
     }
 }

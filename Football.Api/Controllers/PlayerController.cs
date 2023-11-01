@@ -101,5 +101,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> PostInSeasonInjury([FromBody] InSeasonInjury injury) => injury != null ? Ok(await _playersService.PostInSeasonInjury(injury)) : BadRequest();
+
+        [HttpPost("team-change/{playerId}/{newTeam}/{weekEffective}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> PostTeamChange(int playerId, string newTeam, int weekEffective) => Ok(await _playersService.PostTeamChange(playerId, newTeam, weekEffective));
     }
 }
