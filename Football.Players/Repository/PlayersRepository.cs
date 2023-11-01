@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Runtime.CompilerServices;
 using Dapper;
 using Football.Players.Interfaces;
 using Football.Players.Models;
@@ -118,13 +119,14 @@ namespace Football.Players.Repository
 
             return (await _dbConnection.QueryAsync<PlayerTeam>(query, new { season, playerId })).FirstOrDefault();
         }
-        public async Task<List<PlayerTeam>> GetPlayersByTeam(string team)
+        public async Task<List<PlayerTeam>> GetPlayersByTeam(string team, int season)
         {
             var query = $@"SELECT [PlayerId], [Name], [Season], [Team]
                         FROM [dbo].PlayerTeam
-                        WHERE [Team] = @team";
+                        WHERE [Team] = @team
+                            AND [Season] = @season";
 
-            return (await _dbConnection.QueryAsync<PlayerTeam>(query, new { team })).ToList();
+            return (await _dbConnection.QueryAsync<PlayerTeam>(query, new { team , season})).ToList();
         }
         public async Task<int> GetTeamId(string teamName)
         {
@@ -223,6 +225,13 @@ namespace Football.Players.Repository
             var query = $@"INSERT INTO [dbo].InSeasonInjuries (Season, PlayerId, InjuryStartWeek, InjuryEndWeek, Description)
                             VALUES (@Season, @PlayerId, @InjuryStartWeek, @InjuryEndWeek, @Description)";
             return await _dbConnection.ExecuteAsync(query, injury);
+        }
+
+        public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges(int season)
+        {
+            var query = $@"SELECT * FROM [dbo].InSeasonTeamChanges
+                           WHERE [Season] = @season";
+            return (await _dbConnection.QueryAsync<InSeasonTeamChange>(query, new { season })).ToList();
         }
     }
 }

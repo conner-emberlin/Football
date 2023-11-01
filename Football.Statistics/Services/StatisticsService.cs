@@ -10,10 +10,12 @@ namespace Football.Statistics.Services
     {
         private readonly IStatisticsRepository _statisticsRepository;
         private readonly IPlayersService _playersService;
-        public StatisticsService(IStatisticsRepository statisticsRepository, IPlayersService playersService)
+        private readonly ISettingsService _settingsService;
+        public StatisticsService(IStatisticsRepository statisticsRepository, IPlayersService playersService, ISettingsService settingsService)
         {
             _statisticsRepository = statisticsRepository;
             _playersService = playersService;
+            _settingsService = settingsService;
         }
         public async Task<List<T>> GetSeasonData<T>(Position position, int queryParam, bool isPlayer) => await _statisticsRepository.GetSeasonData<T>(position, queryParam, isPlayer);
         public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId) => await _statisticsRepository.GetWeeklyData<T>(position, playerId);
@@ -34,6 +36,32 @@ namespace Football.Statistics.Services
                 Ties = gameResults.Count(gr => gr.LoserPoints == gr.WinnerPoints
                                             && (gr.HomeTeamId == team.TeamId || gr.AwayTeamId == team.TeamId))
             }).ToList();
+        }
+
+        public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId, string team)
+        {
+            var weeklyData = await _statisticsRepository.GetWeeklyData<T>(position, playerId);
+            var teamChanges = await _playersService.GetInSeasonTeamChanges();
+            if (teamChanges.Any(t => t.PlayerId == playerId))
+            {
+                List<T> filteredData = new();
+                var teamChange = teamChanges.First(t => t.PlayerId == playerId);
+
+                foreach (var data in weeklyData)
+                {
+                    var week = (int)_settingsService.GetValueFromModel(data, Model.Week);
+                    if (teamChange.PreviousTeam == team && week < teamChange.WeekEffective)
+                    {
+                        filteredData.Add(data);
+                    }
+                    else if(teamChange.NewTeam == team && week >= teamChange.WeekEffective)
+                    {
+                        filteredData.Add(data);
+                    }
+                }
+                return filteredData;
+            }
+            else return weeklyData;
         }
         public async Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week) => await _statisticsRepository.GetWeeklyRosterPercentages(season, week);
 

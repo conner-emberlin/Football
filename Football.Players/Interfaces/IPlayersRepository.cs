@@ -18,7 +18,7 @@ namespace Football.Players.Interfaces
         public Task<double> GetSeasonProjection(int season, int playerId);
         public Task<double> GetWeeklyProjection(int season, int week, int playerId);
         public Task<PlayerTeam?> GetPlayerTeam(int season, int playerId);
-        public Task<List<PlayerTeam>> GetPlayersByTeam(string team);
+        public Task<List<PlayerTeam>> GetPlayersByTeam(string team, int season);
         public Task<int> GetCurrentWeek(int season);
         public Task<int> GetTeamId(string teamName);
         public Task<int> GetTeamId(int playerId);
@@ -33,5 +33,6 @@ namespace Football.Players.Interfaces
         public Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week);
         public Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season);
         public Task<int> PostInSeasonInjury(InSeasonInjury injury);
+        public Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges(int season);
     }
 }
