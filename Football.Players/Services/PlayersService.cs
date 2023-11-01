@@ -33,7 +33,7 @@ namespace Football.Players.Services
         public async Task<double> GetSeasonProjection(int season, int playerId) => await _playersRepository.GetSeasonProjection(season, playerId);
         public async Task<double> GetWeeklyProjection(int season, int week, int playerId) => await _playersRepository.GetWeeklyProjection(season, week, playerId);
         public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId) => await _playersRepository.GetPlayerTeam(season, playerId);
-        public Task<TeamMap> GetTeam(int teamId) => _playersRepository.GetTeam(teamId);
+        public async Task<TeamMap> GetTeam(int teamId) => await _playersRepository.GetTeam(teamId);
         public async Task<int> GetTeamId(string teamName) => await _playersRepository.GetTeamId(teamName);
         public async Task<int> GetTeamId(int playerId) => await _playersRepository.GetTeamId(playerId);
         public async Task<int> GetTeamIdFromDescription(string teamDescription) => await _playersRepository.GetTeamIdFromDescription(teamDescription);
