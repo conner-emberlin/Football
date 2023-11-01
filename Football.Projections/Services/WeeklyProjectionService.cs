@@ -53,6 +53,7 @@ namespace Football.Projections.Services
         }
         public async Task<IEnumerable<WeekProjection>?> GetPlayerProjections(int playerId) => await _projectionRepository.GetWeeklyProjection(playerId);
         public async Task<int> PostProjections(List<WeekProjection> projections) => await _projectionRepository.PostWeeklyProjections(projections);
+
         public bool GetProjectionsFromSQL(Position position, int week, out IEnumerable<WeekProjection> projections)
         {
             projections = _projectionRepository.GetWeeklyProjectionsFromSQL(position, week);

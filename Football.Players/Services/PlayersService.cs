@@ -20,19 +20,6 @@ namespace Football.Players.Services
             _cache = cache;
             _settingsService = settingsService;
         }
-        public async Task<List<Player>> GetAllPlayers()
-        {
-            if (_settingsService.GetFromCache<Player>(Cache.AllPlayers, out var cachedValues))
-            {
-                return cachedValues;
-            }
-            else
-            {
-                var players = await _playersRepository.GetAllPlayers();
-                _cache.Set(Cache.AllPlayers.ToString(), players);
-                return players;
-            }
-        }
         public async Task<int> GetPlayerId(string name) => await _playersRepository.GetPlayerId(name);
         public async Task<int> CreatePlayer(Player player) => await _playersRepository.CreatePlayer(player);
         public async Task<List<Player>> GetPlayersByPosition(Position position) => await _playersRepository.GetPlayersByPosition(position.ToString());        
@@ -46,6 +33,34 @@ namespace Football.Players.Services
         public async Task<double> GetSeasonProjection(int season, int playerId) => await _playersRepository.GetSeasonProjection(season, playerId);
         public async Task<double> GetWeeklyProjection(int season, int week, int playerId) => await _playersRepository.GetWeeklyProjection(season, week, playerId);
         public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId) => await _playersRepository.GetPlayerTeam(season, playerId);
+        public Task<TeamMap> GetTeam(int teamId) => _playersRepository.GetTeam(teamId);
+        public async Task<int> GetTeamId(string teamName) => await _playersRepository.GetTeamId(teamName);
+        public async Task<int> GetTeamId(int playerId) => await _playersRepository.GetTeamId(playerId);
+        public async Task<int> GetTeamIdFromDescription(string teamDescription) => await _playersRepository.GetTeamIdFromDescription(teamDescription);
+        public async Task<int> GetCurrentWeek(int season) => await _playersRepository.GetCurrentWeek(season);
+        public async Task<List<Schedule>> GetGames(int season, int week) => await _playersRepository.GetGames(season, week);
+        public async Task<List<Schedule>> GetTeamGames(int teamId) => await _playersRepository.GetTeamGames(teamId, _season.CurrentSeason);
+        public async Task<List<TeamMap>> GetAllTeams() => await _playersRepository.GetAllTeams();
+        public async Task<List<int>> GetIgnoreList() => await _playersRepository.GetIgnoreList();
+        public async Task<TeamLocation> GetTeamLocation(int teamId) => await _playersRepository.GetTeamLocation(teamId);
+        public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => await _playersRepository.GetScheduleDetails(season, week);
+        public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => await _playersRepository.GetActiveInSeasonInjuries(season);
+        public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await _playersRepository.PostInSeasonInjury(injury);
+        public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => await _playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
+
+        public async Task<List<Player>> GetAllPlayers()
+        {
+            if (_settingsService.GetFromCache<Player>(Cache.AllPlayers, out var cachedValues))
+            {
+                return cachedValues;
+            }
+            else
+            {
+                var players = await _playersRepository.GetAllPlayers();
+                _cache.Set(Cache.AllPlayers.ToString(), players);
+                return players;
+            }
+        }
         public async Task<List<PlayerTeam>> GetPlayersByTeam(string team) 
         { 
             var playerTeams = await _playersRepository.GetPlayersByTeam(team, _season.CurrentSeason);
@@ -67,11 +82,6 @@ namespace Football.Players.Services
             }
             return playerTeams;
         } 
-        public Task<TeamMap> GetTeam(int teamId) => _playersRepository.GetTeam(teamId);
-        public async Task<int> GetTeamId(string teamName) => await _playersRepository.GetTeamId(teamName);
-        public async Task<int> GetTeamId(int playerId) => await _playersRepository.GetTeamId(playerId);
-        public async Task<int> GetTeamIdFromDescription(string teamDescription) => await _playersRepository.GetTeamIdFromDescription(teamDescription);
-        public async Task<int> GetCurrentWeek(int season) => await _playersRepository.GetCurrentWeek(season);
         public async Task<List<Schedule>> GetUpcomingGames(int playerId)
         {
             var team = await GetPlayerTeam(_season.CurrentSeason, playerId);
@@ -83,14 +93,5 @@ namespace Football.Players.Services
             }
             else return new List<Schedule>();
         }
-        public async Task<List<Schedule>> GetGames(int season, int week) => await _playersRepository.GetGames(season, week);
-        public async Task<List<Schedule>> GetTeamGames(int teamId) => await _playersRepository.GetTeamGames(teamId, _season.CurrentSeason);
-        public async Task<List<TeamMap>> GetAllTeams() => await _playersRepository.GetAllTeams();
-        public async Task<List<int>> GetIgnoreList() => await _playersRepository.GetIgnoreList();
-        public async Task<TeamLocation> GetTeamLocation(int teamId) => await _playersRepository.GetTeamLocation(teamId);
-        public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => await _playersRepository.GetScheduleDetails(season, week);
-        public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => await _playersRepository.GetActiveInSeasonInjuries(season);
-        public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await _playersRepository.PostInSeasonInjury(injury);
-        public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => await _playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
     }
 }

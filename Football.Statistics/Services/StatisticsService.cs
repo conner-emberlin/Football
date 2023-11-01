@@ -21,6 +21,8 @@ namespace Football.Statistics.Services
         public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId) => await _statisticsRepository.GetWeeklyData<T>(position, playerId);
         public async Task<List<T>> GetWeeklyData<T>(Position position, int season, int week) => await _statisticsRepository.GetWeeklyData<T>(position, season, week);
         public async Task<List<GameResult>> GetGameResults(int season) => await _statisticsRepository.GetGameResults(season);
+        public async Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week) => await _statisticsRepository.GetWeeklyRosterPercentages(season, week);
+
         public async Task<List<TeamRecord>> GetTeamRecords(int season)
         {
             var gameResults = await GetGameResults(season);
@@ -63,7 +65,6 @@ namespace Football.Statistics.Services
             }
             else return weeklyData;
         }
-        public async Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week) => await _statisticsRepository.GetWeeklyRosterPercentages(season, week);
-
+        
     }
 }

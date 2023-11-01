@@ -34,7 +34,9 @@ namespace Football.Fantasy.Services
             _season = season.CurrentValue;
             _settingsService = settingsService;
         }
-        public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId) => await _fantasyData.GetSeasonFantasy(playerId);       
+        public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId) => await _fantasyData.GetSeasonFantasy(playerId);
+        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId) => await _fantasyData.GetWeeklyFantasy(playerId);
+        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => await _fantasyData.GetWeeklyFantasy(season, week);
         public async Task<int> PostSeasonFantasy(int season, Position position)
         {
             List<SeasonFantasy> seasonFantasy = new();
@@ -118,7 +120,6 @@ namespace Football.Fantasy.Services
             }
             return await _fantasyData.PostWeeklyFantasy(weeklyFantasy);
         }
-        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId) => await _fantasyData.GetWeeklyFantasy(playerId);
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId, string team)
         {
             var allFantasy = await GetWeeklyFantasy(playerId);
@@ -142,7 +143,7 @@ namespace Football.Fantasy.Services
             }
             else return allFantasy;
         }
-        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => await _fantasyData.GetWeeklyFantasy(season, week);
+        
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(Position position)
         {
             var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);

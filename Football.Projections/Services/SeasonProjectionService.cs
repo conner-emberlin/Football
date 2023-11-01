@@ -51,6 +51,8 @@ namespace Football.Projections.Services
         }
 
         public async Task<IEnumerable<SeasonProjection>?> GetPlayerProjections(int playerId) => await _projectionRepository.GetSeasonProjection(playerId);
+        public async Task<int> PostProjections(List<SeasonProjection> projections) => await _projectionRepository.PostSeasonProjections(projections);
+
         public bool GetProjectionsFromSQL(Position position, int season, out IEnumerable<SeasonProjection> projections)
         {
             projections =  _projectionRepository.GetSeasonProjectionsFromSQL(position, season);
@@ -64,7 +66,7 @@ namespace Football.Projections.Services
             }
             else return false;
         }
-        public async Task<int> PostProjections(List<SeasonProjection> projections) => await _projectionRepository.PostSeasonProjections(projections);
+        
         public async Task<IEnumerable<SeasonProjection>> GetProjections(Position position)
         {
             if (GetProjectionsFromCache(position, out var cachedProj))
