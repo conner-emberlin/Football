@@ -12,7 +12,7 @@ namespace Football.Fantasy.Analysis.Services
     public class MatchupAnalysisService : IMatchupAnalysisService
     {
         private readonly IPlayersService _playersService;
-        private readonly IFantasyDataService _fastaDataService;
+        private readonly IFantasyDataService _fantasyDataService;
         private readonly Season _season;
         private readonly IMemoryCache _cache;
         private readonly ISettingsService _settings;
@@ -21,7 +21,7 @@ namespace Football.Fantasy.Analysis.Services
             IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settings)
         {
             _playersService = playersService;
-            _fastaDataService = fantasyDataService;
+            _fantasyDataService = fantasyDataService;
             _season = season.CurrentValue;
             _cache = cache;
             _settings = settings;
@@ -49,7 +49,7 @@ namespace Football.Fantasy.Analysis.Services
                             var player = await _playersService.GetPlayer(op.PlayerId);
                             if (player.Position == position.ToString())
                             {
-                                var weeklyFantasy = (await _fastaDataService.GetWeeklyFantasy(player.PlayerId)).Where(w => w.Week == game.Week).FirstOrDefault();
+                                var weeklyFantasy = (await _fantasyDataService.GetWeeklyFantasy(player.PlayerId, game.OpposingTeam)).Where(w => w.Week == game.Week).FirstOrDefault();
                                 if (weeklyFantasy != null)
                                 {
                                     fpTotal += weeklyFantasy.FantasyPoints;

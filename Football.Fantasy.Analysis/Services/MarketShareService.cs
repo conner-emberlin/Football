@@ -54,25 +54,25 @@ namespace Football.Fantasy.Analysis.Services
                     _ = Enum.TryParse((await _playersService.GetPlayer(p.PlayerId)).Position, out Position position);
                     if (position == Position.QB)
                     {
-                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, p.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, p.PlayerId, team.Team);
                         totalAttempts += stats.Sum(s => s.Attempts);
                         totalCompletions += stats.Sum(s => s.Completions);
                     }
                     else if (position == Position.RB)
                     {
-                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId, team.Team);
                         RBTargets += stats.Sum(s => s.Targets);
                         RBComps += stats.Sum(s => s.Receptions);
                     }
                     else if (position == Position.WR)
                     {
-                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId, team.Team);
                         WRTargets += stats.Sum(s => s.Targets);
                         WRComps += stats.Sum(s => s.Receptions);
                     }
                     else if (position == Position.TE)
                     {
-                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId, team.Team);
                         TETargets += stats.Sum(s => s.Targets);
                         TEComps += stats.Sum(s => s.Receptions);
                     }
@@ -99,11 +99,11 @@ namespace Football.Fantasy.Analysis.Services
             {
                 var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, player.PlayerId);
                 if (team != null) {
-                    var fantasy = await _fantasyService.GetWeeklyFantasy(player.PlayerId);
+                    var fantasy = await _fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team);
                     var teamTotal = teamTotals.First(t => t.Team.Team == team.Team);
                     if (position == Position.RB)
                     {
-                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId, team.Team);
                         if (stats.Any())
                         {
                             share.Add(new MarketShare
@@ -125,7 +125,7 @@ namespace Football.Fantasy.Analysis.Services
                     }
                     else if (position == Position.WR)
                     {
-                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId, team.Team);
                         if (stats.Any())
                         {
                             share.Add(new MarketShare
@@ -147,7 +147,7 @@ namespace Football.Fantasy.Analysis.Services
                     }
                     else if (position == Position.TE)
                     {
-                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId);
+                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId, team.Team);
                         if (stats.Any())
                         {
                             share.Add(new MarketShare
@@ -202,10 +202,10 @@ namespace Football.Fantasy.Analysis.Services
                     {
                         var player = await _playersService.GetPlayer(p.PlayerId);
                         _ = Enum.TryParse(player.Position, out Position position);
-                        var fantasy = await _fantasyService.GetWeeklyFantasy(player.PlayerId);
+                        var fantasy = await _fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team);
                         if (position == Position.QB)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId);
+                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId, team.Team);
                             totalFantasyQB += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAttempts);
                             totalRushYd += stats.Sum(s => s.RushingYards);
@@ -213,7 +213,7 @@ namespace Football.Fantasy.Analysis.Services
                         }
                         else if (position == Position.RB)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId);
+                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId, team.Team);
                             totalFantasyRB += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAtt);
                             totalRushYd += stats.Sum(s => s.RushingYds);
@@ -225,7 +225,7 @@ namespace Football.Fantasy.Analysis.Services
                         }
                         else if (position == Position.WR)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId);
+                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId, team.Team);
                             totalFantasyWR += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAtt);
                             totalRushYd += stats.Sum(s => s.RushingYds);
@@ -237,7 +237,7 @@ namespace Football.Fantasy.Analysis.Services
                         }
                         else if (position == Position.TE)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId);
+                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId, team.Team);
                             totalFantasyTE += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAtt);
                             totalRushYd += stats.Sum(s => s.RushingYds);

@@ -50,7 +50,7 @@ namespace Football.Players.Services
         { 
             var playerTeams = await _playersRepository.GetPlayersByTeam(team, _season.CurrentSeason);
             var teamChanges = await GetInSeasonTeamChanges();
-            var newPlayers = teamChanges.Where(t => t.NewTeam == team);
+            var newPlayers = teamChanges.Where(t => t.PreviousTeam == team);
             if (newPlayers.Any())
             {
                 foreach (var newPlayer in newPlayers)
