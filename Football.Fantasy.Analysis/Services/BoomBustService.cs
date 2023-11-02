@@ -47,6 +47,32 @@ namespace Football.Fantasy.Analysis.Services
                                                                 }).ToList();
         }
 
+        public async Task<List<FantasyPerformance>> GetFantasyPerformances(Position position)
+        {
+            List<FantasyPerformance> fantasyPerformances = new();
+            var players = await _playersService.GetPlayersByPosition(position);
+            foreach (var player in players)
+            {
+                var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
+                if (weeklyFantasy.Any())
+                {
+                    var variance = CalculateVariance(weeklyFantasy.Select(w => w.FantasyPoints));
+                    fantasyPerformances.Add(new FantasyPerformance
+                    {
+                        PlayerId = player.PlayerId,
+                        Name = player.Name,
+                        Position = player.Position,
+                        Season = _season.CurrentSeason,
+                        AvgFantasy = weeklyFantasy.Average(w => w.FantasyPoints),
+                        MinFantasy = weeklyFantasy.Min(w => w.FantasyPoints),
+                        MaxFantasy = weeklyFantasy.Max(w => w.FantasyPoints),
+                        Variance = variance,
+                        StdDev = Math.Sqrt(variance)
+                    }) ;
+                }
+            }
+            return fantasyPerformances.Where(f => f.AvgFantasy > 0).OrderByDescending(f => f.AvgFantasy).ToList();
+        }
         public async Task<List<BoomBustByWeek>> GetBoomBustsByWeek(int playerId)
         {
             var player = await _playersService.GetPlayer(playerId);
@@ -66,5 +92,17 @@ namespace Football.Fantasy.Analysis.Services
             else return Enumerable.Empty<BoomBustByWeek>().ToList();
         }
 
+        private static double CalculateVariance(IEnumerable<double> fantasyPoints)
+        {
+            var mean = fantasyPoints.Average();
+            var count = fantasyPoints.Count();
+            var sumOfSquares = 0.0;
+            foreach (var fp in fantasyPoints)
+            {
+                sumOfSquares += Math.Pow(fp - mean, 2);
+            }
+
+            return sumOfSquares / count;
+        }
     }
 }

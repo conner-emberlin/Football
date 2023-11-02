@@ -93,7 +93,7 @@ namespace Football.Fantasy.Analysis.Services
         public async Task<List<MarketShare>> GetMarketShare(Position position)
         {
             List<MarketShare> share = new();
-            var players = (await _playersService.GetPlayersByPosition(position)).Where(p => p.Active == 1).ToList();
+            var players = await _playersService.GetPlayersByPosition(position);
             var teamTotals = await GetTeamTotals();
             foreach (var player in players)
             {
