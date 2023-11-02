@@ -1,5 +1,4 @@
-﻿using Football;
-using Football.Data.Models;
+﻿using Football.Data.Models;
 using Football.Enums;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
@@ -203,9 +202,12 @@ namespace Football.Projections.Services
             }
             return teModel;
         }
-        private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) => seasonProjection > 0 ?
+        private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) 
+        {
+            return seasonProjection > 0 ?
             (_weeklyTunings.ProjectionWeight / week) * seasonProjection + (1 - (_weeklyTunings.ProjectionWeight / week)) * weeklyProjection
             : weeklyProjection;
+        } 
 
     }    
 }
