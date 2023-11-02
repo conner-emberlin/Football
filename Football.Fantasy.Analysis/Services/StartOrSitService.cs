@@ -79,6 +79,13 @@ namespace Football.Fantasy.Analysis.Services
                 if (scheduleDetail != null)
                 {
                     var homeLocation = await _playersService.GetTeamLocation(scheduleDetail.HomeTeamId);
+                    if (homeLocation.Indoor == 1)
+                    {
+                        return new Weather
+                        {
+                            GameTime = FormatTime(scheduleDetail.Time, scheduleDetail.Date),
+                        };
+                    }
                     var forecast = await _newsService.GetWeatherAPI(homeLocation.Zip);
                     if (forecast != null)
                     {
