@@ -55,8 +55,8 @@ namespace Football.Leagues.Services
                         var opponentRoster = rosterMatchup.Rosters.First(r => r.OwnerId != user.UserId);
                         var opponentProjections = await GetProjectionsFromRoster(opponentRoster, week);
                         var opponent = await _sleeperLeagueService.GetSleeperUser(opponentRoster.OwnerId);
-                        matchupProjections.Add( new MatchupProjections { TeamName = user.DisplayName, TeamProjections = userProjections });
-                        matchupProjections.Add(new MatchupProjections { TeamName = opponent!.DisplayName, TeamProjections = opponentProjections });
+                        matchupProjections.Add( new MatchupProjections {LeagueName = league.Name, TeamName = user.DisplayName, TeamProjections = userProjections });
+                        matchupProjections.Add(new MatchupProjections { LeagueName = league.Name, TeamName = opponent!.DisplayName, TeamProjections = opponentProjections });
                     }
                 }
             }

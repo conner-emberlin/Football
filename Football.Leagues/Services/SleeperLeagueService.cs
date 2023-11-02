@@ -113,7 +113,7 @@ namespace Football.Leagues.Services
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
                 var dictionary = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonObject>>(responseStream, options);
-                if (dictionary != null)
+                if (dictionary is not null)
                 {
                     foreach (var item in dictionary)
                     {
