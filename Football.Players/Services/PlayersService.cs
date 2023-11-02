@@ -94,20 +94,11 @@ namespace Football.Players.Services
             else return new List<Schedule>();
         }
 
-        public async Task<int> PostTeamChange(int playerId, string newTeam, int weekEffective)
+        public async Task<int> PostInSeasonTeamChange(InSeasonTeamChange teamChange)
         {
-            var previousTeam = await GetPlayerTeam(_season.CurrentSeason, playerId);
-            var allTeams = (await GetAllTeams()).Select(t => t.Team).ToList();
-            if (previousTeam != null && allTeams.Contains(newTeam))
+            var recordUpdated = await _playersRepository.UpdateCurrentTeam(teamChange.PlayerId, teamChange.NewTeam, _season.CurrentSeason);
+            if (recordUpdated)
             {
-                var teamChange = new InSeasonTeamChange {
-                    Season = _season.CurrentSeason,
-                    PlayerId = playerId,
-                    PreviousTeam = previousTeam.Team,
-                    NewTeam = newTeam,
-                    WeekEffective = weekEffective
-                };
-                _ = await _playersRepository.UpdateCurrentTeam(playerId, newTeam, _season.CurrentSeason);
                 return await _playersRepository.PostTeamChange(teamChange);
             }
             else return 0;

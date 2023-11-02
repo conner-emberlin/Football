@@ -234,13 +234,13 @@ namespace Football.Players.Repository
             return (await _dbConnection.QueryAsync<InSeasonTeamChange>(query, new { season })).ToList();
         }
 
-        public async Task<int> UpdateCurrentTeam(int playerId, string team, int season)
+        public async Task<bool> UpdateCurrentTeam(int playerId, string team, int season)
         {
             var query = $@"UPDATE [dbo].PlayerTeam
                            SET [Team] = @team
                            WHERE [PlayerId] = @playerId
                                 AND [Season] = @season";
-            return await _dbConnection.ExecuteAsync(query, new { playerId, team, season });
+            return await _dbConnection.ExecuteAsync(query, new { playerId, team, season }) > 0;
         }
 
         public async Task<int> PostTeamChange(InSeasonTeamChange teamChange)
