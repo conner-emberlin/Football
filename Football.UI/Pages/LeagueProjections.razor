@@ -119,7 +119,7 @@ else if(youTried && badRequestError)
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             projections = await JsonSerializer.DeserializeAsync<List<MatchupProjections>>(responseStream, options);
-            if (projections != null)
+            if (projections != null && projections.Any())
             {
                 userProjections = projections.First(p => p.TeamName.ToLower().Trim() == teamName.ToLower().Trim());
                 opponentProjections = projections.First(p => p.TeamName.ToLower().Trim() != teamName.ToLower().Trim());
