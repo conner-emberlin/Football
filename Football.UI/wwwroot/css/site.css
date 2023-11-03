@@ -328,6 +328,12 @@ div.matchup-opponent {
     display:inline-block;
 }
 
+.sort-link{
+    cursor: pointer;
+    color: black;
+    text-decoration: underline;
+}
+
 
 
 

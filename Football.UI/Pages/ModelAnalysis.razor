@@ -3,6 +3,7 @@
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @using Football.Projections.Models;
+@using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
 <h4>Model Analysis</h4>
 <div>
@@ -41,9 +42,15 @@ else if (ProjectionAnalyses.Any())
             <thead>
                 <tr>
                     <th>Season</th>
-                    <th>Week</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("Week"))">Week</span>
+                        <span class="oi @(tableSort.GetSortStyle("Week"))"></span>                       
+                    </th>
                     <th>Position</th>
-                    <th>MSE</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("MSE"))">MSE</span>
+                        <span class="oi @(tableSort.GetSortStyle("MSE"))"></span>
+                    </th>
                     <th>RSqrd</th>
                     <th>MAE</th>
                     <th>MAPE</th>
@@ -73,14 +80,14 @@ else if (ProjectionAnalyses.Any())
     protected override bool ShouldRender() => shouldRender;
     private bool badRequestError;
 
-    private List<WeeklyProjectionAnalysis> ProjectionAnalyses = new();
+    private List<WeeklyProjectionAnalysis>? ProjectionAnalyses = new();
     private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End"};
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
     private bool loading { get; set; }
     int count = 0;
 
-
+    public TableSort tableSort = new();
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
@@ -90,7 +97,12 @@ else if (ProjectionAnalyses.Any())
     {
         loading = true;
         shouldRender = true;
-        ProjectionAnalyses.Clear();
+
+        if (ProjectionAnalyses is not null)
+        {
+            ProjectionAnalyses.Clear();
+        }
+
         switch (Position.ToLower())
         {
             case "quarterback":
@@ -125,6 +137,12 @@ else if (ProjectionAnalyses.Any())
         loading = false;
         shouldRender = true;
     }
+
+    public void SetTable(string columnName)
+    {
+        ProjectionAnalyses = tableSort.SortTable<WeeklyProjectionAnalysis>(ProjectionAnalyses, columnName);
+    }
+
 }
 
 
