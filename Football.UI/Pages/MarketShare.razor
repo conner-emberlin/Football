@@ -7,6 +7,7 @@
 @using Football.Fantasy.Models;
 @using Football.Fantasy.Analysis.Models;
 @using Football.Enums;
+@using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
 
 <h3>Market Share</h3>
@@ -44,25 +45,44 @@
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
-                    <th>Rank</th>
                     <th>Player</th>
-                    <th>Team</th>                 
+                    <th>Team</th>   
                     <th>@positionEnum.ToString()Fantasy%</th>
-                    <th>RushAtt%</th>
-                    <th>RushYd%</th>
-                    <th>RushTd%</th>
-                    <th>Tgt%</th>
-                    <th>Rec%</th>
-                    <th>RecYd%</th>
-                    <th>RecTd%</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RushAttShare"))">RushAtt%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RushAttShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RushYdShare"))">RushYd%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RushYdShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RushTdShare"))">RushTd%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RushTdShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("TargetShare"))">Target%</span>
+                        <span class="oi @(tableSort.GetSortStyle("TargetShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("ReceptionShare"))">Rec%</span>
+                        <span class="oi @(tableSort.GetSortStyle("ReceptionShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RecYdShare"))">RecYd%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RecYdShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RecTDShare"))">RecTd%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RecTDShare"))"></span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
                 @for (int i = 1; i <= marketShare.Count; i++)
                 {
                     <tr>
-                        <td>@i</td>
-                        <td>@marketShare.ElementAt(i-1).Player.Name</td>
+                        <td><a class="page-links" href="Players/@marketShare.ElementAt(i-1).Player.PlayerId"> @marketShare.ElementAt(i-1).Player.Name</a></td>
                         <td>@marketShare.ElementAt(i-1).PlayerTeam.Team</td>
                         <td>@Math.Round(marketShare.ElementAt(i-1).FantasyShare * 100, 1) </td>
                         <td>@Math.Round(marketShare.ElementAt(i-1).RushAttShare *100,1)</td>
@@ -90,10 +110,12 @@
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
 
+    public TableSort tableSort = new();
+
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
-            positionEnum = Position switch
+        positionEnum = Position switch
         {
             "Runningback" => Enums.Position.RB,
             "Wide Receiver" => Enums.Position.WR,
@@ -123,5 +145,10 @@
         }
         loading = false;
         shouldRender = true;
+    }
+
+    private void SetTable(string columnName)
+    {
+        marketShare = tableSort.SortTable<Football.Fantasy.Analysis.Models.MarketShare>(marketShare, columnName);
     }
 }

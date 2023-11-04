@@ -152,19 +152,19 @@ table.boostrap4_table_head_dark_striped_rounded_with_shadow {
     border-radius: 10px;
 }
 
-table.boostrap4_table_head_dark_striped_rounded_with_shadow thead th {
-    font-size: 1rem;
-    line-height: 1.5;
-    border-collapse: collapse;
-    box-sizing: border-box;
-    text-align: inherit;
-    padding: .75rem;
-    vertical-align: bottom;
-    border-bottom: 2px solid #dee2e6;
-    color: black;
-    background-color: #DFDFF0;
-    border-color: #32383e;
- }
+    table.boostrap4_table_head_dark_striped_rounded_with_shadow thead th {
+        font-size: 1rem;
+        line-height: 1.5;
+        border-collapse: collapse;
+        box-sizing: border-box;
+        text-align: inherit;
+        padding: .75rem;
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+        color: black;
+        background-color: #b3ffd9;
+        border-color: #32383e;
+    }
 
 table.boostrap4_table_head_dark_striped_rounded_with_shadow td {
     font-size: 1rem;

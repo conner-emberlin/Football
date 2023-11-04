@@ -41,12 +41,12 @@
     }
 
         .nav-item ::deep a.active {
-            background-color: #caddfa;
+            background-color: #b3ffd9;
             color: black;
         }
 
         .nav-item ::deep a:hover {
-            background-color: #deeafc;
+            background-color: #e6fff2;
             color: black;
         }
 

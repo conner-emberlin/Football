@@ -563,7 +563,7 @@ else if (youTried && badRequestError)
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             players = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
-            players = players.Where(p => p.Active == 1).OrderBy(p => p.Position).OrderBy(p => p.Name).ToList();
+            players = players.OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
             badRequestError = false;
             youTried = true;
 

@@ -42,19 +42,28 @@ else if (ProjectionAnalyses.Any())
             <thead>
                 <tr>
                     <th>Season</th>
-                    <th>
-                        <span class="sort-link" onclick="@(() => SetTable("Week"))">Week</span>
-                        <span class="oi @(tableSort.GetSortStyle("Week"))"></span>                       
-                    </th>
                     <th>Position</th>
+                    <th>Week </th>
                     <th>
                         <span class="sort-link" onclick="@(() => SetTable("MSE"))">MSE</span>
                         <span class="oi @(tableSort.GetSortStyle("MSE"))"></span>
                     </th>
-                    <th>RSqrd</th>
-                    <th>MAE</th>
-                    <th>MAPE</th>
-                    <th>AvgError</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RSquared"))">RSqrd</span>
+                        <span class="oi @(tableSort.GetSortStyle("RSquared"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("MAE"))">MAE</span>
+                        <span class="oi @(tableSort.GetSortStyle("MAE"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("MAPE"))">MAPE</span>
+                        <span class="oi @(tableSort.GetSortStyle("MAPE"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("AvgError"))">AvgError</span>
+                        <span class="oi @(tableSort.GetSortStyle("AvgError"))"></span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -62,8 +71,8 @@ else if (ProjectionAnalyses.Any())
                 {
                     <tr>
                         <td>@p.Season</td>
-                        <td>@p.Week</td>
                         <td>@p.Position</td>
+                        <td>@p.Week</td>                        
                         <td>@Math.Round(p.MSE,2)</td>
                         <td>@Math.Round(p.RSquared,4)</td>
                         <td>@Math.Round(p.MAE,2)</td>
