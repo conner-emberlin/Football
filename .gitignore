@@ -365,3 +365,7 @@ FodyWeavers.xsd
 
 
 /Football.Api/appsettings.json
+/Football.Api/appsettings.Development.json
+/Football.UI/appsettings.json
+/Football.UI/appsettings.Development.json
+/Football/appsettings.json
