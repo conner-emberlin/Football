@@ -1,0 +1,183 @@
+﻿@page "/FantasyAnalysis"
+<PageTitle>Matchup Rankings</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Fantasy.Analysis.Models;
+@using Football.Enums;
+@using Football.UI.Helpers;
+@inject IHttpClientFactory ClientFactory
+
+<h4>Fantasy Analysis</h4>
+
+<div>
+    @foreach (var position in Positions)
+    {
+
+        <input type="radio" name="players" id=" @position" value="@position"
+        @onchange="SetPosition"
+               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+        <label for="@position ">@position</label>
+
+    }
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="Get">
+    Submit
+</button>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+@if (badRequestError)
+{
+    <p>Unexpected Error. Please try again.</p>
+}
+
+@if (FantasyPerformances.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Season</th>
+                    <th>Position</th>
+                    <th>Name</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("AvgFantasy"))">AvgFantasy</span>
+                        <span class="oi @(tableSort.GetSortStyle("AvgFantasy"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("MinFantasy"))">MinFantasy</span>
+                        <span class="oi @(tableSort.GetSortStyle("MinFantasy"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("MaxFantasy"))">MaxFantasy</span>
+                        <span class="oi @(tableSort.GetSortStyle("MaxFantasy"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("Variance"))">Variance</span>
+                        <span class="oi @(tableSort.GetSortStyle("Variance"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("StdDev"))">StdDev</span>
+                        <span class="oi @(tableSort.GetSortStyle("StdDev"))"></span>
+                    </th>
+                    <th>Boom%</th>
+                    <th>Bust%</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i <= FantasyPerformances.Count; i++)
+                {
+                    var playerId = FantasyPerformances.ElementAt(i - 1).PlayerId;
+                    var boomBust = BoomBusts.FirstOrDefault(b => b.Player.PlayerId == playerId);
+
+                    <tr>
+                        <td>@FantasyPerformances.ElementAt(i-1).Season</td>
+                        <td>@FantasyPerformances.ElementAt(i-1).Position</td>
+                        <td>@FantasyPerformances.ElementAt(i-1).Name</td>
+                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).AvgFantasy,2)</td>
+                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MinFantasy,2)</td>
+                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MaxFantasy,2)</td>
+                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).Variance,2)</td>
+                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).StdDev,2)</td>
+
+                        @if(boomBust is not null)
+                        {
+                            <td>@boomBust.BoomPercentage</td>
+                            <td>@boomBust.BustPercentage</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+@code {
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
+    public string Position { get; set; } = "Quarterback";
+    public Position positionEnum { get; set; }
+    public List<FantasyPerformance> FantasyPerformances = new();
+    public List<BoomBust> BoomBusts = new();
+
+    public bool loading { get; set; } = false;
+    public bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    public TableSort tableSort = new();
+
+    public void SetPosition(ChangeEventArgs args)
+    {
+        Position = args.Value.ToString();
+        positionEnum = Position switch
+        {
+            "Quarterback" => Enums.Position.QB,
+            "Runningback" => Enums.Position.RB,
+            "Wide Receiver" => Enums.Position.WR,
+            "Tight End" => Enums.Position.TE,
+            _ => Enums.Position.QB
+        };
+    }
+
+    public async Task Get()
+    {
+        loading = true;
+        FantasyPerformances.Clear();
+        shouldRender = true;
+
+        await GetFantasyPerformances();
+        await GetBoomBusts();
+
+        loading = false;
+        shouldRender = true;
+    }
+    public async Task GetFantasyPerformances()
+    {      
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/fantasy-performance/" + positionEnum.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            FantasyPerformances = await JsonSerializer.DeserializeAsync<List<FantasyPerformance>>(responseStream, options);
+            FantasyPerformances = FantasyPerformances.Where(f => f.AvgFantasy >= 5).ToList();
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+
+    public async Task GetBoomBusts()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/boom-busts/" + positionEnum.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            BoomBusts = await JsonSerializer.DeserializeAsync<List<BoomBust>>(responseStream, options);
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+
+    public void SetTable(string columnName)
+    {       
+        FantasyPerformances = tableSort.SortTable<FantasyPerformance>(FantasyPerformances, columnName);
+    }
+}
