@@ -147,7 +147,7 @@ else if (ProjectionAnalyses.Any())
         shouldRender = true;
     }
 
-    public void SetTable(string columnName)
+    private void SetTable(string columnName)
     {
         ProjectionAnalyses = tableSort.SortTable<WeeklyProjectionAnalysis>(ProjectionAnalyses, columnName);
     }

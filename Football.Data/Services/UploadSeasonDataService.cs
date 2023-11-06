@@ -318,13 +318,13 @@ namespace Football.Data.Services
                 var homeTeamId = 0;
                 var awayTeamId = 0;
                 if (s.HomeIndicator == "@") {
-                    homeTeamId = await _playerService.GetTeamIdFromDescription(s.Winner);
-                    awayTeamId = await _playerService.GetTeamIdFromDescription(s.Loser);
+                    homeTeamId = await _playerService.GetTeamIdFromDescription(s.Loser);
+                    awayTeamId = await _playerService.GetTeamIdFromDescription(s.Winner);
                 }
                 else
                 {
-                    homeTeamId = await _playerService.GetTeamIdFromDescription(s.Loser);
-                    awayTeamId = await _playerService.GetTeamIdFromDescription(s.Winner);
+                    homeTeamId = await _playerService.GetTeamIdFromDescription(s.Winner);
+                    awayTeamId = await _playerService.GetTeamIdFromDescription(s.Loser);
                 }
 
                 if (awayTeamId > 0 && homeTeamId > 0)

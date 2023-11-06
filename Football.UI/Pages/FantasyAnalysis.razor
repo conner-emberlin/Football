@@ -1,5 +1,5 @@
 ﻿@page "/FantasyAnalysis"
-<PageTitle>Matchup Rankings</PageTitle>
+<PageTitle>Fantasy Analysis</PageTitle>
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @using Football.Fantasy.Analysis.Models;
@@ -78,7 +78,7 @@
                     <tr>
                         <td>@FantasyPerformances.ElementAt(i-1).Season</td>
                         <td>@FantasyPerformances.ElementAt(i-1).Position</td>
-                        <td>@FantasyPerformances.ElementAt(i-1).Name</td>
+                        <td><a class="page-links" href="Players/@FantasyPerformances.ElementAt(i-1).PlayerId"> @FantasyPerformances.ElementAt(i-1).Name</a></td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).AvgFantasy,2)</td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MinFantasy,2)</td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MaxFantasy,2)</td>

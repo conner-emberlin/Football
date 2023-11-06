@@ -1,5 +1,328 @@
-﻿<h3>StartOrSit</h3>
+﻿@page "/StartOrSit"
+<PageTitle>Start Or Sit</PageTitle>
+
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using System.Text;
+@using Football.Projections.Models;
+@using Football.Players.Models;
+@using Football.Fantasy.Models;
+@using Football.Fantasy.Analysis.Models;
+@using Football.Enums;
+@using Football.UI.Helpers;
+@inject IHttpClientFactory ClientFactory
+
+<h4>Start Or Sit</h4>
+
+<EditForm model="this" OnSubmit="Get">
+    <TextBoxName @bind-Value="this.Name1" />
+    <TextBoxName @bind-Value="this.Name2" />
+    <TextBoxName @bind-Value="this.Name3" />
+    <TextBoxName @bind-Value="this.Name4" />
+    <button class="button-22" type="submit">Submit</button>
+</EditForm>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@if (StartOrSits.Any()  && !loading){
+
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                    @foreach (var sos in StartOrSits)
+                    {
+                        <th>@sos.Player.Name (@sos.Player.Position)</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Team</td>
+                    @foreach (var sos in StartOrSits)
+                    {
+                        if(sos.TeamMap is not null){
+                            <td>@sos.TeamMap.Team</td>
+                        }
+                        else
+                        {
+                            <td>-</td>
+                        }
+                    }
+                </tr>
+                <tr>
+                    <td>Opponent</td>
+                    @foreach (var sos in StartOrSits)
+                    {
+                        var opp = GetOpponent(sos);
+                        if (string.IsNullOrEmpty(opp))
+                        {
+                            <td>BYE</td>
+                        }
+                        else
+                        {
+                            <td>@AtIndicator(sos) @opp <b><text style="@FormatMatchupRank(sos.MatchupRanking)">(@sos.MatchupRanking.ToString())</text></b></td>
+                        }
+                    }
+                </tr>
+                <tr>
+                    <td>Betting</td>
+                    @foreach (var sos in StartOrSits)
+                    {
+                        if (sos.MatchLines is not null)
+                        {
+                         <td>
+                             <p>
+                                OU: @sos.MatchLines.OverUnder
+                            <br>
+                                Line: @sos.MatchLines.Line
+                            <br>
+                                Implied Total @sos.MatchLines.ImpliedTeamTotal
+                             </p>
+                             
+                         </td>
+
+                        }
+                    }
+                </tr>
+                <tr>
+                    <td>Match</td>
+                    @foreach (var sos in StartOrSits)
+                    {
+                        if (sos.Weather is not null)
+                        {
+                            <td>
+                                <p>
+                                    Date: @sos.Weather.GameTime
+                                    <br>
+                                    @if (!string.IsNullOrEmpty(sos.Weather.Temperature))
+                                    {
+                                        <text>@sos.Weather.Temperature</text>
+                                        <br>
+                                    }
+                                    @if (!string.IsNullOrEmpty(sos.Weather.Wind))
+                                    {
+                                        <text>@sos.Weather.Wind</text>
+                                        <br>
+                                    }
+                                    @if (!string.IsNullOrEmpty(sos.Weather.RainChance))
+                                    {
+                                        <text>@sos.Weather.RainChance</text>
+                                        <br>
+                                    }
+                                    @if (!string.IsNullOrEmpty(sos.Weather.SnowChance))
+                                    {
+                                        <text>@sos.Weather.SnowChance</text>
+                                    }
+                                </p>
+                            </td>
+
+                        }
+                    }
+                </tr>
+                <tr>
+                    <td>Projected Points</td>
+                    @foreach (var sos in StartOrSits)
+                    {
+                        if (sos.ProjectedPoints > 0)
+                        {
+                            <td>@sos.ProjectedPoints</td>
+                        }
+                        else
+                        {
+                            <td>-</td>
+                        }
+                    }
+                </tr>
+                <tr>
+                <td>Start/Sit</td>
+                    @foreach (var sos in StartOrSits)
+                    {
+                        <td><b><text style="@GetStartColor(sos.Start)">@StartFormat(sos.Start)</text></b></td>
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+
+else if (badRequestError){
+<text>Unexpected error. Please try again.</text>
+}
 
 @code {
+    public List<Player> AllPlayers { get; set; } = new();
+    public List<TeamMap> AllTeams { get; set; } = new();
 
+    public bool badRequestError;
+    public bool youTried;
+
+    public string? Name1 { get; set; } = "";
+    public string? Name2 { get; set; } = "";
+    public string? Name3 { get; set; } = "";
+    public string? Name4 { get; set; } = "";
+
+    public Player? Player1 { get; set; } = new();
+    public Player? Player2 { get; set; } = new();
+    public Player? Player3 { get; set; } = new();
+    public Player? Player4 { get; set; } = new();
+
+    public List<Player> Players { get; set; } = new();
+
+
+    public bool loading { get; set; } = false;
+    private bool shouldRender;
+
+    public List<Football.Fantasy.Analysis.Models.StartOrSit>? StartOrSits { get; set; } = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllPlayers();
+        await GetAllTeams();
+    }
+
+    private async Task Get()
+    {
+        loading = true;
+        badRequestError = false;
+        Players.Clear();
+        if (StartOrSits.Any())
+        {
+            StartOrSits.Clear();
+        }
+        shouldRender = true;
+        SetPlayers();
+
+
+        var ids = Players.Select(p => p.PlayerId).ToList();
+        var json = JsonSerializer.Serialize(ids);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var client = ClientFactory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/fantasy/start-or-sit") {Content = content};
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = response.Content.ReadAsStream();
+            StartOrSits = JsonSerializer.Deserialize<List<Football.Fantasy.Analysis.Models.StartOrSit>>(responseStream, options);
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        loading = false;
+        shouldRender = true;
+    }
+
+    private void SetPlayers()
+    {
+        if (AllPlayers.Any())
+        {
+            if (!string.IsNullOrEmpty(Name1))
+            {
+                Player1 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name1.ToLower().Trim()));
+                if (Player1 is not null)
+                {
+                    Players.Add(Player1);
+                    Name1 = Player1.Name;
+                }                
+            }
+            if (!string.IsNullOrEmpty(Name2))
+            {
+                Player2 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name2.ToLower().Trim()));
+                if (Player2 is not null)
+                {
+                    Players.Add(Player2);
+                    Name2 = Player2.Name;
+                }
+
+            }
+            if (!string.IsNullOrEmpty(Name3))
+            {
+                Player3 = AllPlayers.First(p => p.Name.ToLower().Contains(Name3.ToLower().Trim()));
+                if (Player3 is not null)
+                {
+                    Players.Add(Player3);
+                    Name3 = Player3.Name;
+                }
+            }
+            if (!string.IsNullOrEmpty(Name4))
+            {
+                Player4 = AllPlayers.First(p => p.Name.ToLower().Contains(Name4.ToLower().Trim()));
+                if (Player4 is not null)
+                {
+                    Players.Add(Player4);
+                    Name4 = Player4.Name;
+                }
+            }
+            shouldRender = true;
+        }
+    }
+    private string StartFormat(bool start) => start ? "Start" : "Sit";
+    private string GetStartColor(bool start) => start ? "color:green" : "color:red";
+    private string FormatMatchupRank(int rank)
+    {
+        return 1 <= rank && rank < 10 ? "color:red"
+              : 10 <= rank && rank < 20 ? "color:orange"
+              : "color:green";
+    }
+    private string AtIndicator(Football.Fantasy.Analysis.Models.StartOrSit sos)
+    {
+        var det = sos.ScheduleDetails;
+        var playerTeamId = sos.TeamMap!.TeamId;
+        if (det is not null)
+        {
+            return playerTeamId == det.HomeTeamId ? "vs" : "@";
+        }
+        else return string.Empty;
+    }
+   
+    private string GetOpponent(Football.Fantasy.Analysis.Models.StartOrSit sos)
+    {
+        var det = sos.ScheduleDetails;
+        var playerTeamId = sos.TeamMap!.TeamId;
+        if (det is not null)
+        {
+            var opponentId = det.AwayTeamId == playerTeamId ? det.HomeTeamId : det.AwayTeamId;
+            var opponentTeamMap = AllTeams.First(a => a.TeamId == opponentId);
+            return opponentTeamMap.Team;
+        }
+        else return string.Empty;
+    }
+
+    private async Task GetAllPlayers()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            AllPlayers = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
+            AllPlayers = AllPlayers.OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
+        }
+    }
+
+    private async Task GetAllTeams()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/team/all");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            AllTeams = await JsonSerializer.DeserializeAsync<List<TeamMap>>(responseStream, options);
+        }
+    }
 }

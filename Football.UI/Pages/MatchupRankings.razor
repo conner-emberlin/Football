@@ -7,6 +7,7 @@
 @using Football.Fantasy.Models;
 @using Football.Fantasy.Analysis.Models;
 @using Football.Enums;
+@using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
 
 <h4>Matchup Rankings</h4>
@@ -44,20 +45,22 @@
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
-                    <th>Rank</th>
-                    <th>Position</th>
                     <th>Team</th>
                     <th>Games</th>
-                    <th>Total Pts</th>
-                    <th>Avg Pts</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("PointsAllowed"))">Total Pts</span>
+                        <span class="oi @(tableSort.GetSortStyle("PointsAllowed"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("AvgPointsAllowed"))">Avg Pts</span>
+                        <span class="oi @(tableSort.GetSortStyle("AvgPointsAllowed"))"></span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
                 @for (int i = 1; i <= Rankings.Count; i++)
                 {
                     <tr>
-                        <td>@i</td>
-                        <td>@Rankings.ElementAt(i-1).Position</td>
                         <td>@Rankings.ElementAt(i-1).Team.TeamDescription</td>
                         <td>@Rankings.ElementAt(i-1).GamesPlayed</td>
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).PointsAllowed,2)</td>
@@ -82,6 +85,8 @@
     public bool badRequestError { get; set; } = false;
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
+
+    private TableSort tableSort = new();
 
     public void SetPosition(ChangeEventArgs args)
     {
@@ -117,5 +122,10 @@
         }
         loading = false;
         shouldRender = true;
+    }
+
+    private void SetTable(string columnName)
+    {
+        Rankings = tableSort.SortTable<MatchupRanking>(Rankings, columnName);
     }
 }

@@ -39,16 +39,26 @@ namespace Football.Fantasy.Analysis.Services
                 if (team != null)
                 {
                     var schedule = await _playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
-                    var teamId = await _playersService.GetTeamId(team.Team);                   
-                    startOrSits.Add(new StartOrSit { 
-                        Player = await _playersService.GetPlayer(playerId),                    
-                        TeamMap = await _playersService.GetTeam(teamId),                    
-                        ScheduleDetails = schedule.FirstOrDefault(s => s.AwayTeamId == teamId || s.HomeTeamId == teamId),
-                        MatchLines = await GetMatchLines(playerId),
-                        Weather = await GetWeather(playerId),
-                        MatchupRanking = await _matchupAnalysisService.GetMatchupRanking(playerId),
-                        ProjectedPoints = await _playersService.GetWeeklyProjection(_season.CurrentSeason, currentWeek, playerId)
+                    var teamId = await _playersService.GetTeamId(team.Team);
+                    var projection = await _playersService.GetWeeklyProjection(_season.CurrentSeason, currentWeek, playerId);
+                    try
+                    {
+                        startOrSits.Add(new StartOrSit
+                        {
+                            Player = await _playersService.GetPlayer(playerId),
+                            TeamMap = await _playersService.GetTeam(teamId),
+                            ScheduleDetails = schedule.FirstOrDefault(s => s.AwayTeamId == teamId || s.HomeTeamId == teamId),
+                            MatchLines = await GetMatchLines(playerId),
+                            Weather = await GetWeather(playerId),
+                            MatchupRanking = await _matchupAnalysisService.GetMatchupRanking(playerId),
+                            ProjectedPoints = Math.Round(projection, 2)
                         });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex.Message, ex.StackTrace, ex.ToString(), ex.InnerException);
+                        throw;
+                    }
                 }
                 else
                 {
@@ -84,6 +94,7 @@ namespace Football.Fantasy.Analysis.Services
                         return new Weather
                         {
                             GameTime = FormatTime(scheduleDetail.Time, scheduleDetail.Date),
+                            Temperature = "Indoor"
                         };
                     }
                     var forecast = await _newsService.GetWeatherAPI(homeLocation.Zip);

@@ -9,8 +9,8 @@ namespace Football.Fantasy.Analysis.Models
         public ScheduleDetails? ScheduleDetails { get; set; }
         public MatchLines? MatchLines { get; set; }
         public Weather? Weather { get; set; }
-        public int? MatchupRanking { get; set; }
-        public double? ProjectedPoints { get; set; }
+        public int MatchupRanking { get; set; }
+        public double ProjectedPoints { get; set; }
         public bool Start { get; set; }
     }
 
