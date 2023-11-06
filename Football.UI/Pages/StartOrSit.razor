@@ -82,7 +82,7 @@
                             <br>
                                 Line: @sos.MatchLines.Line
                             <br>
-                                Implied Total @sos.MatchLines.ImpliedTeamTotal
+                                Implied Total: @sos.MatchLines.ImpliedTeamTotal
                              </p>
                              
                          </td>
@@ -121,7 +121,10 @@
                                     }
                                 </p>
                             </td>
-
+                        }
+                        else
+                        {
+                            <td>-</td>
                         }
                     }
                 </tr>
@@ -173,7 +176,6 @@ else if (badRequestError){
     public Player? Player4 { get; set; } = new();
 
     public List<Player> Players { get; set; } = new();
-
 
     public bool loading { get; set; } = false;
     private bool shouldRender;

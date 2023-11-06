@@ -7,6 +7,7 @@
 @using Football.Fantasy.Models;
 @using Football.Fantasy.Analysis.Models;
 @using Football.Enums;
+@using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
 
 <h4>Target Share</h4>
@@ -28,12 +29,31 @@
             <thead>
                 <tr>
                     <th>Team</th>
-                    <th>RBTarget%</th>
-                    <th>RBComp%</th>
-                    <th>WRTarget%</th>
-                    <th>WRComp%</th>
-                    <th>TETarget%</th>
-                    <th>TEComp%</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RBTargetShare"))">RBTarget%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RBTargetShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RBCompShare"))">RBComp%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RBCompShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("WRTargetShare"))">WRTarget%</span>
+                        <span class="oi @(tableSort.GetSortStyle("WRTargetShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("WRCompShare"))">WRComp%</span>
+                        <span class="oi @(tableSort.GetSortStyle("WRCompShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("TETargetShare"))">TETarget%</span>
+                        <span class="oi @(tableSort.GetSortStyle("TETargetShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("TECompShare"))">TEComp%</span>
+                        <span class="oi @(tableSort.GetSortStyle("TECompShare"))"></span>
+                    </th>
+
                 </tr>
             </thead>
             <tbody>
@@ -61,9 +81,11 @@
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
 
+    private TableSort tableSort = new();
+
     protected override async Task OnInitializedAsync()
     {
-       await GetTargetShare();
+        await GetTargetShare();
     }
 
     public async Task GetTargetShare()
@@ -88,5 +110,10 @@
         }
         loading = false;
         shouldRender = true;
+    }
+
+    private void SetTable(string columnName)
+    {
+        targetShare = tableSort.SortTable<Football.Fantasy.Analysis.Models.TargetShare>(targetShare, columnName);
     }
 }
