@@ -104,4 +104,9 @@
         public double TEBoom { get; set; }
         public double TEBust { get; set;}
     }
+
+    public class GeoDistance
+    {
+        public int RadiusMiles { get; set; }
+    }
 }

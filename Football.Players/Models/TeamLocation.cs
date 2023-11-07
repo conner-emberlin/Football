@@ -7,5 +7,7 @@
         public string State { get; set; } = "";
         public string Zip { get; set; } = "";
         public int Indoor { get; set; }
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
     }
 }

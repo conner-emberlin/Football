@@ -15,11 +15,14 @@ namespace Football.Api.Controllers
     {
         private readonly IStatisticsService _statisticsService;
         private readonly IPlayersService _playersService;
+        private readonly IDistanceService _distanceService;
         private readonly Season _season;
-        public PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season)
+        public PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IDistanceService distanceService,
+            IOptionsMonitor<Season> season)
         {
             _playersService = playersService;
             _statisticsService = statisticsService;
+            _distanceService = distanceService;
             _season = season.CurrentValue;
         }
         [HttpGet("data/players")]
@@ -106,5 +109,11 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> PostInSeasonTeamChange([FromBody] InSeasonTeamChange teamChange) => Ok(await _playersService.PostInSeasonTeamChange(teamChange));
+
+        [HttpPost("travel-distance/{playerId}")]
+        [ProducesResponseType(typeof(double), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<double>> GetTravelDistance([FromRoute] int playerId) => Ok(await _distanceService.GetTravelDistance(playerId));
+
     }
 }
