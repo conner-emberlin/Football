@@ -108,5 +108,6 @@
     public class GeoDistance
     {
         public int RadiusMiles { get; set; }
+        public int LongLatDec { get; set; }
     }
 }

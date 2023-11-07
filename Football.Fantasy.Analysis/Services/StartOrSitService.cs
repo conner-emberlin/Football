@@ -216,5 +216,6 @@ namespace Football.Fantasy.Analysis.Services
                 return string.Empty;
             }
         }
+
     }
 }

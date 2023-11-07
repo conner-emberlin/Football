@@ -60,10 +60,10 @@ namespace Football.Players.Services
             return _geo.RadiusMiles * c;
         }
 
-        private static TeamLocation FormatCoordinates(TeamLocation location)
+        private TeamLocation FormatCoordinates(TeamLocation location)
         {
-            location.Longitude *= -Math.Pow(10, -6);
-            location.Latitude *= Math.Pow(10, -6);
+            location.Longitude *= -Math.Pow(10, _geo.LongLatDec);
+            location.Latitude *= Math.Pow(10, _geo.LongLatDec);
             return location;
         }
         private static double Radians(double val) => (Math.PI / 180) * val;
