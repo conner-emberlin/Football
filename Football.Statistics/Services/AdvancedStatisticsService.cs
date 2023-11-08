@@ -96,10 +96,10 @@ namespace Football.Statistics.Services
                     var cActual = (weeklyStats.Average(w => w.TD) / weeklyStats.Average(w => w.TD)) * 20;
                     var dActual = 2.375 - (weeklyStats.Average(w => w.Int) / (weeklyStats.Average(w => w.Attempts)) * 25);
 
-                    var a = aActual > 2.375 ? 2.37 : aActual < 0 ? 0 : aActual;
-                    var b = bActual > 2.375 ? 2.37 : bActual < 0 ? 0 : bActual;
-                    var c = cActual > 2.375 ? 2.37 : cActual < 0 ? 0 : cActual;
-                    var d = dActual > 2.375 ? 2.37 : dActual < 0 ? 0 : dActual;
+                    var a = aActual > 2.375 ? 2.375 : aActual < 0 ? 0 : aActual;
+                    var b = bActual > 2.375 ? 2.375 : bActual < 0 ? 0 : bActual;
+                    var c = cActual > 2.375 ? 2.375 : cActual < 0 ? 0 : cActual;
+                    var d = dActual > 2.375 ? 2.375 : dActual < 0 ? 0 : dActual;
 
                     return ((a + b + c + d) / 6) * 100;
                 }
