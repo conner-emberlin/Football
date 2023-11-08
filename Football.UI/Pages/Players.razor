@@ -114,6 +114,36 @@ else if (youTried && badRequestError)
                                 <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
                             </tr>
                         }
+                        <tr>
+                            <td><b>Total</b></td>
+                            <td>-</td>
+                            <td>@weeklyQBData.Sum(w => w.Completions)</td>
+                            <td>@weeklyQBData.Sum(w => w.Attempts)</td>
+                            <td>@weeklyQBData.Sum(w => w.Yards)</td>
+                            <td>@weeklyQBData.Sum(w => w.TD)</td>
+                            <td>@weeklyQBData.Sum(w => w.Int)</td>
+                            <td>@weeklyQBData.Sum(w => w.Sacks)</td>
+                            <td>@weeklyQBData.Sum(w => w.RushingAttempts)</td>
+                            <td>@weeklyQBData.Sum(w => w.RushingYards)</td>
+                            <td>@weeklyQBData.Sum(w => w.RushingTD)</td>
+                            <td>@weeklyQBData.Sum(w => w.Fumbles)</td>
+                            <td>@Math.Round(weeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
+                        </tr>
+                        <tr>
+                            <td><b>Pace</b></td>
+                            <td>-</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Completions)*17)</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Attempts)*17)</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Yards)*17)</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.TD)*17)</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Int)*17)</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Sacks)*17)</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.RushingAttempts)*17)</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.RushingYards)*17)</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.RushingTD)*17)</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Fumbles)*17)</td>
+                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

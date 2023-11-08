@@ -67,7 +67,7 @@
         public double RecentWeekWeight { get; set; }
         public double ProjectionWeight { get; set; }
         public double TamperedMin { get; set; }
-        public double TamperedMax { get; set; } 
+        public double TamperedMax { get; set; }
     }
 
     public class MockDraftSettings
@@ -100,9 +100,9 @@
         public double RBBoom { get; set; }
         public double RBBust { get; set; }
         public double WRBoom { get; set; }
-        public double WRBust { get; set;}
+        public double WRBust { get; set; }
         public double TEBoom { get; set; }
-        public double TEBust { get; set;}
+        public double TEBust { get; set; }
     }
 
     public class GeoDistance
@@ -110,4 +110,18 @@
         public int RadiusMiles { get; set; }
         public int LongLatDec { get; set; }
     }
+
+    public class FiveThirtyEightValueSettings
+    {
+        public double PAtts { get; set; }
+        public double PComps { get; set; }
+        public double PTds { get; set; }
+        public double PYds { get; set; }
+        public double Ints { get; set; }
+        public double Sacks { get; set; }
+        public double RAtts { get; set; }
+        public double RYds { get; set; }
+        public double RTds { get; set; }
+    }
+       
 }

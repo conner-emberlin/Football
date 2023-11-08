@@ -87,6 +87,7 @@ builder.Services.AddScoped<ISleeperLeagueService, SleeperLeagueService>();
 builder.Services.AddScoped<ILeagueAnalysisService, LeagueAnalysisService>();
 builder.Services.AddScoped<ILeagueAnalysisRepository, LeagueAnalysisRepository>();
 builder.Services.AddScoped<IDistanceService, DistanceService>();
+builder.Services.AddScoped<IAdvancedStatisticsService, AdvancedStatisticsService>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
@@ -108,6 +109,7 @@ builder.Services.Configure<WaiverWireSettings>(builder.Configuration.GetSection(
 builder.Services.Configure<BoomBustSettings>(builder.Configuration.GetSection("BoomBustSettings"));
 builder.Services.Configure<SleeperSettings>(builder.Configuration.GetSection("SleeperSettings"));
 builder.Services.Configure<GeoDistance>(builder.Configuration.GetSection("GeoDistance"));
+builder.Services.Configure<FiveThirtyEightValueSettings>(builder.Configuration.GetSection("FiveThirtyEightValueSettings"));
 
 var app = builder.Build();
 

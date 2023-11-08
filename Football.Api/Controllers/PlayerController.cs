@@ -16,14 +16,16 @@ namespace Football.Api.Controllers
         private readonly IStatisticsService _statisticsService;
         private readonly IPlayersService _playersService;
         private readonly IDistanceService _distanceService;
+        private readonly IAdvancedStatisticsService _advancedStatisticsService;
         private readonly Season _season;
         public PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IDistanceService distanceService,
-            IOptionsMonitor<Season> season)
+            IOptionsMonitor<Season> season, IAdvancedStatisticsService advancedStatisticsService)
         {
             _playersService = playersService;
             _statisticsService = statisticsService;
             _distanceService = distanceService;
             _season = season.CurrentValue;
+            _advancedStatisticsService = advancedStatisticsService;
         }
         [HttpGet("data/players")]
         [ProducesResponseType(typeof(List<Player>), 200)]
@@ -114,6 +116,16 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(double), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<double>> GetTravelDistance([FromRoute] int playerId) => Ok(await _distanceService.GetTravelDistance(playerId));
+
+        [HttpGet("qb-value")]
+        [ProducesResponseType(typeof(double), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<double>> GetQBValue() => Ok(await _advancedStatisticsService.FiveThirtyEightQBValue());
+
+        [HttpGet("passer-rating")]
+        [ProducesResponseType(typeof(double), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<double>> GetPasserRating() => Ok(await _advancedStatisticsService.PasserRating());
 
     }
 }
