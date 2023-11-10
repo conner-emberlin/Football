@@ -80,7 +80,7 @@ builder.Services.AddScoped<IMockDraftRepository, MockDraftRepository>();
 builder.Services.AddScoped<IStartOrSitService, StartOrSitService>();
 builder.Services.AddScoped<IProjectionAnalysisService, ProjectionAnalysisService>();
 builder.Services.AddScoped<IWaiverWireService, WaiverWireService>();
-builder.Services.AddScoped<IBoomBustService, BoomBustService>();
+builder.Services.AddScoped<IFantasyAnalysisService, FantasyAnalysisService>();
 builder.Services.AddScoped<IProjectionService<SeasonProjection>, SeasonProjectionService>();
 builder.Services.AddScoped<IProjectionService<WeekProjection>, WeeklyProjectionService>();
 builder.Services.AddScoped<ISleeperLeagueService, SleeperLeagueService>();

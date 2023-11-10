@@ -22,13 +22,13 @@ namespace Football.Api.Controllers
         private readonly IStartOrSitService _startOrSitService;
         private readonly IWaiverWireService _waiverWireService;
         private readonly IPlayersService _playersService;
-        private readonly IBoomBustService _boomBustService;
+        private readonly IFantasyAnalysisService _boomBustService;
         private readonly ILeagueAnalysisService _leagueService;
         private readonly Season _season;
 
         public FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMarketShareService marketShareService,
             IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService, 
-            IPlayersService playersService, IBoomBustService boomBustService, ILeagueAnalysisService leagueService)
+            IPlayersService playersService, IFantasyAnalysisService boomBustService, ILeagueAnalysisService leagueService)
         {
             _fantasyDataService = fantasyDataService;
             _matchupAnalysisService = matchupAnalysisService;
@@ -160,5 +160,9 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<FantasyPerformance>>> GetFantasyPerformances([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await _boomBustService.GetFantasyPerformances(posEnum)) : BadRequest();
 
+        [HttpGet("fantasy-percentages/{position}")]
+        [ProducesResponseType(typeof(List<FantasyPerformance>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<FantasyPerformance>>> GetFantasyPercentages([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await _boomBustService.GetFantasyPercentages(posEnum)) : BadRequest();
     }
 }

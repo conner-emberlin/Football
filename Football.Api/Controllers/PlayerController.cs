@@ -127,5 +127,15 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<double>> GetPasserRating() => Ok(await _advancedStatisticsService.PasserRating());
 
+        [HttpGet("passer-rating/{playerId}")]
+        [ProducesResponseType(typeof(double), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<double>> GetPasserRating(int playerId) => Ok(await _advancedStatisticsService.PasserRating(playerId));
+
+        [HttpGet("qb-value/{playerId}")]
+        [ProducesResponseType(typeof(double), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<double>> GetQBValue(int playerId) => Ok(await _advancedStatisticsService.FiveThirtyEightQBValue(playerId));
+
     }
 }

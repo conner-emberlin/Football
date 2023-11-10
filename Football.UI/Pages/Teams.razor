@@ -55,7 +55,7 @@ else if (youTried && badRequestError)
 
     protected override async Task OnInitializedAsync()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/teams");
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/all");
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);

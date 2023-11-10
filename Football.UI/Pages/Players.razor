@@ -5,6 +5,7 @@
 @using System.Text.Json.Serialization
 @using Football.Data.Models;
 @using Football.Fantasy.Models;
+@using Football.Statistics.Models;
 @using Football.Players.Models;
 @inject IHttpClientFactory ClientFactory
 
@@ -574,6 +575,10 @@ else if (youTried && badRequestError)
     List<WeeklyFantasy> weeklyFantasy { get; set; } = new();
 
     SeasonFantasy runningTotal { get; set; } = new();
+
+    QBValue passerRating { get; set; } = new();
+    QBValue fiveThirtyEightValue { get; set; } = new();
+
     public int rank { get; set; }
     public int positionRank { get; set; }
 
