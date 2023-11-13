@@ -6,6 +6,7 @@ using Football.Statistics.Interfaces;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
+using Football.Statistics.Models;
 
 namespace Football.Api.Controllers
 {
@@ -118,14 +119,14 @@ namespace Football.Api.Controllers
         public async Task<ActionResult<double>> GetTravelDistance([FromRoute] int playerId) => Ok(await _distanceService.GetTravelDistance(playerId));
 
         [HttpGet("qb-value")]
-        [ProducesResponseType(typeof(double), 200)]
+        [ProducesResponseType(typeof(List<QBValue>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<double>> GetQBValue() => Ok(await _advancedStatisticsService.FiveThirtyEightQBValue());
+        public async Task<ActionResult<List<QBValue>>> GetQBValue() => Ok(await _advancedStatisticsService.FiveThirtyEightQBValue());
 
         [HttpGet("passer-rating")]
-        [ProducesResponseType(typeof(double), 200)]
+        [ProducesResponseType(typeof(List<QBValue>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<double>> GetPasserRating() => Ok(await _advancedStatisticsService.PasserRating());
+        public async Task<ActionResult<List<QBValue>>> GetPasserRating() => Ok(await _advancedStatisticsService.PasserRating());
 
         [HttpGet("passer-rating/{playerId}")]
         [ProducesResponseType(typeof(double), 200)]
