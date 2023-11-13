@@ -54,7 +54,12 @@ main {
         width: 250px;
         height: 100vh;
         position: sticky;
+        overflow: hidden;
         top: 0;
+    }
+
+    .sidebar:hover{
+        overflow-y:auto;
     }
 
     .top-row {

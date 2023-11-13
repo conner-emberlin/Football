@@ -1,0 +1,185 @@
+﻿@page "/FantasyDistribution"
+<PageTitle>Market Share</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Projections.Models;
+@using Football.Players.Models;
+@using Football.Fantasy.Models;
+@using Football.Fantasy.Analysis.Models;
+@using Football.Enums;
+@using Football.UI.Helpers;
+@inject IHttpClientFactory ClientFactory
+
+<h4>Fantasy Distribution</h4>
+
+<div>
+    @foreach (var position in Positions)
+    {
+
+        <input type="radio" name="players" id=" @position" value="@position"
+        @onchange="SetPosition"
+               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+        <label for="@position ">@position</label>
+
+    }
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="Get">
+    Submit
+</button>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+@if (badRequestError)
+{
+    <p>Unexpected Error. Please try again.</p>
+}
+
+@if (fantasyShare.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    if (positionEnum == Enums.Position.QB)
+    {
+        <div class="table_container">
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("PassYDShare"))">PassYD%</span>
+                            <span class="oi @(tableSort.GetSortStyle("PassYDShare"))"></span>
+                        </th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("PassTDShare"))">PassTD%</span>
+                            <span class="oi @(tableSort.GetSortStyle("PassTDShare"))"></span>
+                        </th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("RushYDShare"))">RushYD%</span>
+                            <span class="oi @(tableSort.GetSortStyle("RushYDShare"))"></span>
+                        </th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("RushTDShare"))">RushTD%</span>
+                            <span class="oi @(tableSort.GetSortStyle("RushTDShare"))"></span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in fantasyShare)
+                    {
+                        <tr>
+                            <td><a class="page-links" href="Players/@f.PlayerId"> @f.Name</a></td>
+                            <td>@Math.Round(f.PassYDShare * 100)</td>
+                            <td>@Math.Round(f.PassTDShare * 100)</td>
+                            <td>@Math.Round(f.RushYDShare * 100)</td>
+                            <td>@Math.Round(f.RushTDShare * 100)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="table_container">
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("RecShare"))">Rec%</span>
+                            <span class="oi @(tableSort.GetSortStyle("RecShare"))"></span>
+                        </th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("RecYDShare"))">RecYD%</span>
+                            <span class="oi @(tableSort.GetSortStyle("RecYDShare"))"></span>
+                        </th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("RecTDShare"))">RecTD%</span>
+                            <span class="oi @(tableSort.GetSortStyle("RecTDShare"))"></span>
+                        </th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("RushYDShare"))">RushYD%</span>
+                            <span class="oi @(tableSort.GetSortStyle("RushYDShare"))"></span>
+                        </th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("RushTDShare"))">RushTD%</span>
+                            <span class="oi @(tableSort.GetSortStyle("RushTDShare"))"></span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in fantasyShare)
+                    {
+                        <tr>
+                            <td><a class="page-links" href="Players/@f.PlayerId"> @f.Name</a></td>
+                            <td>@Math.Round(f.RecShare * 100)</td>
+                            <td>@Math.Round(f.RecYDShare * 100)</td>
+                            <td>@Math.Round(f.RecTDShare * 100)</td>
+                            <td>@Math.Round(f.RushYDShare * 100)</td>
+                            <td>@Math.Round(f.RushTDShare * 100)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
+    public string Position { get; set; } = "Quarterback";
+    public Position positionEnum { get; set; } = Enums.Position.QB;
+    public List<Football.Fantasy.Analysis.Models.FantasyPercentage> fantasyShare = new();
+
+    public bool loading { get; set; } = false;
+    public bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    public TableSort tableSort = new();
+
+    public void SetPosition(ChangeEventArgs args)
+    {
+        Position = args.Value.ToString();
+        positionEnum = Position switch
+        {
+            "Quarterback" => Enums.Position.QB,
+            "Runningback" => Enums.Position.RB,
+            "Wide Receiver" => Enums.Position.WR,
+            "Tight End" => Enums.Position.TE,
+            _ => Enums.Position.RB
+        };
+    }
+    public async Task Get()
+    {
+        loading = true;
+        fantasyShare.Clear();
+        shouldRender = true;
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/shares/" + positionEnum.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            fantasyShare = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Analysis.Models.FantasyPercentage>>(responseStream, options);
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        loading = false;
+        shouldRender = true;
+    }
+
+    private void SetTable(string columnName)
+    {
+        fantasyShare = tableSort.SortTable<Football.Fantasy.Analysis.Models.FantasyPercentage>(fantasyShare, columnName);
+    }
+}

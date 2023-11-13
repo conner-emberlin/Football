@@ -108,7 +108,9 @@ namespace Football.Fantasy.Analysis.Services
                 {
                     var stats = await _statsService.GetWeeklyData<WeeklyDataQB>(position, player.PlayerId);
                     var fantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
-                    var totalFantasy = fantasy.Sum(f => f.FantasyPoints);
+                    var totalFantasy = fantasy.Sum(f => f.FantasyPoints)
+                                     + stats.Sum(s => s.Int) * _scoring.PointsPerInterception
+                                     + stats.Sum(s => s.Fumbles) * _scoring.PointsPerFumble;
                     if (stats.Any() && totalFantasy > 0)
                     {
                         fantasyPercentages.Add(new FantasyPercentage
@@ -116,11 +118,10 @@ namespace Football.Fantasy.Analysis.Services
                             PlayerId = player.PlayerId,
                             Name = player.Name,
                             Position = player.Position,
-                            TotalFantasy = Math.Round(totalFantasy, 2),
-                            PassYDShare = Math.Round((stats.Sum(s => s.Yards) * _scoring.PointsPerPassingYard) / totalFantasy, 2),
-                            PassTDShare = Math.Round((stats.Sum(s => s.TD) * _scoring.PointsPerPassingTouchdown) / totalFantasy, 2),
-                            RushYDShare = Math.Round(stats.Sum(s => s.RushingYards) * _scoring.PointsPerYard / totalFantasy, 2),
-                            RushTDShare = Math.Round(stats.Sum(s => s.RushingTD) * _scoring.PointsPerTouchdown / totalFantasy, 2)
+                            PassYDShare = Math.Round((stats.Sum(s => s.Yards) * _scoring.PointsPerPassingYard) /totalFantasy , 4),
+                            PassTDShare = Math.Round((stats.Sum(s => s.TD) * _scoring.PointsPerPassingTouchdown) /totalFantasy, 4),
+                            RushYDShare = Math.Round(stats.Sum(s => s.RushingYards) * _scoring.PointsPerYard/totalFantasy , 4),
+                            RushTDShare = Math.Round(stats.Sum(s => s.RushingTD) * _scoring.PointsPerTouchdown/totalFantasy, 4)
                         });
                     }
                 }
@@ -131,7 +132,7 @@ namespace Football.Fantasy.Analysis.Services
                 {
                     var stats = await _statsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId);
                     var fantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
-                    var totalFantasy = fantasy.Sum(f => f.FantasyPoints);
+                    var totalFantasy = fantasy.Sum(f => f.FantasyPoints) + stats.Sum(s => s.Fumbles)* _scoring.PointsPerFumble;
                     if (stats.Any() && totalFantasy > 0)
                     {
                         fantasyPercentages.Add(new FantasyPercentage
@@ -139,12 +140,11 @@ namespace Football.Fantasy.Analysis.Services
                             PlayerId = player.PlayerId,
                             Name = player.Name,
                             Position = player.Position,
-                            TotalFantasy = Math.Round(totalFantasy, 2),
-                            RushYDShare = Math.Round(stats.Sum(s => s.RushingYds) * _scoring.PointsPerYard / totalFantasy, 2),
-                            RushTDShare = Math.Round(stats.Sum(s => s.RushingTD) * _scoring.PointsPerTouchdown / totalFantasy, 2),
-                            RecShare = Math.Round(stats.Sum(s => s.Receptions) * _scoring.PointsPerReception / totalFantasy, 2),
-                            RecYDShare = Math.Round(stats.Sum(s => s.Yards) * _scoring.PointsPerYard / totalFantasy, 2),
-                            RecTDShare = Math.Round(stats.Sum(s => s.ReceivingTD) * _scoring.PointsPerTouchdown / totalFantasy, 2)
+                            RushYDShare = Math.Round(stats.Sum(s => s.RushingYds) * _scoring.PointsPerYard / totalFantasy, 4),
+                            RushTDShare = Math.Round(stats.Sum(s => s.RushingTD) * _scoring.PointsPerTouchdown / totalFantasy, 4),
+                            RecShare = Math.Round(stats.Sum(s => s.Receptions) * _scoring.PointsPerReception / totalFantasy, 4),
+                            RecYDShare = Math.Round(stats.Sum(s => s.Yards) * _scoring.PointsPerYard / totalFantasy, 4),
+                            RecTDShare = Math.Round(stats.Sum(s => s.ReceivingTD) * _scoring.PointsPerTouchdown / totalFantasy, 4)
                         });
                     }
                 }
@@ -155,7 +155,7 @@ namespace Football.Fantasy.Analysis.Services
                 {
                     var stats = await _statsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId);
                     var fantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
-                    var totalFantasy = fantasy.Sum(f => f.FantasyPoints);
+                    var totalFantasy = fantasy.Sum(f => f.FantasyPoints) + stats.Sum(s => s.Fumbles) * _scoring.PointsPerFumble;
                     if (stats.Any() && totalFantasy > 0)
                     {
                         fantasyPercentages.Add(new FantasyPercentage
@@ -163,12 +163,11 @@ namespace Football.Fantasy.Analysis.Services
                             PlayerId = player.PlayerId,
                             Name = player.Name,
                             Position = player.Position,
-                            TotalFantasy = Math.Round(totalFantasy, 2),
-                            RushYDShare = Math.Round(stats.Sum(s => s.RushingYds) * _scoring.PointsPerYard / totalFantasy, 2),
-                            RushTDShare = Math.Round(stats.Sum(s => s.RushingTD) * _scoring.PointsPerTouchdown / totalFantasy, 2),
-                            RecShare = Math.Round(stats.Sum(s => s.Receptions) * _scoring.PointsPerReception / totalFantasy, 2),
-                            RecYDShare = Math.Round(stats.Sum(s => s.Yards) * _scoring.PointsPerYard / totalFantasy, 2),
-                            RecTDShare = Math.Round(stats.Sum(s => s.TD) * _scoring.PointsPerTouchdown / totalFantasy, 2)
+                            RushYDShare = Math.Round(stats.Sum(s => s.RushingYds) * _scoring.PointsPerYard / totalFantasy, 4),
+                            RushTDShare = Math.Round(stats.Sum(s => s.RushingTD) * _scoring.PointsPerTouchdown / totalFantasy, 4),
+                            RecShare = Math.Round(stats.Sum(s => s.Receptions) * _scoring.PointsPerReception / totalFantasy, 4),
+                            RecYDShare = Math.Round(stats.Sum(s => s.Yards) * _scoring.PointsPerYard / totalFantasy, 4),
+                            RecTDShare = Math.Round(stats.Sum(s => s.TD) * _scoring.PointsPerTouchdown / totalFantasy, 4)
                         });
                     }
                 }
@@ -179,7 +178,7 @@ namespace Football.Fantasy.Analysis.Services
                 {
                     var stats = await _statsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId);
                     var fantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
-                    var totalFantasy = fantasy.Sum(f => f.FantasyPoints);
+                    var totalFantasy = fantasy.Sum(f => f.FantasyPoints) + stats.Sum(s => s.Fumbles) * _scoring.PointsPerFumble;
                     if (stats.Any() && totalFantasy > 0)
                     {
                         fantasyPercentages.Add(new FantasyPercentage
@@ -187,17 +186,16 @@ namespace Football.Fantasy.Analysis.Services
                             PlayerId = player.PlayerId,
                             Name = player.Name,
                             Position = player.Position,
-                            TotalFantasy = Math.Round(totalFantasy,2),
-                            RushYDShare = Math.Round(stats.Sum(s => s.RushingYds) * _scoring.PointsPerYard / totalFantasy, 2),
-                            RushTDShare = Math.Round(stats.Sum(s => s.RushingTD) * _scoring.PointsPerTouchdown / totalFantasy, 2),
-                            RecShare = Math.Round(stats.Sum(s => s.Receptions) * _scoring.PointsPerReception / totalFantasy, 2),
-                            RecYDShare = Math.Round(stats.Sum(s => s.Yards) * _scoring.PointsPerYard / totalFantasy, 2),
-                            RecTDShare = Math.Round(stats.Sum(s => s.TD) * _scoring.PointsPerTouchdown / totalFantasy, 2)
+                            RushYDShare = Math.Round(stats.Sum(s => s.RushingYds) * _scoring.PointsPerYard / totalFantasy, 4),
+                            RushTDShare = Math.Round(stats.Sum(s => s.RushingTD) * _scoring.PointsPerTouchdown / totalFantasy, 4),
+                            RecShare = Math.Round(stats.Sum(s => s.Receptions) * _scoring.PointsPerReception / totalFantasy, 4),
+                            RecYDShare = Math.Round(stats.Sum(s => s.Yards) * _scoring.PointsPerYard / totalFantasy, 4),
+                            RecTDShare = Math.Round(stats.Sum(s => s.TD) * _scoring.PointsPerTouchdown / totalFantasy, 4)
                         });
                     }
                 }
             }
-            return fantasyPercentages.OrderByDescending(f => f.TotalFantasy).ToList();
+            return fantasyPercentages;
         }
 
         private static double CalculateVariance(IEnumerable<double> fantasyPoints)

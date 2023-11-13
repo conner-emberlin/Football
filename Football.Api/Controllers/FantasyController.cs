@@ -160,7 +160,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<FantasyPerformance>>> GetFantasyPerformances([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await _boomBustService.GetFantasyPerformances(posEnum)) : BadRequest();
 
-        [HttpGet("fantasy-percentages/{position}")]
+        [HttpGet("shares/{position}")]
         [ProducesResponseType(typeof(List<FantasyPerformance>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<FantasyPerformance>>> GetFantasyPercentages([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await _boomBustService.GetFantasyPercentages(posEnum)) : BadRequest();
