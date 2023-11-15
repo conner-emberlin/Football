@@ -108,6 +108,16 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> PostInSeasonInjury([FromBody] InSeasonInjury injury) => injury != null ? Ok(await _playersService.PostInSeasonInjury(injury)) : BadRequest();
 
+        [HttpGet("player-injuries")]
+        [ProducesResponseType(typeof(List<PlayerInjury>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<PlayerInjury>>> GetPlayerInjuries() => Ok(await _playersService.GetPlayerInjuries());
+
+        [HttpPut("end-injury/{injuryId}/{endWeek}")]
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<bool>> EndActiveInjury(int injuryId, int endWeek) => Ok(await _playersService.EndActiveInjury(injuryId, endWeek));
+
         [HttpPost("team-change/in-season")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]

@@ -33,7 +33,9 @@ namespace Football.Players.Interfaces
         public Task<TeamLocation> GetTeamLocation(int teamId);
         public Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week);
         public Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season);
+        public Task<List<PlayerInjury>> GetPlayerInjuries();
         public Task<int> PostInSeasonInjury(InSeasonInjury injury);
+        public Task<bool> EndActiveInjury(int injuryId, int endWeek);
         public Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges();
         public Task<int> PostInSeasonTeamChange(InSeasonTeamChange teamChange);
     }

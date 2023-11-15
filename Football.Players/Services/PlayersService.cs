@@ -46,6 +46,27 @@ namespace Football.Players.Services
         public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => await _playersRepository.GetScheduleDetails(season, week);
         public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => await _playersRepository.GetActiveInSeasonInjuries(season);
         public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await _playersRepository.PostInSeasonInjury(injury);
+        public async Task<List<PlayerInjury>> GetPlayerInjuries()
+        {
+            List<PlayerInjury> playerInjuries = new();
+            var injuries = await GetActiveInSeasonInjuries(_season.CurrentSeason);
+            foreach (var injury in injuries)
+            {
+                var player = await GetPlayer(injury.PlayerId);
+                playerInjuries.Add(new PlayerInjury
+                {
+                    InjuryId = injury.InjuryId,
+                    Season = injury.Season,
+                    PlayerId = injury.PlayerId,
+                    InjuryStartWeek = injury.InjuryStartWeek,
+                    InjuryEndWeek = injury.InjuryEndWeek,
+                    Description = injury.Description,
+                    Player = player
+                });
+            }
+            return playerInjuries;
+        }
+        public async Task<bool> EndActiveInjury(int injuryId, int endWeek) => await _playersRepository.EndActiveInjury(injuryId, endWeek);
         public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => await _playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
 
         public async Task<List<Player>> GetAllPlayers()

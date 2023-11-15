@@ -227,6 +227,14 @@ namespace Football.Players.Repository
             return await _dbConnection.ExecuteAsync(query, injury);
         }
 
+        public async Task<bool> EndActiveInjury(int injuryId, int endWeek)
+        {
+            var query = $@"UPDATE [dbo].InSeasonInjuries
+                           SET [InjuryEndWeek] = @endWeek
+                           WHERE [InjuryId] = @injuryId";
+            return await _dbConnection.ExecuteAsync(query, new { endWeek, injuryId }) > 0;
+        }
+
         public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges(int season)
         {
             var query = $@"SELECT * FROM [dbo].InSeasonTeamChanges

@@ -1,0 +1,353 @@
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Data.Models;
+@using Football.Fantasy.Models;
+@using Football.Players.Models;
+@using System.Text;
+@inject IHttpClientFactory ClientFactory
+@page "/Injuries/"
+
+<h4>Injuries</h4>
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="Add">
+    Add
+</button>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@if (adding)
+{
+        <div class="autocomplete w-25">
+        <input @bind=selectedPlayer @oninput=HandleInput class="form-control filter" placeholder="Player Name..."/>
+        @if (filteredPlayers is not null)
+        {
+            <ul class="options">
+                @if (filteredPlayers.Any())
+                {
+                    @foreach (var p in filteredPlayers)
+                    {
+                        <li class="option" @onclick=@(_ => SelectPlayer(p))>
+                            <span class="option-text">@p.Name</span>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="disabled option">No results</li>
+                }
+            </ul>
+        }        
+        </div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+    @if (playerChosen)
+    {
+        <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>                   
+                    <th>Name</th>
+                    <th>Season</th>
+                    <th>Start Week</th>
+                    <th>End Week</th>
+                    <th>Description</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@playerName</td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Season" @bind="@newInjury.Season" />
+                    </td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Start Week" @bind="@newInjury.InjuryStartWeek" />
+                    </td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="End Week" @bind="@newInjury.InjuryEndWeek" />
+                    </td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Desc" @bind="@newInjury.Description" />
+                    </td>
+                    <td>
+                       <button type="button" class="btn btn-link" @onclick="() => CancellAdd()">
+                          <i class="oi oi-circle-x" />
+                       </button>
+                       <button type="button" class="btn btn-link" @onclick="() => AddInjury(newInjury)">
+                          <i class="oi oi-circle-check" />
+                       </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+
+        @if (youTriedToAdd && injuryAdded > 0)
+        {
+            <text>Record added.</text>
+        }
+        else if (youTriedToAdd && injuryAdded == 0)
+        {
+            <text>Something went wrong.</text>
+        }
+    }
+
+}
+else if (injuryEdits.Any() && !badRequestError)
+{
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>                   
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Season</th>
+                    <th>Start Week</th>
+                    <th>End Week</th>
+                    <th>Description</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var injury in injuryEdits)
+                {
+                    if (injury.IsEditing)
+                    {
+                    <tr>                       
+                        <td>@injury.Player.Name</td>
+                        <td>@injury.Player.Position</td>
+                            <td>@injury.Season</td>
+                        <td>@injury.InjuryStartWeek</td>
+                        <td>
+                            <input type="text" class="form-control" placeholder="End Week" @bind="@injury.InjuryEndWeek"/>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" placeholder="Desc" @bind="@injury.Description" />
+                       </td>
+                        <td>
+                            <button type="button" class="btn btn-link" @onclick="() => EnableEditing(false, injury)">
+                            <i class="oi oi-circle-x" />
+                            </button>
+                            <button type="button" class="btn btn-link" @onclick="() => UpdateInjury(injury)">
+                            <i class="oi oi-circle-check" />
+                            </button>
+                        </td>
+
+                     </tr>
+                    }
+                    else
+                    {
+                        <tr>                        
+                        <td>@injury.Player.Name</td>
+                        <td>@injury.Player.Position</td>
+                            <td>@injury.Season</td>
+                        <td>@injury.InjuryStartWeek</td>
+                        <td>@FormatEndWeek(injury.InjuryEndWeek)</td>
+                        <td>@injury.Description</td>
+                        <td>
+                            <button type="button" class="btn btn-link" @onclick="() => EnableEditing(true, injury)">
+                                <i class="oi oi-pencil" />
+                            </button>
+                        </td>
+                    </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (badRequestError)
+{
+    <text>Something Went Wrong. Please Try Again.</text>
+}
+
+
+@code {
+
+    public bool badRequestError = false;
+    private bool shouldRender;
+    private bool loading = false;
+
+    private bool adding = false;
+
+    public List<PlayerInjury> injuries = new();
+    public List<InjuryEdit> injuryEdits = new();
+    public InSeasonInjury newInjury { get; set; } = new();
+
+    public List<Player> allPlayers = new();
+    public List<Player>? filteredPlayers { get; set; }
+    public string selectedPlayer { get; set; } = "";
+    public Player playerSelected { get; set; } = new();
+    public bool playerChosen { get; set; } = false;
+    public string playerName { get; set; } = "";
+    public string playerPosition { get; set; } = "";
+
+    public bool youTriedToAdd { get; set; }
+    public int injuryAdded { get; set; }
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        await GetInjuryEdits();
+        loading = false;
+        shouldRender = true;
+    }
+
+    private async Task GetInjuryEdits()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/player-injuries");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            injuries = await JsonSerializer.DeserializeAsync<List<PlayerInjury>>(responseStream, options);
+            injuryEdits = injuries.Select(i => new InjuryEdit
+                {
+                    Player = i.Player,
+                    Season = i.Season,
+                    PlayerId = i.PlayerId,
+                    InjuryId = i.InjuryId,
+                    InjuryStartWeek = i.InjuryStartWeek,
+                    InjuryEndWeek = i.InjuryEndWeek,
+                    Description = i.Description
+                }).ToList();
+
+            injuryEdits.ForEach(i => i.IsEditing = false);
+        }
+    }
+    private async void Add()
+    {
+        adding = true;
+        selectedPlayer = string.Empty;
+        filteredPlayers = null;
+        newInjury = new InSeasonInjury();
+        await GetPlayers();
+        shouldRender = true;
+    }
+
+    private void SelectPlayer(Player player)
+    {
+        selectedPlayer = "";
+
+        playerChosen = true;
+        playerSelected = player;
+        playerName = player.Name;
+        playerPosition = player.Position;
+        newInjury.PlayerId = player.PlayerId;
+
+        selectedPlayer = playerName;
+        filteredPlayers = null;
+        StateHasChanged();
+
+    }
+
+    private string FormatEndWeek(int endWeek) => endWeek > 0 ? endWeek.ToString() : "-";
+
+    private void EnableEditing(bool flag, InjuryEdit injuryEdit)
+    {
+        injuryEdit.IsEditing = flag;
+    }
+
+    private async Task UpdateInjury(InjuryEdit injuryEdit)
+    {
+        EnableEditing(false, injuryEdit);
+
+        loading = true;
+        var url = string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Player/end-injury", injuryEdit.InjuryId.ToString(), injuryEdit.InjuryEndWeek.ToString());
+        var request = new HttpRequestMessage(HttpMethod.Put, url);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            await GetInjuryEdits();
+        }
+        else badRequestError = true;
+
+        loading = false;
+        shouldRender = true;
+    }
+
+    private async Task GetPlayers()
+    {       
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            allPlayers = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
+            allPlayers = allPlayers.OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
+        }
+    }
+
+    private void HandleInput(ChangeEventArgs e)
+    {
+        var filter = e.Value?.ToString();
+        if (filter?.Length > 2)
+        {
+            filteredPlayers = allPlayers.Where(p => p.Name.ToLower().Contains(filter.ToLower())).ToList();
+        }
+        else
+        {
+            filteredPlayers = null;
+        }
+    }
+
+    private void CancellAdd()
+    {
+        adding = false;
+        newInjury = new InSeasonInjury();
+        playerChosen = false;
+        playerSelected = new Player();
+        playerName = string.Empty;
+        playerPosition = string.Empty;
+        shouldRender = true;
+    }
+
+    private async Task AddInjury(InSeasonInjury injury)
+    {
+        adding = false;
+        playerChosen = false;
+        playerSelected = new Player();
+        playerName = string.Empty;
+        playerPosition = string.Empty;
+
+        var json = JsonSerializer.Serialize(injury);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var client = ClientFactory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/injury")
+            {
+                Content = content
+            };
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = response.Content.ReadAsStream();
+            injuryAdded = await JsonSerializer.DeserializeAsync<int>(responseStream, options);
+            await GetInjuryEdits();
+        }
+        else injuryAdded = 0;
+    }
+
+    public class InjuryEdit : PlayerInjury
+    {
+        public bool IsEditing { get; set; }
+    }
+
+}
