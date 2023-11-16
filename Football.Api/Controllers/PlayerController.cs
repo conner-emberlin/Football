@@ -113,10 +113,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<PlayerInjury>>> GetPlayerInjuries() => Ok(await _playersService.GetPlayerInjuries());
 
-        [HttpPut("end-injury/{injuryId}/{endWeek}")]
+        [HttpPut("update-injury")]
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<bool>> EndActiveInjury(int injuryId, int endWeek) => Ok(await _playersService.EndActiveInjury(injuryId, endWeek));
+        public async Task<ActionResult<bool>> UpdateInjury([FromBody] InSeasonInjury injury) => Ok(await _playersService.UpdateInjury(injury));
 
         [HttpPost("team-change/in-season")]
         [ProducesResponseType(typeof(int), 200)]

@@ -234,7 +234,8 @@ else if (badRequestError){
                 {
                     Players.Add(Player1);
                     Name1 = Player1.Name;
-                }                
+                }
+                else Name1 = string.Empty;
             }
             if (!string.IsNullOrEmpty(Name2))
             {
@@ -244,25 +245,27 @@ else if (badRequestError){
                     Players.Add(Player2);
                     Name2 = Player2.Name;
                 }
-
+                else Name2 = string.Empty;
             }
             if (!string.IsNullOrEmpty(Name3))
             {
-                Player3 = AllPlayers.First(p => p.Name.ToLower().Contains(Name3.ToLower().Trim()));
+                Player3 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name3.ToLower().Trim()));
                 if (Player3 is not null)
                 {
                     Players.Add(Player3);
                     Name3 = Player3.Name;
                 }
+                else Name3 = string.Empty;
             }
             if (!string.IsNullOrEmpty(Name4))
             {
-                Player4 = AllPlayers.First(p => p.Name.ToLower().Contains(Name4.ToLower().Trim()));
+                Player4 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name4.ToLower().Trim()));
                 if (Player4 is not null)
                 {
                     Players.Add(Player4);
                     Name4 = Player4.Name;
                 }
+                else Name4 = string.Empty;
             }
             shouldRender = true;
         }

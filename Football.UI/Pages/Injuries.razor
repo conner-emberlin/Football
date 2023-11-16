@@ -7,11 +7,11 @@
 @inject IHttpClientFactory ClientFactory
 @page "/Injuries/"
 
-<h4>Injuries</h4>
+<h4>Injury Management</h4>
 
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 <button class="button-22" role="button" @onclick="Add">
-    Add
+    New Injury
 </button>
 
 @if (loading)
@@ -119,8 +119,8 @@ else if (injuryEdits.Any() && !badRequestError)
                 {
                     if (injury.IsEditing)
                     {
-                    <tr>                       
-                        <td>@injury.Player.Name</td>
+                    <tr>
+                        <td><a class="page-links" href="Players/@injury.Player.PlayerId"> @injury.Player.Name</a></td>
                         <td>@injury.Player.Position</td>
                             <td>@injury.Season</td>
                         <td>@injury.InjuryStartWeek</td>
@@ -143,8 +143,8 @@ else if (injuryEdits.Any() && !badRequestError)
                     }
                     else
                     {
-                        <tr>                        
-                        <td>@injury.Player.Name</td>
+                        <tr>
+                        <td><a class="page-links" href="Players/@injury.Player.PlayerId"> @injury.Player.Name</a></td>
                         <td>@injury.Player.Position</td>
                             <td>@injury.Season</td>
                         <td>@injury.InjuryStartWeek</td>
@@ -263,12 +263,23 @@ else if (injuryEdits.Any() && !badRequestError)
     private async Task UpdateInjury(InjuryEdit injuryEdit)
     {
         EnableEditing(false, injuryEdit);
-
         loading = true;
-        var url = string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Player/end-injury", injuryEdit.InjuryId.ToString(), injuryEdit.InjuryEndWeek.ToString());
-        var request = new HttpRequestMessage(HttpMethod.Put, url);
-        request.Headers.Add("Accept", "application/json");
+        var inSeasonInjury = new InSeasonInjury
+        {
+            Season = injuryEdit.Season,
+            InjuryId = injuryEdit.InjuryId,
+            PlayerId = injuryEdit.PlayerId,
+            InjuryStartWeek = injuryEdit.InjuryStartWeek,
+            InjuryEndWeek = injuryEdit.InjuryEndWeek,
+            Description = injuryEdit.Description
+        };
+        var json = JsonSerializer.Serialize(inSeasonInjury);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
         var client = ClientFactory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Put, "https://localhost:7028/api/Player/update-injury")
+            {
+                Content = content
+            };
         var response = await client.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
