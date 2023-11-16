@@ -64,6 +64,10 @@ else if (ProjectionAnalyses.Any())
                         <span class="sort-link" onclick="@(() => SetTable("AvgError"))">AvgError</span>
                         <span class="oi @(tableSort.GetSortStyle("AvgError"))"></span>
                     </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("AvgRankError"))">AvgRankError</span>
+                        <span class="oi @(tableSort.GetSortStyle("AvgRankError"))"></span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -78,6 +82,7 @@ else if (ProjectionAnalyses.Any())
                         <td>@Math.Round(p.MAE,2)</td>
                         <td>@Math.Round(p.MAPE,2)</td>
                         <td>@p.AvgError</td>
+                        <td>@p.AvgRankError</td>
                     </tr>
                 }
             </tbody>

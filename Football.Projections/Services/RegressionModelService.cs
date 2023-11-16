@@ -4,17 +4,20 @@ using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using Microsoft.Extensions.Options;
+using Football.Statistics.Interfaces;
 
 namespace Football.Projections.Services
 {
     public class RegressionModelService : IRegressionModelService
     {
         private readonly IPlayersService _playerService;
+        private readonly IAdvancedStatisticsService _advandedStatisticsService;
         private readonly Season _season;
 
-        public RegressionModelService(IPlayersService playerService, IOptionsMonitor<Season> season)
+        public RegressionModelService(IPlayersService playerService, IAdvancedStatisticsService advancedStatisticsService, IOptionsMonitor<Season> season)
         {
             _playerService = playerService;
+            _advandedStatisticsService = advancedStatisticsService;
             _season = season.CurrentValue;
         }
         public QBModelSeason QBModelSeason(SeasonDataQB stat)
@@ -35,6 +38,9 @@ namespace Football.Projections.Services
         public async Task<QBModelWeek> QBModelWeek(WeeklyDataQB stat)
         {
             var projection = await _playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
+            var fiveThirtyEightValue = await _advandedStatisticsService.FiveThirtyEightQBValue(stat.PlayerId);
+            var passerRating = await _advandedStatisticsService.PasserRating(stat.PlayerId);
+
             return new QBModelWeek
             {
                 PlayerId = stat.PlayerId,
@@ -47,7 +53,9 @@ namespace Football.Projections.Services
                 RushingAttemptsPerGame= stat.RushingAttempts,
                 RushingYardsPerGame = stat.RushingYards,
                 RushingTouchdownsPerGame = stat.RushingTD,
-                SacksPerGame = stat.Sacks
+                SacksPerGame = stat.Sacks,
+                FiveThirtyEightValue = fiveThirtyEightValue,
+                PasserRating = passerRating
             };
         }
         public RBModelSeason RBModelSeason(SeasonDataRB stat)

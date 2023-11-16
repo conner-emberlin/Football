@@ -75,7 +75,8 @@ namespace Football.Projections.Services
                     RSquared = GetRSquared(projections, weeklyFantasy),
                     MAE = GetMeanAbsoluteError(projections, weeklyFantasy),
                     MAPE = GetMeanAbsolutePercentageError(projections, weeklyFantasy),
-                    AvgError = GetAverageError(projections, weeklyFantasy)
+                    AvgError = GetAverageError(projections, weeklyFantasy),
+                    AvgRankError = GetAverageRankError(projections, weeklyFantasy)
                 };
             }
             else
@@ -215,6 +216,26 @@ namespace Football.Projections.Services
                 }
             }
             return count > 0 ? (sumOfError/count)*100 : 0;
+        }
+
+        private static double GetAverageRankError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
+        {
+            var orderedFantasy = weeklyFantasy.OrderByDescending(w => w.FantasyPoints);
+            var orderedProjections = projections.OrderByDescending(p => p.ProjectedPoints);
+            var error = 0.0;
+            var count = 0;
+            foreach (var op in orderedProjections)
+            {
+                var projectedRank = orderedProjections.ToList().IndexOf(op);
+                var fantasy = orderedFantasy.FirstOrDefault(of => of.PlayerId == op.PlayerId);
+                if (fantasy != null)
+                {
+                    var actualRank = orderedFantasy.ToList().IndexOf(fantasy);
+                    error += Math.Abs(projectedRank - actualRank);
+                    count++;
+                }                
+            }
+            return count > 0 ? Math.Round(error / count, 2) : 0;
         }
         private async Task<double> GetReplacementPoints(Position position)
         {

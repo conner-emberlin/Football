@@ -29,6 +29,7 @@
         public double MAE { get; set; }
         public double MAPE { get; set; }
         public double AvgError { get; set; }
+        public double AvgRankError { get; set; }
     }
 
     public class WeeklyProjectionError

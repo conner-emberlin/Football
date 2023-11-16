@@ -49,6 +49,8 @@
     {
         public int Week { get; set; }
         public double ProjectedPoints { get; set; }
+        public double FiveThirtyEightValue { get; set; }
+        public double PasserRating { get; set; }
     }
 
     public class RBModelWeek : RBModelSeason
