@@ -123,11 +123,10 @@ namespace Football.Projections.Services
 
         public async Task<List<WeekProjection>> WeeklyFlexRankings()
         {            
-            var qbProjections = (await _weekProjection.GetProjections(Position.QB)).ToList();
             var rbProjections = (await _weekProjection.GetProjections(Position.RB)).ToList();
             var wrProjections = (await _weekProjection.GetProjections(Position.WR)).ToList();
             var teProjections = (await _weekProjection.GetProjections(Position.TE)).ToList();
-            var rankings = qbProjections.Concat(rbProjections).Concat(wrProjections).Concat(teProjections);
+            var rankings = rbProjections.Concat(wrProjections).Concat(teProjections);
             return rankings.OrderByDescending(r => r.ProjectedPoints).ToList();
         }
         private static double GetMeanSquaredError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
