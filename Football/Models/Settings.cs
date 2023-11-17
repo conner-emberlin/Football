@@ -123,5 +123,13 @@
         public double RYds { get; set; }
         public double RTds { get; set; }
     }
+
+    public class StartOrSitSettings
+    {
+        public double QBCompareRange { get; set; }
+        public double RBCompareRange { get; set; }
+        public double WRCompareRange { get; set; }
+        public double TECompareRange { get; set; }
+    }
        
 }

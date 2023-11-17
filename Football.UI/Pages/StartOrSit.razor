@@ -143,6 +143,31 @@
                     }
                 </tr>
                 <tr>
+                    <td>Player Comparisons</td>
+                    @foreach (var sos in StartOrSits)
+                    {
+                        <td>
+                            @if (sos.PlayerComparisons != null)
+                            {
+                                @foreach (var comp in sos.PlayerComparisons)
+                                {
+                                    @if (comp.WeeklyFantasy != null)
+                                    {
+                                        var diff = Math.Round(@comp.ProjectedPoints - @comp.WeeklyFantasy.FantasyPoints, 2);
+
+                                        <text> @comp.Player.Name <b>vs</b> @GetOpponent(sos): 
+                                            Proj: @Math.Round(comp.ProjectedPoints,2) 
+                                            Actual:@Math.Round(comp.WeeklyFantasy.FantasyPoints,2)
+                                            Diff: <b><text style="@GetDiffColor(diff)">@Math.Round(-1*diff,2)</text></b>
+                                        </text>
+                                        <br>
+                                    }
+                                }
+                            }
+                        </td>
+                    }
+                </tr>
+                <tr>
                 <td>Start/Sit</td>
                     @foreach (var sos in StartOrSits)
                     {
@@ -277,6 +302,13 @@ else if (badRequestError){
         return 1 <= rank && rank < 10 ? "color:red"
               : 10 <= rank && rank < 20 ? "color:orange"
               : "color:green";
+    }
+
+    private string GetDiffColor(double diff)
+    {
+        return diff < 3 ? "color:green"
+              : 3 <= diff && diff < 10 ? "color:orange"
+              : "color:red";
     }
     private string AtIndicator(Football.Fantasy.Analysis.Models.StartOrSit sos)
     {

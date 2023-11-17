@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using Football.Fantasy.Analysis.Models;
 using Football.Players.Models;
+using Football.Fantasy.Interfaces;
 
 namespace Football.Fantasy.Analysis.Services
 {
@@ -16,15 +17,20 @@ namespace Football.Fantasy.Analysis.Services
         private readonly INewsService _newsService;
         private readonly IPlayersService _playersService;
         private readonly IMatchupAnalysisService _matchupAnalysisService;
+        private readonly IFantasyDataService _fantasyDataService;
+        private readonly ISettingsService _settingsService;
         private readonly ILogger _logger;
         private readonly Season _season;
         private readonly NFLOddsAPI _oddsAPI;
-        public StartOrSitService(INewsService newsService, IPlayersService playersService, IMatchupAnalysisService matchupAnalysisService, 
+        public StartOrSitService(INewsService newsService, IPlayersService playersService, IMatchupAnalysisService matchupAnalysisService,
+            IFantasyDataService fantasyDataService, ISettingsService settingsService,
             IOptionsMonitor<Season> season, ILogger logger, IOptionsMonitor<NFLOddsAPI> oddsAPI)
         {
             _newsService = newsService;
             _playersService = playersService;
             _matchupAnalysisService = matchupAnalysisService;
+            _fantasyDataService = fantasyDataService;
+            _settingsService = settingsService;
             _season = season.CurrentValue;
             _logger = logger;
             _oddsAPI = oddsAPI.CurrentValue;
@@ -51,7 +57,8 @@ namespace Football.Fantasy.Analysis.Services
                             MatchLines = await GetMatchLines(playerId),
                             Weather = await GetWeather(playerId),
                             MatchupRanking = await _matchupAnalysisService.GetMatchupRanking(playerId),
-                            ProjectedPoints = Math.Round(projection, 2)
+                            ProjectedPoints = Math.Round(projection, 2),
+                            PlayerComparisons = await GetPlayerComparisons(playerId)
                         });
                     }
                     catch (Exception ex)
@@ -132,6 +139,53 @@ namespace Football.Fantasy.Analysis.Services
             }
         }
 
+        public async Task<List<PlayerComparison>> GetPlayerComparisons(int playerId)
+        {
+            List<PlayerComparison> comparisons = new();
+            var player = await _playersService.GetPlayer(playerId);            
+            var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);            
+            if (team != null)
+            {
+                var teamId = await _playersService.GetTeamId(team.Team);
+                var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
+                var schedule = (await _playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek))
+                               .FirstOrDefault(s => s.AwayTeamId == teamId || s.HomeTeamId == teamId);
+                if (schedule != null)
+                {
+                    var playerProjection = await _playersService.GetWeeklyProjection(_season.CurrentSeason, currentWeek, player.PlayerId);
+                    var opponentId = schedule.HomeTeamId == teamId ? schedule.AwayTeamId : schedule.HomeTeamId;
+                    var opponentSchedule = (await _playersService.GetTeamGames(opponentId)).Where(s => s.Week < currentWeek);
+                    foreach (var match in opponentSchedule)
+                    {
+                        var otherPlayers = await _playersService.GetPlayersByTeam(match.OpposingTeam);
+                        if (otherPlayers != null)
+                        {
+                            foreach(var op in otherPlayers)
+                            {
+                                var otherPlayer = await _playersService.GetPlayer(op.PlayerId);
+                                _ = Enum.TryParse(otherPlayer.Position, out Position otherPlayerPosition);
+                                var otherProjectedPoints = await _playersService.GetWeeklyProjection(_season.CurrentSeason, match.Week, otherPlayer.PlayerId);
+                                if (otherPlayer.Position == player.Position && Math.Abs(playerProjection - otherProjectedPoints) <= _settingsService.GetPlayerComparison(otherPlayerPosition))
+                                {
+                                    var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(otherPlayer.PlayerId);
+                                    comparisons.Add(new PlayerComparison
+                                    {
+                                        Player = otherPlayer,
+                                        Team = match.OpposingTeam,
+                                        Schedule = match,
+                                        WeeklyFantasy = weeklyFantasy.FirstOrDefault(w => w.Week == match.Week),
+                                        ProjectedPoints = otherProjectedPoints
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+
+                }
+            }
+            return comparisons;
+        }
         public async Task<MatchLines> GetMatchLines(int playerId)
         {
             var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);

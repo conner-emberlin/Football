@@ -110,6 +110,7 @@ builder.Services.Configure<BoomBustSettings>(builder.Configuration.GetSection("B
 builder.Services.Configure<SleeperSettings>(builder.Configuration.GetSection("SleeperSettings"));
 builder.Services.Configure<GeoDistance>(builder.Configuration.GetSection("GeoDistance"));
 builder.Services.Configure<FiveThirtyEightValueSettings>(builder.Configuration.GetSection("FiveThirtyEightValueSettings"));
+builder.Services.Configure<StartOrSitSettings>(builder.Configuration.GetSection("StartOrSitSettings"));
 
 var app = builder.Build();
 

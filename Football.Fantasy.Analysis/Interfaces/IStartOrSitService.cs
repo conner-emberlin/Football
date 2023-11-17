@@ -5,6 +5,7 @@ namespace Football.Fantasy.Analysis.Interfaces
     public interface IStartOrSitService
     {
         public Task<List<StartOrSit>> GetStartOrSits(List<int> playerIds);
+        public Task<List<PlayerComparison>> GetPlayerComparisons(int playerId);
         public Task<Weather> GetWeather(int playerId);
         public Task<MatchLines> GetMatchLines(int playerId);
     }

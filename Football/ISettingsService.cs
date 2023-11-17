@@ -10,6 +10,7 @@ namespace Football
         public double GetBoomSetting(Position position);
         public double GetBustSetting(Position position);
         public double GoodWeek(Position position);
+        public double GetPlayerComparison(Position position);
         public double GetValueFromModel<T>(T type, Model model);
         public List<PropertyInfo> GetPropertiesFromModel<T>();
         public bool GetFromCache<T>(Cache cache, out List<T> cachedValues);

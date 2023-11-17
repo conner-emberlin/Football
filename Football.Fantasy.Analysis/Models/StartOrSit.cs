@@ -1,4 +1,5 @@
-﻿using Football.Players.Models;
+﻿using Football.Fantasy.Models;
+using Football.Players.Models;
 
 namespace Football.Fantasy.Analysis.Models
 {
@@ -11,6 +12,7 @@ namespace Football.Fantasy.Analysis.Models
         public Weather? Weather { get; set; }
         public int MatchupRanking { get; set; }
         public double ProjectedPoints { get; set; }
+        public List<PlayerComparison>? PlayerComparisons { get; set; }
         public bool Start { get; set; }
     }
 
@@ -30,5 +32,14 @@ namespace Football.Fantasy.Analysis.Models
         public string Wind { get; set; } = "";
         public string RainChance { get; set; } = "";
         public string SnowChance { get; set; } = "";
+    }
+
+    public class PlayerComparison
+    {
+        public Player Player { get; set; } = new();
+        public string? Team { get; set; } 
+        public Schedule? Schedule { get; set; }
+        public WeeklyFantasy? WeeklyFantasy { get; set; }
+        public double ProjectedPoints { get; set; }
     }
 }
