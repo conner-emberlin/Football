@@ -61,7 +61,7 @@
                 @for (int i = 1; i <= Rankings.Count; i++)
                 {
                     <tr>
-                        <td>@Rankings.ElementAt(i-1).Team.TeamDescription</td>
+                        <td><a class="page-links" href="Teams/@Rankings.ElementAt(i-1).Team.TeamId"> @Rankings.ElementAt(i-1).Team.TeamDescription</a></td>
                         <td>@Rankings.ElementAt(i-1).GamesPlayed</td>
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).PointsAllowed,2)</td>
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).AvgPointsAllowed,2)</td>

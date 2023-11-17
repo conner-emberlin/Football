@@ -4,6 +4,7 @@ using Football.Fantasy.Analysis.Models;
 using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
+using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using Football.Statistics.Interfaces;
 using Football.Data.Models;
@@ -53,31 +54,61 @@ namespace Football.Fantasy.Analysis.Services
                                                                 }).ToList();
         }
 
+        public async Task<List<FantasyPerformance>> GetFantasyPerformances(int teamId)
+        {
+            var teamMap = await _playersService.GetTeam(teamId);
+            var players = await _playersService.GetPlayersByTeam(teamMap.Team);
+            List<FantasyPerformance> teamFantasyPerformances = new();
+            if (players.Any())
+            {
+                foreach (var p in players)
+                {
+                    var player = await _playersService.GetPlayer(p.PlayerId);
+                    var fp = await GetFantasyPerformance(player);
+                    if (fp != null)
+                    {
+                        teamFantasyPerformances.Add(fp);
+                    }
+                }
+            }
+            return teamFantasyPerformances;
+        }
         public async Task<List<FantasyPerformance>> GetFantasyPerformances(Position position)
         {
             List<FantasyPerformance> fantasyPerformances = new();
             var players = await _playersService.GetPlayersByPosition(position);
             foreach (var player in players)
             {
-                var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
-                if (weeklyFantasy.Any())
+                var fantasyPerformance = await GetFantasyPerformance(player);
+                if (fantasyPerformance != null)
                 {
-                    var variance = CalculateVariance(weeklyFantasy.Select(w => w.FantasyPoints));
-                    fantasyPerformances.Add(new FantasyPerformance
-                    {
-                        PlayerId = player.PlayerId,
-                        Name = player.Name,
-                        Position = player.Position,
-                        Season = _season.CurrentSeason,
-                        AvgFantasy = weeklyFantasy.Average(w => w.FantasyPoints),
-                        MinFantasy = weeklyFantasy.Min(w => w.FantasyPoints),
-                        MaxFantasy = weeklyFantasy.Max(w => w.FantasyPoints),
-                        Variance = variance,
-                        StdDev = Math.Sqrt(variance)
-                    }) ;
+                    fantasyPerformances.Add(fantasyPerformance);
                 }
             }
             return fantasyPerformances.Where(f => f.AvgFantasy > 0).OrderByDescending(f => f.AvgFantasy).ToList();
+        }
+
+        public async Task<FantasyPerformance?> GetFantasyPerformance(Player player)
+        {
+            var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
+            if (weeklyFantasy.Any())
+            {
+                var variance = CalculateVariance(weeklyFantasy.Select(w => w.FantasyPoints));
+                return new FantasyPerformance
+                {
+                    PlayerId = player.PlayerId,
+                    Name = player.Name,
+                    Position = player.Position,
+                    Season = _season.CurrentSeason,
+                    TotalFantasy = weeklyFantasy.Sum(w => w.FantasyPoints),
+                    AvgFantasy = weeklyFantasy.Average(w => w.FantasyPoints),
+                    MinFantasy = weeklyFantasy.Min(w => w.FantasyPoints),
+                    MaxFantasy = weeklyFantasy.Max(w => w.FantasyPoints),
+                    Variance = variance,
+                    StdDev = Math.Sqrt(variance)
+                };
+            }
+            else return null;
         }
         public async Task<List<BoomBustByWeek>> GetBoomBustsByWeek(int playerId)
         {

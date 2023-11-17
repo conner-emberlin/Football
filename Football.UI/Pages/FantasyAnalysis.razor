@@ -42,12 +42,14 @@
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
-                    <th>Season</th>
-                    <th>Position</th>
                     <th>Name</th>
                     <th>
                         <span class="sort-link" onclick="@(() => SetTable("AvgFantasy"))">AvgFantasy</span>
                         <span class="oi @(tableSort.GetSortStyle("AvgFantasy"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("TotalFantasy"))">Total Fantasy</span>
+                        <span class="oi @(tableSort.GetSortStyle("TotalFantasy"))"></span>
                     </th>
                     <th>
                         <span class="sort-link" onclick="@(() => SetTable("MinFantasy"))">MinFantasy</span>
@@ -76,10 +78,9 @@
                     var boomBust = BoomBusts.FirstOrDefault(b => b.Player.PlayerId == playerId);
 
                     <tr>
-                        <td>@FantasyPerformances.ElementAt(i-1).Season</td>
-                        <td>@FantasyPerformances.ElementAt(i-1).Position</td>
                         <td><a class="page-links" href="Players/@FantasyPerformances.ElementAt(i-1).PlayerId"> @FantasyPerformances.ElementAt(i-1).Name</a></td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).AvgFantasy,2)</td>
+                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).TotalFantasy,2)</td>                       
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MinFantasy,2)</td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MaxFantasy,2)</td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).Variance,2)</td>

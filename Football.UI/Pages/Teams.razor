@@ -6,6 +6,8 @@
 @using Football.Data.Models;
 @using Football.Fantasy.Models;
 @using Football.Players.Models;
+@using Football.Fantasy.Analysis.Models;
+@using Football.Statistics.Models;
 @inject IHttpClientFactory ClientFactory
 
 @if (!badRequestError && teams.Any())
@@ -32,20 +34,153 @@
         }
     </div>
 }
-else if (youTried && badRequestError)
+else if (badRequestError)
 {
     <p>Bad Request</p>
 }
 <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+
+@if (teamSelected && teamChosen != null)
+{
+    var photoPath = "https://localhost:7176/Logos/" + teamChosen.Team + ".png";
+    <div>
+        <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/Logos/BYE.png'">
+    </div>
+    <div>
+        <b>@teamChosen.TeamDescription</b>
+    </div>
+    @if(teamRecord != null)
+    {
+        <p>Record: @teamRecord.Wins - @teamRecord.Losses</p>
+    }
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <h5>Game Results</h5>
+    @if (teamGameResults.Any())
+    {
+        <div class="table_container">
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th>Season</th>
+                        <th>Week</th>
+                        <th>Winner</th>
+                        <th>Loser</th>
+                        <th>WPts</th>
+                        <th>LPts</th>
+                        <th>WYds</th>
+                        <th>LYds</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var gr in teamGameResults)
+                    {
+                        <tr>
+                            <td>@gr.Season</td>
+                            <td>@gr.Week</td>
+                            @if(gr.Winner == teamChosen.TeamDescription)
+                            {
+                                <td><b>@gr.Winner</b></td>
+                            }
+                            else
+                            {
+                                <td>@gr.Winner</td>
+                            }
+                            @if (gr.Loser == teamChosen.TeamDescription)
+                            {
+                                <td><b>@gr.Loser</b></td>
+                            }
+                            else
+                            {
+                                <td>@gr.Loser</td>
+                            }
+                            <td>@gr.WinnerPoints</td>
+                            <td>@gr.LoserPoints</td>
+                            <td>@gr.WinnerYards</td>
+                            <td>@gr.LoserYards</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <h5>Team Leaders</h5>
+    @if (allPerformances.Any())
+    {
+                <div class="table_container">
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Name</th>
+                        <th>Total Fantasy</th>
+                        <th>Average Fantasy</th>
+                        <th>StdDev</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@qbPerformance.Position</td>
+                        <td>@qbPerformance.Name</td>
+                        <td>@Math.Round(qbPerformance.TotalFantasy,2)</td>
+                        <td>@Math.Round(qbPerformance.AvgFantasy,2)</td>
+                        <td>@Math.Round(qbPerformance.StdDev,2)</td>
+                    </tr>
+                    @foreach (var rb in rbPerformance)
+                    {
+                        <tr>
+                            <td>@rb.Position</td>
+                            <td>@rb.Name</td>
+                            <td>@Math.Round(rb.TotalFantasy,2)</td>
+                            <td>@Math.Round(rb.AvgFantasy,2)</td>
+                            <td>@Math.Round(rb.StdDev,2)</td>
+                        </tr>
+                    }
+                    @foreach (var wr in wrPerformance)
+                    {
+                        <tr>
+                            <td>@wr.Position</td>
+                            <td>@wr.Name</td>
+                            <td>@Math.Round(wr.TotalFantasy,2)</td>
+                            <td>@Math.Round(wr.AvgFantasy,2)</td>
+                            <td>@Math.Round(wr.StdDev,2)</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td>@tePerformance.Position</td>
+                        <td>@tePerformance.Name</td>
+                        <td>@Math.Round(tePerformance.TotalFantasy,2)</td>
+                        <td>@Math.Round(tePerformance.AvgFantasy,2)</td>
+                        <td>@Math.Round(tePerformance.StdDev,2)</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    }
+}
 
 @code {
     public List<TeamMap> teams = new();
     public List<TeamMap>? filteredTeams { get; set; }
     public bool teamSelected { get; set; } = false;
     public string selectedTeam { get; set; } = "";
+    public TeamMap teamChosen = new();
 
     public bool badRequestError { get; set; } = false;
     public bool youTried { get; set; } = false;
+
+    public List<GameResult>? gameResults = new();
+    public List<GameResult>? teamGameResults = new();
+    public List<TeamRecord>? teamRecords = new();
+    public TeamRecord? teamRecord = new();
+
+    public List<FantasyPerformance> allPerformances = new();
+    public FantasyPerformance qbPerformance = new();
+    public List<FantasyPerformance> rbPerformance = new();
+    public List<FantasyPerformance> wrPerformance = new();
+    public FantasyPerformance tePerformance = new();
 
     [Parameter]
     public string id { get; set; } = "";
@@ -55,29 +190,16 @@ else if (youTried && badRequestError)
 
     protected override async Task OnInitializedAsync()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/all");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            teams = await JsonSerializer.DeserializeAsync<List<TeamMap>>(responseStream, options);
-            badRequestError = false;
-            youTried = true;
+        await GetAllTeams();
+        await GetTeamRecords();
+        await GetGameResults();  
 
-            if (!String.IsNullOrEmpty(id))
-            {
-                SelectTeam(int.Parse(id));
-                id = "";
-            }
-        }
-        else
+        if (!String.IsNullOrEmpty(id))
         {
-            badRequestError = true;
-            youTried = true;
+            SelectTeam(int.Parse(id));
+            id = "";
         }
+
         shouldRender = true;
     }
 
@@ -96,6 +218,87 @@ else if (youTried && badRequestError)
 
     private async void SelectTeam(int tid)
     {
+        selectedTeam = "";
+        teamSelected = false;
+
+        teamChosen = teams.First(t => t.TeamId == tid);
+        teamGameResults = gameResults.Where(g => g.HomeTeamId == tid || g.AwayTeamId == tid).OrderBy(g => g.Week).ToList();
+        teamRecord = teamRecords.FirstOrDefault(t => t.TeamMap.TeamId == tid);
+
+        await GetFantasyPerformances(tid);
+
+        selectedTeam = teamChosen.TeamDescription;
+        teamSelected = true;
+        filteredTeams = null;
+        StateHasChanged();
+    }
+
+    private async Task GetAllTeams()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/all");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            teams = await JsonSerializer.DeserializeAsync<List<TeamMap>>(responseStream, options);
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+
+    private async Task GetGameResults()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/game-results");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            gameResults = await JsonSerializer.DeserializeAsync<List<GameResult>>(responseStream, options);
+        }
+    }
+
+    private async Task GetTeamRecords()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/team-records");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            teamRecords = await JsonSerializer.DeserializeAsync<List<TeamRecord>>(responseStream, options);
+        }
+    }
+
+    private async Task GetFantasyPerformances(int teamId)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/fantasy-performances/" + teamId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            allPerformances = await JsonSerializer.DeserializeAsync<List<FantasyPerformance>>(responseStream, options);
+
+            qbPerformance = allPerformances.Where(p => p.Position == "QB").OrderByDescending(p => p.TotalFantasy).First();
+            rbPerformance = allPerformances.Where(p => p.Position == "RB").OrderByDescending(p => p.TotalFantasy).Take(2).ToList();
+            wrPerformance = allPerformances.Where(p => p.Position == "WR").OrderByDescending(p => p.TotalFantasy).Take(3).ToList();
+            tePerformance = allPerformances.Where(p => p.Position == "TE").OrderByDescending(p => p.TotalFantasy).First();
+        }
+
         
     }
+
 }

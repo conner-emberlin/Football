@@ -5,6 +5,9 @@ using Football.Models;
 using Football.Players.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Football.Data.Models;
+using Football.Fantasy.Analysis.Interfaces;
+using Football.Fantasy.Analysis.Models;
 
 namespace Football.Api.Controllers
 {
@@ -14,11 +17,14 @@ namespace Football.Api.Controllers
     {
         private readonly IPlayersService _playersService;
         private readonly IStatisticsService _statisticsService;
+        private readonly IFantasyAnalysisService _fantasyAnalysisService;
         private readonly Season _season;
-        public TeamController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season)
+        public TeamController(IPlayersService playersService, IStatisticsService statisticsService, IFantasyAnalysisService fantasyAnalysisService,
+            IOptionsMonitor<Season> season)
         {
             _playersService = playersService;
             _statisticsService = statisticsService;
+            _fantasyAnalysisService = fantasyAnalysisService;
             _season = season.CurrentValue;
         }
 
@@ -42,10 +48,21 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<ScheduleDetails>>> GetScheduleDetails(int week) => Ok(await _playersService.GetScheduleDetails(_season.CurrentSeason, week));
 
-        [HttpGet("team-records/{season}")]
+        [HttpGet("team-records")]
         [ProducesResponseType(typeof(List<TeamRecord>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<TeamRecord>> GetTeamRecords([FromRoute] int season) => Ok(await _statisticsService.GetTeamRecords(season));
+        public async Task<ActionResult<List<TeamRecord>>> GetTeamRecords() => Ok(await _statisticsService.GetTeamRecords(_season.CurrentSeason));
+
+        [HttpGet("game-results")]
+        [ProducesResponseType(typeof(List<GameResult>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<GameResult>>> GetGameResults() => Ok(await _statisticsService.GetGameResults(_season.CurrentSeason));
+
+        [HttpGet("fantasy-performances/{teamId}")]
+        [ProducesResponseType(typeof(List<FantasyPerformance>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<FantasyPerformance>>> GetFantasyPerformances([FromRoute] int teamId) => Ok(await _fantasyAnalysisService.GetFantasyPerformances(teamId));
+
 
     }
 }

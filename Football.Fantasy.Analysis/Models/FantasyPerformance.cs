@@ -12,6 +12,7 @@ namespace Football.Fantasy.Analysis.Models
         public string Name { get; set; } = "";
         public string Position { get; set; } = "";
         public int Season { get; set; }
+        public double TotalFantasy { get; set; }
         public double AvgFantasy { get; set; }
         public double MinFantasy { get; set; }
         public double MaxFantasy { get;set; }
