@@ -7,6 +7,7 @@
         AllPlayers,
         SeasonTotals,
         TeamTotals,
-        MatchupRankings
+        MatchupRankings,
+        TargetShares
     }
 }

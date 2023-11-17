@@ -3,6 +3,7 @@ using Football.Data.Models;
 using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
+using Football.Fantasy.Analysis.Interfaces;
 using Microsoft.Extensions.Options;
 using Football.Statistics.Interfaces;
 
@@ -12,12 +13,15 @@ namespace Football.Projections.Services
     {
         private readonly IPlayersService _playerService;
         private readonly IAdvancedStatisticsService _advandedStatisticsService;
+        private readonly IMarketShareService _marketShareService;
         private readonly Season _season;
 
-        public RegressionModelService(IPlayersService playerService, IAdvancedStatisticsService advancedStatisticsService, IOptionsMonitor<Season> season)
+        public RegressionModelService(IPlayersService playerService, IAdvancedStatisticsService advancedStatisticsService, IMarketShareService marketShareService,
+            IOptionsMonitor<Season> season)
         {
             _playerService = playerService;
             _advandedStatisticsService = advancedStatisticsService;
+            _marketShareService = marketShareService;
             _season = season.CurrentValue;
         }
         public QBModelSeason QBModelSeason(SeasonDataQB stat)
@@ -76,6 +80,7 @@ namespace Football.Projections.Services
         public async Task<RBModelWeek> RBModelWeek(WeeklyDataRB stat)
         {
             var projection = await _playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
+            var targetShare = (await _marketShareService.GetTargetShare(stat.PlayerId)).RBTargetShare;
             return new RBModelWeek
             {
                 PlayerId = stat.PlayerId,
@@ -88,7 +93,8 @@ namespace Football.Projections.Services
                 RushingTouchdownsPerGame = stat.RushingTD,
                 ReceptionsPerGame = stat.Receptions,
                 ReceivingYardsPerGame = stat.Yards,
-                ReceivingTouchdownsPerGame = stat.ReceivingTD
+                ReceivingTouchdownsPerGame = stat.ReceivingTD,
+                RBTargetShare = targetShare
             };
         }
         public WRModelSeason WRModelSeason(SeasonDataWR stat)

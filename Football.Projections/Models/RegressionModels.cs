@@ -57,6 +57,7 @@
     {
         public int Week { get; set; }
         public double ProjectedPoints { get; set; }
+        public double RBTargetShare { get; set; }
     }
 
     public class WRModelWeek : WRModelSeason
