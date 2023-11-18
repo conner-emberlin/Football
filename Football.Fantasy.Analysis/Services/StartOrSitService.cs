@@ -9,6 +9,7 @@ using Serilog;
 using Football.Fantasy.Analysis.Models;
 using Football.Players.Models;
 using Football.Fantasy.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Football.Fantasy.Analysis.Services
 {
@@ -20,10 +21,11 @@ namespace Football.Fantasy.Analysis.Services
         private readonly IFantasyDataService _fantasyDataService;
         private readonly ISettingsService _settingsService;
         private readonly ILogger _logger;
+        private readonly IMemoryCache _cache;
         private readonly Season _season;
         private readonly NFLOddsAPI _oddsAPI;
         public StartOrSitService(INewsService newsService, IPlayersService playersService, IMatchupAnalysisService matchupAnalysisService,
-            IFantasyDataService fantasyDataService, ISettingsService settingsService,
+            IFantasyDataService fantasyDataService, ISettingsService settingsService, IMemoryCache cache,
             IOptionsMonitor<Season> season, ILogger logger, IOptionsMonitor<NFLOddsAPI> oddsAPI)
         {
             _newsService = newsService;
@@ -31,6 +33,7 @@ namespace Football.Fantasy.Analysis.Services
             _matchupAnalysisService = matchupAnalysisService;
             _fantasyDataService = fantasyDataService;
             _settingsService = settingsService;
+            _cache = cache;
             _season = season.CurrentValue;
             _logger = logger;
             _oddsAPI = oddsAPI.CurrentValue;
@@ -40,37 +43,47 @@ namespace Football.Fantasy.Analysis.Services
             List<StartOrSit> startOrSits = new();
             var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
             foreach (var playerId in playerIds)
-            {               
-                var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
-                if (team != null)
+            {           
+                if (_cache.TryGetValue(playerId.ToString() + Cache.StartOrSit, out StartOrSit startOrSit))
                 {
-                    var schedule = await _playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
-                    var teamId = await _playersService.GetTeamId(team.Team);
-                    var projection = await _playersService.GetWeeklyProjection(_season.CurrentSeason, currentWeek, playerId);
-                    try
+                    startOrSits.Add(startOrSit);
+                }
+                else {
+                    var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+                    if (team != null)
                     {
-                        startOrSits.Add(new StartOrSit
+                        var schedule = await _playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
+                        var teamId = await _playersService.GetTeamId(team.Team);
+                        var projection = await _playersService.GetWeeklyProjection(_season.CurrentSeason, currentWeek, playerId);
+                        try
                         {
-                            Player = await _playersService.GetPlayer(playerId),
-                            TeamMap = await _playersService.GetTeam(teamId),
-                            ScheduleDetails = schedule.FirstOrDefault(s => s.AwayTeamId == teamId || s.HomeTeamId == teamId),
-                            MatchLines = await GetMatchLines(playerId),
-                            Weather = await GetWeather(playerId),
-                            MatchupRanking = await _matchupAnalysisService.GetMatchupRanking(playerId),
-                            ProjectedPoints = Math.Round(projection, 2),
-                            PlayerComparisons = await GetPlayerComparisons(playerId)
-                        });
+                            var sos = new StartOrSit
+                            {
+                                Player = await _playersService.GetPlayer(playerId),
+                                TeamMap = await _playersService.GetTeam(teamId),
+                                ScheduleDetails = schedule.FirstOrDefault(s => s.AwayTeamId == teamId || s.HomeTeamId == teamId),
+                                MatchLines = await GetMatchLines(playerId),
+                                Weather = await GetWeather(playerId),
+                                MatchupRanking = await _matchupAnalysisService.GetMatchupRanking(playerId),
+                                ProjectedPoints = Math.Round(projection, 2),
+                                PlayerComparisons = await GetPlayerComparisons(playerId)
+                            };
+                            _cache.Set(playerId.ToString() + Cache.StartOrSit, sos);
+                            startOrSits.Add(sos);
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error(ex.Message, ex.StackTrace, ex.ToString(), ex.InnerException);
+                            throw;
+                        }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        _logger.Error(ex.Message, ex.StackTrace, ex.ToString(), ex.InnerException);
-                        throw;
+                        _logger.Information("PlayerId {0} has not been assigned a team.", playerId);
                     }
                 }
-                else
-                {
-                    _logger.Information("PlayerId {0} has not been assigned a team.", playerId);
-                }
+
             }
             if (startOrSits.Any())
             {
@@ -82,6 +95,7 @@ namespace Football.Fantasy.Analysis.Services
             {
                 return Enumerable.Empty<StartOrSit>().ToList();
             }
+
         }
 
         public async Task<Weather> GetWeather(int playerId)
@@ -150,9 +164,9 @@ namespace Football.Fantasy.Analysis.Services
                 var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
                 var schedule = (await _playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek))
                                .FirstOrDefault(s => s.AwayTeamId == teamId || s.HomeTeamId == teamId);
-                if (schedule != null)
-                {
-                    var playerProjection = await _playersService.GetWeeklyProjection(_season.CurrentSeason, currentWeek, player.PlayerId);
+                var playerProjection = await _playersService.GetWeeklyProjection(_season.CurrentSeason, currentWeek, player.PlayerId);
+                if (schedule != null && playerProjection > 0)
+                {       
                     var opponentId = schedule.HomeTeamId == teamId ? schedule.AwayTeamId : schedule.HomeTeamId;
                     var opponentSchedule = (await _playersService.GetTeamGames(opponentId)).Where(s => s.Week < currentWeek);
                     foreach (var match in opponentSchedule)

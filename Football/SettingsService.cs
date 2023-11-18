@@ -118,5 +118,13 @@ namespace Football
             }
             else return false;
         }
+        public bool GetFromCache<T>(int id, Cache cache, out List<T> cachedValues)
+        {
+            if (_cache.TryGetValue(id.ToString() + cache.ToString(), out cachedValues))
+            {
+                return cachedValues.Any();
+            }
+            else return false;
+        }
     }
 }

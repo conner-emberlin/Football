@@ -59,7 +59,7 @@
             <tbody>
                 @foreach (var t in targetShare){
                 <tr>
-                    <td>@t.Team.TeamDescription</td>
+                    <td><a class="page-links" href="Teams/@t.Team.TeamId"> @t.Team.TeamDescription</a></td>
                     <td>@Math.Round(t.RBTargetShare*100, 1)</td>
                     <td>@Math.Round(t.RBCompShare*100, 1)</td>
                     <td>@Math.Round(t.WRTargetShare*100, 1)</td>

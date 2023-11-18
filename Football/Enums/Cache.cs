@@ -8,6 +8,7 @@
         SeasonTotals,
         TeamTotals,
         MatchupRankings,
-        TargetShares
+        TargetShares,
+        StartOrSit
     }
 }

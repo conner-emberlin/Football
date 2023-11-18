@@ -12,7 +12,7 @@
 @using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
 
-<h4>Start Or Sit</h4>
+<h4>Start or Sit Assistant</h4>
 
 <EditForm model="this" OnSubmit="Get">
     <TextBoxName @bind-Value="this.Name1" />
@@ -154,11 +154,11 @@
                                     @if (comp.WeeklyFantasy != null)
                                     {
                                         var diff = Math.Round(@comp.ProjectedPoints - @comp.WeeklyFantasy.FantasyPoints, 2);
-
+                                        diff *= -1;
                                         <text> @comp.Player.Name <b>vs</b> @GetOpponent(sos): 
                                             Proj: @Math.Round(comp.ProjectedPoints,2) 
                                             Actual:@Math.Round(comp.WeeklyFantasy.FantasyPoints,2)
-                                            Diff: <b><text style="@GetDiffColor(diff)">@Math.Round(-1*diff,2)</text></b>
+                                            Diff: <b><text style="@GetDiffColor(diff)">@Math.Round(diff,2)</text></b>
                                         </text>
                                         <br>
                                     }
