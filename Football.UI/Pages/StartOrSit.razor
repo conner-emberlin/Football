@@ -306,6 +306,7 @@ else if (badRequestError){
 
     private string GetDiffColor(double diff)
     {
+        diff *= -1;
         return diff < 3 ? "color:green"
               : 3 <= diff && diff < 10 ? "color:orange"
               : "color:red";
