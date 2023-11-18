@@ -91,7 +91,8 @@
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
-            positionEnum = Position switch
+        Rankings.Clear();
+        positionEnum = Position switch
         {
             "Quarterback" => Enums.Position.QB,
             "Runningback" => Enums.Position.RB,

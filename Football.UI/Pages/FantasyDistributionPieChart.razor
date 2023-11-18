@@ -1,0 +1,124 @@
+﻿@page "/dist-graph/{position}/{id}"
+<PageTitle>Fantasy Distribution</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Fantasy.Analysis.Models;
+@using ApexCharts;
+@inject IHttpClientFactory ClientFactory
+
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+else{
+<h4>@Title()</h4>
+}
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (playerPercentage != null && youTried && !badRequestError && distributions.Any())
+{
+    <ApexChart TItem="Distribution"
+               Height="500">
+
+        <ApexPointSeries TItem="Distribution"
+                         Items="distributions"
+                         Name="Fantasy Distribution"
+                         SeriesType="SeriesType.Pie"
+                         XValue="@(e => e.Label)"
+                         YAggregate="@(e => e.Sum(e => e.Value))"
+                         OrderByDescending="e=>e.Y" />
+    </ApexChart>
+
+}
+
+else if((youTried && badRequestError) || (youTried && playerPercentage == null))
+{
+    <text>Something went wrong.</text>
+}
+
+
+@code {
+
+    [Parameter]
+    public string id { get; set; } = "";
+    [Parameter]
+    public string position { get; set; } = "";
+
+    public string name { get; set; } = "";
+
+    public List<Football.Fantasy.Analysis.Models.FantasyPercentage>? fantasyPercentages = new();
+    public Football.Fantasy.Analysis.Models.FantasyPercentage? playerPercentage = new();
+    public List<Distribution> distributions = new();
+
+    public bool loading { get; set; } = false;
+    public bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    public bool youTried = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        shouldRender = true;
+        youTried = true;
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/shares/" + position);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            fantasyPercentages = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Analysis.Models.FantasyPercentage>>(responseStream, options);
+            playerPercentage = fantasyPercentages.FirstOrDefault(f => f.PlayerId == int.Parse(id));
+
+            if (playerPercentage != null)
+            {
+                name = playerPercentage.Name;
+
+                if (playerPercentage.Position == "QB")
+                {
+                    distributions.Add(new Distribution { Label = "PassYd%", Value = (decimal)(100 * playerPercentage.PassYDShare) });
+                    distributions.Add(new Distribution { Label = "PassTD%", Value = (decimal)(100 * playerPercentage.PassTDShare) });
+                    distributions.Add(new Distribution { Label = "RushYd%", Value = (decimal)(100 * playerPercentage.RushYDShare) });
+                    distributions.Add(new Distribution { Label = "RushTD%", Value = (decimal)(100 * playerPercentage.RushTDShare) });
+                }
+                else
+                {
+                    distributions.Add(new Distribution { Label = "RushYd%", Value = (decimal)(100 * playerPercentage.RushYDShare) });
+                    distributions.Add(new Distribution { Label = "RushTD%", Value = (decimal)(100 * playerPercentage.RushTDShare) });
+                    distributions.Add(new Distribution { Label = "Rec%", Value = (decimal)(100 * playerPercentage.RecShare) });
+                    distributions.Add(new Distribution { Label = "RecYd%", Value = (decimal)(100 * playerPercentage.RecYDShare) });
+                    distributions.Add(new Distribution { Label = "RecTD%", Value = (decimal)(100 * playerPercentage.RecTDShare) });
+
+                }
+            }
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        loading = false;
+        shouldRender = true;
+    }
+
+    public class Distribution
+    {
+        public string Label { get; set; } = "";
+        public decimal Value { get; set; } 
+    }
+
+    public string Title() => "Fantasy Distributions for " + name;
+
+
+
+
+}

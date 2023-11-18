@@ -90,9 +90,9 @@ else if (ProjectionAnalyses.Any())
         </table>
     </div>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <h6>Avg Error by Week</h6>
         <ApexChart TItem="WeeklyProjectionAnalysis"
-               Title="Avg Error by Week"
-                Height="500">
+                Height="400">
         <ApexPointSeries TItem="WeeklyProjectionAnalysis"
                          Items="ProjectionAnalyses"
                          Name="Avg Error"
@@ -117,6 +117,7 @@ else if (ProjectionAnalyses.Any())
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
+        ProjectionAnalyses.Clear();
     }
 
     public async Task GetModelAnalysis()

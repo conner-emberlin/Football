@@ -115,6 +115,7 @@
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
+        marketShare.Clear();
         positionEnum = Position switch
         {
             "Runningback" => Enums.Position.RB,

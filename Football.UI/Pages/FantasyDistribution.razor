@@ -70,7 +70,10 @@
                     @foreach (var f in fantasyShare)
                     {
                         <tr>
-                            <td><a class="page-links" href="Players/@f.PlayerId"> @f.Name</a></td>
+                            <td>
+                                <a class="page-links" href="Players/@f.PlayerId"> @f.Name</a> &nbsp;
+                                <a href="dist-graph/@f.Position/@f.PlayerId"> <i class="oi oi-pie-chart" /></a>
+                            </td>
                             <td>@Math.Round(f.PassYDShare * 100)</td>
                             <td>@Math.Round(f.PassTDShare * 100)</td>
                             <td>@Math.Round(f.RushYDShare * 100)</td>
@@ -114,7 +117,10 @@
                     @foreach (var f in fantasyShare)
                     {
                         <tr>
-                            <td><a class="page-links" href="Players/@f.PlayerId"> @f.Name</a></td>
+                            <td>
+                                <a class="page-links" href="Players/@f.PlayerId"> @f.Name</a>&nbsp;
+                                <a href="dist-graph/@f.Position/@f.PlayerId"> <i class="oi oi-pie-chart" /></a>
+                            </td>
                             <td>@Math.Round(f.RecShare * 100)</td>
                             <td>@Math.Round(f.RecYDShare * 100)</td>
                             <td>@Math.Round(f.RecTDShare * 100)</td>
@@ -144,6 +150,7 @@
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
+        fantasyShare.Clear();
         positionEnum = Position switch
         {
             "Quarterback" => Enums.Position.QB,
