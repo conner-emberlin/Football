@@ -78,7 +78,10 @@
                     var boomBust = BoomBusts.FirstOrDefault(b => b.Player.PlayerId == playerId);
 
                     <tr>
-                        <td><a class="page-links" href="Players/@FantasyPerformances.ElementAt(i-1).PlayerId"> @FantasyPerformances.ElementAt(i-1).Name</a></td>
+                        <td>
+                            <a class="page-links" href="Players/@FantasyPerformances.ElementAt(i-1).PlayerId"> @FantasyPerformances.ElementAt(i-1).Name</a>
+                            <a href="fantasy-graph/@FantasyPerformances.ElementAt(i-1).PlayerId"> <i class="oi oi-graph" /></a>
+                        </td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).AvgFantasy,2)</td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).TotalFantasy,2)</td>                       
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MinFantasy,2)</td>
@@ -116,6 +119,7 @@
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
+        FantasyPerformances.Clear();
         positionEnum = Position switch
         {
             "Quarterback" => Enums.Position.QB,
