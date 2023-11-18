@@ -44,7 +44,7 @@ namespace Football.Fantasy.Analysis.Services
             var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
             foreach (var playerId in playerIds)
             {           
-                if (_cache.TryGetValue(playerId.ToString() + Cache.StartOrSit, out StartOrSit startOrSit))
+                if (_settingsService.GetFromCache<StartOrSit>(playerId, Cache.StartOrSit, out var startOrSit))
                 {
                     startOrSits.Add(startOrSit);
                 }

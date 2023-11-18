@@ -76,7 +76,7 @@ namespace Football.Statistics.Services
                            + weeklyStats.Average(w => w.Sacks) * _value.Sacks
                            + weeklyStats.Average(w => w.RushingAttempts) * _value.RAtts
                            + weeklyStats.Average(w => w.RushingYards) * _value.RYds
-                           + weeklyStats.Average(w => w.RushingTD) + _value.RTds);
+                           + weeklyStats.Average(w => w.RushingTD) * _value.RTds);
                 }
                 else return 0;
             }

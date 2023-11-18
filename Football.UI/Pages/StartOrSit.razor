@@ -18,7 +18,6 @@
     <TextBoxName @bind-Value="this.Name1" />
     <TextBoxName @bind-Value="this.Name2" />
     <TextBoxName @bind-Value="this.Name3" />
-    <TextBoxName @bind-Value="this.Name4" />
     <button class="button-22" type="submit">Submit</button>
 </EditForm>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -193,12 +192,11 @@ else if (badRequestError){
     public string? Name1 { get; set; } = "";
     public string? Name2 { get; set; } = "";
     public string? Name3 { get; set; } = "";
-    public string? Name4 { get; set; } = "";
 
     public Player? Player1 { get; set; } = new();
     public Player? Player2 { get; set; } = new();
     public Player? Player3 { get; set; } = new();
-    public Player? Player4 { get; set; } = new();
+
 
     public List<Player> Players { get; set; } = new();
 
@@ -281,16 +279,6 @@ else if (badRequestError){
                     Name3 = Player3.Name;
                 }
                 else Name3 = string.Empty;
-            }
-            if (!string.IsNullOrEmpty(Name4))
-            {
-                Player4 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name4.ToLower().Trim()));
-                if (Player4 is not null)
-                {
-                    Players.Add(Player4);
-                    Name4 = Player4.Name;
-                }
-                else Name4 = string.Empty;
             }
             shouldRender = true;
         }

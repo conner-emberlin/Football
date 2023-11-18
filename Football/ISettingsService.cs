@@ -15,6 +15,6 @@ namespace Football
         public List<PropertyInfo> GetPropertiesFromModel<T>();
         public bool GetFromCache<T>(Cache cache, out List<T> cachedValues);
         public bool GetFromCache<T>(Position position, Cache cache, out List<T> cachedValues);
-        public bool GetFromCache<T>(int id, Cache cache, out List<T> cachedValues);
+        public bool GetFromCache<T>(int id, Cache cache, out T cachedValue);
     }
 }
