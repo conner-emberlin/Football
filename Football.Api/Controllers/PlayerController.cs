@@ -128,25 +128,9 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<double>> GetTravelDistance([FromRoute] int playerId) => Ok(await _distanceService.GetTravelDistance(playerId));
 
-        [HttpGet("qb-value")]
-        [ProducesResponseType(typeof(List<QBValue>), 200)]
+        [HttpGet("advanced-stats/qb")]
+        [ProducesResponseType(typeof(List<AdvancedQBStatistics>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<QBValue>>> GetQBValue() => Ok(await _advancedStatisticsService.FiveThirtyEightQBValue());
-
-        [HttpGet("passer-rating")]
-        [ProducesResponseType(typeof(List<QBValue>), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<QBValue>>> GetPasserRating() => Ok(await _advancedStatisticsService.PasserRating());
-
-        [HttpGet("passer-rating/{playerId}")]
-        [ProducesResponseType(typeof(double), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<double>> GetPasserRating(int playerId) => Ok(await _advancedStatisticsService.PasserRating(playerId));
-
-        [HttpGet("qb-value/{playerId}")]
-        [ProducesResponseType(typeof(double), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<double>> GetQBValue(int playerId) => Ok(await _advancedStatisticsService.FiveThirtyEightQBValue(playerId));
-
+        public async Task<ActionResult<List<AdvancedQBStatistics>>> GetAdvancedQBStatistics() => Ok(await _advancedStatisticsService.GetAdvancedQBStatistics());
     }
 }
