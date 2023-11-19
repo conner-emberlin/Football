@@ -226,6 +226,22 @@ namespace Football.Fantasy.Analysis.Services
                     }
                 }
             }
+            return CleanPercentageAmounts(fantasyPercentages);
+        }
+
+        private static List<FantasyPercentage> CleanPercentageAmounts(List<FantasyPercentage> fantasyPercentages)
+        {
+            foreach (var fp in fantasyPercentages)
+            {
+                fp.PassYDShare = fp.PassYDShare > 1 ? 1 : fp.PassYDShare < 0 ? 0 : fp.PassYDShare;
+                fp.PassTDShare = fp.PassTDShare > 1 ? 1 : fp.PassTDShare < 0 ? 0 : fp.PassTDShare;
+                fp.RushYDShare = fp.RushYDShare > 1 ? 1 : fp.RushYDShare < 0 ? 0 : fp.RushYDShare;
+                fp.RushTDShare = fp.RushTDShare > 1 ? 1 : fp.RushTDShare < 0 ? 0 : fp.RushTDShare;
+                fp.RecShare = fp.RecShare > 1 ? 1 : fp.RecShare < 0 ? 0 : fp.RecShare;
+                fp.RecYDShare = fp.RecYDShare > 1 ? 1 : fp.RecYDShare < 0 ? 0 : fp.RecYDShare;
+                fp.RecTDShare = fp.RecTDShare > 1 ? 1 : fp.RecTDShare < 0 ? 0 : fp.RecTDShare;
+            }
+
             return fantasyPercentages;
         }
 

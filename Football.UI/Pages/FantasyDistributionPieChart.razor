@@ -29,8 +29,8 @@ else{
                          Name="Fantasy Distribution"
                          SeriesType="SeriesType.Pie"
                          XValue="@(e => e.Label)"
-                         YAggregate="@(e => e.Sum(e => e.Value))"
-                         OrderByDescending="e=>e.Y" />
+                         YAggregate="@(e => e.Sum(e => e.Value))"                        
+                         />
     </ApexChart>
 
 }
@@ -116,9 +116,6 @@ else if((youTried && badRequestError) || (youTried && playerPercentage == null))
         public decimal Value { get; set; } 
     }
 
-    public string Title() => "Fantasy Distributions for " + name;
-
-
-
+    private string Title() => "Fantasy Distribution for " + name;
 
 }
