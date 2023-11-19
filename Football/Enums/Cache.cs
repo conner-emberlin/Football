@@ -9,6 +9,7 @@
         TeamTotals,
         MatchupRankings,
         TargetShares,
-        StartOrSit
+        StartOrSit,
+        TrendingPlayers
     }
 }

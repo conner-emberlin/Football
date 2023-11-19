@@ -1,10 +1,12 @@
 ﻿using Football.Models;
+using Football.Enums;
 using Football.Players.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
 using Football.Projections.Models;
 using Football.Leagues.Interfaces;
 using Football.Leagues.Models;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Football.Leagues.Services
 {
@@ -13,15 +15,19 @@ namespace Football.Leagues.Services
         private readonly ILeagueAnalysisRepository _leagueAnalysisRepository;
         private readonly ISleeperLeagueService _sleeperLeagueService;
         private readonly IPlayersService _playersService;
+        private readonly ISettingsService _settingsService;
+        private readonly IMemoryCache _cache;
         private readonly Season _season;
 
         public LeagueAnalysisService(ILeagueAnalysisRepository leagueAnalysisRepository, ISleeperLeagueService sleeperLeagueService, IOptionsMonitor<Season> season,
-            IPlayersService playersService)
+            IPlayersService playersService, ISettingsService settingsService, IMemoryCache cache)
         {
             _leagueAnalysisRepository = leagueAnalysisRepository;
             _sleeperLeagueService = sleeperLeagueService;
             _playersService = playersService;
             _season = season.CurrentValue;
+            _settingsService = settingsService;
+            _cache = cache;
         }
 
         public async Task<int> UploadSleeperPlayerMap()
@@ -89,30 +95,38 @@ namespace Football.Leagues.Services
 
         public async Task<List<TrendingPlayer>> GetTrendingPlayers()
         {
-            var sleeperTrendingPlayers = await _sleeperLeagueService.GetSleeperTrendingPlayers();
-            List<TrendingPlayer> trendingPlayers = new();
-
-            if(sleeperTrendingPlayers != null)
+            if (_settingsService.GetFromCache<TrendingPlayer>(Cache.TrendingPlayers, out var cachedTrending))
             {
-                foreach (var sleeperPlayer in sleeperTrendingPlayers)
-                {
-                    if (int.TryParse(sleeperPlayer.SleeperPlayerId, out var sleeperId))
-                    {
-                        var sleeperMap = await GetSleeperPlayerMap(sleeperId);
-                        if (sleeperMap != null)
-                        {
-                            trendingPlayers.Add(new TrendingPlayer
-                            {
-                                Player = await _playersService.GetPlayer(sleeperMap.PlayerId),
-                                PlayerTeam = await _playersService.GetPlayerTeam(_season.CurrentSeason, sleeperMap.PlayerId),
-                                Adds = sleeperPlayer.Adds
-                            }) ;
-                        }
+                return cachedTrending;
+            }
+            else
+            {
+                var sleeperTrendingPlayers = await _sleeperLeagueService.GetSleeperTrendingPlayers();
+                List<TrendingPlayer> trendingPlayers = new();
 
+                if (sleeperTrendingPlayers != null)
+                {
+                    foreach (var sleeperPlayer in sleeperTrendingPlayers)
+                    {
+                        if (int.TryParse(sleeperPlayer.SleeperPlayerId, out var sleeperId))
+                        {
+                            var sleeperMap = await GetSleeperPlayerMap(sleeperId);
+                            if (sleeperMap != null)
+                            {
+                                trendingPlayers.Add(new TrendingPlayer
+                                {
+                                    Player = await _playersService.GetPlayer(sleeperMap.PlayerId),
+                                    PlayerTeam = await _playersService.GetPlayerTeam(_season.CurrentSeason, sleeperMap.PlayerId),
+                                    Adds = sleeperPlayer.Adds
+                                });
+                            }
+
+                        }
                     }
                 }
+                _cache.Set(Cache.TrendingPlayers.ToString(), trendingPlayers);
+                return trendingPlayers;
             }
-            return trendingPlayers;
         }
         private async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => await _leagueAnalysisRepository.GetSleeperPlayerMap(sleeperId);
         private async Task<Tuple<SleeperUser, SleeperLeague?>?> GetCurrentSleeperLeague(string username)
