@@ -1,5 +1,113 @@
-﻿
+﻿@page "/share-graph/{position}/{id}"
+<PageTitle>Market Shares</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Fantasy.Analysis.Models;
+@using ApexCharts;
+@inject IHttpClientFactory ClientFactory
+
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+else
+{
+    <h4>@Title()</h4>
+}
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (playerShare != null && youTried && !badRequestError && shares.Any())
+{
+    <ApexChart TItem="Share"
+               Height="500">
+
+        <ApexPointSeries TItem="Share"
+                         Items="shares"
+                         Name="Share"
+                         SeriesType="SeriesType.Bar"
+                         XValue="@(e => e.Label)"
+                         YAggregate="@(e => Math.Round(e.Sum(e => e.Value)))"
+                         />
+    </ApexChart>
+
+}
+
+else if ((youTried && badRequestError) || (youTried && playerShare == null))
+{
+    <text>Something went wrong.</text>
+}
+
 
 @code {
 
+    [Parameter]
+    public string id { get; set; } = "";
+    [Parameter]
+    public string position { get; set; } = "";
+
+    public string name { get; set; } = "";
+
+    public List<Football.Fantasy.Analysis.Models.MarketShare>? allShares = new();
+    public Football.Fantasy.Analysis.Models.MarketShare? playerShare = new();
+    public List<Share> shares = new();
+
+    public bool loading { get; set; } = false;
+    public bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    public bool youTried = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        shouldRender = true;
+        youTried = true;
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/marketshare/" + position);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            allShares = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Analysis.Models.MarketShare>>(responseStream, options);
+            playerShare = allShares.FirstOrDefault(f => f.Player.PlayerId == int.Parse(id));
+
+            if (playerShare != null)
+            {
+                name = playerShare.Player.Name;
+                shares.Add(new Share { Label = playerShare.Player.Position + "Fantasy%", Value = (decimal)(100 * playerShare.FantasyShare) });
+                shares.Add(new Share { Label = "RushAtt%", Value = (decimal)(100 * playerShare.RushAttShare) });
+                shares.Add(new Share { Label = "RushYd%", Value = (decimal)(100 * playerShare.RushYdShare) });
+                shares.Add(new Share { Label = "Target%", Value = (decimal)(100 * playerShare.TargetShare) });
+                shares.Add(new Share { Label = "Rec%", Value = (decimal)(100 * playerShare.ReceptionShare) });
+                shares.Add(new Share { Label = "RecYd%", Value = (decimal)(100 * playerShare.RecYdShare) });
+                shares.Add(new Share { Label = "RecTD%", Value = (decimal)(100 * playerShare.RecTDShare) });
+            }
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        loading = false;
+        shouldRender = true;
+    }
+
+    public class Share
+    {
+        public string Label { get; set; } = "";
+        public decimal Value { get; set; }
+    }
+
+    private string Title() => "Market Shares for " + name;
+
 }
+

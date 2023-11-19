@@ -82,7 +82,9 @@
                 @for (int i = 1; i <= marketShare.Count; i++)
                 {
                     <tr>
-                        <td><a class="page-links" href="Players/@marketShare.ElementAt(i-1).Player.PlayerId"> @marketShare.ElementAt(i-1).Player.Name</a></td>
+                        <td><a class="page-links" href="Players/@marketShare.ElementAt(i-1).Player.PlayerId"> @marketShare.ElementAt(i-1).Player.Name</a>
+                            <a href="share-graph/@marketShare.ElementAt(i-1).Player.Position/@marketShare.ElementAt(i-1).Player.PlayerId"> <i class="oi oi-bar-chart" /></a>
+                        </td>
                         <td>@marketShare.ElementAt(i-1).PlayerTeam.Team</td>
                         <td>@Math.Round(marketShare.ElementAt(i-1).FantasyShare * 100, 1) </td>
                         <td>@Math.Round(marketShare.ElementAt(i-1).RushAttShare *100,1)</td>
