@@ -162,7 +162,7 @@ table.boostrap4_table_head_dark_striped_rounded_with_shadow {
         vertical-align: bottom;
         border-bottom: 2px solid #dee2e6;
         color: black;
-        background-color: #b3ffd9;
+        background-color: #00e396;
         border-color: #32383e;
     }
 
@@ -214,7 +214,7 @@ a.editstats {
 
 .spinner {
     border: 16px solid silver;
-    border-top: 16px solid #caddfa;
+    border-top: 16px solid #008FFB;
     border-radius: 50%;
     width: 60px;
     height: 60px;

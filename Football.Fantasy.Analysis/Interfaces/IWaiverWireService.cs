@@ -1,9 +1,10 @@
 ﻿using Football.Data.Models;
+using Football.Fantasy.Analysis.Models;
 
 namespace Football.Fantasy.Analysis.Interfaces
 {
     public interface IWaiverWireService
     {
-        public Task<List<WeeklyRosterPercent>> GetWaiverWireCandidates(int season, int week);
+        public Task<List<WaiverWireCandidate>> GetWaiverWireCandidates(int season, int week);
     }
 }

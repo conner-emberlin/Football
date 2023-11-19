@@ -136,9 +136,9 @@ namespace Football.Api.Controllers
         public async Task<ActionResult<List<StartOrSit>>> GetStartOrSit([FromBody] List<int> playerIds) => Ok(await _startOrSitService.GetStartOrSits(playerIds));
 
         [HttpGet("waiver-wire")]
-        [ProducesResponseType(typeof(List<WeeklyRosterPercent>), 200)]
+        [ProducesResponseType(typeof(List<WaiverWireCandidate>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyRosterPercent>>> GetWaiverWireCandidates() 
+        public async Task<ActionResult<List<WaiverWireCandidate>>> GetWaiverWireCandidates() 
         {
             var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
             return Ok(await _waiverWireService.GetWaiverWireCandidates(_season.CurrentSeason, currentWeek));

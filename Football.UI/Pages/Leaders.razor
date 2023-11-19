@@ -6,7 +6,7 @@
 @inject IHttpClientFactory ClientFactory
 @page "/Leaders/"
 
-<h4>Fantasy Leaders</h4>
+<h4>Leaders</h4>
 <EditForm model="this" OnSubmit="GetFantasyResults">
 <TextBoxWeek @bind-Week ="this.week"/>
 <TextBoxPosition @bind-Position="this.position"/>
@@ -24,9 +24,8 @@
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
-                <tr>
-                    <th>Season</th>                   
-                    <th>Rank</th>
+                <tr>                 
+                    <th></th>
                     <th>Games</th>
                     <th>Name</th>
                     <th>Position</th>
@@ -36,8 +35,7 @@
             <tbody>
                 @for (int i = 1; i < currentLeaders.Count; i++)
                 {
-                    <tr>
-                        <td>@currentLeaders.ElementAt(i-1).Season</td>                        
+                    <tr>                      
                         <td>@i</td>
                         <td>@currentLeaders.ElementAt(i-1).Games</td>
                         <td><a class="page-links" href="Players/@currentLeaders.ElementAt(i-1).PlayerId"> @currentLeaders.ElementAt(i-1).Name</a></td>
@@ -55,8 +53,7 @@ else if(youTried && !badRequestError && filterRunning && filteredLeaders.Any())
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
-                    <th>Season</th>
-                    <th>Rank</th>
+                    <th></th>
                     <th>Games</th>
                     <th>Name</th>
                     <th>Position</th>
@@ -67,7 +64,6 @@ else if(youTried && !badRequestError && filterRunning && filteredLeaders.Any())
                 @for (int i = 1; i < filteredLeaders.Count; i++)
                 {
                     <tr>
-                        <td>@filteredLeaders.ElementAt(i-1).Season</td>
                         <td>@i</td>
                         <td>@filteredLeaders.ElementAt(i-1).Games</td>
                         <td><a class="page-links" href="Players/@filteredLeaders.ElementAt(i-1).PlayerId"> @filteredLeaders.ElementAt(i-1).Name</a></td>
@@ -85,8 +81,7 @@ else if(youTried && !badRequestError && filterWeekly && weeklyResults.Any())
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
         <thead>
             <tr>
-                <th>Season</th>
-                <th>Week</th>
+                <th></th>
                 <th>Rank</th>
                 <th>Name</th>
                 <th>Position</th>
@@ -97,7 +92,6 @@ else if(youTried && !badRequestError && filterWeekly && weeklyResults.Any())
                 @for(int i = 1; i < weeklyResults.Count; i ++)
                 {
                     <tr>
-                        <td>@weeklyResults.ElementAt(i-1).Season</td>
                         <td>@weeklyResults.ElementAt(i-1).Week</td>
                         <td>@i</td>
                         <td><a class="page-links" href="Players/@weeklyResults.ElementAt(i-1).PlayerId"> @weeklyResults.ElementAt(i-1).Name</a></td>

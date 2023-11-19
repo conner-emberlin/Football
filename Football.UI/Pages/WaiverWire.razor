@@ -2,15 +2,19 @@
 @using System.Text.Json.Serialization
 @using Football.Data.Models;
 @using Football.Fantasy.Models;
+@using Football.Fantasy.Analysis.Models;
 @using Football.Players.Models;
 @inject IHttpClientFactory ClientFactory
 @page "/WaiverWire/"
 
-<h4>Waiver Wire</h4>
-
 @if (loading)
 {
     <div class="spinner"></div>
+}
+
+else
+{
+    <h4>@GetHeader()</h4>
 }
 
 @if (candidates.Any())
@@ -19,20 +23,25 @@
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
-                    <th>Week</th>
-                    <th>Rank</th>
+                    <th></th>
                     <th>Name</th>
+                    <th>Position</th>
+                    <th>Team</th>
                     <th>Rostered%</th>
                 </tr>
             </thead>
             <tbody>
                 @for (int i = 1; i < candidates.Count; i++)
                 {
+                    var logoPhotoPath = candidates.ElementAt(i - 1).PlayerTeam != null ?
+                                         "https://localhost:7176/Logos/" + candidates.ElementAt(i - 1).PlayerTeam!.Team + ".png" 
+                                       : "https://localhost:7176/Logos/nfl.png";
                     <tr>
-                        <td>@candidates.ElementAt(i-1).Week</td>
                         <td>@i</td>
-                        <td><a class="page-links" href="Players/@candidates.ElementAt(i-1).PlayerId"> @candidates.ElementAt(i-1).Name</a></td>
-                        <td>@candidates.ElementAt(i-1).RosterPercent</td>
+                        <td><a class="page-links" href="Players/@candidates.ElementAt(i-1).Player.PlayerId"> @candidates.ElementAt(i-1).Player.Name.Trim()</a></td>
+                        <td>@candidates.ElementAt(i-1).Player.Position</td>
+                        <td><img src="@logoPhotoPath" width="30" height="30"></td>
+                        <td>@candidates.ElementAt(i-1).RosteredPercentage</td>
                     </tr>
                 }
             </tbody>
@@ -45,7 +54,7 @@ else if (youTried && badRequestError)
 }
 
 @code {
-    public List<WeeklyRosterPercent> candidates = new();
+    public List<WaiverWireCandidate>? candidates = new();
 
     public bool badRequestError = false;
     public bool youTried = false;
@@ -53,6 +62,8 @@ else if (youTried && badRequestError)
     private bool loading = false;
 
     protected override bool ShouldRender() => shouldRender;
+
+    public string GetHeader() => "Waiver Wire - Week " + candidates.First().Week.ToString();
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,11 +76,14 @@ else if (youTried && badRequestError)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            candidates = await JsonSerializer.DeserializeAsync<List<WeeklyRosterPercent>>(responseStream, options);
+            candidates = await JsonSerializer.DeserializeAsync<List<WaiverWireCandidate>>(responseStream, options);
+            candidates = candidates.OrderByDescending(c => c.RosteredPercentage).ToList();
         }
         loading = false;
         shouldRender = true;
     }
+
+
 
 }
 
