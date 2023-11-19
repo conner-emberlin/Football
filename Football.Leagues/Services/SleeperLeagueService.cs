@@ -133,5 +133,23 @@ namespace Football.Leagues.Services
             return sleeperPlayers;
         }
 
+        public async Task<List<SleeperTrendingPlayer>?> GetSleeperTrendingPlayers()
+        {
+            var requestUrl = string.Format("{0}/players/nfl/trending/add", _settings.SleeperBaseURL);
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            request.Headers.Add("Accept", "application/json");
+            var client = new HttpClient();
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                return await JsonSerializer.DeserializeAsync<List<SleeperTrendingPlayer>>(responseStream, options);
+            }
+            else return Enumerable.Empty<SleeperTrendingPlayer>().ToList();
+
+
+
+        }
     }
 }

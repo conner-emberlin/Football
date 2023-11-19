@@ -86,6 +86,34 @@ namespace Football.Leagues.Services
             }
             return projections;
         }
+
+        public async Task<List<TrendingPlayer>> GetTrendingPlayers()
+        {
+            var sleeperTrendingPlayers = await _sleeperLeagueService.GetSleeperTrendingPlayers();
+            List<TrendingPlayer> trendingPlayers = new();
+
+            if(sleeperTrendingPlayers != null)
+            {
+                foreach (var sleeperPlayer in sleeperTrendingPlayers)
+                {
+                    if (int.TryParse(sleeperPlayer.SleeperPlayerId, out var sleeperId))
+                    {
+                        var sleeperMap = await GetSleeperPlayerMap(sleeperId);
+                        if (sleeperMap != null)
+                        {
+                            trendingPlayers.Add(new TrendingPlayer
+                            {
+                                Player = await _playersService.GetPlayer(sleeperMap.PlayerId),
+                                PlayerTeam = await _playersService.GetPlayerTeam(_season.CurrentSeason, sleeperMap.PlayerId),
+                                Adds = sleeperPlayer.Adds
+                            }) ;
+                        }
+
+                    }
+                }
+            }
+            return trendingPlayers;
+        }
         private async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => await _leagueAnalysisRepository.GetSleeperPlayerMap(sleeperId);
         private async Task<Tuple<SleeperUser, SleeperLeague?>?> GetCurrentSleeperLeague(string username)
         {

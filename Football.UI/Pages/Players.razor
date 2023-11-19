@@ -7,6 +7,8 @@
 @using Football.Fantasy.Models;
 @using Football.Statistics.Models;
 @using Football.Players.Models;
+@using Football.Leagues.Models;
+
 @inject IHttpClientFactory ClientFactory
 
 @if (!badRequestError && players.Any())
@@ -37,6 +39,51 @@ else if (youTried && badRequestError)
 {
     <p>Bad Request</p>
 }
+
+@if (loading)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="spinner"></div>
+}
+@if(!playerSelected && showTrending && trendingPlayers.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+    <h5>Trending Players</h5>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Team</th>
+                    <th>Position</th>
+                    <th>Adds</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in trendingPlayers)
+                {
+                    var logoPhotoPath = t.PlayerTeam != null ?
+                    "https://localhost:7176/Logos/" + t.PlayerTeam!.Team + ".png"
+                    : "https://localhost:7176/Logos/nfl.png";
+
+                    <tr>
+                        <td>@t.Player.Name</td>
+                        <td><img src="@logoPhotoPath" width="30" height="30"></td>
+                        <td>@t.Player.Position</td>
+                        <td>@t.Adds</td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+} 
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 @if(playerSelected && playerId > 0)
 {
@@ -657,7 +704,7 @@ else if (youTried && badRequestError)
     List<WeeklyDataDST> weeklyDSTData { get; set; } = new();
     List<WeeklyFantasy> weeklyFantasy { get; set; } = new();
 
-    SeasonFantasy runningTotal { get; set; } = new();
+    SeasonFantasy? runningTotal { get; set; } = new();
 
 
     public int rank { get; set; }
@@ -667,9 +714,14 @@ else if (youTried && badRequestError)
 
     public List<Schedule> schedule { get; set; } = new();
 
+    public bool showTrending { get; set; } = false;
+    public List<TrendingPlayer> trendingPlayers { get; set; } = new();
+
+    public bool loading { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        loading = true;
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players");
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
@@ -694,6 +746,13 @@ else if (youTried && badRequestError)
             badRequestError = true;
             youTried = true;
         }
+
+        if (string.IsNullOrEmpty(id))
+        {
+            showTrending = true;
+            await GetTrendingPlayers();
+        }
+        loading = false;
         shouldRender = true;
     }
     private void HandleInput(ChangeEventArgs e)
@@ -703,7 +762,7 @@ else if (youTried && badRequestError)
         {
             filteredPlayers = players.Where(p => p.Name.ToLower().Contains(filter.ToLower())).ToList();
         }
-        else
+        else 
         {
             filteredPlayers = null;
         }
@@ -711,6 +770,7 @@ else if (youTried && badRequestError)
 
     private async void SelectPlayer(int pid)
     {
+        showTrending = false;
         playerSelected = false;
         selectedPlayer = "";
         playerId = pid;
@@ -1006,9 +1066,23 @@ else if (youTried && badRequestError)
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             var list = await JsonSerializer.DeserializeAsync<List<SeasonFantasy>>(responseStream, options);
-            runningTotal = list.Where(l => l.PlayerId == playerId).First();
+            runningTotal = list.Where(l => l.PlayerId == playerId).FirstOrDefault();
             rank = list.Select(l => l.PlayerId).ToList().IndexOf(playerId) + 1;
             positionRank = list.Where(l => l.Position == playerPosition).Select(l => l.PlayerId).ToList().IndexOf(playerId) + 1;
+        }
+    }
+
+    private async Task GetTrendingPlayers()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/trending-players");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            trendingPlayers = await JsonSerializer.DeserializeAsync<List<TrendingPlayer>>(responseStream, options);
         }
     }
 

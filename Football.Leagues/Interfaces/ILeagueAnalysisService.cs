@@ -8,5 +8,6 @@ namespace Football.Leagues.Interfaces
         public Task<int> UploadSleeperPlayerMap();
         public Task<List<WeekProjection>> GetSleeperLeagueProjections(string username);
         public Task<List<MatchupProjections>> GetMatchupProjections(string username, int week);
+        public Task<List<TrendingPlayer>> GetTrendingPlayers();
     }
 }

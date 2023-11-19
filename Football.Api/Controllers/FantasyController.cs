@@ -9,6 +9,7 @@ using Football.Players.Interfaces;
 using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Analysis.Models;
 using Football.Leagues.Interfaces;
+using Football.Leagues.Models;
 
 namespace Football.Api.Controllers
 {
@@ -165,5 +166,9 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<FantasyPerformance>>> GetFantasyPercentages([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await _boomBustService.GetFantasyPercentages(posEnum)) : BadRequest();
 
+        [HttpGet("trending-players")]
+        [ProducesResponseType(typeof(List<TrendingPlayer>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<TrendingPlayer>>> GetTrendingPlayers() => Ok(await _leagueService.GetTrendingPlayers());
     }
 }
