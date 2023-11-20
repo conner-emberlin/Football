@@ -3,10 +3,11 @@ using Football.News.Interfaces;
 using Football.News.Models;
 using Football.Models;
 using System.Text.Json;
+using System.Net.Http;
 
 namespace Football.News.Services
 {
-    public class NewsService(IOptionsMonitor<ESPN> espn, IOptionsMonitor<WeatherAPI> weatherAPI, IOptionsMonitor<NFLOddsAPI> nflOdds, JsonOptions options) : INewsService
+    public class NewsService(IHttpClientFactory clientFactory, IOptionsMonitor<ESPN> espn, IOptionsMonitor<WeatherAPI> weatherAPI, IOptionsMonitor<NFLOddsAPI> nflOdds, JsonOptions options) : INewsService
     {
         private readonly ESPN _espn = espn.CurrentValue;
         private readonly WeatherAPI _weatherAPI = weatherAPI.CurrentValue;
@@ -16,7 +17,7 @@ namespace Football.News.Services
         {
             var request = new HttpRequestMessage(HttpMethod.Get, _espn.ESPNNewsURL);
             request.Headers.Add("Accept", "application/json");
-            var client = new HttpClient();
+            var client = clientFactory.CreateClient();
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -31,7 +32,7 @@ namespace Football.News.Services
             var url = string.Format("{0}?key={1}&q={2}&days={3}&aqi=no&alerts=no", _weatherAPI.WeatherAPIURL, _weatherAPI.WeatherAPIKey, zip, _weatherAPI.ForecastDays);
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Accept", "application/json");
-            var client = new HttpClient();
+            var client = clientFactory.CreateClient();
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -48,7 +49,7 @@ namespace Football.News.Services
             var url = string.Format("{0}&apiKey={1}", _nflOdds.NFLOddsAPIURL, _nflOdds.NFLOddsAPIKey);
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Accept", "application/json");
-            var client = new HttpClient();
+            var client = clientFactory.CreateClient();
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {

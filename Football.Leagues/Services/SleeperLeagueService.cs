@@ -7,7 +7,7 @@ using Football.Leagues.Interfaces;
 
 namespace Football.Leagues.Services
 {
-    public class SleeperLeagueService(IOptionsMonitor<SleeperSettings> settings, IOptionsMonitor<Season> season, JsonOptions options) : ISleeperLeagueService
+    public class SleeperLeagueService(IHttpClientFactory clientFactory, IOptionsMonitor<SleeperSettings> settings, IOptionsMonitor<Season> season, JsonOptions options) : ISleeperLeagueService
     {
         private readonly SleeperSettings _settings = settings.CurrentValue;
         private readonly Season _season = season.CurrentValue;
@@ -16,7 +16,7 @@ namespace Football.Leagues.Services
             var requestUrl = string.Format("{0}/user/{1}", _settings.SleeperBaseURL, username);
             var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Add("Accept", "application/json");
-            var client = new HttpClient();
+            var client = clientFactory.CreateClient();
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -31,7 +31,7 @@ namespace Football.Leagues.Services
             var requestUrl = string.Format("{0}/user/{1}/leagues/nfl/{2}", _settings.SleeperBaseURL, userId, _season.CurrentSeason.ToString());
             var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Add("Accept", "application/json");
-            var client = new HttpClient();
+            var client = clientFactory.CreateClient();
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -46,7 +46,7 @@ namespace Football.Leagues.Services
             var requestUrl = string.Format("{0}/league/{1}", _settings.SleeperBaseURL, leagueId);
             var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Add("Accept", "application/json");
-            var client = new HttpClient();
+            var client = clientFactory.CreateClient();
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -60,7 +60,7 @@ namespace Football.Leagues.Services
             var requestUrl = string.Format("{0}/league/{1}/rosters", _settings.SleeperBaseURL, leagueId);
             var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Add("Accept", "application/json");
-            var client = new HttpClient();
+            var client = clientFactory.CreateClient();
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -75,7 +75,7 @@ namespace Football.Leagues.Services
             var requestUrl = string.Format("{0}/league/{1}/matchups/{2}", _settings.SleeperBaseURL, leagueId, week.ToString());
             var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Add("Accept", "application/json");
-            var client = new HttpClient();
+            var client = clientFactory.CreateClient();
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -91,7 +91,7 @@ namespace Football.Leagues.Services
             var requestUrl = string.Format("{0}/players/nfl", _settings.SleeperBaseURL);
             var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Add("Accept", "application/json");
-            var client = new HttpClient();
+            var client = clientFactory.CreateClient();
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
@@ -122,7 +122,7 @@ namespace Football.Leagues.Services
             var requestUrl = string.Format("{0}/players/nfl/trending/add", _settings.SleeperBaseURL);
             var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Add("Accept", "application/json");
-            var client = new HttpClient();
+            var client = clientFactory.CreateClient();
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {

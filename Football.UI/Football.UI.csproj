@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Football.Api\Football.Api.csproj" />
     <ProjectReference Include="..\Football\Football.csproj" />
   </ItemGroup>
 
