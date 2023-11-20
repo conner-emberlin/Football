@@ -5,13 +5,8 @@ using System.Data;
 
 namespace Football.Data.Repository
 {
-    public class UploadWeeklyDataRepository : IUploadWeeklyDataRepository
+    public class UploadWeeklyDataRepository(IDbConnection dbConnection) : IUploadWeeklyDataRepository
     {
-        private readonly IDbConnection _dbConnection;
-        public UploadWeeklyDataRepository(IDbConnection dbConnection)
-        {
-            _dbConnection = dbConnection;
-        }
         public async Task<int> UploadWeeklyQBData(List<WeeklyDataQB> players, List<int> ignoreList)
         {
             var query = $@"INSERT INTO [dbo].WeeklyQBData (Season, Week, PlayerId, Name, Completions, Attempts, Yards, TD, Int, Sacks, RushingAttempts, RushingYards, RushingTD, Fumbles)
@@ -19,7 +14,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach(var player in players)
             {
-                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
 
@@ -31,7 +26,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
         }
@@ -42,7 +37,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
         }
@@ -53,7 +48,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
 
@@ -65,7 +60,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += await _dbConnection.ExecuteAsync(query, player);
+                count += await dbConnection.ExecuteAsync(query, player);
             }
             return count;
         }
@@ -80,7 +75,7 @@ namespace Football.Data.Repository
                         (@Season, @WinnerId, @LoserId, @HomeTeamId, @AwayTeamId,
                         @Week, @Day, @Date, @Time, @Winner, @Loser, @WinnerPoints, @LoserPoints,
                         @WinnerYards, @LoserYards)";
-            return await _dbConnection.ExecuteAsync(query, results);
+            return await dbConnection.ExecuteAsync(query, results);
         }
 
         public async Task<int> UploadWeeklyRosterPercentages(List<WeeklyRosterPercent> rosterPercentages, List<int> ignoreList)
@@ -90,7 +85,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var rp in rosterPercentages)
             {
-                count += !ignoreList.Contains(rp.PlayerId) ? await _dbConnection.ExecuteAsync(query, rp) : 0;
+                count += !ignoreList.Contains(rp.PlayerId) ? await dbConnection.ExecuteAsync(query, rp) : 0;
             }
             return count;
         }

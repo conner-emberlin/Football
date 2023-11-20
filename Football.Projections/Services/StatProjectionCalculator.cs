@@ -7,22 +7,15 @@ using Football.Fantasy.Models;
 
 namespace Football.Projections.Services
 {
-    public class StatProjectionCalculator : IStatProjectionCalculator
+    public class StatProjectionCalculator(IOptionsMonitor<Tunings> tunings, IOptionsMonitor<WeeklyTunings> weeklyTunings, IOptionsMonitor<Season> season, ILogger logger) : IStatProjectionCalculator
     {
-        private readonly Tunings _tunings;
-        private readonly WeeklyTunings _weeklyTunings;
-        private readonly Season _season;
-        private readonly ILogger _logger;
-        public StatProjectionCalculator(IOptionsMonitor<Tunings> tunings, IOptionsMonitor<WeeklyTunings> weeklyTunings, IOptionsMonitor<Season> season, ILogger logger)
-        {
-            _tunings = tunings.CurrentValue;
-            _weeklyTunings = weeklyTunings.CurrentValue;
-            _season = season.CurrentValue;
-            _logger = logger;
-        }
+        private readonly Tunings _tunings = tunings.CurrentValue;
+        private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
+        private readonly Season _season = season.CurrentValue;
+
         public SeasonDataQB CalculateStatProjection(List<SeasonDataQB> seasons)
         {
-            _logger.Information("Calculating QB Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
+            logger.Information("Calculating QB Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
                 var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearQBLeap;
@@ -89,14 +82,14 @@ namespace Football.Projections.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.ToString(), ex.StackTrace, ex);
+                logger.Error(ex.ToString(), ex.StackTrace, ex);
                 throw;
             }
         }
 
         public SeasonDataRB CalculateStatProjection(List<SeasonDataRB> seasons)
         {
-            _logger.Information("Calculating RB Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
+            logger.Information("Calculating RB Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
                 var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearRBLeap;
@@ -153,13 +146,13 @@ namespace Football.Projections.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.ToString(), ex.StackTrace, ex);
+                logger.Error(ex.ToString(), ex.StackTrace, ex);
                 throw;
             }
         }
         public SeasonDataWR CalculateStatProjection(List<SeasonDataWR> seasons)
         {
-            _logger.Information("Calculating WR Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
+            logger.Information("Calculating WR Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
                 var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearWRLeap;
@@ -217,13 +210,13 @@ namespace Football.Projections.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.ToString(), ex.StackTrace, ex);
+                logger.Error(ex.ToString(), ex.StackTrace, ex);
                 throw;
             }
         }
         public SeasonDataTE CalculateStatProjection(List<SeasonDataTE> seasons)
         {
-            _logger.Information("Calculating TE Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
+            logger.Information("Calculating TE Stat Projections for {p}: {n}", seasons.First().PlayerId, seasons.First().Name);
             try
             {
                 var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearWRLeap;
@@ -281,14 +274,14 @@ namespace Football.Projections.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.ToString(), ex.StackTrace, ex);
+                logger.Error(ex.ToString(), ex.StackTrace, ex);
                 throw;
             }
         }
 
         public SeasonFantasy CalculateStatProjection(List<SeasonFantasy> seasons)
         {
-            _logger.Information("Calculating Fantasy Stat projections for {p}", seasons.First().PlayerId);
+            logger.Information("Calculating Fantasy Stat projections for {p}", seasons.First().PlayerId);
             try
             {
                 var recentWeight = seasons.Count > 1 ? _tunings.Weight : 1;
@@ -314,7 +307,7 @@ namespace Football.Projections.Services
             }
             catch(Exception ex)
             {
-                _logger.Error(ex.ToString(), ex.StackTrace, ex);
+                logger.Error(ex.ToString(), ex.StackTrace, ex);
                 throw;
             }
         }

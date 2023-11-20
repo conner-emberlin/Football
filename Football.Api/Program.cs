@@ -91,6 +91,7 @@ builder.Services.AddScoped<IAdvancedStatisticsService, AdvancedStatisticsService
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
+builder.Services.AddSingleton<JsonOptions>();
 
 
 builder.Services.Configure<Season>(builder.Configuration.GetSection("Season"));

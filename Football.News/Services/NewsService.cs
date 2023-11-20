@@ -1,22 +1,17 @@
 ﻿using Microsoft.Extensions.Options;
 using Football.News.Interfaces;
 using Football.News.Models;
+using Football.Models;
 using System.Text.Json;
 
 namespace Football.News.Services
 {
-    public class NewsService : INewsService
+    public class NewsService(IOptionsMonitor<ESPN> espn, IOptionsMonitor<WeatherAPI> weatherAPI, IOptionsMonitor<NFLOddsAPI> nflOdds, JsonOptions options) : INewsService
     {
-        private readonly ESPN _espn;
-        private readonly WeatherAPI _weatherAPI;
-        private readonly NFLOddsAPI _nflOdds;
+        private readonly ESPN _espn = espn.CurrentValue;
+        private readonly WeatherAPI _weatherAPI = weatherAPI.CurrentValue;
+        private readonly NFLOddsAPI _nflOdds = nflOdds.CurrentValue;
 
-        public NewsService(IOptionsMonitor<ESPN> espn, IOptionsMonitor<WeatherAPI> weatherAPI, IOptionsMonitor<NFLOddsAPI> nflOdds)
-        {
-            _espn = espn.CurrentValue;
-            _weatherAPI = weatherAPI.CurrentValue;
-            _nflOdds = nflOdds.CurrentValue;
-        }
         public async Task<EspnNews> GetEspnNews()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, _espn.ESPNNewsURL);
@@ -25,9 +20,8 @@ namespace Football.News.Services
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<EspnNews>(responseStream, options);
+                return await JsonSerializer.DeserializeAsync<EspnNews>(responseStream, options.Options);
             }
             else return new EspnNews { };
         }
@@ -41,9 +35,8 @@ namespace Football.News.Services
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<WeatherAPIRoot>(responseStream, options);
+                return await JsonSerializer.DeserializeAsync<WeatherAPIRoot>(responseStream, options.Options);
             }
             else
             {
@@ -59,9 +52,8 @@ namespace Football.News.Services
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<List<NFLOddsRoot>>(responseStream, options);
+                return await JsonSerializer.DeserializeAsync<List<NFLOddsRoot>>(responseStream, options.Options);
             }
             else
             {

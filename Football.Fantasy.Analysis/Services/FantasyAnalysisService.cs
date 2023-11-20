@@ -11,30 +11,17 @@ using Football.Data.Models;
 
 namespace Football.Fantasy.Analysis.Services
 {
-    public class FantasyAnalysisService : IFantasyAnalysisService
+    public class FantasyAnalysisService(IOptionsMonitor<Season> season,
+        IPlayersService playersService, IFantasyDataService fantasyDataService, ISettingsService settingsService,
+        IStatisticsService statsService, IOptionsMonitor<FantasyScoring> scoring) : IFantasyAnalysisService
     {
-        private readonly Season _season;
-        private readonly IPlayersService _playersService;
-        private readonly IFantasyDataService _fantasyDataService;
-        private readonly ISettingsService _settingsService;
-        private readonly IStatisticsService _statsService;
-        private readonly FantasyScoring _scoring;
+        private readonly Season _season = season.CurrentValue;
+        private readonly FantasyScoring _scoring = scoring.CurrentValue;
 
-        public FantasyAnalysisService(IOptionsMonitor<Season> season, 
-            IPlayersService playersService, IFantasyDataService fantasyDataService, ISettingsService settingsService, 
-            IStatisticsService statsService, IOptionsMonitor<FantasyScoring> scoring)
-        {
-            _season = season.CurrentValue;
-            _playersService = playersService;
-            _fantasyDataService = fantasyDataService;
-            _settingsService = settingsService;
-            _statsService = statsService;
-            _scoring = scoring.CurrentValue;
-        }
         public async Task<List<BoomBust>> GetBoomBusts(Position position)
         {
-            var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(position);
-            var playersByPosition = await _playersService.GetPlayersByPosition(position);
+            var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(position);
+            var playersByPosition = await playersService.GetPlayersByPosition(position);
             return weeklyFantasy.Join(playersByPosition, wf => wf.PlayerId, p => p.PlayerId, 
                                        (wf, p) => new { WeeklyFantasy = wf, Player = p })
                                                        .GroupBy(wfp => wfp.Player, 
@@ -42,8 +29,8 @@ namespace Football.Fantasy.Analysis.Services
                                                                 (key, f) => new {Player = key, FantasyPoints = f.ToList()})
                                                        .Select(wf => new { 
                                                                             wf.Player, 
-                                                                            BoomCount = (double)wf.FantasyPoints.Count(fp => fp > _settingsService.GetBoomSetting(position)), 
-                                                                            BustCount = (double)wf.FantasyPoints.Count(fp => fp < _settingsService.GetBustSetting(position)), 
+                                                                            BoomCount = (double)wf.FantasyPoints.Count(fp => fp > settingsService.GetBoomSetting(position)), 
+                                                                            BustCount = (double)wf.FantasyPoints.Count(fp => fp < settingsService.GetBustSetting(position)), 
                                                                             WeekCount = (double)wf.FantasyPoints.Count})                                                                        
                                                        .Select(bb => new BoomBust
                                                                 {
@@ -56,14 +43,14 @@ namespace Football.Fantasy.Analysis.Services
 
         public async Task<List<FantasyPerformance>> GetFantasyPerformances(int teamId)
         {
-            var teamMap = await _playersService.GetTeam(teamId);
-            var players = await _playersService.GetPlayersByTeam(teamMap.Team);
-            List<FantasyPerformance> teamFantasyPerformances = new();
-            if (players.Any())
+            var teamMap = await playersService.GetTeam(teamId);
+            var players = await playersService.GetPlayersByTeam(teamMap.Team);
+            List<FantasyPerformance> teamFantasyPerformances = [];
+            if (players.Count > 0)
             {
                 foreach (var p in players)
                 {
-                    var player = await _playersService.GetPlayer(p.PlayerId);
+                    var player = await playersService.GetPlayer(p.PlayerId);
                     var fp = await GetFantasyPerformance(player);
                     if (fp != null)
                     {
@@ -76,7 +63,7 @@ namespace Football.Fantasy.Analysis.Services
         public async Task<List<FantasyPerformance>> GetFantasyPerformances(Position position)
         {
             List<FantasyPerformance> fantasyPerformances = new();
-            var players = await _playersService.GetPlayersByPosition(position);
+            var players = await playersService.GetPlayersByPosition(position);
             foreach (var player in players)
             {
                 var fantasyPerformance = await GetFantasyPerformance(player);
@@ -90,8 +77,8 @@ namespace Football.Fantasy.Analysis.Services
 
         public async Task<FantasyPerformance?> GetFantasyPerformance(Player player)
         {
-            var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
-            if (weeklyFantasy.Any())
+            var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(player.PlayerId);
+            if (weeklyFantasy.Count > 0)
             {
                 var variance = CalculateVariance(weeklyFantasy.Select(w => w.FantasyPoints));
                 return new FantasyPerformance
@@ -112,8 +99,8 @@ namespace Football.Fantasy.Analysis.Services
         }
         public async Task<List<BoomBustByWeek>> GetBoomBustsByWeek(int playerId)
         {
-            var player = await _playersService.GetPlayer(playerId);
-            var weeklyFantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
+            var player = await playersService.GetPlayer(playerId);
+            var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(player.PlayerId);
             if (Enum.TryParse(player.Position, out Position position))
             {
                  return weeklyFantasy.Select(wf => new BoomBustByWeek
@@ -121,8 +108,8 @@ namespace Football.Fantasy.Analysis.Services
                     Season = _season.CurrentSeason,
                     Player = player,
                     Week = wf.Week,
-                    Boom = wf.FantasyPoints > _settingsService.GetBoomSetting(position),
-                    Bust = wf.FantasyPoints < _settingsService.GetBustSetting(position),
+                    Boom = wf.FantasyPoints > settingsService.GetBoomSetting(position),
+                    Bust = wf.FantasyPoints < settingsService.GetBustSetting(position),
                     FantasyPoints = wf.FantasyPoints
                  }).OrderBy(b => b.Week).ToList();
             }
@@ -131,18 +118,18 @@ namespace Football.Fantasy.Analysis.Services
 
         public async Task<List<FantasyPercentage>> GetFantasyPercentages(Position position)
         {
-            var players = await _playersService.GetPlayersByPosition(position);
-            List<FantasyPercentage> fantasyPercentages = new();
+            var players = await playersService.GetPlayersByPosition(position);
+            List<FantasyPercentage> fantasyPercentages = [];
             if (position == Position.QB)
             {
                 foreach (var player in players)
                 {
-                    var stats = await _statsService.GetWeeklyData<WeeklyDataQB>(position, player.PlayerId);
-                    var fantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
+                    var stats = await statsService.GetWeeklyData<WeeklyDataQB>(position, player.PlayerId);
+                    var fantasy = await fantasyDataService.GetWeeklyFantasy(player.PlayerId);
                     var totalFantasy = fantasy.Sum(f => f.FantasyPoints)
                                      + stats.Sum(s => s.Int) * _scoring.PointsPerInterception
                                      + stats.Sum(s => s.Fumbles) * _scoring.PointsPerFumble;
-                    if (stats.Any() && totalFantasy > 0)
+                    if (stats.Count > 0 && totalFantasy > 0)
                     {
                         fantasyPercentages.Add(new FantasyPercentage
                         {
@@ -161,10 +148,10 @@ namespace Football.Fantasy.Analysis.Services
             {
                 foreach (var player in players)
                 {
-                    var stats = await _statsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId);
-                    var fantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
+                    var stats = await statsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId);
+                    var fantasy = await fantasyDataService.GetWeeklyFantasy(player.PlayerId);
                     var totalFantasy = fantasy.Sum(f => f.FantasyPoints) + stats.Sum(s => s.Fumbles)* _scoring.PointsPerFumble;
-                    if (stats.Any() && totalFantasy > 0)
+                    if (stats.Count > 0 && totalFantasy > 0)
                     {
                         fantasyPercentages.Add(new FantasyPercentage
                         {
@@ -184,10 +171,10 @@ namespace Football.Fantasy.Analysis.Services
             {
                 foreach (var player in players)
                 {
-                    var stats = await _statsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId);
-                    var fantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
+                    var stats = await statsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId);
+                    var fantasy = await fantasyDataService.GetWeeklyFantasy(player.PlayerId);
                     var totalFantasy = fantasy.Sum(f => f.FantasyPoints) + stats.Sum(s => s.Fumbles) * _scoring.PointsPerFumble;
-                    if (stats.Any() && totalFantasy > 0)
+                    if (stats.Count > 0 && totalFantasy > 0)
                     {
                         fantasyPercentages.Add(new FantasyPercentage
                         {
@@ -207,10 +194,10 @@ namespace Football.Fantasy.Analysis.Services
             {
                 foreach (var player in players)
                 {
-                    var stats = await _statsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId);
-                    var fantasy = await _fantasyDataService.GetWeeklyFantasy(player.PlayerId);
+                    var stats = await statsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId);
+                    var fantasy = await fantasyDataService.GetWeeklyFantasy(player.PlayerId);
                     var totalFantasy = fantasy.Sum(f => f.FantasyPoints) + stats.Sum(s => s.Fumbles) * _scoring.PointsPerFumble;
-                    if (stats.Any() && totalFantasy > 0)
+                    if (stats.Count > 0 && totalFantasy > 0)
                     {
                         fantasyPercentages.Add(new FantasyPercentage
                         {

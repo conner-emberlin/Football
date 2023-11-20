@@ -1,4 +1,6 @@
-﻿namespace Football.Models
+﻿using System.Text.Json;
+
+namespace Football.Models
 {
     public class Season
     {
@@ -131,6 +133,19 @@
         public double RBCompareRange { get; set; }
         public double WRCompareRange { get; set; }
         public double TECompareRange { get; set; }
+    }
+
+    public class JsonOptions
+    {
+        public JsonSerializerOptions Options { get; }
+
+        public JsonOptions()
+        {
+            Options = new JsonSerializerOptions{
+
+                PropertyNameCaseInsensitive = true
+            };
+        }
     }
        
 }

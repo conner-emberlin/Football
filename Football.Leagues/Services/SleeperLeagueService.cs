@@ -1,26 +1,16 @@
 ﻿using Football.Models;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
-using Football.Players.Interfaces;
 using System.Text.Json.Nodes;
 using Football.Leagues.Models;
 using Football.Leagues.Interfaces;
 
 namespace Football.Leagues.Services
 {
-    public class SleeperLeagueService : ISleeperLeagueService
+    public class SleeperLeagueService(IOptionsMonitor<SleeperSettings> settings, IOptionsMonitor<Season> season, JsonOptions options) : ISleeperLeagueService
     {
-        private readonly SleeperSettings _settings;
-        private readonly Season _season;
-        private readonly IPlayersService _playersService;
-        public SleeperLeagueService(IOptionsMonitor<SleeperSettings> settings, IOptionsMonitor<Season> season, IPlayersService playersService)
-
-        {
-            _settings = settings.CurrentValue;
-            _season = season.CurrentValue;
-            _playersService = playersService;
-        }
-
+        private readonly SleeperSettings _settings = settings.CurrentValue;
+        private readonly Season _season = season.CurrentValue;
         public async Task<SleeperUser?> GetSleeperUser(string username)
         {
             var requestUrl = string.Format("{0}/user/{1}", _settings.SleeperBaseURL, username);
@@ -30,9 +20,8 @@ namespace Football.Leagues.Services
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<SleeperUser>(responseStream, options);
+                return await JsonSerializer.DeserializeAsync<SleeperUser>(responseStream, options.Options);
             }
             else return new SleeperUser();
         }
@@ -46,9 +35,8 @@ namespace Football.Leagues.Services
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<List<SleeperLeague>>(responseStream, options);
+                return await JsonSerializer.DeserializeAsync<List<SleeperLeague>>(responseStream, options.Options);
             }
             else return Enumerable.Empty<SleeperLeague>().ToList();
         }
@@ -62,9 +50,8 @@ namespace Football.Leagues.Services
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<SleeperLeague>(responseStream, options);
+                return await JsonSerializer.DeserializeAsync<SleeperLeague>(responseStream, options.Options);
             }
             else return new SleeperLeague();
         }
@@ -77,9 +64,8 @@ namespace Football.Leagues.Services
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<List<SleeperRoster>>(responseStream, options);
+                return await JsonSerializer.DeserializeAsync<List<SleeperRoster>>(responseStream, options.Options);
             }
             else return Enumerable.Empty<SleeperRoster>().ToList();
         }
@@ -93,9 +79,8 @@ namespace Football.Leagues.Services
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<List<SleeperMatchup>>(responseStream, options);
+                return await JsonSerializer.DeserializeAsync<List<SleeperMatchup>>(responseStream, options.Options);
             }
             else return Enumerable.Empty<SleeperMatchup>().ToList();
         }
@@ -110,9 +95,8 @@ namespace Football.Leagues.Services
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                var dictionary = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonObject>>(responseStream, options);
+                var dictionary = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonObject>>(responseStream, options.Options);
                 if (dictionary is not null)
                 {
                     foreach (var item in dictionary)
@@ -142,9 +126,8 @@ namespace Football.Leagues.Services
             var response = await client.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<List<SleeperTrendingPlayer>>(responseStream, options);
+                return await JsonSerializer.DeserializeAsync<List<SleeperTrendingPlayer>>(responseStream, options.Options);
             }
             else return Enumerable.Empty<SleeperTrendingPlayer>().ToList();
 

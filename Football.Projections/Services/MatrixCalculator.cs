@@ -4,17 +4,12 @@ using MathNet.Numerics.LinearAlgebra;
 
 namespace Football.Projections.Services
 {
-    public class MatrixCalculator : IMatrixCalculator
+    public class MatrixCalculator(ISettingsService settings) : IMatrixCalculator
     {
-        private readonly ISettingsService _settings;
-        public MatrixCalculator(ISettingsService settings)
-        {
-            _settings = settings;
-        }
         public Matrix<double> RegressorMatrix<T>(List<T> model)
         {
             var rowCount = model.Count;
-            var columnCount = _settings.GetPropertiesFromModel<T>().Count + 1;
+            var columnCount = settings.GetPropertiesFromModel<T>().Count + 1;
             var rows = new List<Vector<double>>();
             foreach (var m in model)
             {
@@ -26,17 +21,17 @@ namespace Football.Projections.Services
         public Vector<double> DependentVector<T>(List<T> dependents, Model value)
         {
             var len = dependents.Count;
-            var fpProp = _settings.GetPropertiesFromModel<T>().First(p => p.ToString()!.Contains(value.ToString()));
+            var prop = settings.GetPropertiesFromModel<T>().First(p => p.ToString()!.Contains(value.ToString()));
             var vec = Vector<double>.Build.Dense(len);
             for (int i = 0; i < len; i++)
             {                
-                vec[i] = Convert.ToDouble(fpProp.GetValue(dependents[i]));
+                vec[i] = Convert.ToDouble(prop.GetValue(dependents[i]));
             }
             return vec;
         }
         private Vector<double> TransformModel<T>(T modelItem)
         {
-            var properties = _settings.GetPropertiesFromModel<T>();
+            var properties = settings.GetPropertiesFromModel<T>();
             var columnCount = properties.Count + 1;
             var vec = Vector<double>.Build.Dense(columnCount);
             vec[0] = 1;

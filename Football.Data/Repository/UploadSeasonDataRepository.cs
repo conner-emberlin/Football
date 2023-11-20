@@ -8,13 +8,8 @@ using System.Xml.Linq;
 
 namespace Football.Data.Repository
 {
-    public class UploadSeasonDataRepository : IUploadSeasonDataRepository
+    public class UploadSeasonDataRepository(IDbConnection dbConnection) : IUploadSeasonDataRepository
     {
-        private readonly IDbConnection _dbConnection;
-        public UploadSeasonDataRepository(IDbConnection dbConnection)
-        {
-            _dbConnection = dbConnection;
-        }
         public async Task<int> UploadSeasonQBData(List<SeasonDataQB> players, List<int> ignoreList)
         {
             var query = $@"INSERT INTO [dbo].SeasonQBData (Season, PlayerId, Name, Completions, Attempts, Yards, TD, Int, Sacks, RushingAttempts, RushingYards, RushingTD, Fumbles, Games)
@@ -22,7 +17,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
 
@@ -34,7 +29,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
         }
@@ -45,7 +40,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
         }
@@ -56,7 +51,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += !ignoreList.Contains(player.PlayerId) ? await _dbConnection.ExecuteAsync(query, player) : 0;
+                count += !ignoreList.Contains(player.PlayerId) ? await dbConnection.ExecuteAsync(query, player) : 0;
             }
             return count;
 
@@ -68,7 +63,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var player in players)
             {
-                count += await _dbConnection.ExecuteAsync(query, player);
+                count += await dbConnection.ExecuteAsync(query, player);
             }
             return count;
         }
@@ -80,7 +75,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var t in teams)
             {
-                count += await _dbConnection.ExecuteAsync(query, t);
+                count += await dbConnection.ExecuteAsync(query, t);
             }
             return count;
         }
@@ -91,7 +86,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var s in schedules)
             {
-                count += await _dbConnection.ExecuteAsync(query, s);
+                count += await dbConnection.ExecuteAsync(query, s);
             }
             return count;
         }
@@ -99,7 +94,7 @@ namespace Football.Data.Repository
         {
             var query = $@"INSERT INTO [dbo].ScheduleDetails (Season, Week, Day, Date, Time, HomeTeamId, AwayTeamId)
                             VALUES (@Season, @Week, @Day, @Date, @Time, @HomeTeamId, @AwayTeamId)";
-            return await _dbConnection.ExecuteAsync(query, scheduleDetails);
+            return await dbConnection.ExecuteAsync(query, scheduleDetails);
         }
         public async Task<int> UploadADP(List<SeasonADP> adp)
         {
@@ -108,7 +103,7 @@ namespace Football.Data.Repository
             var count = 0;
             foreach (var a in adp)
             {
-                count += await _dbConnection.ExecuteAsync(query, a);
+                count += await dbConnection.ExecuteAsync(query, a);
             }
             return count;
         }

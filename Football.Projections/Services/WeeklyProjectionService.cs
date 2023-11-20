@@ -14,55 +14,27 @@ using Serilog;
 
 namespace Football.Projections.Services
 {
-    public class WeeklyProjectionService : IProjectionService<WeekProjection>
+    public class WeeklyProjectionService(IRegressionModelService regressionService, IFantasyDataService fantasyService,
+    IMemoryCache cache, ILogger logger, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
+    IStatisticsService statisticsService, IOptionsMonitor<Season> season,
+    IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository,
+    IOptionsMonitor<WeeklyTunings> weeklyTunings, ISettingsService settingsService, IOptionsMonitor<ProjectionLimits> settings) : IProjectionService<WeekProjection>
     {
-        private readonly IMemoryCache _cache;
-        private readonly ILogger _logger;
-        private readonly Season _season;
-        private readonly WeeklyTunings _weeklyTunings;
-        private readonly ProjectionLimits _settings;
-        private readonly IFantasyDataService _fantasyService;
-        private readonly IStatisticsService _statisticsService;
-        private readonly IMatrixCalculator _matrixCalculator;
-        private readonly IStatProjectionCalculator _statCalculator;
-        private readonly IRegressionModelService _regressionService;
-        private readonly IAdjustmentService _adjustmentService;
-        private readonly IPlayersService _playersService;
-        private readonly IProjectionRepository _projectionRepository;
-        private readonly ISettingsService _settingsService;
+        private readonly Season _season = season.CurrentValue;
+        private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
+        private readonly ProjectionLimits _settings = settings.CurrentValue;
 
-        public WeeklyProjectionService(IRegressionModelService regressionService, IFantasyDataService fantasyService, 
-        IMemoryCache cache, ILogger logger, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
-        IStatisticsService statisticsService, IOptionsMonitor<Season> season,
-        IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, 
-        IOptionsMonitor<WeeklyTunings> weeklyTunings, ISettingsService settingsService, IOptionsMonitor<ProjectionLimits> settings)
-        {
-            _regressionService = regressionService;
-            _season = season.CurrentValue;
-            _weeklyTunings = weeklyTunings.CurrentValue;
-            _cache = cache;
-            _logger = logger;
-            _fantasyService = fantasyService;
-            _matrixCalculator = matrixCalculator;
-            _statCalculator = statCalculator;
-            _statisticsService = statisticsService;
-            _playersService = playersService;
-            _adjustmentService = adjustmentService;
-            _projectionRepository = projectionRepository;
-            _settingsService = settingsService;
-            _settings = settings.CurrentValue;
-        }
-        public async Task<IEnumerable<WeekProjection>?> GetPlayerProjections(int playerId) => await _projectionRepository.GetWeeklyProjection(playerId);
-        public async Task<int> PostProjections(List<WeekProjection> projections) => await _projectionRepository.PostWeeklyProjections(projections);
+        public async Task<IEnumerable<WeekProjection>?> GetPlayerProjections(int playerId) => await projectionRepository.GetWeeklyProjection(playerId);
+        public async Task<int> PostProjections(List<WeekProjection> projections) => await projectionRepository.PostWeeklyProjections(projections);
 
         public bool GetProjectionsFromSQL(Position position, int week, out IEnumerable<WeekProjection> projections)
         {
-            projections = _projectionRepository.GetWeeklyProjectionsFromSQL(position, week);
+            projections = projectionRepository.GetWeeklyProjectionsFromSQL(position, week);
             return projections.Any();
         }
         public bool GetProjectionsFromCache(Position position, out IEnumerable<WeekProjection> cachedValues)
         {
-            if (_cache.TryGetValue(position.ToString() + Cache.WeeklyProjections.ToString(), out cachedValues))
+            if (cache.TryGetValue(position.ToString() + Cache.WeeklyProjections.ToString(), out cachedValues!))
             {
                 return cachedValues.Any();
             }
@@ -70,14 +42,14 @@ namespace Football.Projections.Services
         }
         public async Task<IEnumerable<WeekProjection>> GetProjections(Position position)
         {
-            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             if (GetProjectionsFromCache(position, out var cachedValues))
             {
                 return cachedValues;
             }
             else if (GetProjectionsFromSQL(position, currentWeek, out var projectionsSQL))
             {
-                _cache.Set(position.ToString() + Cache.WeeklyProjections.ToString(), projectionsSQL);
+                cache.Set(position.ToString() + Cache.WeeklyProjections.ToString(), projectionsSQL);
                 return projectionsSQL;
             }
             else
@@ -90,30 +62,30 @@ namespace Football.Projections.Services
                     Position.TE => await CalculateProjections(await TEProjectionModel(currentWeek), position),
                     _ => throw new NotImplementedException()
                 };
-                projections = await _adjustmentService.AdjustmentEngine(projections.ToList());
-                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(_settingsService.GetProjectionsCount(position));
-                _cache.Set(position.ToString() + Cache.WeeklyProjections.ToString(), formattedProjections);
+                projections = await adjustmentService.AdjustmentEngine(projections.ToList());
+                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
+                cache.Set(position.ToString() + Cache.WeeklyProjections.ToString(), formattedProjections);
                 return formattedProjections;
             }
         }
         public async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, Position position)
         {
-            List<WeekProjection> projections = new();
-            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
-            var regressorMatrix = _matrixCalculator.RegressorMatrix(model);
+            List<WeekProjection> projections = [];
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            var regressorMatrix = matrixCalculator.RegressorMatrix(model);
             var fantasyModel = await FantasyProjectionModel(model, currentWeek);
-            var dependentVector = _matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
+            var dependentVector = matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
             var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
             var results = regressorMatrix * coefficients;
             
             for (int i = 0; i < results.Count; i++)
             {
-                var playerId = (int)_settingsService.GetValueFromModel(model[i], Model.PlayerId);
-                var projectedPoints = _settingsService.GetValueFromModel(model[i], Model.ProjectedPoints);
+                var playerId = (int)settingsService.GetValueFromModel(model[i], Model.PlayerId);
+                var projectedPoints = settingsService.GetValueFromModel(model[i], Model.ProjectedPoints);
 
                 if (playerId > 0)
                 {
-                    var player = await _playersService.GetPlayer(playerId);
+                    var player = await playersService.GetPlayer(playerId);
                     if (player.Active == 1)
                     {
                         var projection = WeightedWeeklyProjection(projectedPoints / _season.Games, results[i], currentWeek - 1);
@@ -137,7 +109,7 @@ namespace Football.Projections.Services
         private async Task<double> GetAverageProjectionError(int playerId)
         {
             var weeklyProjections = await GetPlayerProjections(playerId);
-            var weeklyFantasy = await _fantasyService.GetWeeklyFantasy(playerId);
+            var weeklyFantasy = await fantasyService.GetWeeklyFantasy(playerId);
             if (weeklyProjections != null && weeklyFantasy.Any() && weeklyProjections.Count() > _settings.ErrorAdjustmentWeek - 1)
             {
                 var diffs = weeklyProjections.Join(weeklyFantasy, wp => wp.Week, wf => wf.Week, (wp, wf) => new { WeekProjection = wp, WeeklyFantasy = wf })
@@ -151,13 +123,13 @@ namespace Football.Projections.Services
             List<WeeklyFantasy> weeklyFantasy = new();
             foreach (var stat in statsModel)
             {
-                var playerId = (int)_settingsService.GetValueFromModel(stat, Model.PlayerId);
+                var playerId = (int)settingsService.GetValueFromModel(stat, Model.PlayerId);
                 if (playerId > 0)
                 {
-                    var weeklyResults = await _fantasyService.GetWeeklyFantasy(playerId);
-                    if (weeklyResults.Any())
+                    var weeklyResults = await fantasyService.GetWeeklyFantasy(playerId);
+                    if (weeklyResults.Count > 0)
                     {
-                        var weeklyAverage = _statCalculator.CalculateWeeklyAverage(weeklyResults, currentWeek);
+                        var weeklyAverage = statCalculator.CalculateWeeklyAverage(weeklyResults, currentWeek);
                         weeklyFantasy.Add(weeklyAverage);
                     }
                 }
@@ -166,56 +138,56 @@ namespace Football.Projections.Services
         }
         private async Task<List<QBModelWeek>> QBProjectionModel(int currentWeek)
         {
-            var players = await _playersService.GetPlayersByPosition(Position.QB);
-            List<QBModelWeek> qbModel = new();
+            var players = await playersService.GetPlayersByPosition(Position.QB);
+            List<QBModelWeek> qbModel = [];
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId);
-                if (stats.Any())
+                var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId);
+                if (stats.Count > 0)
                 {
-                    qbModel.Add(await _regressionService.QBModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    qbModel.Add(await regressionService.QBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
                 }
             }
             return qbModel;
         }
         private async Task<List<RBModelWeek>> RBProjectionModel(int currentWeek)
         {
-            var players = await _playersService.GetPlayersByPosition(Position.RB);
-            List<RBModelWeek> rbModel = new();
+            var players = await playersService.GetPlayersByPosition(Position.RB);
+            List<RBModelWeek> rbModel = [];
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, player.PlayerId);
-                if (stats.Any())
+                var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, player.PlayerId);
+                if (stats.Count > 0)
                 {
-                    rbModel.Add(await _regressionService.RBModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    rbModel.Add(await regressionService.RBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
                 }
             }
             return rbModel;
         }
         private async Task<List<WRModelWeek>> WRProjectionModel(int currentWeek)
         {
-            var players = await _playersService.GetPlayersByPosition(Position.WR);
-            List<WRModelWeek> wrModel = new();
+            var players = await playersService.GetPlayersByPosition(Position.WR);
+            List<WRModelWeek> wrModel = [];
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, player.PlayerId);
-                if (stats.Any())
+                var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, player.PlayerId);
+                if (stats.Count > 0)
                 {
-                    wrModel.Add(await _regressionService.WRModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    wrModel.Add(await regressionService.WRModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
                 }
             }
             return wrModel;
         }
         private async Task<List<TEModelWeek>> TEProjectionModel(int currentWeek)
         {
-            var players = await _playersService.GetPlayersByPosition(Position.TE);
-            List<TEModelWeek> teModel = new();
+            var players = await playersService.GetPlayersByPosition(Position.TE);
+            List<TEModelWeek> teModel = [];
             foreach (var player in players)
             {
-                var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, player.PlayerId);
-                if (stats.Any())
+                var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, player.PlayerId);
+                if (stats.Count > 0)
                 {
-                    teModel.Add(await _regressionService.TEModelWeek(_statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    teModel.Add(await regressionService.TEModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
                 }
             }
             return teModel;

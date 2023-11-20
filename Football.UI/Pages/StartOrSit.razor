@@ -46,7 +46,8 @@
                     @foreach (var sos in StartOrSits)
                     {
                         if(sos.TeamMap is not null){
-                            <td>@sos.TeamMap.Team</td>
+                            var imgPath = "https://localhost:7176/Logos/" + sos.TeamMap.Team + ".png";
+                            <td><img src="@imgPath" width="30" height="30"></td>
                         }
                         else
                         {
@@ -156,7 +157,7 @@
                                         diff *= -1;
                                         <text> @comp.Player.Name <b>vs</b> @GetOpponent(sos): 
                                             Proj: @Math.Round(comp.ProjectedPoints,2) 
-                                            Actual:@Math.Round(comp.WeeklyFantasy.FantasyPoints,2)
+                                            Actual: @Math.Round(comp.WeeklyFantasy.FantasyPoints,2)
                                             Diff: <b><text style="@GetDiffColor(diff)">@Math.Round(diff,2)</text></b>
                                         </text>
                                         <br>

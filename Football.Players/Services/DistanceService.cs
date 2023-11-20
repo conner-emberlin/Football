@@ -5,26 +5,19 @@ using Microsoft.Extensions.Options;
 
 namespace Football.Players.Services
 {
-    public class DistanceService : IDistanceService
+    public class DistanceService(IPlayersService playersService, IOptionsMonitor<GeoDistance> geo, IOptionsMonitor<Season> season) : IDistanceService
     {
-        private readonly IPlayersService _playersService;
-        private readonly GeoDistance _geo;
-        private readonly Season _season;
+        private readonly GeoDistance _geo = geo.CurrentValue;
+        private readonly Season _season = season.CurrentValue;
 
-        public DistanceService(IPlayersService playersService, IOptionsMonitor<GeoDistance> geo, IOptionsMonitor<Season> season)
-        {
-            _playersService = playersService;
-            _geo = geo.CurrentValue;
-            _season = season.CurrentValue;
-        }
         public async Task<double> GetTravelDistance(int playerId)
         {
-            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
-            var scheduleDetails = await _playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
-            var playerTeam = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            var scheduleDetails = await playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
+            var playerTeam = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
             if (playerTeam is not null)
             {
-                var teamId = await _playersService.GetTeamId(playerTeam.Team);
+                var teamId = await playersService.GetTeamId(playerTeam.Team);
                 var scheduleDetail = scheduleDetails.FirstOrDefault(s => s.HomeTeamId == teamId || s.AwayTeamId == teamId);
                 if (scheduleDetail is null)
                 {
@@ -36,8 +29,8 @@ namespace Football.Players.Services
                 }
                 else
                 {
-                    var location1 = await _playersService.GetTeamLocation(teamId);
-                    var location2 = await _playersService.GetTeamLocation(scheduleDetail.HomeTeamId);
+                    var location1 = await playersService.GetTeamLocation(teamId);
+                    var location2 = await playersService.GetTeamLocation(scheduleDetail.HomeTeamId);
                     return GetDistance(location1, location2);
                 }
             }

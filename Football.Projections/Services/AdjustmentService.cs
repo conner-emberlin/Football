@@ -10,29 +10,16 @@ using Football.Enums;
 
 namespace Football.Projections.Services
 {
-    public class AdjustmentService : IAdjustmentService
+    public class AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, ILogger logger, IOptionsMonitor<Season> season,
+        IOptionsMonitor<Tunings> tunings, IOptionsMonitor<WeeklyTunings> weeklyTunings) : IAdjustmentService
     {
-        private readonly IPlayersService _playersService;
-        private readonly IMatchupAnalysisService _matchupAnalysisService;
-        private readonly ILogger _logger;
-        private readonly Season _season;
-        private readonly Tunings _tunings;
-        private readonly WeeklyTunings _weeklyTunings;
-
-        public AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, ILogger logger, IOptionsMonitor<Season> season, 
-            IOptionsMonitor<Tunings> tunings, IOptionsMonitor<WeeklyTunings> weeklyTunings)
-        {
-            _playersService = playerService;
-            _matchupAnalysisService = mathupAnalysisService;
-            _logger = logger;
-            _season = season.CurrentValue;
-            _tunings = tunings.CurrentValue;
-            _weeklyTunings = weeklyTunings.CurrentValue;
-        }
+        private readonly Season _season = season.CurrentValue;
+        private readonly Tunings _tunings = tunings.CurrentValue;
+        private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
 
         public async Task<List<SeasonProjection>> AdjustmentEngine(List<SeasonProjection> seasonProjections)
         {
-            _logger.Information("Calculating adjustments");
+            logger.Information("Calculating adjustments");
             seasonProjections = await InjuryAdjustment(seasonProjections);
             seasonProjections = await SuspensionAdjustment(seasonProjections);
 
@@ -46,7 +33,7 @@ namespace Football.Projections.Services
         }
         public async Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections)
         {
-            _logger.Information("Calculating adjustments");
+            logger.Information("Calculating adjustments");
             weekProjections = await MatchupAdjustment(weekProjections);
             weekProjections = await InjuryAdustment(weekProjections);
             return weekProjections;
@@ -56,10 +43,10 @@ namespace Football.Projections.Services
         {
             foreach(var s in seasonProjections)
             {
-                var gamesInjured = await _playersService.GetPlayerInjuries(s.PlayerId, _season.CurrentSeason);
+                var gamesInjured = await playerService.GetPlayerInjuries(s.PlayerId, _season.CurrentSeason);
                 if ( gamesInjured > 0)
                 {
-                    _logger.Information("Injury adjustment of {p} weeks for player {t}: {v}", gamesInjured, s.PlayerId, s.Name);
+                    logger.Information("Injury adjustment of {p} weeks for player {t}: {v}", gamesInjured, s.PlayerId, s.Name);
                     s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * gamesInjured;
                 }
             }
@@ -68,7 +55,7 @@ namespace Football.Projections.Services
 
         private async Task<List<WeekProjection>> InjuryAdustment(List<WeekProjection> weeklyProjections)
         {
-            var activeInjuries = await _playersService.GetActiveInSeasonInjuries(_season.CurrentSeason);
+            var activeInjuries = await playerService.GetActiveInSeasonInjuries(_season.CurrentSeason);
             var injuredPlayerProjections = activeInjuries.Join(weeklyProjections, 
                                                                 ai => ai.PlayerId, 
                                                                 wp => wp.PlayerId, 
@@ -87,10 +74,10 @@ namespace Football.Projections.Services
         {
             foreach (var s in seasonProjections)
             {
-                var gamesSuspended = await _playersService.GetPlayerSuspensions(s.PlayerId, _season.CurrentSeason);
+                var gamesSuspended = await playerService.GetPlayerSuspensions(s.PlayerId, _season.CurrentSeason);
                 if (gamesSuspended > 0)
                 {
-                    _logger.Information("Suspension adjustment of {p} days for player {t}: {v}", gamesSuspended, s.PlayerId, s.Name);
+                    logger.Information("Suspension adjustment of {p} days for player {t}: {v}", gamesSuspended, s.PlayerId, s.Name);
                     s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * gamesSuspended;
                 }
             }
@@ -98,15 +85,15 @@ namespace Football.Projections.Services
         }
         private async Task<List<SeasonProjection>> QuarterbackChangeAdjustment(List<SeasonProjection> seasonProjections)
         {
-            var qbChanges = await _playersService.GetQuarterbackChanges(_season.CurrentSeason);
+            var qbChanges = await playerService.GetQuarterbackChanges(_season.CurrentSeason);
             foreach(var s in seasonProjections)
             {
                 if (qbChanges.Any(q => q.PlayerId == s.PlayerId))
                 {                   
                     var changeRecord = qbChanges.First(q => q.PlayerId == s.PlayerId);
-                    _logger.Information("QB Change found for player {p}: {n}. The New QB is {q}.", s.PlayerId, s.Name, changeRecord.CurrentQB);
-                    var previousEPA = await _playersService.GetEPA(changeRecord.PreviousQB, _season.CurrentSeason - 1);
-                    var currentEPA = await _playersService.GetEPA(changeRecord.CurrentQB, _season.CurrentSeason - 1);
+                    logger.Information("QB Change found for player {p}: {n}. The New QB is {q}.", s.PlayerId, s.Name, changeRecord.CurrentQB);
+                    var previousEPA = await playerService.GetEPA(changeRecord.PreviousQB, _season.CurrentSeason - 1);
+                    var currentEPA = await playerService.GetEPA(changeRecord.CurrentQB, _season.CurrentSeason - 1);
                     var ratio = EPARatio(previousEPA, currentEPA);
                     s.ProjectedPoints *= ratio;
                 }
@@ -117,15 +104,15 @@ namespace Football.Projections.Services
         private async Task<List<WeekProjection>> MatchupAdjustment(List<WeekProjection> weekProjections)
         {
             var t = Enum.TryParse(weekProjections.First().Position, out Position position);
-            var matchupRanks = await _matchupAnalysisService.PositionalMatchupRankings(position);
+            var matchupRanks = await mathupAnalysisService.PositionalMatchupRankings(position);
             var avgMatchup = matchupRanks.ElementAt((int)Math.Round((double)(matchupRanks.Count/2)));
             foreach (var w in weekProjections)
             {
-                var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, w.PlayerId);
+                var team = await playerService.GetPlayerTeam(_season.CurrentSeason, w.PlayerId);
                 if (team != null) 
                 {
-                    var teamId = await _playersService.GetTeamId(team.Team);
-                    var matchup = (await _playersService.GetTeamGames(teamId)).First(m => m.Week == w.Week);
+                    var teamId = await playerService.GetTeamId(team.Team);
+                    var matchup = (await playerService.GetTeamGames(teamId)).First(m => m.Week == w.Week);
                     if (matchup.OpposingTeam != "BYE")
                     {
                         var opponentRank = matchupRanks.FirstOrDefault(mr => mr.Team.TeamId == matchup.OpposingTeamId);

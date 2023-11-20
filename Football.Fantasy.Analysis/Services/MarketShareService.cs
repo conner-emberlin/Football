@@ -12,45 +12,30 @@ using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Analysis.Services
 {
-    public class MarketShareService : IMarketShareService
+    public class MarketShareService(IPlayersService playersService, IStatisticsService statisticsService, IFantasyDataService fantasyService,
+        IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settingsService) : IMarketShareService
     {
-        private readonly IPlayersService _playersService;
-        private readonly IStatisticsService _statisticsService;
-        private readonly IFantasyDataService _fantasyService;
-        private readonly IMemoryCache _cache;
-        private readonly ISettingsService _settingsService;
-        private readonly Season _season;
-
-        public MarketShareService(IPlayersService playersService, IStatisticsService statisticsService, IFantasyDataService fantasyService,
-            IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settingsService)
-        {
-            _playersService = playersService;
-            _statisticsService = statisticsService;
-            _fantasyService = fantasyService;
-            _cache = cache;
-            _season = season.CurrentValue;
-            _settingsService = settingsService;
-        }
+        private readonly Season _season = season.CurrentValue;
 
         public async Task<TargetShare> GetTargetShare(int playerId)
         {
-            var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+            var team = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
             return team != null ? (await GetTargetShares()).First(t => t.Team.Team == team.Team) : new TargetShare();           
         }
         public async Task<List<TargetShare>> GetTargetShares()
         {
-            if (_settingsService.GetFromCache<TargetShare>(Cache.TargetShares, out var cachedShares))
+            if (settingsService.GetFromCache<TargetShare>(Cache.TargetShares, out var cachedShares))
             {
                 return cachedShares;
             }
             else
             {
-                var teams = await _playersService.GetAllTeams();
-                List<TargetShare> shares = new();
+                var teams = await playersService.GetAllTeams();
+                List<TargetShare> shares = [];
                 foreach (var team in teams)
                 {
-                    var allPlayers = await _playersService.GetPlayersByTeam(team.Team);
-                    List<Player> players = new();
+                    var allPlayers = await playersService.GetPlayersByTeam(team.Team);
+                    List<Player> players = [];
 
                     var totalAttempts = 0.0;
                     var totalCompletions = 0.0;
@@ -63,28 +48,28 @@ namespace Football.Fantasy.Analysis.Services
 
                     foreach (var p in allPlayers)
                     {
-                        _ = Enum.TryParse((await _playersService.GetPlayer(p.PlayerId)).Position, out Position position);
+                        _ = Enum.TryParse((await playersService.GetPlayer(p.PlayerId)).Position, out Position position);
                         if (position == Position.QB)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, p.PlayerId, team.Team);
+                            var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, p.PlayerId, team.Team);
                             totalAttempts += stats.Sum(s => s.Attempts);
                             totalCompletions += stats.Sum(s => s.Completions);
                         }
                         else if (position == Position.RB)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId, team.Team);
+                            var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId, team.Team);
                             RBTargets += stats.Sum(s => s.Targets);
                             RBComps += stats.Sum(s => s.Receptions);
                         }
                         else if (position == Position.WR)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId, team.Team);
+                            var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId, team.Team);
                             WRTargets += stats.Sum(s => s.Targets);
                             WRComps += stats.Sum(s => s.Receptions);
                         }
                         else if (position == Position.TE)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId, team.Team);
+                            var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId, team.Team);
                             TETargets += stats.Sum(s => s.Targets);
                             TEComps += stats.Sum(s => s.Receptions);
                         }
@@ -101,25 +86,25 @@ namespace Football.Fantasy.Analysis.Services
                     });
                 }
                 var orderedShares = shares.OrderBy(s => s.Team.TeamDescription).ToList();
-                _cache.Set(Cache.TargetShares.ToString(), orderedShares);
+                cache.Set(Cache.TargetShares.ToString(), orderedShares);
                 return orderedShares;
             }
         }
         public async Task<List<MarketShare>> GetMarketShare(Position position)
         {
-            List<MarketShare> share = new();
-            var players = await _playersService.GetPlayersByPosition(position);
+            List<MarketShare> share = [];
+            var players = await playersService.GetPlayersByPosition(position);
             var teamTotals = await GetTeamTotals();
             foreach (var player in players)
             {
-                var team = await _playersService.GetPlayerTeam(_season.CurrentSeason, player.PlayerId);
+                var team = await playersService.GetPlayerTeam(_season.CurrentSeason, player.PlayerId);
                 if (team != null) {
-                    var fantasy = await _fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team);
+                    var fantasy = await fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team);
                     var teamTotal = teamTotals.First(t => t.Team.Team == team.Team);
                     if (position == Position.RB)
                     {
-                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId, team.Team);
-                        if (stats.Any())
+                        var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId, team.Team);
+                        if (stats.Count > 0)
                         {
                             share.Add(new MarketShare
                             {
@@ -140,8 +125,8 @@ namespace Football.Fantasy.Analysis.Services
                     }
                     else if (position == Position.WR)
                     {
-                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId, team.Team);
-                        if (stats.Any())
+                        var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId, team.Team);
+                        if (stats.Count > 0)
                         {
                             share.Add(new MarketShare
                             {
@@ -162,8 +147,8 @@ namespace Football.Fantasy.Analysis.Services
                     }
                     else if (position == Position.TE)
                     {
-                        var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId, team.Team);
-                        if (stats.Any())
+                        var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId, team.Team);
+                        if (stats.Count > 0)
                         {
                             share.Add(new MarketShare
                             {
@@ -189,15 +174,15 @@ namespace Football.Fantasy.Analysis.Services
 
         public async Task<List<TeamTotals>> GetTeamTotals()
         {
-            if (_settingsService.GetFromCache<TeamTotals>(Cache.TeamTotals, out var cachedTotals))
+            if (settingsService.GetFromCache<TeamTotals>(Cache.TeamTotals, out var cachedTotals))
             {
                 return cachedTotals;
             }
             else
             {
-                List<TeamTotals> totals = new();
-                var teams = await _playersService.GetAllTeams();
-                var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
+                List<TeamTotals> totals = [];
+                var teams = await playersService.GetAllTeams();
+                var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
                 foreach (var team in teams)
                 {
                     var totalFantasyQB = 0.0;
@@ -212,15 +197,15 @@ namespace Football.Fantasy.Analysis.Services
                     var totalRecYds = 0.0;
                     var totalRecTd = 0.0;
 
-                    var players = await _playersService.GetPlayersByTeam(team.Team);
+                    var players = await playersService.GetPlayersByTeam(team.Team);
                     foreach (var p in players)
                     {
-                        var player = await _playersService.GetPlayer(p.PlayerId);
+                        var player = await playersService.GetPlayer(p.PlayerId);
                         _ = Enum.TryParse(player.Position, out Position position);
-                        var fantasy = await _fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team);
+                        var fantasy = await fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team);
                         if (position == Position.QB)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId, team.Team);
+                            var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId, team.Team);
                             totalFantasyQB += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAttempts);
                             totalRushYd += stats.Sum(s => s.RushingYards);
@@ -228,7 +213,7 @@ namespace Football.Fantasy.Analysis.Services
                         }
                         else if (position == Position.RB)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId, team.Team);
+                            var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId, team.Team);
                             totalFantasyRB += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAtt);
                             totalRushYd += stats.Sum(s => s.RushingYds);
@@ -240,7 +225,7 @@ namespace Football.Fantasy.Analysis.Services
                         }
                         else if (position == Position.WR)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId, team.Team);
+                            var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId, team.Team);
                             totalFantasyWR += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAtt);
                             totalRushYd += stats.Sum(s => s.RushingYds);
@@ -252,7 +237,7 @@ namespace Football.Fantasy.Analysis.Services
                         }
                         else if (position == Position.TE)
                         {
-                            var stats = await _statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId, team.Team);
+                            var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId, team.Team);
                             totalFantasyTE += fantasy.Sum(f => f.FantasyPoints);
                             totalRushAtt += stats.Sum(s => s.RushingAtt);
                             totalRushYd += stats.Sum(s => s.RushingYds);
@@ -282,7 +267,7 @@ namespace Football.Fantasy.Analysis.Services
                     });
                 }
                 var teamTotals = totals.OrderByDescending(t => t.TotalFantasy).ToList();
-                _cache.Set(Cache.TeamTotals.ToString(), teamTotals);
+                cache.Set(Cache.TeamTotals.ToString(), teamTotals);
                 return teamTotals;
             }
         }

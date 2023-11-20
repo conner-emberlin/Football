@@ -10,32 +10,25 @@ using System.Text.RegularExpressions;
 
 namespace Football.Data.Services
 {
-    public class ScraperService : IScraperService
+    public class ScraperService(IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playersService, ILogger logger, IOptionsMonitor<Season> season) : IScraperService
     {
-        private readonly WeeklyScraping _scraping;
-        private readonly IPlayersService _playersService;
-        private readonly ILogger _logger;
-        private readonly Season _season;
-        public ScraperService(IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playersService, ILogger logger, IOptionsMonitor<Season> season)
-        {
-            _scraping = scraping.CurrentValue;
-            _playersService = playersService;
-            _season = season.CurrentValue;
-            _logger = logger;
-        }
+        private readonly WeeklyScraping _scraping = scraping.CurrentValue;
+        private readonly Season _season = season.CurrentValue;
+        private static readonly string[] separator = ["\r\n", "\r", "\n"];
+        private static readonly string[] separatorArray = ["@", "vs"];
+
         public string FantasyProsURLFormatter(string position, string year, string week) => string.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
         public string FantasyProsURLFormatter(string position, string year) => string.Format("{0}{1}.php?year={2}", _scraping.FantasyProsBaseURL, position.ToLower(), year);        
         public string[] ScrapeData(string url, string xpath)
         {
             var web = new HtmlWeb();
             HtmlDocument doc = web.Load(url);
-            return doc.DocumentNode.SelectNodes(xpath)[0].InnerText.Split(new string[] { "\r\n", "\r", "\n" },
-                    StringSplitOptions.RemoveEmptyEntries); 
+            return doc.DocumentNode.SelectNodes(xpath)[0].InnerText.Split(separator, StringSplitOptions.RemoveEmptyEntries);
         }
 
         public List<FantasyProsRosterPercent> ParseFantasyProsRosterPercent(string[] strings, string position)
         {
-            List<FantasyProsRosterPercent> rosterPercent = new();
+            List<FantasyProsRosterPercent> rosterPercent = [];
             var len = GetFantasyProsTableLength(position);
             for(int i = 0; i < strings.Length - len; i+=len)
             {
@@ -49,7 +42,7 @@ namespace Football.Data.Services
         }
         public List<FantasyProsStringParseWR> ParseFantasyProsWRData(string[] strings)
         {
-            List<FantasyProsStringParseWR> players = new();
+            List<FantasyProsStringParseWR> players = [];
             for (int i = 0; i < strings.Length - 15; i += 15)
             {
                 FantasyProsStringParseWR parse = new()
@@ -72,7 +65,7 @@ namespace Football.Data.Services
         }
         public List<FantasyProsStringParseRB> ParseFantasyProsRBData(string[] strings)
         {
-            List<FantasyProsStringParseRB> players = new();
+            List<FantasyProsStringParseRB> players = [];
             for (int i = 0; i < strings.Length - 16; i += 16)
             {
                 FantasyProsStringParseRB parse = new()
@@ -95,7 +88,7 @@ namespace Football.Data.Services
 
         public List<FantasyProsStringParseQB> ParseFantasyProsQBData(string[] strings)
         {
-            List<FantasyProsStringParseQB> players = new();
+            List<FantasyProsStringParseQB> players = [];
             for (int i = 0; i < strings.Length - 16; i += 16)
             {
                 FantasyProsStringParseQB parse = new()
@@ -119,7 +112,7 @@ namespace Football.Data.Services
         }
         public List<FantasyProsStringParseTE> ParseFantasyProsTEData(string[] strings)
         {
-            List<FantasyProsStringParseTE> players = new();
+            List<FantasyProsStringParseTE> players = [];
             for (int i = 0; i < strings.Length - 15; i += 15)
             {
                 FantasyProsStringParseTE parse = new()
@@ -142,7 +135,7 @@ namespace Football.Data.Services
         }
         public List<FantasyProsStringParseDST> ParseFantasyProsDSTData(string[] strings)
         {
-            List<FantasyProsStringParseDST> players = new();
+            List<FantasyProsStringParseDST> players = [];
             for (int i = 0; i < strings.Length - 11; i += 11)
             {
                 FantasyProsStringParseDST parse = new()
@@ -165,13 +158,13 @@ namespace Football.Data.Services
         public async Task<int> DownloadHeadShots(string position)
         {
             var web = new HtmlWeb();
-            List<string> urls = new();
+            List<string> urls = [];
             var count = 0;
             var linkParser = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            var activePlayers = (await _playersService.GetAllPlayers()).Where(p => p.Active == 1 && p.Position == position).ToList();
+            var activePlayers = (await playersService.GetAllPlayers()).Where(p => p.Active == 1 && p.Position == position).ToList();
             foreach (var player in activePlayers)
             {
-                _logger.Information("Getting url for {p}", player.Name);
+                logger.Information("Getting url for {p}", player.Name);
                 var name = Regex.Replace(player.Name, @"[^\w\s]", string.Empty).Trim();
                 name = Regex.Replace(name, @"Jr", string.Empty).Trim();
                 name = Regex.Replace(name, @"III", string.Empty).Trim();
@@ -205,7 +198,7 @@ namespace Football.Data.Services
         }
         public async Task<int> DownloadTeamLogos()
         {
-            var teams = await _playersService.GetAllTeams();
+            var teams = await playersService.GetAllTeams();
             var count = 0;
             foreach (var team in teams)
             {
@@ -227,7 +220,7 @@ namespace Football.Data.Services
         public List<PlayerTeam> ParseFantasyProsPlayerTeam(string[] strings, string position)
         {
             var len = GetFantasyProsTableLength(position);
-            List<PlayerTeam> playerTeams = new();
+            List<PlayerTeam> playerTeams = [];
             for (int i = 0; i < strings.Length - len; i += len)
             {
                 int start = strings[i].IndexOf("(") + 1;
@@ -243,12 +236,12 @@ namespace Football.Data.Services
         }
         public async Task<List<Schedule>> ParseFantasyProsSeasonSchedule(string[] str)
         {
-            List<List<string>> games = new();
-            List<Schedule> schedules = new();
+            List<List<string>> games = [];
+            List<Schedule> schedules = [];
 
             foreach (var s in str)
             {
-                games.Add(s.Split(new string[] { "@", "vs" }, StringSplitOptions.RemoveEmptyEntries).ToList());
+                games.Add([.. s.Split(separatorArray, StringSplitOptions.RemoveEmptyEntries)]);
             }
             foreach (var g in games)
             {
@@ -276,10 +269,10 @@ namespace Football.Data.Services
                     schedules.Add(new Schedule
                     {
                         Season = _season.CurrentSeason,
-                        TeamId = await _playersService.GetTeamId(g.ElementAt(0).Trim()),
+                        TeamId = await playersService.GetTeamId(g.ElementAt(0).Trim()),
                         Team = g.ElementAt(0).Trim(),
                         Week = i,
-                        OpposingTeamId = g.ElementAt(i).Trim() == "BYE" ? 0 : await _playersService.GetTeamId(g.ElementAt(i).Trim()),
+                        OpposingTeamId = g.ElementAt(i).Trim() == "BYE" ? 0 : await playersService.GetTeamId(g.ElementAt(i).Trim()),
                         OpposingTeam = g.ElementAt(i).Trim()
                     });
                 }
@@ -290,7 +283,7 @@ namespace Football.Data.Services
         {
             var t = await Task.Run(() =>
             {
-                List<ProFootballReferenceGameScores> scores = new();
+                List<ProFootballReferenceGameScores> scores = [];
                 var url = string.Format("{0}{1}games.htm", "https://www.pro-football-reference.com/years/", _season.CurrentSeason.ToString() + "/");
                 var xpath = "//*[@id=\"games\"]/tbody";
                 var web = new HtmlWeb();
@@ -298,11 +291,11 @@ namespace Football.Data.Services
                 var tempdata = doc.DocumentNode.SelectNodes(xpath)[0].InnerHtml;
                 var strings = tempdata.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 strings = strings.Where(s => !s.Contains("aria-label") && s.Contains("data-stat")).ToList();
-                List<List<string>> splits = new();
+                List<List<string>> splits = [];
                 foreach (var s in strings)
                 {
                     var splitS = s.Split(new[] { "data-stat" }, StringSplitOptions.RemoveEmptyEntries);
-                    splits.Add(splitS.ToList());
+                    splits.Add([.. splitS]);
                 }
 
                 foreach (var split in splits)

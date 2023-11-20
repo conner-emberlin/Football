@@ -1,5 +1,4 @@
 ﻿using Football.Enums;
-using MathNet.Numerics.LinearAlgebra;
 
 namespace Football.Projections.Interfaces
 {

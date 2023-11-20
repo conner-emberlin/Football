@@ -9,21 +9,11 @@ using Football.Statistics.Interfaces;
 
 namespace Football.Projections.Services
 {
-    public class RegressionModelService : IRegressionModelService
+    public class RegressionModelService(IPlayersService playerService, IAdvancedStatisticsService advancedStatisticsService, IMarketShareService marketShareService,
+        IOptionsMonitor<Season> season) : IRegressionModelService
     {
-        private readonly IPlayersService _playerService;
-        private readonly IAdvancedStatisticsService _advandedStatisticsService;
-        private readonly IMarketShareService _marketShareService;
-        private readonly Season _season;
+        private readonly Season _season = season.CurrentValue;
 
-        public RegressionModelService(IPlayersService playerService, IAdvancedStatisticsService advancedStatisticsService, IMarketShareService marketShareService,
-            IOptionsMonitor<Season> season)
-        {
-            _playerService = playerService;
-            _advandedStatisticsService = advancedStatisticsService;
-            _marketShareService = marketShareService;
-            _season = season.CurrentValue;
-        }
         public QBModelSeason QBModelSeason(SeasonDataQB stat)
         {
             return new QBModelSeason
@@ -41,9 +31,9 @@ namespace Football.Projections.Services
         }
         public async Task<QBModelWeek> QBModelWeek(WeeklyDataQB stat)
         {
-            var projection = await _playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
-            var fiveThirtyEightValue = await _advandedStatisticsService.FiveThirtyEightQBValue(stat.PlayerId);
-            var passerRating = await _advandedStatisticsService.PasserRating(stat.PlayerId);
+            var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
+            var fiveThirtyEightValue = await advancedStatisticsService.FiveThirtyEightQBValue(stat.PlayerId);
+            var passerRating = await advancedStatisticsService.PasserRating(stat.PlayerId);
 
             return new QBModelWeek
             {
@@ -79,8 +69,8 @@ namespace Football.Projections.Services
         }
         public async Task<RBModelWeek> RBModelWeek(WeeklyDataRB stat)
         {
-            var projection = await _playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
-            var targetShare = (await _marketShareService.GetTargetShare(stat.PlayerId)).RBTargetShare;
+            var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
+            var targetShare = (await marketShareService.GetTargetShare(stat.PlayerId)).RBTargetShare;
             return new RBModelWeek
             {
                 PlayerId = stat.PlayerId,
@@ -112,7 +102,7 @@ namespace Football.Projections.Services
         }
         public async Task<WRModelWeek> WRModelWeek(WeeklyDataWR stat)
         {
-            var projection = await _playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
+            var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
             return new WRModelWeek
             {
                 PlayerId = stat.PlayerId,
@@ -141,7 +131,7 @@ namespace Football.Projections.Services
         }
         public async Task<TEModelWeek> TEModelWeek(WeeklyDataTE stat)
         {
-            var projection = await _playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
+            var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
             return new TEModelWeek
             {
                 PlayerId = stat.PlayerId,

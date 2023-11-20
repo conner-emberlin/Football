@@ -91,7 +91,7 @@ namespace Football.Projections.Services
         }
         public async Task<List<SeasonFlex>> SeasonFlexRankings()
         {
-            List<SeasonFlex> flexRankings = new();
+            List<SeasonFlex> flexRankings = [];
             var qbProjections = (await _seasonProjection.GetProjections(Position.QB)).ToList();
             var rbProjections = (await _seasonProjection.GetProjections(Position.RB)).ToList();
             var wrProjections = (await _seasonProjection.GetProjections(Position.WR)).ToList();
@@ -163,7 +163,7 @@ namespace Football.Projections.Services
         }
         private static double GetRSquared(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
         {
-            List<double> observedFantasyPoints = new();
+            List<double> observedFantasyPoints = [];
             var residualSumOfSquares = 0.0;
             var totalSumOfSquares = 0.0;
             var count = 0;

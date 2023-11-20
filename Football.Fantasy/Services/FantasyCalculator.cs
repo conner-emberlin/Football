@@ -7,13 +7,10 @@ using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Services
 {
-    public class FantasyCalculator : IFantasyCalculator
+    public class FantasyCalculator(IOptionsMonitor<FantasyScoring> scoring) : IFantasyCalculator
     {
-        private readonly FantasyScoring _scoring;
-        public FantasyCalculator(IOptionsMonitor<FantasyScoring> scoring)
-        {
-            _scoring = scoring.CurrentValue;
-        }           
+        private readonly FantasyScoring _scoring = scoring.CurrentValue;
+
         public SeasonFantasy CalculateFantasy(SeasonDataQB stat)
         {
             var points = _scoring.PointsPerPassingTouchdown * stat.TD + _scoring.PointsPerTouchdown * stat.RushingTD

@@ -8,63 +8,52 @@ using Serilog;
 
 namespace Football.Data.Services
 {
-    public class UploadWeeklyDataService : IUploadWeeklyDataService
+    public class UploadWeeklyDataService(IScraperService scraperService, IUploadWeeklyDataRepository uploadWeeklyDataRepository,
+        IPlayersService playerService, ILogger logger, IOptionsMonitor<WeeklyScraping> scraping) : IUploadWeeklyDataService
     {
-        private readonly IScraperService _scraperService;
-        private readonly IUploadWeeklyDataRepository _uploadWeeklyDataRepository;
-        private readonly IPlayersService _playerService;
-        private readonly ILogger _logger;
-        private readonly WeeklyScraping _scraping;
-        public UploadWeeklyDataService(IScraperService scraperService, IUploadWeeklyDataRepository uploadWeeklyDataRepository, 
-            IPlayersService playerService, ILogger logger, IOptionsMonitor<WeeklyScraping> scraping)
-        {
-            _scraperService = scraperService;
-            _uploadWeeklyDataRepository = uploadWeeklyDataRepository;
-            _playerService = playerService;
-            _logger = logger;
-            _scraping = scraping.CurrentValue;
-        }
+        private readonly WeeklyScraping _scraping = scraping.CurrentValue;
+
         public async Task<int> UploadWeeklyQBData(int season, int week)
         {
-            var url = _scraperService.FantasyProsURLFormatter(Position.QB.ToString(), season.ToString(), week.ToString());
-            var players = await WeeklyDataQB(_scraperService.ParseFantasyProsQBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyQBData(players, await _playerService.GetIgnoreList());
+            var url = scraperService.FantasyProsURLFormatter(Position.QB.ToString(), season.ToString(), week.ToString());
+            var players = await WeeklyDataQB(scraperService.ParseFantasyProsQBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
+            return await uploadWeeklyDataRepository.UploadWeeklyQBData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyRBData(int season, int week)
         {
-            var url = _scraperService.FantasyProsURLFormatter(Position.RB.ToString(), season.ToString(), week.ToString());
-            var players = await WeeklyDataRB(_scraperService.ParseFantasyProsRBData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyRBData(players, await _playerService.GetIgnoreList());
+            var url = scraperService.FantasyProsURLFormatter(Position.RB.ToString(), season.ToString(), week.ToString());
+            var players = await WeeklyDataRB(scraperService.ParseFantasyProsRBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
+            return await uploadWeeklyDataRepository.UploadWeeklyRBData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyWRData(int season, int week)
         {
-            var url = _scraperService.FantasyProsURLFormatter(Position.WR.ToString(), season.ToString(), week.ToString());
-            var players = await WeeklyDataWR(_scraperService.ParseFantasyProsWRData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyWRData(players, await _playerService.GetIgnoreList());
+            var url = scraperService.FantasyProsURLFormatter(Position.WR.ToString(), season.ToString(), week.ToString());
+            var players = await WeeklyDataWR(scraperService.ParseFantasyProsWRData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
+            return await uploadWeeklyDataRepository.UploadWeeklyWRData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyTEData(int season, int week)
         {
-            var url = _scraperService.FantasyProsURLFormatter(Position.TE.ToString(), season.ToString(), week.ToString());
-            var players = await WeeklyDataTE(_scraperService.ParseFantasyProsTEData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyTEData(players, await _playerService.GetIgnoreList());
+            var url = scraperService.FantasyProsURLFormatter(Position.TE.ToString(), season.ToString(), week.ToString());
+            var players = await WeeklyDataTE(scraperService.ParseFantasyProsTEData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
+            return await uploadWeeklyDataRepository.UploadWeeklyTEData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyDSTData(int season, int week)
         {
-            var url = _scraperService.FantasyProsURLFormatter(Position.DST.ToString(), season.ToString(), week.ToString());
-            var players = await WeeklyDataDST(_scraperService.ParseFantasyProsDSTData(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyDSTData(players);
+            var url = scraperService.FantasyProsURLFormatter(Position.DST.ToString(), season.ToString(), week.ToString());
+            var players = await WeeklyDataDST(scraperService.ParseFantasyProsDSTData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
+            return await uploadWeeklyDataRepository.UploadWeeklyDSTData(players);
         }
         public async Task<int> UploadWeeklyGameResults(int season, int week)
         {
-            var results = await GameResult(await _scraperService.ScrapeGameScores(week), season);
-            return await _uploadWeeklyDataRepository.UploadWeeklyGameResults(results);
+            var results = await GameResult(await scraperService.ScrapeGameScores(week), season);
+            return await uploadWeeklyDataRepository.UploadWeeklyGameResults(results);
         }
         public async Task<int> UploadWeeklyRosterPercentages(int season, int week, string position)
         {
-            var url = _scraperService.FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
-            var data = _scraperService.ParseFantasyProsRosterPercent(_scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position);
+            var url = scraperService.FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
+            var data = scraperService.ParseFantasyProsRosterPercent(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position);
             var rosterPercentages = await WeeklyRosterPercent(data, season, week);
-            return await _uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages, await _playerService.GetIgnoreList());
+            return await uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages, await playerService.GetIgnoreList());
         }
 
         private async Task<List<WeeklyRosterPercent>> WeeklyRosterPercent(List<FantasyProsRosterPercent> rosterPercents, int season, int week)
@@ -72,7 +61,7 @@ namespace Football.Data.Services
             List<WeeklyRosterPercent> rosterPercentages = new();
             foreach (var rp in rosterPercents.Where(rp => rp.RosterPercent > 0.0))
             {
-                var playerId = await _playerService.GetPlayerId(rp.Name);
+                var playerId = await playerService.GetPlayerId(rp.Name);
                 if (playerId > 0 && !rosterPercentages.Any(rp => rp.PlayerId == playerId))
                 {
                     rosterPercentages.Add(new WeeklyRosterPercent
@@ -93,14 +82,14 @@ namespace Football.Data.Services
             List<WeeklyDataQB> weeklyData = new();
             foreach(var p in players)
             {
-                var playerId = await _playerService.GetPlayerId(p.Name);
+                var playerId = await playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.QB.ToString(), Active = 1 });
-                    _logger.Information("New player created: {p}", p.Name);
-                    playerId = await _playerService.GetPlayerId(p.Name);
+                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.QB.ToString(), Active = 1 });
+                    logger.Information("New player created: {p}", p.Name);
+                    playerId = await playerService.GetPlayerId(p.Name);
                 }
-                var player = await _playerService.GetPlayer(playerId);
+                var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.QB.ToString())
                 {
                     weeklyData.Add(new WeeklyDataQB
@@ -124,7 +113,7 @@ namespace Football.Data.Services
                 }
                 else
                 {
-                    _logger.Information("{name} did not play in week {week}", p.Name, week);
+                    logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -135,14 +124,14 @@ namespace Football.Data.Services
             List<WeeklyDataRB> weeklyData = new();
             foreach (var p in players)
             {
-                var playerId = await _playerService.GetPlayerId(p.Name);
+                var playerId = await playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.RB.ToString(), Active = 1 });
-                    _logger.Information("New player created: {p}", p.Name);
-                    playerId = await _playerService.GetPlayerId(p.Name);
+                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.RB.ToString(), Active = 1 });
+                    logger.Information("New player created: {p}", p.Name);
+                    playerId = await playerService.GetPlayerId(p.Name);
                 }
-                var player = await _playerService.GetPlayer(playerId);
+                var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.RB.ToString())
                 {
                     weeklyData.Add(new WeeklyDataRB
@@ -164,7 +153,7 @@ namespace Football.Data.Services
                 }
                 else
                 {
-                    _logger.Information("{name} did not play in week {week}", p.Name, week);
+                    logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -174,14 +163,14 @@ namespace Football.Data.Services
             List<WeeklyDataWR> weeklyData = new();
             foreach (var p in players)
             {
-                var playerId = await _playerService.GetPlayerId(p.Name);
+                var playerId = await playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.WR.ToString(), Active = 1 });
-                    _logger.Information("New player created: {p}", p.Name);
-                    playerId = await _playerService.GetPlayerId(p.Name);
+                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.WR.ToString(), Active = 1 });
+                    logger.Information("New player created: {p}", p.Name);
+                    playerId = await playerService.GetPlayerId(p.Name);
                 }
-                var player = await _playerService.GetPlayer(playerId);
+                var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.WR.ToString())
                 {
                     weeklyData.Add(new WeeklyDataWR
@@ -204,7 +193,7 @@ namespace Football.Data.Services
                 }
                 else
                 {
-                    _logger.Information("{name} did not play in week {week}", p.Name, week);
+                    logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -215,14 +204,14 @@ namespace Football.Data.Services
             List<WeeklyDataTE> weeklyData = new();
             foreach (var p in players)
             {
-                var playerId = await _playerService.GetPlayerId(p.Name);
+                var playerId = await playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.TE.ToString(), Active = 1 });
-                    _logger.Information("New player created: {p}", p.Name);
-                    playerId = await _playerService.GetPlayerId(p.Name);
+                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.TE.ToString(), Active = 1 });
+                    logger.Information("New player created: {p}", p.Name);
+                    playerId = await playerService.GetPlayerId(p.Name);
                 }
-                var player = await _playerService.GetPlayer(playerId);
+                var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.TE.ToString())
                 {
                     weeklyData.Add(new WeeklyDataTE
@@ -245,7 +234,7 @@ namespace Football.Data.Services
                 }
                 else
                 {
-                    _logger.Information("{name} did not play in week {week}", p.Name, week);
+                    logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -256,12 +245,12 @@ namespace Football.Data.Services
             List<WeeklyDataDST> weeklyData = new();
             foreach (var p in players)
             {
-                var playerId = await _playerService.GetPlayerId(p.Name);
+                var playerId = await playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await _playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.DST.ToString(), Active = 1 });
-                    _logger.Information("New player created: {p}", p.Name);
-                    playerId = await _playerService.GetPlayerId(p.Name);
+                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.DST.ToString(), Active = 1 });
+                    logger.Information("New player created: {p}", p.Name);
+                    playerId = await playerService.GetPlayerId(p.Name);
                 }
                 if (p.Games > 0)
                 {
@@ -283,7 +272,7 @@ namespace Football.Data.Services
                 }
                 else
                 {
-                    _logger.Information("{name} did not play in week {week}", p.Name, week);
+                    logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -294,8 +283,8 @@ namespace Football.Data.Services
             List<GameResult> results = new();
             foreach (var g in games)
             {
-                var winnerId = await _playerService.GetTeamIdFromDescription(g.Winner);
-                var loserId = await _playerService.GetTeamIdFromDescription(g.Loser);
+                var winnerId = await playerService.GetTeamIdFromDescription(g.Winner);
+                var loserId = await playerService.GetTeamIdFromDescription(g.Loser);
                 results.Add(new GameResult
                 {
                     Season = season,

@@ -8,23 +8,14 @@ using Football.Statistics.Models;
 
 namespace Football.Statistics.Services
 {
-    public class AdvancedStatisticsService : IAdvancedStatisticsService
+    public class AdvancedStatisticsService(IStatisticsService statisticsService, IPlayersService playersService, IOptionsMonitor<FiveThirtyEightValueSettings> value) : IAdvancedStatisticsService
     {
-        private readonly IStatisticsService _statisticsService;
-        private readonly IPlayersService _playersService;
-        private readonly FiveThirtyEightValueSettings _value;
-
-        public AdvancedStatisticsService(IStatisticsService statisticsService, IPlayersService playersService, IOptionsMonitor<FiveThirtyEightValueSettings> value)
-        {
-            _statisticsService = statisticsService;
-            _playersService = playersService;
-            _value = value.CurrentValue;
-        }
+        private readonly FiveThirtyEightValueSettings _value = value.CurrentValue;
 
         public async Task<List<AdvancedQBStatistics>> GetAdvancedQBStatistics()
         {
-            List<AdvancedQBStatistics> stats = new();
-            var qbs = await _playersService.GetPlayersByPosition(Position.QB);
+            List<AdvancedQBStatistics> stats = [];
+            var qbs = await playersService.GetPlayersByPosition(Position.QB);
            foreach (var qb in qbs)
             {
                 stats.Add(new AdvancedQBStatistics
@@ -41,8 +32,8 @@ namespace Football.Statistics.Services
 
         public async Task<double> FiveThirtyEightQBValue(int playerId)
         {
-            var weeklyStats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, playerId);
-            if (weeklyStats.Any())
+            var weeklyStats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, playerId);
+            if (weeklyStats.Count > 0)
             {
                 return Math.Round(
                          weeklyStats.Average(w => w.Attempts) * _value.PAtts
@@ -59,8 +50,8 @@ namespace Football.Statistics.Services
 
         public async Task<double> PasserRating(int playerId)
         {
-            var weeklyStats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, playerId);
-            if (weeklyStats.Any())
+            var weeklyStats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, playerId);
+            if (weeklyStats.Count > 0)
             {
                 var aActual = (weeklyStats.Average(w => w.Completions) / weeklyStats.Average(w => w.Attempts) - 0.3) * 5;
                 var bActual = (weeklyStats.Average(w => w.Yards) / weeklyStats.Average(w => w.Attempts) - 3) * 0.25;
@@ -79,8 +70,8 @@ namespace Football.Statistics.Services
 
         public async Task<double> QBYardsPerPlay(int playerId)
         {
-            var weeklyStats = await _statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, playerId);
-            if (weeklyStats.Any())
+            var weeklyStats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, playerId);
+            if (weeklyStats.Count > 0)
             {
                 var totalPlays = weeklyStats.Sum(w => w.RushingAttempts) + weeklyStats.Sum(w => w.Attempts);
                 var totalYards = weeklyStats.Sum(w => w.Yards) + weeklyStats.Sum(w => w.RushingYards);

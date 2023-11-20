@@ -3,6 +3,7 @@
 
 @using System.Text.Json
 @using System.Text.Json.Serialization
+@using System.Globalization;
 @using Football.Data.Models;
 @using Football.Fantasy.Models;
 @using Football.Players.Models;
@@ -40,6 +41,51 @@ else if (badRequestError)
 }
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 
+@if (loading)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="spinner"></div>
+}
+
+@if (!teamSelected && showSchedule && scheduleDetails.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+    <h5>@ScheduleHeader()</h5>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Match</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in scheduleDetails)
+                {
+                    if (s.HomeTeamId > 0 && s.AwayTeamId > 0)
+                    {
+                        var homeTeam = GetTeamName(s.HomeTeamId);
+                        var awayTeam = GetTeamName(s.AwayTeamId);
+
+                        var match = homeTeam + " vs " + awayTeam;
+                        var date = s.Day + " " + ConvertDate(s.Date) + " " + s.Time;
+
+                        <tr>
+                            <td>@match</td>
+                            <td>@date</td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+}
 
 @if (teamSelected && teamChosen != null)
 {
@@ -163,6 +209,8 @@ else if (badRequestError)
 }
 
 @code {
+    public bool loading { get; set; }
+
     public List<TeamMap> teams = new();
     public List<TeamMap>? filteredTeams { get; set; }
     public bool teamSelected { get; set; } = false;
@@ -176,6 +224,9 @@ else if (badRequestError)
     public List<GameResult>? teamGameResults = new();
     public List<TeamRecord>? teamRecords = new();
     public TeamRecord? teamRecord = new();
+
+    public bool showSchedule { get; set; } = false;
+    public List<ScheduleDetails>? scheduleDetails = new();
 
     public List<FantasyPerformance> allPerformances = new();
     public FantasyPerformance qbPerformance = new();
@@ -191,6 +242,8 @@ else if (badRequestError)
 
     protected override async Task OnInitializedAsync()
     {
+        loading = true;
+        shouldRender = true;
         await GetAllTeams();
         await GetTeamRecords();
         await GetGameResults();  
@@ -200,7 +253,12 @@ else if (badRequestError)
             SelectTeam(int.Parse(id));
             id = "";
         }
-
+        else
+        {
+            showSchedule = true;
+            await GetScheduleDetails();
+        }
+        loading = false;
         shouldRender = true;
     }
 
@@ -221,6 +279,7 @@ else if (badRequestError)
     {
         selectedTeam = "";
         teamSelected = false;
+        showSchedule = false;
 
         teamChosen = teams.First(t => t.TeamId == tid);
         teamGameResults = gameResults.Where(g => g.HomeTeamId == tid || g.AwayTeamId == tid).OrderBy(g => g.Week).ToList();
@@ -297,9 +356,31 @@ else if (badRequestError)
             rbPerformance = allPerformances.Where(p => p.Position == "RB").OrderByDescending(p => p.TotalFantasy).Take(2).ToList();
             wrPerformance = allPerformances.Where(p => p.Position == "WR").OrderByDescending(p => p.TotalFantasy).Take(3).ToList();
             tePerformance = allPerformances.Where(p => p.Position == "TE").OrderByDescending(p => p.TotalFantasy).First();
-        }
+        }       
+    }
 
-        
+    private async Task GetScheduleDetails()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/schedule-details/current");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            scheduleDetails = await JsonSerializer.DeserializeAsync<List<ScheduleDetails>>(responseStream, options);
+        }
+    }
+
+    private string ScheduleHeader() => scheduleDetails != null ? "Week " + scheduleDetails.First().Week + " Schedule" : "Schedule";
+
+    private string GetTeamName(int teamId) => teams != null ? teams.First(t => t.TeamId == teamId).TeamDescription : string.Empty;
+
+    private string ConvertDate(string date)
+    {
+        DateTime dt = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+        return dt.ToString("MM/dd");
     }
 
 }
