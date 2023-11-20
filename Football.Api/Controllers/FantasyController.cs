@@ -169,6 +169,6 @@ namespace Football.Api.Controllers
         [HttpGet("trending-players")]
         [ProducesResponseType(typeof(List<TrendingPlayer>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<TrendingPlayer>>> GetTrendingPlayers() => Ok(await _leagueService.GetTrendingPlayers());
+        public async Task<IActionResult> GetTrendingPlayers() => Ok(await _leagueService.GetTrendingPlayers());
     }
 }

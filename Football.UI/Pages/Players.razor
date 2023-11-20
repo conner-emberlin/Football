@@ -722,6 +722,7 @@ else if (youTried && badRequestError)
     protected override async Task OnInitializedAsync()
     {
         loading = true;
+        shouldRender = true;
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players");
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
@@ -740,17 +741,17 @@ else if (youTried && badRequestError)
                 SelectPlayer(int.Parse(id));
                 id = "";
             }
+            else
+            {
+                showTrending = true;
+                await GetTrendingPlayers();
+
+            }
         }
         else
         {
             badRequestError = true;
             youTried = true;
-        }
-
-        if (string.IsNullOrEmpty(id))
-        {
-            showTrending = true;
-            await GetTrendingPlayers();
         }
         loading = false;
         shouldRender = true;
@@ -770,6 +771,7 @@ else if (youTried && badRequestError)
 
     private async void SelectPlayer(int pid)
     {
+        loading = true;
         showTrending = false;
         playerSelected = false;
         selectedPlayer = "";
@@ -796,6 +798,7 @@ else if (youTried && badRequestError)
         playerSelected = true;
         selectedPlayer = playerName;
         filteredPlayers = null;
+        loading = false;
         StateHasChanged();
 
     }

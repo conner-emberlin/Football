@@ -7,6 +7,11 @@
 <PageTitle>Home</PageTitle>
 <h4>NFL News</h4>
 
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
 @if (!badRequestError && articles!= null)
 {
     foreach(var article in articles)
@@ -14,8 +19,9 @@
         <div>
         <a class="page-links" href="@article.links.web.href"> @article.headline </a>
         <p>@article.description</p>
-            @if (article.images.FirstOrDefault() != null){
-            <img src="@article.images.FirstOrDefault().url" height="200" />
+            @if (article.images != null && article.images.Any())            
+            {
+            <img src="@article.images.First().url" height="200" />
             }
         <hr style="width:75%;text-align:left;margin-left:0">
         </div>
@@ -29,10 +35,13 @@
     protected override bool ShouldRender() => shouldRender;
     private bool badRequestError;
 
+    private bool loading { get; set; }
+
     private EspnNews root = new();
     private List<Article> articles = new();
     protected override async Task OnInitializedAsync()
     {
+        loading = true;
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/News/espn");
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
@@ -48,6 +57,7 @@
         {
             badRequestError = true;
         }
+        loading = false;
         shouldRender = true;
     }
 

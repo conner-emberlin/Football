@@ -25,9 +25,9 @@
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>                 
-                    <th></th>
-                    <th>Games</th>
+                    <th></th>                   
                     <th>Name</th>
+                    <th>Games</th>
                     <th>Position</th>
                     <th>Points</th>
                 </tr>
@@ -36,9 +36,9 @@
                 @for (int i = 1; i < currentLeaders.Count; i++)
                 {
                     <tr>                      
-                        <td>@i</td>
-                        <td>@currentLeaders.ElementAt(i-1).Games</td>
+                        <td>@i</td>                      
                         <td><a class="page-links" href="Players/@currentLeaders.ElementAt(i-1).PlayerId"> @currentLeaders.ElementAt(i-1).Name</a></td>
+                        <td>@currentLeaders.ElementAt(i-1).Games</td>
                         <td>@currentLeaders.ElementAt(i-1).Position</td>
                         <td>@currentLeaders.ElementAt(i-1).FantasyPoints</td>
                     </tr>
