@@ -144,7 +144,6 @@ namespace Football.Projections.Services
             }
             return weekProjections;
         }
-
         private double EPARatio(double previousEPA, double currentEPA) => previousEPA == 0 ? 1
                    : previousEPA > currentEPA ? Math.Max(_tunings.NewQBFloor, currentEPA / previousEPA)
                    : Math.Min(_tunings.NewQBCeiling, currentEPA / previousEPA);               

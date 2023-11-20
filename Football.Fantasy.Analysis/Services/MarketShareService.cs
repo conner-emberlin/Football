@@ -1,14 +1,14 @@
-﻿using Football.Fantasy.Interfaces;
-using Football.Enums;
+﻿using Football.Enums;
 using Football.Models;
-using Football.Players.Interfaces;
-using Microsoft.Extensions.Options;
+using Football.Data.Models;
+using Football.Fantasy.Interfaces;
 using Football.Fantasy.Analysis.Models;
 using Football.Fantasy.Analysis.Interfaces;
-using Microsoft.Extensions.Caching.Memory;
+using Football.Players.Interfaces;
 using Football.Players.Models;
-using Football.Data.Models;
 using Football.Statistics.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Analysis.Services
 {

@@ -41,6 +41,7 @@
         public int RBProjections { get; set; }
         public int WRProjections { get; set; }
         public int TEProjections { get; set; }
+        public int ErrorAdjustmentWeek { get; set; }
     }
 
     public class Starters
