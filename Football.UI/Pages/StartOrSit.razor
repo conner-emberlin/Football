@@ -110,14 +110,9 @@
                                         <text>@sos.Weather.Wind</text>
                                         <br>
                                     }
-                                    @if (!string.IsNullOrEmpty(sos.Weather.RainChance))
+                                    @if (!string.IsNullOrEmpty(sos.Weather.Condition))
                                     {
-                                        <text>@sos.Weather.RainChance</text>
-                                        <br>
-                                    }
-                                    @if (!string.IsNullOrEmpty(sos.Weather.SnowChance))
-                                    {
-                                        <text>@sos.Weather.SnowChance</text>
+                                        <text>@sos.Weather.Condition </text> <img src="@sos.Weather.ConditionURL" width="30" height="30">
                                     }
                                 </p>
                             </td>

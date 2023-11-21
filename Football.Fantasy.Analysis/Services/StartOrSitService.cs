@@ -10,6 +10,7 @@ using Football.Fantasy.Analysis.Models;
 using Football.Players.Models;
 using Football.Fantasy.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
+using System.Globalization;
 
 namespace Football.Fantasy.Analysis.Services
 {
@@ -247,7 +248,7 @@ namespace Football.Fantasy.Analysis.Services
                 GameTime = hour.time,
                 Temperature = string.Format("{0}°F", hour.temp_f),
                 Condition = hour.condition.text,
-                ConditionURL = string.Format("https{0}", hour.condition.icon),
+                ConditionURL = string.Format("https:{0}", hour.condition.icon),
                 Wind = string.Format("{0} mph winds", hour.wind_mph),
                 RainChance = string.Format("{0}% chance of rain", hour.chance_of_rain),
                 SnowChance = string.Format("{0}% chance of snow", hour.chance_of_snow)
@@ -255,11 +256,13 @@ namespace Football.Fantasy.Analysis.Services
 
         private static string FormatTime(string time, string date)
         {
-            var ind = time.IndexOf(":");
+            var ind = time.IndexOf(':');
             if (ind > 0)
             {
                 var sub = time[..ind];
-                return sub.Length == 1 ? date + " 0" + sub + ":00" : date + " " + sub + ":00";
+                var gameTime = " " + (int.Parse(sub) + 12).ToString() + ":00";
+                return date + gameTime;
+
             }
             else
             {
