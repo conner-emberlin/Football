@@ -17,37 +17,37 @@ namespace Football.Data.Services
 
         public async Task<int> UploadSeasonQBData(int season)
         {
-            var url = scraperService.FantasyProsURLFormatter(Position.QB.ToString(), season.ToString());
+            var url = FantasyProsURLFormatter(Position.QB.ToString(), season.ToString());
             var players = await SeasonDataQB(scraperService.ParseFantasyProsQBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await uploadSeasonDataRepository.UploadSeasonQBData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonRBData(int season)
         {
-            var url = scraperService.FantasyProsURLFormatter(Position.RB.ToString(), season.ToString());
+            var url = FantasyProsURLFormatter(Position.RB.ToString(), season.ToString());
             var players = await SeasonDataRB(scraperService.ParseFantasyProsRBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await uploadSeasonDataRepository.UploadSeasonRBData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonWRData(int season)
         {
-            var url = scraperService.FantasyProsURLFormatter(Position.WR.ToString(), season.ToString());
+            var url = FantasyProsURLFormatter(Position.WR.ToString(), season.ToString());
             var players = await SeasonDataWR(scraperService.ParseFantasyProsWRData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await uploadSeasonDataRepository.UploadSeasonWRData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonTEData(int season)
         {
-            var url = scraperService.FantasyProsURLFormatter(Position.TE.ToString(), season.ToString());
+            var url = FantasyProsURLFormatter(Position.TE.ToString(), season.ToString());
             var players = await SeasonDataTE(scraperService.ParseFantasyProsTEData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await uploadSeasonDataRepository.UploadSeasonTEData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadSeasonDSTData(int season)
         {
-            var url = scraperService.FantasyProsURLFormatter(Position.DST.ToString(), season.ToString());
+            var url = FantasyProsURLFormatter(Position.DST.ToString(), season.ToString());
             var players = await SeasonDataDST(scraperService.ParseFantasyProsDSTData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season);
             return await uploadSeasonDataRepository.UploadSeasonDSTData(players);
         }
         public async Task<int> UploadCurrentTeams(int season, string position)
         {
-            var url = scraperService.FantasyProsURLFormatter(position, season.ToString());
+            var url = FantasyProsURLFormatter(position, season.ToString());
             var str = scraperService.ScrapeData(url, _scraping.FantasyProsXPath);
             var parsedStr = scraperService.ParseFantasyProsPlayerTeam(str, position);
             foreach (var pt in parsedStr)
@@ -331,6 +331,7 @@ namespace Football.Data.Services
             }
             return scheduleDetails;
         }
+        private string FantasyProsURLFormatter(string position, string year) => string.Format("{0}{1}.php?year={2}", _scraping.FantasyProsBaseURL, position.ToLower(), year);
     }
 }
 

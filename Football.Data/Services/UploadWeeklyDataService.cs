@@ -15,31 +15,31 @@ namespace Football.Data.Services
 
         public async Task<int> UploadWeeklyQBData(int season, int week)
         {
-            var url = scraperService.FantasyProsURLFormatter(Position.QB.ToString(), season.ToString(), week.ToString());
+            var url = FantasyProsURLFormatter(Position.QB.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataQB(scraperService.ParseFantasyProsQBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await uploadWeeklyDataRepository.UploadWeeklyQBData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyRBData(int season, int week)
         {
-            var url = scraperService.FantasyProsURLFormatter(Position.RB.ToString(), season.ToString(), week.ToString());
+            var url = FantasyProsURLFormatter(Position.RB.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataRB(scraperService.ParseFantasyProsRBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await uploadWeeklyDataRepository.UploadWeeklyRBData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyWRData(int season, int week)
         {
-            var url = scraperService.FantasyProsURLFormatter(Position.WR.ToString(), season.ToString(), week.ToString());
+            var url = FantasyProsURLFormatter(Position.WR.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataWR(scraperService.ParseFantasyProsWRData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await uploadWeeklyDataRepository.UploadWeeklyWRData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyTEData(int season, int week)
         {
-            var url = scraperService.FantasyProsURLFormatter(Position.TE.ToString(), season.ToString(), week.ToString());
+            var url = FantasyProsURLFormatter(Position.TE.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataTE(scraperService.ParseFantasyProsTEData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await uploadWeeklyDataRepository.UploadWeeklyTEData(players, await playerService.GetIgnoreList());
         }
         public async Task<int> UploadWeeklyDSTData(int season, int week)
         {
-            var url = scraperService.FantasyProsURLFormatter(Position.DST.ToString(), season.ToString(), week.ToString());
+            var url = FantasyProsURLFormatter(Position.DST.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataDST(scraperService.ParseFantasyProsDSTData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await uploadWeeklyDataRepository.UploadWeeklyDSTData(players);
         }
@@ -50,7 +50,7 @@ namespace Football.Data.Services
         }
         public async Task<int> UploadWeeklyRosterPercentages(int season, int week, string position)
         {
-            var url = scraperService.FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
+            var url = FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
             var data = scraperService.ParseFantasyProsRosterPercent(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position);
             var rosterPercentages = await WeeklyRosterPercent(data, season, week);
             return await uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages, await playerService.GetIgnoreList());
@@ -306,6 +306,6 @@ namespace Football.Data.Services
             }
             return results;
         }
-
+        private string FantasyProsURLFormatter(string position, string year, string week) => string.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
     }
 }

@@ -7,18 +7,19 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text.RegularExpressions;
+using System.Net.Http;
 
 namespace Football.Data.Services
 {
-    public class ScraperService(IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playersService, ILogger logger, IOptionsMonitor<Season> season) : IScraperService
+    public class ScraperService(IHttpClientFactory clientFactory, IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playersService, ILogger logger, IOptionsMonitor<Season> season) : IScraperService
     {
         private readonly WeeklyScraping _scraping = scraping.CurrentValue;
         private readonly Season _season = season.CurrentValue;
-        private static readonly string[] separator = ["\r\n", "\r", "\n"];
-        private static readonly string[] separatorArray = ["@", "vs"];
 
-        public string FantasyProsURLFormatter(string position, string year, string week) => string.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
-        public string FantasyProsURLFormatter(string position, string year) => string.Format("{0}{1}.php?year={2}", _scraping.FantasyProsBaseURL, position.ToLower(), year);        
+        private static readonly string[] separator = ["\r\n", "\r", "\n"];
+        private static readonly string[] homeSeparator = ["@", "vs"];
+        private static readonly string[] dataSeparator = [ "data-stat" ];
+
         public string[] ScrapeData(string url, string xpath)
         {
             var web = new HtmlWeb();
@@ -180,7 +181,7 @@ namespace Football.Data.Services
                     if (tempdata != null)
                     {
                         var url = linkParser.Match(tempdata[0].OuterHtml).Value;
-                        HttpClient client = new();
+                        var client = clientFactory.CreateClient();
                         var res = await client.GetAsync(url);
                         byte[] bytes = await res.Content.ReadAsByteArrayAsync();
                         MemoryStream memoryStream = new(bytes);
@@ -203,7 +204,7 @@ namespace Football.Data.Services
             foreach (var team in teams)
             {
                 var url = _scraping.NFLTeamLogoURL + team.Team;
-                HttpClient client = new();
+                var client = clientFactory.CreateClient();
                 var res = await client.GetAsync(url);
                 byte[] bytes = await res.Content.ReadAsByteArrayAsync();
                 MemoryStream memoryStream = new(bytes);
@@ -241,7 +242,7 @@ namespace Football.Data.Services
 
             foreach (var s in str)
             {
-                games.Add([.. s.Split(separatorArray, StringSplitOptions.RemoveEmptyEntries)]);
+                games.Add([.. s.Split(homeSeparator, StringSplitOptions.RemoveEmptyEntries)]);
             }
             foreach (var g in games)
             {
@@ -294,7 +295,7 @@ namespace Football.Data.Services
                 List<List<string>> splits = [];
                 foreach (var s in strings)
                 {
-                    var splitS = s.Split(new[] { "data-stat" }, StringSplitOptions.RemoveEmptyEntries);
+                    var splitS = s.Split(dataSeparator, StringSplitOptions.RemoveEmptyEntries);
                     splits.Add([.. splitS]);
                 }
 
@@ -341,7 +342,6 @@ namespace Football.Data.Services
             });
             return t;
         }
-
         public async Task<List<FantasyProsADP>> ScrapeADP(string position)
         {
             var t = await Task.Run(() =>
@@ -350,7 +350,7 @@ namespace Football.Data.Services
                 var xpath = "//*[@id=\"data\"]/tbody";
                 var data = ScrapeData(url, xpath);
                 var colCount = position.Trim().ToLower() == "qb" ? 9 : 7;
-                List<FantasyProsADP> adp = new();
+                List<FantasyProsADP> adp = [];
                 for (int i = 0; i < data.Length - colCount; i += colCount)
                 {
                     adp.Add(new FantasyProsADP

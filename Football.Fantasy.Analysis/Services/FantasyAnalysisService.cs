@@ -62,7 +62,7 @@ namespace Football.Fantasy.Analysis.Services
         }
         public async Task<List<FantasyPerformance>> GetFantasyPerformances(Position position)
         {
-            List<FantasyPerformance> fantasyPerformances = new();
+            List<FantasyPerformance> fantasyPerformances = [];
             var players = await playersService.GetPlayersByPosition(position);
             foreach (var player in players)
             {
