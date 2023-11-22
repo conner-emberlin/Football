@@ -131,10 +131,10 @@ else if (injuryEdits.Any() && !badRequestError)
                             <input type="text" class="form-control" placeholder="Desc" @bind="@injury.Description" />
                        </td>
                         <td>
-                            <button type="button" class="btn btn-link" @onclick="() => EnableEditing(false, injury)">
+                            <button style="color:red" type="button" class="btn btn-link" @onclick="() => EnableEditing(false, injury)">
                             <i class="oi oi-circle-x" />
                             </button>
-                            <button type="button" class="btn btn-link" @onclick="() => UpdateInjury(injury)">
+                            <button style="color:green" type="button" class="btn btn-link" @onclick="() => UpdateInjury(injury)">
                             <i class="oi oi-circle-check" />
                             </button>
                         </td>
