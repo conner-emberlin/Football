@@ -49,15 +49,15 @@ else if (players.Count > 0)
         <text>Record deleted.</text>
     }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <h5>Week @players.First().Week</h5>
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
-                    <th>Week</th>
-                    <th>Rank</th>
+                    <th></th>
                     <th>Name</th>
                     <th>Team</th>
-                    <th>Position</th>
                     <th>Opponent</th>
                     <th>Points</th>
                     <th></th>
@@ -69,11 +69,9 @@ else if (players.Count > 0)
                     var logoPhotoPath = player.Team != null ? "https://localhost:7176/Logos/" + player.Team + ".png" : "https://localhost:7176/Logos/nfl.png";
                     var opponentPhotoPath = !string.IsNullOrEmpty(player.Opponent) ? "https://localhost:7176/Logos/" + player.Opponent + ".png" : "https://localhost:7176/Logos/nfl.png";
                     <tr>
-                        <td>@player.Week</td>
-                        <td>@players.IndexOf(player)</td>
+                        <td>@GetRank(player)</td>
                         <td><a class="page-links" href="Players/@player.PlayerId"> @player.Name</a></td>
-                        <td><img src="@logoPhotoPath" width="30" height="30"></td>
-                        <td>@player.Position</td>
+                        <td><img src="@logoPhotoPath" width="30" height="30"></td>                        
                         <td><img src="@opponentPhotoPath" width="30" height="30"></td>
                         <td>@Math.Round((double)player.ProjectedPoints,2)</td>
                         <td>
@@ -226,6 +224,8 @@ else if (players.Count > 0)
     }
 
     private string GetHeader() => players.Any() ? "Week " + players.First().Week + " Projections" : string.Empty;
+
+    private int GetRank(WeekProjectionWithTeam projection) => players.IndexOf(projection) + 1;
 
 }
 

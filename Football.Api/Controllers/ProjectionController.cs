@@ -7,6 +7,7 @@ using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
 using Football.Leagues.Interfaces;
 using Football.Leagues.Models;
+using HtmlAgilityPack;
 
 namespace Football.Api.Controllers
 {
@@ -132,30 +133,21 @@ namespace Football.Api.Controllers
         }
 
         [HttpDelete("weekly/{playerId}/{season}/{week}")]
-        [ProducesResponseType(typeof(bool), 200)]
-        [ProducesResponseType(typeof(string), 400)]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteWeeklyProjection(int playerId, int season, int week)
         {
             var projection = (await weekProjectionService.GetPlayerProjections(playerId)).FirstOrDefault(p => p.Week == week && p.Season == season);
-            if (projection != null)
-            {
-                return Ok(await weekProjectionService.DeleteProjection(projection));
-            }
-            else return BadRequest();
+            return projection != null ? Ok(await weekProjectionService.DeleteProjection(projection)) : BadRequest();
         }
 
         [HttpDelete("season/{playerId}/{season}")]
-        [ProducesResponseType(typeof(bool), 200)]
-        [ProducesResponseType(typeof(string), 400)]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteSeasonProjection(int playerId, int season)
         {
             var projection = (await seasonProjectionService.GetPlayerProjections(playerId)).FirstOrDefault(p => p.Season == season);
-            if (projection != null)
-            {
-                return Ok(await seasonProjectionService.DeleteProjection(projection));
-            }
-            else return BadRequest();
-
+            return projection != null ? Ok(await seasonProjectionService.DeleteProjection(projection)) : BadRequest();
         }
     }
 }

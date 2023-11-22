@@ -222,7 +222,7 @@ else if (injuryEdits.Any() && !badRequestError)
                     InjuryStartWeek = i.InjuryStartWeek,
                     InjuryEndWeek = i.InjuryEndWeek,
                     Description = i.Description
-                }).ToList();
+                }).OrderBy(ie => ie.Player.Name).ToList();
 
             injuryEdits.ForEach(i => i.IsEditing = false);
         }

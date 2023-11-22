@@ -276,12 +276,10 @@ a.editstats {
             }
 a.page-links {
     text-decoration: none;
-    color: black;
     font-weight: bold;
 }
     a.page-links:hover {
         text-decoration: underline;
-        color: black;
         font-weight: bold;
     }
 

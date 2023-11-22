@@ -32,12 +32,12 @@ namespace Football.Fantasy.Analysis.Services
 
         public async Task<List<WaiverWireCandidate>> GetWaiverWireCandidates(int season, int week)
         {
-            List<WaiverWireCandidate> candidates = new();
+            List<WaiverWireCandidate> candidates = [];
             var rosterPercentages = (await _statisticsService.GetWeeklyRosterPercentages(season, week - 1)).Where(r => r.RosterPercent < _settings.RostershipMax).ToList();
             foreach (var rp in rosterPercentages)
             {
                 var player = await _playersService.GetPlayer(rp.PlayerId);
-                if (Enum.TryParse(player.Position, out Position pos))
+                if (Enum.TryParse(player.Position, out Position pos) && player.Active == 1)
                 {
                     var weeklyFantasy = await _fantasyService.GetWeeklyFantasy(rp.PlayerId);
                     var goodWeekCount = weeklyFantasy.Count(w => w.FantasyPoints > _settingsService.GoodWeek(pos));
@@ -77,7 +77,6 @@ namespace Football.Fantasy.Analysis.Services
             var playerTeam = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);            
             if (playerTeam != null)
             {
-
                 var activeInjuries = await _playersService.GetActiveInSeasonInjuries(_season.CurrentSeason);
                 var otherPlayersOnTeam = (await _playersService.GetPlayersByTeam(playerTeam.Team)).Where(p => p.PlayerId != playerId);
                 var injuredPlayersOnTeam = activeInjuries.Join(otherPlayersOnTeam, ai => ai.PlayerId, op => op.PlayerId, (ai, op) => new { InSeasonInjury = ai, PlayerTeam = op });                                                        
@@ -87,9 +86,7 @@ namespace Football.Fantasy.Analysis.Services
                     {
                         var position = (await _playersService.GetPlayer(injuredPlayer.PlayerTeam.PlayerId)).Position;
                         if (position == Position.RB.ToString())
-                        {
                             return true;
-                        }
                     }
                 }
             }

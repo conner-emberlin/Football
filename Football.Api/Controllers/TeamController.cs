@@ -15,55 +15,43 @@ namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TeamController : ControllerBase
+    public class TeamController(IPlayersService playersService, IStatisticsService statisticsService, IFantasyAnalysisService fantasyAnalysisService,
+        IOptionsMonitor<Season> season, IFantasyDataService fantasyDataService) : ControllerBase
     {
-        private readonly IPlayersService _playersService;
-        private readonly IStatisticsService _statisticsService;
-        private readonly IFantasyAnalysisService _fantasyAnalysisService;
-        private readonly IFantasyDataService _fantasyDataService;
-        private readonly Season _season;
-        public TeamController(IPlayersService playersService, IStatisticsService statisticsService, IFantasyAnalysisService fantasyAnalysisService,
-            IOptionsMonitor<Season> season, IFantasyDataService fantasyDataService)
-        {
-            _playersService = playersService;
-            _statisticsService = statisticsService;
-            _fantasyAnalysisService = fantasyAnalysisService;
-            _fantasyDataService = fantasyDataService;
-            _season = season.CurrentValue;
-        }
+        private readonly Season _season = season.CurrentValue;
 
         [HttpGet("all")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<Player>>> GetAllTeams() => Ok(await _playersService.GetAllTeams());
+        public async Task<ActionResult<List<Player>>> GetAllTeams() => Ok(await playersService.GetAllTeams());
 
         [HttpGet("players/{team}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<Player>>> GetPlayersByTeam(string team) => Ok(await _playersService.GetPlayersByTeam(team));
+        public async Task<ActionResult<List<Player>>> GetPlayersByTeam(string team) => Ok(await playersService.GetPlayersByTeam(team));
 
         [HttpGet("location/{teamId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<TeamLocation>> GetTeamLocation(int teamId) => Ok(await _playersService.GetTeamLocation(teamId));
+        public async Task<ActionResult<TeamLocation>> GetTeamLocation(int teamId) => Ok(await playersService.GetTeamLocation(teamId));
 
         [HttpGet("schedule-details/current")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<ScheduleDetails>>> GetScheduleDetails() => Ok(await _playersService.GetScheduleDetails(_season.CurrentSeason, await _playersService.GetCurrentWeek(_season.CurrentSeason)));
+        public async Task<ActionResult<List<ScheduleDetails>>> GetScheduleDetails() => Ok(await playersService.GetScheduleDetails(_season.CurrentSeason, await playersService.GetCurrentWeek(_season.CurrentSeason)));
 
         [HttpGet("team-records")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<TeamRecord>>> GetTeamRecords() => Ok(await _statisticsService.GetTeamRecords(_season.CurrentSeason));
+        public async Task<ActionResult<List<TeamRecord>>> GetTeamRecords() => Ok(await statisticsService.GetTeamRecords(_season.CurrentSeason));
 
         [HttpGet("game-results")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<GameResult>>> GetGameResults() => Ok(await _statisticsService.GetGameResults(_season.CurrentSeason));
+        public async Task<ActionResult<List<GameResult>>> GetGameResults() => Ok(await statisticsService.GetGameResults(_season.CurrentSeason));
 
         [HttpGet("fantasy-performances/{teamId}")]
         [ProducesResponseType(typeof(List<FantasyPerformance>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetFantasyPerformances([FromRoute] int teamId) => teamId > 0 ? Ok(await _fantasyAnalysisService.GetFantasyPerformances(teamId)) : BadRequest("Bad Request");
+        public async Task<IActionResult> GetFantasyPerformances([FromRoute] int teamId) => teamId > 0 ? Ok(await fantasyAnalysisService.GetFantasyPerformances(teamId)) : BadRequest("Bad Request");
 
         [HttpGet("weekly-fantasy/{team}/{week}")]
         [ProducesResponseType(typeof(List<WeeklyFantasy>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyTeamFantasy([FromRoute] string team, [FromRoute] int week) => week > 0 ? Ok(await _fantasyDataService.GetWeeklyTeamFantasy(team, week)) : BadRequest("Bad Request");
+        public async Task<IActionResult> GetWeeklyTeamFantasy([FromRoute] string team, [FromRoute] int week) => week > 0 ? Ok(await fantasyDataService.GetWeeklyTeamFantasy(team, week)) : BadRequest("Bad Request");
     }
 }
