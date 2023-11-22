@@ -3,6 +3,7 @@
 @using Football.Fantasy.Models;
 @using System.Text.Json
 @using System.Text.Json.Serialization
+@using ApexCharts;
 
 @inject IHttpClientFactory ClientFactory;
 
@@ -20,13 +21,25 @@
     {
         var qbTeam = teamFantasy.Where(t => t.Position == "QB").OrderByDescending(t => t.FantasyPoints).First();
         var qbOpp = opponentFantasy.Where(t => t.Position == "QB").OrderByDescending(t => t.FantasyPoints).First();
+        graph.Add(new BarGraphComp { Label = "QB", TeamBar = qbTeam, OppBar = qbOpp });
         var rbTeam = teamFantasy.Where(t => t.Position == "RB").OrderByDescending(t => t.FantasyPoints).Take(2).ToList();
         var rbOpp = opponentFantasy.Where(t => t.Position == "RB").OrderByDescending(t => t.FantasyPoints).Take(2).ToList();
-        var wrTeam = teamFantasy.Where(t => t.Position == "WR").OrderByDescending(t => t.FantasyPoints).Take(3).ToList();
-        var wrOpp = opponentFantasy.Where(t => t.Position == "WR").OrderByDescending(t => t.FantasyPoints).Take(3).ToList();
+        for (int i = 0; i < 2; i++)
+        {
+            graph.Add(new BarGraphComp { Label = "RB", TeamBar = rbTeam.ElementAt(i), OppBar = rbOpp.ElementAt(i) });
+        }
+        var wrTeam = teamFantasy.Where(t => t.Position == "WR").OrderByDescending(t => t.FantasyPoints).Take(2).ToList();
+        var wrOpp = opponentFantasy.Where(t => t.Position == "WR").OrderByDescending(t => t.FantasyPoints).Take(2).ToList();
+        for (int i = 0; i < 2; i++)
+        {
+            if (wrTeam.ElementAt(i) != null && wrOpp.ElementAt(i) != null)
+            {
+                graph.Add(new BarGraphComp { Label = "WR", TeamBar = wrTeam.ElementAt(i), OppBar = wrOpp.ElementAt(i) });
+            }
+        }
         var teTeam = teamFantasy.Where(t => t.Position == "TE").OrderByDescending(t => t.FantasyPoints).First();
         var teOpp = opponentFantasy.Where(t => t.Position == "TE").OrderByDescending(t => t.FantasyPoints).First();
-
+        graph.Add(new BarGraphComp { Label = "TE", TeamBar = teTeam, OppBar = teOpp });
         var teamLogo = string.Format("{0}/{1}.png", "https://localhost:7176/Logos", team);
         var oppLogo = string.Format("{0}/{1}.png", "https://localhost:7176/Logos", opponent);
 
@@ -67,11 +80,6 @@
                         <td><a class="page-links" href="@PlayerPage(wrOpp.ElementAt(1).PlayerId)">@wrOpp.ElementAt(1).Name</a>: @wrOpp.ElementAt(1).FantasyPoints</td>
                     </tr>
                     <tr>
-                        <td>WR</td>
-                        <td><a class="page-links" href="@PlayerPage(wrTeam.ElementAt(1).PlayerId)">@wrTeam.ElementAt(2).Name</a>: @wrTeam.ElementAt(2).FantasyPoints</td>
-                        <td><a class="page-links" href="@PlayerPage(wrOpp.ElementAt(1).PlayerId)">@wrOpp.ElementAt(2).Name</a>: @wrOpp.ElementAt(2).FantasyPoints</td>
-                    </tr>
-                    <tr>
                         <td>TE</td>
                         <td><a class="page-links" href="@PlayerPage(teTeam.PlayerId)">@teTeam.Name</a>: @teTeam.FantasyPoints</td>
                         <td><a class="page-links" href="@PlayerPage(teOpp.PlayerId)">@teOpp.Name</a>: @teOpp.FantasyPoints</td>
@@ -79,6 +87,27 @@
                 </tbody>                                          
             </table>
         </div>
+        <hr style="width:100%;text-align:left;margin-left:0">
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <h5>Fantasy Points by Position</h5>
+        <ApexChart TItem="BarGraphComp"
+                   Height="400">
+            <ApexPointSeries TItem="BarGraphComp"
+                             Items="graph"
+                             Name="@team"
+                             XValue="@(e => e.Label)"
+                             YAggregate="@(e => e.Sum(e => (decimal)e.TeamBar.FantasyPoints))"                            
+                             SeriesType="SeriesType.Bar"
+                             Color="#3633FF" />
+
+            <ApexPointSeries TItem="BarGraphComp"
+                             Items="graph"
+                             Name="@opponent"
+                             XValue="@(e => e.Label)"
+                             YAggregate="@(e => e.Sum(e => (decimal)e.OppBar.FantasyPoints))"                      
+                             SeriesType="SeriesType.Bar"
+                             Color="#E51C15" />
+        </ApexChart>
     }
 }
 
@@ -96,6 +125,8 @@
 
     public List<WeeklyFantasy>? teamFantasy = [];
     public List<WeeklyFantasy>? opponentFantasy = [];
+
+    public List<BarGraphComp> graph = [];
 
     protected override bool ShouldRender() => shouldRender;
 
@@ -132,5 +163,12 @@
     private string GetHeader() => team + " vs " + opponent + " Fantasy Results";
 
     private string PlayerPage(int playerId) => "Players/" + playerId.ToString();
+
+    public class BarGraphComp
+    {
+        public string Label { get; set; } = "";
+        public WeeklyFantasy TeamBar { get; set; } = new();
+        public WeeklyFantasy OppBar { get; set; } = new();
+    }
 
 }
