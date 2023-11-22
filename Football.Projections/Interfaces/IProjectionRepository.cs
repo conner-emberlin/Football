@@ -12,5 +12,7 @@ namespace Football.Projections.Interfaces
         public Task<IEnumerable<WeekProjection>?> GetWeeklyProjection(int playerId);
         public IEnumerable<WeekProjection> GetWeeklyProjectionsFromSQL(Position position, int week);
         public IEnumerable<SeasonProjection> GetSeasonProjectionsFromSQL(Position position, int season);
+        public Task<bool> DeleteWeeklyProjection(int playerId, int week, int season);
+        public Task<bool> DeleteSeasonProjection(int playerId, int season);
     }
 }

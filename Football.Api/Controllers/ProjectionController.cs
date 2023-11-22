@@ -12,27 +12,12 @@ namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProjectionController : ControllerBase
+    public class ProjectionController(IPlayersService playersService,
+        IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season,
+        IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService,
+        ILeagueAnalysisService leagueService) : ControllerBase
     {
-        private readonly IPlayersService _playersService;
-        private readonly IProjectionAnalysisService _analysisService;
-        private readonly IProjectionService<SeasonProjection> _seasonProjectionService;
-        private readonly IProjectionService<WeekProjection> _weekProjectionService;
-        private readonly ILeagueAnalysisService _leagueService;
-        private readonly Season _season;
-
-        public ProjectionController(IPlayersService playersService, 
-            IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season, 
-            IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService,
-            ILeagueAnalysisService leagueService)
-        {
-            _playersService = playersService;
-            _analysisService = analysisService;
-            _season = season.CurrentValue;
-            _seasonProjectionService = seasonProjectionService;
-            _weekProjectionService = weekProjectionService;
-            _leagueService = leagueService;
-        }
+        private readonly Season _season = season.CurrentValue;
 
         [HttpGet("season/{position}")]
         [ProducesResponseType(typeof(List<SeasonProjection>), 200)]
@@ -41,8 +26,8 @@ namespace Football.Api.Controllers
         {
             if(Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
-                return positionEnum == Position.FLEX ? Ok(await _analysisService.SeasonFlexRankings())
-                                      : Ok(await _seasonProjectionService.GetProjections(positionEnum));
+                return positionEnum == Position.FLEX ? Ok(await analysisService.SeasonFlexRankings())
+                                      : Ok(await seasonProjectionService.GetProjections(positionEnum));
             }
             else
             {
@@ -53,7 +38,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(SeasonProjection), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<SeasonProjection>> GetSeasonProjections(int playerId) => playerId > 0 ? 
-            Ok((await _seasonProjectionService.GetPlayerProjections(playerId)).Where(p => p.Season == _season.CurrentSeason).First()) : BadRequest("Bad Request");
+            Ok((await seasonProjectionService.GetPlayerProjections(playerId)).Where(p => p.Season == _season.CurrentSeason).First()) : BadRequest("Bad Request");
 
         [HttpPost("season/{position}")]
         [ProducesResponseType(typeof(int), 200)]
@@ -62,8 +47,8 @@ namespace Football.Api.Controllers
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))  
             {
-                var proj = (await _seasonProjectionService.GetProjections(positionEnum)).ToList();
-                return Ok(await _seasonProjectionService.PostProjections(proj));
+                var proj = (await seasonProjectionService.GetProjections(positionEnum)).ToList();
+                return Ok(await seasonProjectionService.PostProjections(proj));
             }
             else
             {
@@ -78,8 +63,8 @@ namespace Football.Api.Controllers
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
-                return positionEnum == Position.FLEX ? Ok(await _analysisService.WeeklyFlexRankings()) 
-                                                         : Ok(await _weekProjectionService.GetProjections(positionEnum));
+                return positionEnum == Position.FLEX ? Ok(await analysisService.WeeklyFlexRankings()) 
+                                                         : Ok(await weekProjectionService.GetProjections(positionEnum));
             }
             else
             {
@@ -93,8 +78,8 @@ namespace Football.Api.Controllers
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
-                var proj = (await _weekProjectionService.GetProjections(positionEnum)).ToList();
-                return Ok(await _weekProjectionService.PostProjections(proj));
+                var proj = (await weekProjectionService.GetProjections(positionEnum)).ToList();
+                return Ok(await weekProjectionService.PostProjections(proj));
             }
             else
             {
@@ -110,10 +95,10 @@ namespace Football.Api.Controllers
             if (Enum.TryParse(position, out Position positionEnum))
             {
                 List<WeeklyProjectionAnalysis> projectionAnalyses = new();
-                var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
+                var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
                 for (int i = 2; i < currentWeek; i++)
                 {
-                    projectionAnalyses.Add(await _analysisService.GetWeeklyProjectionAnalysis(positionEnum, i));
+                    projectionAnalyses.Add(await analysisService.GetWeeklyProjectionAnalysis(positionEnum, i));
                 }
                 return Ok(projectionAnalyses);
             }
@@ -127,7 +112,7 @@ namespace Football.Api.Controllers
         {
             if (Enum.TryParse(position, out Position positionEnum))
             {
-                return Ok(await _analysisService.GetWeeklyProjectionError(positionEnum, week));
+                return Ok(await analysisService.GetWeeklyProjectionError(positionEnum, week));
             }
             else return BadRequest("Bad Request");
         }
@@ -135,15 +120,42 @@ namespace Football.Api.Controllers
         [HttpGet("sleeper-projections/{username}")]
         [ProducesResponseType(typeof(List<WeekProjection>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeekProjection>>> GetSleeperLeagueProjections([FromRoute] string username) => Ok(await _leagueService.GetSleeperLeagueProjections(username));
+        public async Task<ActionResult<List<WeekProjection>>> GetSleeperLeagueProjections([FromRoute] string username) => Ok(await leagueService.GetSleeperLeagueProjections(username));
 
         [HttpGet("sleeper-projections/{username}/matchup")]
         [ProducesResponseType(typeof(List<MatchupProjections>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<MatchupProjections>>> GetMatchupProjections([FromRoute] string username)
         {
-            var currentWeek = await _playersService.GetCurrentWeek(_season.CurrentSeason);
-            return Ok(await _leagueService.GetMatchupProjections(username, currentWeek));
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            return Ok(await leagueService.GetMatchupProjections(username, currentWeek));
+        }
+
+        [HttpDelete("weekly/{playerId}/{season}/{week}")]
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> DeleteWeeklyProjection(int playerId, int season, int week)
+        {
+            var projection = (await weekProjectionService.GetPlayerProjections(playerId)).FirstOrDefault(p => p.Week == week && p.Season == season);
+            if (projection != null)
+            {
+                return Ok(await weekProjectionService.DeleteProjection(projection));
+            }
+            else return BadRequest();
+        }
+
+        [HttpDelete("season/{playerId}/{season}")]
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> DeleteSeasonProjection(int playerId, int season)
+        {
+            var projection = (await seasonProjectionService.GetPlayerProjections(playerId)).FirstOrDefault(p => p.Season == season);
+            if (projection != null)
+            {
+                return Ok(await seasonProjectionService.DeleteProjection(projection));
+            }
+            else return BadRequest();
+
         }
     }
 }

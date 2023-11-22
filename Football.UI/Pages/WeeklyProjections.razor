@@ -44,6 +44,10 @@ else if (players.Count > 0)
         <p>@count records added </p>
         count = 0;
     }
+    @if (recordDeleted)
+    {
+        <text>Record deleted.</text>
+    }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -56,21 +60,27 @@ else if (players.Count > 0)
                     <th>Position</th>
                     <th>Opponent</th>
                     <th>Points</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 1; i <= players.Count; i++)
+                @foreach (var player in players)
                 {
-                    var logoPhotoPath = players.ElementAt(i - 1).Team != null ? "https://localhost:7176/Logos/" + players.ElementAt(i - 1).Team + ".png" : "https://localhost:7176/Logos/nfl.png";
-                    var opponentPhotoPath = !string.IsNullOrEmpty(players.ElementAt(i - 1).Opponent) ? "https://localhost:7176/Logos/" + players.ElementAt(i - 1).Opponent + ".png" : "https://localhost:7176/Logos/nfl.png";
+                    var logoPhotoPath = player.Team != null ? "https://localhost:7176/Logos/" + player.Team + ".png" : "https://localhost:7176/Logos/nfl.png";
+                    var opponentPhotoPath = !string.IsNullOrEmpty(player.Opponent) ? "https://localhost:7176/Logos/" + player.Opponent + ".png" : "https://localhost:7176/Logos/nfl.png";
                     <tr>
-                        <td>@players.ElementAt(i-1).Week</td>
-                        <td>@i</td>
-                        <td><a class="page-links" href="Players/@players.ElementAt(i-1).PlayerId"> @players.ElementAt(i-1).Name</a></td>
+                        <td>@player.Week</td>
+                        <td>@players.IndexOf(player)</td>
+                        <td><a class="page-links" href="Players/@player.PlayerId"> @player.Name</a></td>
                         <td><img src="@logoPhotoPath" width="30" height="30"></td>
-                        <td>@players.ElementAt(i-1).Position</td>
+                        <td>@player.Position</td>
                         <td><img src="@opponentPhotoPath" width="30" height="30"></td>
-                        <td>@Math.Round((double)players.ElementAt(i-1).ProjectedPoints,2)</td>
+                        <td>@Math.Round((double)player.ProjectedPoints,2)</td>
+                        <td>
+                        <button style="color:red" type="button" class="btn btn-link" @onclick="() => DeleteProjection(player.PlayerId, player.Season, player.Week)">
+                            <i sytle="color:red" class="oi oi-circle-x" />
+                        </button>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -89,6 +99,7 @@ else if (players.Count > 0)
     public string PositionEnum { get; set; } = "1";
     private bool loading { get; set; }
     int count = 0;
+    private bool recordDeleted = false;
 
     public async Task UploadProjections()
     {
@@ -186,6 +197,28 @@ else if (players.Count > 0)
         }
         else return string.Empty;
     }
+
+    public async Task DeleteProjection(int playerId, int season, int week)
+    {
+        var url = string.Format("{0}/{1}/{2}/{3}", "https://localhost:7028/api/Projection/weekly", playerId, season, week);
+        var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            recordDeleted =  await JsonSerializer.DeserializeAsync<bool>(responseStream, options);
+            await CalculateProjections();
+        }
+        else
+        {
+            badRequestError = true;           
+        }
+        shouldRender = true;
+    }
+
+
     public class WeekProjectionWithTeam : WeekProjection
     {
         public string Team { get; set; } = "";

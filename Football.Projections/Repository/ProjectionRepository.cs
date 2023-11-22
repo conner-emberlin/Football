@@ -51,5 +51,24 @@ namespace Football.Projections.Repository
                             AND [Season] = @season";
             return dbConnection.Query<SeasonProjection>(query, new { pos, season });
         }
+
+        public async Task<bool> DeleteWeeklyProjection(int playerId, int week, int season)
+        {
+            var query = $@"DELETE FROM [dbo].WeeklyProjections
+                            WHERE [PlayerId] = @playerId
+                                AND [Season] = @season
+                                AND [Week] = @week";
+            return await dbConnection.ExecuteAsync(query, new { playerId, week, season }) > 0;
+        }
+
+        public async Task<bool> DeleteSeasonProjection(int playerId, int season)
+        {
+            var query = $@"DELETE FROM [dbo].SeasonProjections
+                            WHERE [PlayerId] = @playerId
+                                AND [Season] = @season";
+                                
+            return await dbConnection.ExecuteAsync(query, new { playerId, season }) > 0;
+        }
+
     }
 }

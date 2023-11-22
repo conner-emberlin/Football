@@ -4,6 +4,7 @@ namespace Football.Projections.Interfaces
 {
     public interface IProjectionService<T>
     {
+        public Task<bool> DeleteProjection(T projection);
         public bool GetProjectionsFromSQL(Position position, int season, out IEnumerable<T> projections);
         public bool GetProjectionsFromCache(Position position, out IEnumerable<T> projections);
         public Task<IEnumerable<T>?> GetPlayerProjections(int playerId);

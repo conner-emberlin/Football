@@ -22,6 +22,7 @@ namespace Football.Projections.Services
     {
         private readonly Season _season = season.CurrentValue;
 
+        public async Task<bool> DeleteProjection(SeasonProjection projection) => await projectionRepository.DeleteSeasonProjection(projection.PlayerId, projection.Season);
         public async Task<IEnumerable<SeasonProjection>?> GetPlayerProjections(int playerId) => await projectionRepository.GetSeasonProjection(playerId);
         public async Task<int> PostProjections(List<SeasonProjection> projections) => await projectionRepository.PostSeasonProjections(projections);
 

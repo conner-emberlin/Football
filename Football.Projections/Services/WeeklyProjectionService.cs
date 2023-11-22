@@ -15,7 +15,7 @@ using Serilog;
 namespace Football.Projections.Services
 {
     public class WeeklyProjectionService(IRegressionModelService regressionService, IFantasyDataService fantasyService,
-    IMemoryCache cache, ILogger logger, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
+    IMemoryCache cache,IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
     IStatisticsService statisticsService, IOptionsMonitor<Season> season,
     IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository,
     IOptionsMonitor<WeeklyTunings> weeklyTunings, ISettingsService settingsService, IOptionsMonitor<ProjectionLimits> settings) : IProjectionService<WeekProjection>
@@ -24,6 +24,13 @@ namespace Football.Projections.Services
         private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
         private readonly ProjectionLimits _settings = settings.CurrentValue;
 
+        public async Task<bool> DeleteProjection(WeekProjection projection) 
+        { 
+            var recordDeleted = await projectionRepository.DeleteWeeklyProjection(projection.PlayerId, projection.Week, projection.Season);
+            if (recordDeleted) 
+                cache.Remove(projection.Position + Cache.WeeklyProjections.ToString());
+            return recordDeleted;
+        } 
         public async Task<IEnumerable<WeekProjection>?> GetPlayerProjections(int playerId) => await projectionRepository.GetWeeklyProjection(playerId);
         public async Task<int> PostProjections(List<WeekProjection> projections) => await projectionRepository.PostWeeklyProjections(projections);
 
@@ -120,7 +127,7 @@ namespace Football.Projections.Services
         }
         private async Task<List<WeeklyFantasy>> FantasyProjectionModel<T>(List<T> statsModel, int currentWeek)
         {
-            List<WeeklyFantasy> weeklyFantasy = new();
+            List<WeeklyFantasy> weeklyFantasy = [];
             foreach (var stat in statsModel)
             {
                 var playerId = (int)settingsService.GetValueFromModel(stat, Model.PlayerId);
