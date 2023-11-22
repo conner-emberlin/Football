@@ -108,7 +108,6 @@ else if (badRequestError)
             <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
                 <thead>
                     <tr>
-                        <th>Season</th>
                         <th>Week</th>
                         <th>Winner</th>
                         <th>Loser</th>
@@ -116,13 +115,14 @@ else if (badRequestError)
                         <th>LPts</th>
                         <th>WYds</th>
                         <th>LYds</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var gr in teamGameResults)
                     {
+
                         <tr>
-                            <td>@gr.Season</td>
                             <td>@gr.Week</td>
                             @if(gr.Winner == teamChosen.TeamDescription)
                             {
@@ -144,6 +144,9 @@ else if (badRequestError)
                             <td>@gr.LoserPoints</td>
                             <td>@gr.WinnerYards</td>
                             <td>@gr.LoserYards</td>
+                            <td>
+                                <a href="@GetTeamFantasyLink(gr.WinnerId, gr.LoserId, gr.Week)"> <i class="oi oi-magnifying-glass" /></a>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -383,4 +386,11 @@ else if (badRequestError)
         return dt.ToString("MM/dd");
     }
 
+    private string GetTeamFantasyLink(int teamId, int opponentId, int week)
+    {
+        var team = (teams.First(t => t.TeamId == teamId)).Team;
+        var opponent = (teams.First(t => t.TeamId == opponentId)).Team;
+        return string.Format("{0}/{1}/{2}/{3}", "/team-fantasy", team, opponent, week.ToString());
+
+    }
 }

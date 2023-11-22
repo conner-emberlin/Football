@@ -76,6 +76,7 @@
                         <span class="sort-link" onclick="@(() => SetTable("RecTDShare"))">RecTd%</span>
                         <span class="oi @(tableSort.GetSortStyle("RecTDShare"))"></span>
                     </th>
+                    <th> </th>
                 </tr>
             </thead>
             <tbody>
@@ -83,7 +84,7 @@
                 {
                     <tr>
                         <td><a class="page-links" href="Players/@marketShare.ElementAt(i-1).Player.PlayerId"> @marketShare.ElementAt(i-1).Player.Name</a>
-                            <a href="share-graph/@marketShare.ElementAt(i-1).Player.Position/@marketShare.ElementAt(i-1).Player.PlayerId"> <i class="oi oi-bar-chart" /></a>
+                        
                         </td>
                         <td>@marketShare.ElementAt(i-1).PlayerTeam.Team</td>
                         <td>@Math.Round(marketShare.ElementAt(i-1).FantasyShare * 100, 1) </td>
@@ -94,6 +95,7 @@
                         <td>@Math.Round(marketShare.ElementAt(i-1).ReceptionShare * 100, 1)</td>
                         <td>@Math.Round(marketShare.ElementAt(i-1).RecYdShare * 100, 1)</td>
                         <td>@Math.Round(marketShare.ElementAt(i-1).RecTDShare * 100, 1)</td>
+                        <td><a href="share-graph/@marketShare.ElementAt(i-1).Player.Position/@marketShare.ElementAt(i-1).Player.PlayerId"> <i class="oi oi-bar-chart" /></a></td>
                     </tr>
                 }
             </tbody>

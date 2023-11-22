@@ -127,6 +127,21 @@ namespace Football.Fantasy.Services
             }
             else return allFantasy;
         }
+
+        public async Task<List<WeeklyFantasy>> GetWeeklyTeamFantasy(string team, int week)
+        {
+            List<WeeklyFantasy> teamFantasy = [];
+            var players = await playersService.GetPlayersByTeam(team);
+            foreach (var player in players)
+            {
+                var weeklyFantasy = (await GetWeeklyFantasy(player.PlayerId, team)).FirstOrDefault(f => f.Week == week);
+                if(weeklyFantasy != null)
+                {
+                    teamFantasy.Add(weeklyFantasy);
+                }
+            }
+            return teamFantasy;
+        }
         
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(Position position)
         {

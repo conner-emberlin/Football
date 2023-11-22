@@ -50,7 +50,7 @@
                         <tr>
                             <td>
                                 @userProjections.TeamProjections.ElementAt(i).Position
-                                <a class="page-links" href="Players/@userProjections.TeamProjections.ElementAt(i-1).PlayerId">@userProjections.TeamProjections.ElementAt(i-1).Name</a>
+                                <a class="page-links" href="Players/@userProjections.TeamProjections.ElementAt(i).PlayerId">@userProjections.TeamProjections.ElementAt(i).Name</a>
                                 : @Math.Round(userProjections.TeamProjections.ElementAt(i).ProjectedPoints,2)
                             </td>
                             <td>
@@ -67,7 +67,7 @@
                             </td>
                             <td>
                                 @opponentProjections.TeamProjections.ElementAt(i).Position
-                                <a class="page-links" href="Players/@opponentProjections.TeamProjections.ElementAt(i-1).PlayerId">@opponentProjections.TeamProjections.ElementAt(i-1).Name</a>
+                                <a class="page-links" href="Players/@opponentProjections.TeamProjections.ElementAt(i).PlayerId">@opponentProjections.TeamProjections.ElementAt(i).Name</a>
                                 : @Math.Round(opponentProjections.TeamProjections.ElementAt(i).ProjectedPoints,2)
                             </td>
                             

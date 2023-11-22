@@ -1,0 +1,136 @@
+﻿@page "/team-fantasy/{team}/{opponent}/{week}"
+
+@using Football.Fantasy.Models;
+@using System.Text.Json
+@using System.Text.Json.Serialization
+
+@inject IHttpClientFactory ClientFactory;
+
+
+<h5>@GetHeader()</h5>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+@if(teamFantasy != null && opponentFantasy != null)
+{
+    if (teamFantasy.Count > 0 && opponentFantasy.Count > 0)
+    {
+        var qbTeam = teamFantasy.Where(t => t.Position == "QB").OrderByDescending(t => t.FantasyPoints).First();
+        var qbOpp = opponentFantasy.Where(t => t.Position == "QB").OrderByDescending(t => t.FantasyPoints).First();
+        var rbTeam = teamFantasy.Where(t => t.Position == "RB").OrderByDescending(t => t.FantasyPoints).Take(2).ToList();
+        var rbOpp = opponentFantasy.Where(t => t.Position == "RB").OrderByDescending(t => t.FantasyPoints).Take(2).ToList();
+        var wrTeam = teamFantasy.Where(t => t.Position == "WR").OrderByDescending(t => t.FantasyPoints).Take(3).ToList();
+        var wrOpp = opponentFantasy.Where(t => t.Position == "WR").OrderByDescending(t => t.FantasyPoints).Take(3).ToList();
+        var teTeam = teamFantasy.Where(t => t.Position == "TE").OrderByDescending(t => t.FantasyPoints).First();
+        var teOpp = opponentFantasy.Where(t => t.Position == "TE").OrderByDescending(t => t.FantasyPoints).First();
+
+        var teamLogo = string.Format("{0}/{1}.png", "https://localhost:7176/Logos", team);
+        var oppLogo = string.Format("{0}/{1}.png", "https://localhost:7176/Logos", opponent);
+
+        <div class="table_container">
+
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>@team <img src="@teamLogo" width="30" height="30"></th>
+                        <th>@opponent <img src="@oppLogo" width="30" height="30"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>QB</td>
+                        <td><a class="page-links" href="@PlayerPage(qbTeam.PlayerId)">@qbTeam.Name</a>: @qbTeam.FantasyPoints</td>
+                        <td><a class="page-links" href="@PlayerPage(qbOpp.PlayerId)">@qbOpp.Name</a>: @qbOpp.FantasyPoints</td>
+                    </tr>
+                    <tr>
+                        <td>RB</td>
+                        <td><a class="page-links" href="@PlayerPage(rbTeam.ElementAt(0).PlayerId)">@rbTeam.ElementAt(0).Name</a>: @rbTeam.ElementAt(0).FantasyPoints</td>
+                        <td><a class="page-links" href="@PlayerPage(rbOpp.ElementAt(0).PlayerId)">@rbOpp.ElementAt(0).Name</a>: @rbOpp.ElementAt(0).FantasyPoints</td>
+                    </tr>
+                    <tr>
+                        <td>RB</td>
+                        <td><a class="page-links" href="@PlayerPage(rbTeam.ElementAt(1).PlayerId)">@rbTeam.ElementAt(1).Name</a>: @rbTeam.ElementAt(1).FantasyPoints</td>
+                        <td><a class="page-links" href="@PlayerPage(rbOpp.ElementAt(1).PlayerId)">@rbOpp.ElementAt(1).Name</a>: @rbOpp.ElementAt(1).FantasyPoints</td>
+                    </tr>
+                    <tr>
+                        <td>WR</td>
+                        <td><a class="page-links" href="@PlayerPage(wrTeam.ElementAt(0).PlayerId)">@wrTeam.ElementAt(0).Name</a>: @wrTeam.ElementAt(0).FantasyPoints</td>
+                        <td><a class="page-links" href="@PlayerPage(wrOpp.ElementAt(0).PlayerId)">@wrOpp.ElementAt(0).Name</a>: @wrOpp.ElementAt(0).FantasyPoints</td>
+                    </tr>
+                    <tr>
+                        <td>WR</td>
+                        <td><a class="page-links" href="@PlayerPage(wrTeam.ElementAt(1).PlayerId)">@wrTeam.ElementAt(1).Name</a>: @wrTeam.ElementAt(1).FantasyPoints</td>
+                        <td><a class="page-links" href="@PlayerPage(wrOpp.ElementAt(1).PlayerId)">@wrOpp.ElementAt(1).Name</a>: @wrOpp.ElementAt(1).FantasyPoints</td>
+                    </tr>
+                    <tr>
+                        <td>WR</td>
+                        <td><a class="page-links" href="@PlayerPage(wrTeam.ElementAt(1).PlayerId)">@wrTeam.ElementAt(2).Name</a>: @wrTeam.ElementAt(2).FantasyPoints</td>
+                        <td><a class="page-links" href="@PlayerPage(wrOpp.ElementAt(1).PlayerId)">@wrOpp.ElementAt(2).Name</a>: @wrOpp.ElementAt(2).FantasyPoints</td>
+                    </tr>
+                    <tr>
+                        <td>TE</td>
+                        <td><a class="page-links" href="@PlayerPage(teTeam.PlayerId)">@teTeam.Name</a>: @teTeam.FantasyPoints</td>
+                        <td><a class="page-links" href="@PlayerPage(teOpp.PlayerId)">@teOpp.Name</a>: @teOpp.FantasyPoints</td>
+                    </tr>
+                </tbody>                                          
+            </table>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public string team { get; set; } = "";
+    [Parameter]
+    public string opponent { get; set; } = "";
+    [Parameter]
+    public string week { get; set; } = "";
+
+    public bool loading { get; set; }
+    public bool shouldRender { get; set; }
+    public bool badRequestError { get; set; }
+
+    public List<WeeklyFantasy>? teamFantasy = [];
+    public List<WeeklyFantasy>? opponentFantasy = [];
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        teamFantasy = await GetTeamFantasy(team, week);
+        opponentFantasy = await GetTeamFantasy(opponent, week);
+        loading = false;
+        shouldRender = true;
+    }
+
+    private async Task<List<WeeklyFantasy>?> GetTeamFantasy(string team, string week)
+    {
+        var url = string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Team/weekly-fantasy", team, week);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            var temp = await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options);
+            if (temp is not null)
+            {
+                temp.ForEach(t => t.FantasyPoints = Math.Round(t.FantasyPoints, 2));
+            }
+            return temp;
+        }
+        else return null;
+    }
+
+    private string GetHeader() => team + " vs " + opponent + " Fantasy Results";
+
+    private string PlayerPage(int playerId) => "Players/" + playerId.ToString();
+
+}

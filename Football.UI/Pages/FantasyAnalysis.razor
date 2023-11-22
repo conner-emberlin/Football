@@ -69,6 +69,7 @@
                     </th>
                     <th>Boom%</th>
                     <th>Bust%</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -79,21 +80,27 @@
 
                     <tr>
                         <td>
-                            <a class="page-links" href="Players/@FantasyPerformances.ElementAt(i-1).PlayerId"> @FantasyPerformances.ElementAt(i-1).Name</a>
-                            <a href="fantasy-graph/@FantasyPerformances.ElementAt(i-1).PlayerId"> <i class="oi oi-graph" /></a>
+                            <a class="page-links" href="Players/@FantasyPerformances.ElementAt(i-1).PlayerId"> @FantasyPerformances.ElementAt(i-1).Name</a>                            
                         </td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).AvgFantasy,2)</td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).TotalFantasy,2)</td>                       
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MinFantasy,2)</td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MaxFantasy,2)</td>
                         <td>@Math.Round(FantasyPerformances.ElementAt(i-1).Variance,2)</td>
-                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).StdDev,2)</td>
+                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).StdDev,2)</td>   
 
                         @if(boomBust is not null)
                         {
                             <td>@boomBust.BoomPercentage</td>
                             <td>@boomBust.BustPercentage</td>
                         }
+                        else{
+                            <td>-</td>
+                            <td>-</td>
+                        }
+                        <td>
+                            <a href="fantasy-graph/@FantasyPerformances.ElementAt(i-1).PlayerId"> <i class="oi oi-graph" /></a>
+                        </td>
                     </tr>
                 }
             </tbody>

@@ -125,6 +125,7 @@ namespace Football.Projections.Services
                     }
                     else
                     {
+                        logger.Information("{0} is on BYE", team);
                         w.ProjectedPoints = 0;
                     }
                 }

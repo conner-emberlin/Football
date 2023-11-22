@@ -64,6 +64,7 @@
                             <span class="sort-link" onclick="@(() => SetTable("RushTDShare"))">RushTD%</span>
                             <span class="oi @(tableSort.GetSortStyle("RushTDShare"))"></span>
                         </th>
+                        <th> </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,12 +73,13 @@
                         <tr>
                             <td>
                                 <a class="page-links" href="Players/@f.PlayerId"> @f.Name</a> &nbsp;
-                                <a href="dist-graph/@f.Position/@f.PlayerId"> <i class="oi oi-pie-chart" /></a>
+                                
                             </td>
                             <td>@Math.Round(f.PassYDShare * 100)</td>
                             <td>@Math.Round(f.PassTDShare * 100)</td>
                             <td>@Math.Round(f.RushYDShare * 100)</td>
                             <td>@Math.Round(f.RushTDShare * 100)</td>
+                            <td><a href="dist-graph/@f.Position/@f.PlayerId"> <i class="oi oi-pie-chart" /></a></td>
                         </tr>
                     }
                 </tbody>

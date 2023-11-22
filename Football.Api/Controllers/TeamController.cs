@@ -8,6 +8,8 @@ using Microsoft.Extensions.Options;
 using Football.Data.Models;
 using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Analysis.Models;
+using Football.Fantasy.Interfaces;
+using Football.Fantasy.Models;
 
 namespace Football.Api.Controllers
 {
@@ -18,13 +20,15 @@ namespace Football.Api.Controllers
         private readonly IPlayersService _playersService;
         private readonly IStatisticsService _statisticsService;
         private readonly IFantasyAnalysisService _fantasyAnalysisService;
+        private readonly IFantasyDataService _fantasyDataService;
         private readonly Season _season;
         public TeamController(IPlayersService playersService, IStatisticsService statisticsService, IFantasyAnalysisService fantasyAnalysisService,
-            IOptionsMonitor<Season> season)
+            IOptionsMonitor<Season> season, IFantasyDataService fantasyDataService)
         {
             _playersService = playersService;
             _statisticsService = statisticsService;
             _fantasyAnalysisService = fantasyAnalysisService;
+            _fantasyDataService = fantasyDataService;
             _season = season.CurrentValue;
         }
 
@@ -57,6 +61,9 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetFantasyPerformances([FromRoute] int teamId) => teamId > 0 ? Ok(await _fantasyAnalysisService.GetFantasyPerformances(teamId)) : BadRequest("Bad Request");
 
-
+        [HttpGet("weekly-fantasy/{team}/{week}")]
+        [ProducesResponseType(typeof(List<WeeklyFantasy>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetWeeklyTeamFantasy([FromRoute] string team, [FromRoute] int week) => week > 0 ? Ok(await _fantasyDataService.GetWeeklyTeamFantasy(team, week)) : BadRequest("Bad Request");
     }
 }
