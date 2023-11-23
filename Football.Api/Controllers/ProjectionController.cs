@@ -118,6 +118,11 @@ namespace Football.Api.Controllers
             else return BadRequest("Bad Request");
         }
 
+        [HttpGet("weekly-error/{playerId}")]
+        [ProducesResponseType(typeof(List<WeeklyProjectionError>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> GetWeeklyProjectionError(int playerId) => playerId > 0 ? Ok(await analysisService.GetWeeklyProjectionError(playerId)) : BadRequest();
+
         [HttpGet("sleeper-projections/{username}")]
         [ProducesResponseType(typeof(List<WeekProjection>), 200)]
         [ProducesResponseType(typeof(string), 400)]

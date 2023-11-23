@@ -92,6 +92,7 @@
     {
         Position = args.Value.ToString();
         Rankings.Clear();
+        tableSort = new();
         positionEnum = Position switch
         {
             "Quarterback" => Enums.Position.QB,

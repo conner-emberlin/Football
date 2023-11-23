@@ -42,7 +42,6 @@ else if (ProjectionAnalyses.Any())
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
-                    <th>Season</th>
                     <th>Position</th>
                     <th>Week </th>
                     <th>
@@ -69,13 +68,13 @@ else if (ProjectionAnalyses.Any())
                         <span class="sort-link" onclick="@(() => SetTable("AvgRankError"))">AvgRankError</span>
                         <span class="oi @(tableSort.GetSortStyle("AvgRankError"))"></span>
                     </th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var p in ProjectionAnalyses)
                 {
                     <tr>
-                        <td>@p.Season</td>
                         <td>@p.Position</td>
                         <td>@p.Week</td>                        
                         <td>@Math.Round(p.MSE,2)</td>
@@ -84,6 +83,9 @@ else if (ProjectionAnalyses.Any())
                         <td>@Math.Round(p.MAPE,2)</td>
                         <td>@p.AvgError</td>
                         <td>@p.AvgRankError</td>
+                        <td>
+                            <a href="@GetProjectionErrorLink(p.Position, p.Week)"> <i class="oi oi-magnifying-glass" /></a>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -118,7 +120,11 @@ else if (ProjectionAnalyses.Any())
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
-        ProjectionAnalyses.Clear();
+        if (ProjectionAnalyses != null)
+        {
+            ProjectionAnalyses.Clear();
+        }
+        tableSort = new();
     }
 
     public async Task GetModelAnalysis()
@@ -170,6 +176,8 @@ else if (ProjectionAnalyses.Any())
     {
         ProjectionAnalyses = tableSort.SortTable<WeeklyProjectionAnalysis>(ProjectionAnalyses, columnName);
     }
+
+    private string GetProjectionErrorLink(string position, int week) => string.Format("{0}/{1}/{2}", "/ProjectionError", position, week);
 
 }
 

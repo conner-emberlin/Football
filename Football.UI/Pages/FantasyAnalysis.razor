@@ -127,6 +127,7 @@
     {
         Position = args.Value.ToString();
         FantasyPerformances.Clear();
+        tableSort = new();
         positionEnum = Position switch
         {
             "Quarterback" => Enums.Position.QB,

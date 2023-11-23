@@ -6,8 +6,8 @@
         private string CurrentSortColumn { get; set; } = "";
         public List<T> SortTable<T>(List<T> table, string columnName)
         {
-            var property = typeof(T).GetProperties().First(p => p.ToString()!.Contains(columnName));
-            if (property is not null)
+            var property = typeof(T).GetProperties().FirstOrDefault(p => p.ToString()!.Contains(columnName));
+            if (property != null)
             {
                 if (columnName != CurrentSortColumn)
                 {

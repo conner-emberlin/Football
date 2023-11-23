@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Football.Projections.Models;
 using Football.Fantasy.Models;
 using Serilog;
+using Football.Players.Interfaces;
 
 namespace Football.Projections.Services
 {
@@ -14,28 +15,57 @@ namespace Football.Projections.Services
         private readonly IFantasyDataService _fantasyService;
         private readonly IProjectionService<SeasonProjection> _seasonProjection;
         private readonly IProjectionService<WeekProjection> _weekProjection;
+        private readonly IPlayersService _playersService;
         private readonly Season _season;
         private readonly Starters _starters;
         private readonly ILogger _logger;
 
         public ProjectionAnalysisService(IFantasyDataService fantasyService, 
             IOptionsMonitor<Season> season, IProjectionService<SeasonProjection> seasonProjection,
-            IProjectionService<WeekProjection> weekProjection, ILogger logger, IOptionsMonitor<Starters> starters)
+            IProjectionService<WeekProjection> weekProjection, ILogger logger, IOptionsMonitor<Starters> starters, IPlayersService playersService)
         {
-            _fantasyService = fantasyService;;
+            _fantasyService = fantasyService;
             _season = season.CurrentValue;
             _seasonProjection = seasonProjection;
             _weekProjection = weekProjection;
+            _playersService = playersService;
             _logger = logger;
             _starters = starters.CurrentValue;
         }
 
+        public async Task<List<WeeklyProjectionError>> GetWeeklyProjectionError(int playerId)
+        {
+            List<WeeklyProjectionError> errors = [];
+            var projections = await _weekProjection.GetPlayerProjections(playerId);
+            if (projections != null)
+            {
+                foreach (var projection in projections)
+                {
+                    var weeklyFantasy = (await _fantasyService.GetWeeklyFantasy(playerId)).FirstOrDefault(w => w.Week == projection.Week);
+                    if (weeklyFantasy != null && projection.ProjectedPoints > 0)
+                    {
+                        errors.Add(new WeeklyProjectionError
+                        {
+                            Season = projection.Season,
+                            Week = projection.Week,
+                            Position = projection.Position,
+                            PlayerId = playerId,
+                            Name = projection.Name,
+                            ProjectedPoints = projection.ProjectedPoints,
+                            FantasyPoints = weeklyFantasy.FantasyPoints,
+                            Error = Math.Abs(projection.ProjectedPoints - weeklyFantasy.FantasyPoints)
+                        });
+                    }
+                }
+            }
+            return errors;
+        }
         public async Task<List<WeeklyProjectionError>> GetWeeklyProjectionError(Position position, int week)
         {
             var projectionsExist = (_weekProjection.GetProjectionsFromSQL(position, week, out var projections));
             if (projectionsExist)
             {
-                List<WeeklyProjectionError> weeklyProjectionErrors = new();
+                List<WeeklyProjectionError> weeklyProjectionErrors = [];
                 var weeklyFantasy = (await _fantasyService.GetWeeklyFantasy(_season.CurrentSeason, week)).Where(w => w.Position == position.ToString());
                 foreach (var projection in projections)
                 {
@@ -51,7 +81,7 @@ namespace Football.Projections.Services
                             Name = fantasy.Name,
                             ProjectedPoints = projection.ProjectedPoints,
                             FantasyPoints = fantasy.FantasyPoints,
-                            Error = projection.ProjectedPoints - fantasy.FantasyPoints
+                            Error = Math.Abs(projection.ProjectedPoints - fantasy.FantasyPoints)
                         });
                     }
                 }

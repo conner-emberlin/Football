@@ -1,0 +1,119 @@
+﻿@page "/ProjectionError/{position}/{week}"
+<PageTitle>Projection Error</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Projections.Models;
+@using Football.Enums;
+@using Football.UI.Helpers;
+@inject IHttpClientFactory ClientFactory
+
+<h4>@GetHeader()</h4>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+@if (badRequestError)
+{
+    <p>Unexpected Error. Please try again.</p>
+}
+
+@if (projectionErrors.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("ProjectedPoints"))">Projected Points</span>
+                        <span class="oi @(tableSort.GetSortStyle("ProjectedPoints"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("FantasyPoints"))">Fantasy Points</span>
+                        <span class="oi @(tableSort.GetSortStyle("FantasyPoints"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("Error"))">Error</span>
+                        <span class="oi @(tableSort.GetSortStyle("Error"))"></span>
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in projectionErrors)
+                {
+                    <tr>
+                        <td><a class="page-links" href="Players/@p.PlayerId"> @p.Name</a></td>
+                        <td>@Math.Round(p.ProjectedPoints, 2)</td>
+                        <td>@Math.Round(p.FantasyPoints, 2)</td>
+                        <td>@Math.Round(p.Error, 2)</td>
+                        <td>
+                            <a href="@GetGraphLink(p.PlayerId)"> <i class="oi oi-graph" /></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string position { get; set; } = "";
+    [Parameter]
+    public string week { get; set; } = "";
+
+
+    public List<WeeklyProjectionError>? projectionErrors = [];
+
+    public bool loading { get; set; } = false;
+    public bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    private TableSort tableSort = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Get();
+    }
+
+    public async Task Get()
+    {
+        loading = true;
+
+        if (projectionErrors != null)
+            projectionErrors.Clear();
+
+        shouldRender = true;
+
+        var url = string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Projection/weekly-error", position, week);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            projectionErrors = await JsonSerializer.DeserializeAsync<List<WeeklyProjectionError>>(responseStream, options);
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        loading = false;
+        shouldRender = true;
+    }
+
+    private void SetTable(string columnName)
+    {
+        projectionErrors = tableSort.SortTable<WeeklyProjectionError>(projectionErrors, columnName);
+    }
+
+    private string GetHeader() => position + " Projection Error - Week " + week;
+    private string GetGraphLink(int playerId) => string.Format("{0}/{1}", "/error-graph", playerId);
+}
