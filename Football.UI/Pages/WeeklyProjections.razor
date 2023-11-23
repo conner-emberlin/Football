@@ -75,8 +75,8 @@ else if (players.Count > 0)
                         <td><img src="@opponentPhotoPath" width="30" height="30"></td>
                         <td>@Math.Round((double)player.ProjectedPoints,2)</td>
                         <td>
-                        <button style="color:red" type="button" class="btn btn-link" @onclick="() => DeleteProjection(player.PlayerId, player.Season, player.Week)">
-                            <i sytle="color:red" class="oi oi-circle-x" />
+                        <button type="button" style="color:red" class="btn btn-link" @onclick="() => DeleteProjection(player.PlayerId, player.Season, player.Week)">
+                            <i sytle="color:red" class="oi oi-x" />
                         </button>
                         </td>
                     </tr>

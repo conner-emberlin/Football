@@ -4,6 +4,7 @@
 @using Football.Fantasy.Models;
 @using Football.Fantasy.Analysis.Models;
 @using Football.Players.Models;
+@using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
 @page "/WaiverWire/"
 
@@ -31,17 +32,19 @@ else
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 1; i < candidates.Count; i++)
+                @foreach (var cand in candidates)
                 {
-                    var logoPhotoPath = candidates.ElementAt(i - 1).PlayerTeam != null ?
-                                         "https://localhost:7176/Logos/" + candidates.ElementAt(i - 1).PlayerTeam!.Team + ".png" 
+                    var logoPhotoPath = cand.PlayerTeam != null ?
+                                         "https://localhost:7176/Logos/" + cand.PlayerTeam!.Team + ".png" 
                                        : "https://localhost:7176/Logos/nfl.png";
+
+                    var pos = cand.Player.Position;                   
                     <tr>
-                        <td>@i</td>
-                        <td><a class="page-links" href="Players/@candidates.ElementAt(i-1).Player.PlayerId"> @candidates.ElementAt(i-1).Player.Name</a></td>
-                        <td>@candidates.ElementAt(i-1).Player.Position</td>
+                        <td>@form.Rank(candidates, cand)</td>
+                        <td><a class="page-links" href="Players/@cand.Player.PlayerId"> @cand.Player.Name</a></td>
+                        <td><b style="color:@form.PositionColor(pos)">@pos</b></td>
                         <td><img src="@logoPhotoPath" width="30" height="30"></td>
-                        <td>@candidates.ElementAt(i-1).RosteredPercentage</td>
+                        <td>@cand.RosteredPercentage</td>
                     </tr>
                 }
             </tbody>
@@ -60,6 +63,8 @@ else if (youTried && badRequestError)
     public bool youTried = false;
     private bool shouldRender;
     private bool loading = false;
+
+    public Formatter form = new();
 
     protected override bool ShouldRender() => shouldRender;
 

@@ -2,7 +2,7 @@
 @import url('https://cdn.jsdelivr.net/gh/iconoir-icons/iconoir@main/css/iconoir.css');
 
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
 }
 
 h1:focus {
@@ -296,6 +296,7 @@ a.page-links {
     border: 1px solid black;
     padding: 0.5rem 0.5rem;
     vertical-align: middle;
+    
 }
 
 div.matchup-container {

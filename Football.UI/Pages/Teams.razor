@@ -9,6 +9,7 @@
 @using Football.Players.Models;
 @using Football.Fantasy.Analysis.Models;
 @using Football.Statistics.Models;
+@using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
 
 @if (!badRequestError && teams.Any())
@@ -171,7 +172,7 @@ else if (badRequestError)
                 </thead>
                 <tbody>
                     <tr>
-                        <td>@qbPerformance.Position</td>
+                        <td><b style="color:@form.PositionColor("QB")">QB</b></td>
                         <td><a class="page-links" href="Players/@qbPerformance.PlayerId"> @qbPerformance.Name</a></td>
                         <td>@Math.Round(qbPerformance.TotalFantasy,2)</td>
                         <td>@Math.Round(qbPerformance.AvgFantasy,2)</td>
@@ -180,7 +181,7 @@ else if (badRequestError)
                     @foreach (var rb in rbPerformance)
                     {
                         <tr>
-                            <td>@rb.Position</td>
+                            <td><b style="color:@form.PositionColor("RB")">RB</b></td>
                             <td><a class="page-links" href="Players/@rb.PlayerId"> @rb.Name</a></td>
                             <td>@Math.Round(rb.TotalFantasy,2)</td>
                             <td>@Math.Round(rb.AvgFantasy,2)</td>
@@ -190,7 +191,7 @@ else if (badRequestError)
                     @foreach (var wr in wrPerformance)
                     {
                         <tr>
-                            <td>@wr.Position</td>
+                            <td><b style="color:@form.PositionColor("WR")">WR</b></td>
                             <td><a class="page-links" href="Players/@wr.PlayerId"> @wr.Name</a></td>
                             <td>@Math.Round(wr.TotalFantasy,2)</td>
                             <td>@Math.Round(wr.AvgFantasy,2)</td>
@@ -198,7 +199,7 @@ else if (badRequestError)
                         </tr>
                     }
                     <tr>
-                        <td>@tePerformance.Position</td>
+                        <td><b style="color:@form.PositionColor("TE")">TE</b></td>
                         <td><a class="page-links" href="Players/@tePerformance.PlayerId"> @tePerformance.Name</a></td>
                         <td>@Math.Round(tePerformance.TotalFantasy,2)</td>
                         <td>@Math.Round(tePerformance.AvgFantasy,2)</td>
@@ -212,16 +213,20 @@ else if (badRequestError)
 }
 
 @code {
+
+    [Parameter]
+    public string id { get; set; } = "";
+
     public bool loading { get; set; }
+    private bool shouldRender;
+    public bool badRequestError { get; set; } = false;
+    public bool youTried { get; set; } = false;
 
     public List<TeamMap> teams = new();
     public List<TeamMap>? filteredTeams { get; set; }
     public bool teamSelected { get; set; } = false;
     public string selectedTeam { get; set; } = "";
     public TeamMap teamChosen = new();
-
-    public bool badRequestError { get; set; } = false;
-    public bool youTried { get; set; } = false;
 
     public List<GameResult>? gameResults = new();
     public List<GameResult>? teamGameResults = new();
@@ -237,10 +242,8 @@ else if (badRequestError)
     public List<FantasyPerformance> wrPerformance = new();
     public FantasyPerformance tePerformance = new();
 
-    [Parameter]
-    public string id { get; set; } = "";
-
-    private bool shouldRender;
+    public Formatter form = new();
+    
     protected override bool ShouldRender() => shouldRender;
 
     protected override async Task OnInitializedAsync()

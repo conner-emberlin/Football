@@ -1,6 +1,7 @@
 ﻿@page "/team-fantasy/{team}/{opponent}/{week}"
 
 @using Football.Fantasy.Models;
+@using Football.UI.Helpers;
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @using ApexCharts;
@@ -55,32 +56,32 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>QB</td>
+                        <td><b style="color:@form.PositionColor("QB")">QB</b></td>
                         <td><a class="page-links" href="@PlayerPage(qbTeam.PlayerId)">@qbTeam.Name</a>: @qbTeam.FantasyPoints</td>
                         <td><a class="page-links" href="@PlayerPage(qbOpp.PlayerId)">@qbOpp.Name</a>: @qbOpp.FantasyPoints</td>
                     </tr>
                     <tr>
-                        <td>RB</td>
+                        <td><b style="color:@form.PositionColor("RB")">RB</b></td>
                         <td><a class="page-links" href="@PlayerPage(rbTeam.ElementAt(0).PlayerId)">@rbTeam.ElementAt(0).Name</a>: @rbTeam.ElementAt(0).FantasyPoints</td>
                         <td><a class="page-links" href="@PlayerPage(rbOpp.ElementAt(0).PlayerId)">@rbOpp.ElementAt(0).Name</a>: @rbOpp.ElementAt(0).FantasyPoints</td>
                     </tr>
                     <tr>
-                        <td>RB</td>
+                        <td><b style="color:@form.PositionColor("RB")">RB</b></td>
                         <td><a class="page-links" href="@PlayerPage(rbTeam.ElementAt(1).PlayerId)">@rbTeam.ElementAt(1).Name</a>: @rbTeam.ElementAt(1).FantasyPoints</td>
                         <td><a class="page-links" href="@PlayerPage(rbOpp.ElementAt(1).PlayerId)">@rbOpp.ElementAt(1).Name</a>: @rbOpp.ElementAt(1).FantasyPoints</td>
                     </tr>
                     <tr>
-                        <td>WR</td>
+                        <td><b style="color:@form.PositionColor("WR")">WR</b></td>
                         <td><a class="page-links" href="@PlayerPage(wrTeam.ElementAt(0).PlayerId)">@wrTeam.ElementAt(0).Name</a>: @wrTeam.ElementAt(0).FantasyPoints</td>
                         <td><a class="page-links" href="@PlayerPage(wrOpp.ElementAt(0).PlayerId)">@wrOpp.ElementAt(0).Name</a>: @wrOpp.ElementAt(0).FantasyPoints</td>
                     </tr>
                     <tr>
-                        <td>WR</td>
+                        <td><b style="color:@form.PositionColor("WR")">WR</b></td>
                         <td><a class="page-links" href="@PlayerPage(wrTeam.ElementAt(1).PlayerId)">@wrTeam.ElementAt(1).Name</a>: @wrTeam.ElementAt(1).FantasyPoints</td>
                         <td><a class="page-links" href="@PlayerPage(wrOpp.ElementAt(1).PlayerId)">@wrOpp.ElementAt(1).Name</a>: @wrOpp.ElementAt(1).FantasyPoints</td>
                     </tr>
                     <tr>
-                        <td>TE</td>
+                        <td><b style="color:@form.PositionColor("TE")">TE</b></td>
                         <td><a class="page-links" href="@PlayerPage(teTeam.PlayerId)">@teTeam.Name</a>: @teTeam.FantasyPoints</td>
                         <td><a class="page-links" href="@PlayerPage(teOpp.PlayerId)">@teOpp.Name</a>: @teOpp.FantasyPoints</td>
                     </tr>
@@ -127,6 +128,8 @@
     public List<WeeklyFantasy>? opponentFantasy = [];
 
     public List<BarGraphComp> graph = [];
+
+    public Formatter form = new();
 
     protected override bool ShouldRender() => shouldRender;
 

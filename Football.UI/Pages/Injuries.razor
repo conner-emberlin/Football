@@ -3,6 +3,7 @@
 @using Football.Data.Models;
 @using Football.Fantasy.Models;
 @using Football.Players.Models;
+@using Football.UI.Helpers;
 @using System.Text;
 @inject IHttpClientFactory ClientFactory
 @page "/Injuries/"
@@ -117,11 +118,12 @@ else if (injuryEdits.Any() && !badRequestError)
             <tbody>
                 @foreach (var injury in injuryEdits)
                 {
+                    var pos = injury.Player.Position;
                     if (injury.IsEditing)
                     {
                     <tr>
                         <td><a class="page-links" href="Players/@injury.Player.PlayerId"> @injury.Player.Name</a></td>
-                        <td>@injury.Player.Position</td>
+                        <td><b style="color:@form.PositionColor(pos)">@pos</b></td>
                             <td>@injury.Season</td>
                         <td>@injury.InjuryStartWeek</td>
                         <td>
@@ -145,7 +147,7 @@ else if (injuryEdits.Any() && !badRequestError)
                     {
                         <tr>
                         <td><a class="page-links" href="Players/@injury.Player.PlayerId"> @injury.Player.Name</a></td>
-                        <td>@injury.Player.Position</td>
+                            <td><b style="color:@form.PositionColor(pos)">@pos</b></td>
                             <td>@injury.Season</td>
                         <td>@injury.InjuryStartWeek</td>
                         <td>@FormatEndWeek(injury.InjuryEndWeek)</td>
@@ -191,6 +193,8 @@ else if (injuryEdits.Any() && !badRequestError)
 
     public bool youTriedToAdd { get; set; }
     public int injuryAdded { get; set; }
+
+    public Formatter form = new();
 
     protected override bool ShouldRender() => shouldRender;
 

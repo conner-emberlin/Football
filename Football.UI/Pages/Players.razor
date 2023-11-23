@@ -8,6 +8,7 @@
 @using Football.Statistics.Models;
 @using Football.Players.Models;
 @using Football.Leagues.Models;
+@using Football.UI.Helpers;
 
 @inject IHttpClientFactory ClientFactory
 
@@ -74,7 +75,7 @@ else if (youTried && badRequestError)
                     <tr>
                         <td>@t.Player.Name</td>
                         <td><img src="@logoPhotoPath" width="30" height="30"></td>
-                        <td>@t.Player.Position</td>
+                        <td><b style="color:@form.PositionColor(t.Player.Position)">@t.Player.Position</b></td>
                         <td>@t.Adds</td>
                     </tr>
                 }
@@ -96,7 +97,7 @@ else if (youTried && badRequestError)
     </div>
     @if(!string.IsNullOrEmpty(team.Team))
     {
-        <div><b>@team.Team</b> <b>&#x2022;</b>  <b>@playerPosition</b> </div>
+        <div><b>@team.Team</b> <b>&#x2022;</b>  <b style="color:@form.PositionColor(@playerPosition)">@playerPosition</b> </div>
     }
     else
     {
@@ -104,7 +105,7 @@ else if (youTried && badRequestError)
     }
     @if (runningTotal != null)
     {
-        <div>@playerPosition #@positionRank <b>&#x2022;</b> #@rank Overall <b>&#x2022;</b> Fpts: @runningTotal.FantasyPoints </div>
+        <div> <b style="color:@form.PositionColor(playerPosition)">@playerPosition</b> #@positionRank <b>&#x2022;</b> #@rank Overall <b>&#x2022;</b> Fpts: @runningTotal.FantasyPoints </div>
     }
     @if (schedule.Any())
     {
@@ -720,6 +721,8 @@ else if (youTried && badRequestError)
     public List<TrendingPlayer> trendingPlayers { get; set; } = new();
 
     public bool loading { get; set; }
+
+    public Formatter form = new();
 
     protected override async Task OnInitializedAsync()
     {

@@ -42,7 +42,6 @@ else if (ProjectionAnalyses.Any())
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
-                    <th>Position</th>
                     <th>Week </th>
                     <th>
                         <span class="sort-link" onclick="@(() => SetTable("MSE"))">MSE</span>
@@ -75,7 +74,6 @@ else if (ProjectionAnalyses.Any())
                 @foreach (var p in ProjectionAnalyses)
                 {
                     <tr>
-                        <td>@p.Position</td>
                         <td>@p.Week</td>                        
                         <td>@Math.Round(p.MSE,2)</td>
                         <td>@Math.Round(p.RSquared,4)</td>

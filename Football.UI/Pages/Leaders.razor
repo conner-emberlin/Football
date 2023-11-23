@@ -3,6 +3,7 @@
 @using Football.Data.Models;
 @using Football.Fantasy.Models;
 @using Football.Players.Models;
+@using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
 @page "/Leaders/"
 
@@ -33,14 +34,14 @@
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 1; i < currentLeaders.Count; i++)
+                @foreach (var leader in currentLeaders)
                 {
                     <tr>                      
-                        <td>@i</td>                      
-                        <td><a class="page-links" href="Players/@currentLeaders.ElementAt(i-1).PlayerId"> @currentLeaders.ElementAt(i-1).Name</a></td>
-                        <td>@currentLeaders.ElementAt(i - 1).Position</td>
-                        <td>@currentLeaders.ElementAt(i-1).Games</td>                       
-                        <td>@currentLeaders.ElementAt(i-1).FantasyPoints</td>
+                        <td>@form.Rank(currentLeaders, leader)</td>                      
+                        <td><a class="page-links" href="Players/@leader.PlayerId"> @leader.Name</a></td>
+                        <td style="color:@form.PositionColor(leader.Position)"><b>@leader.Position</b></td>
+                        <td>@leader.Games</td>                       
+                        <td>@leader.FantasyPoints</td>
                     </tr>
                 }
             </tbody>
@@ -61,14 +62,14 @@ else if(youTried && !badRequestError && filterRunning && filteredLeaders.Any())
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 1; i < filteredLeaders.Count; i++)
+                @foreach (var leader in filteredLeaders)
                 {
                     <tr>
-                        <td>@i</td>                       
-                        <td><a class="page-links" href="Players/@filteredLeaders.ElementAt(i-1).PlayerId"> @filteredLeaders.ElementAt(i-1).Name</a></td>
-                        <td>@filteredLeaders.ElementAt(i-1).Position</td>
-                        <td>@filteredLeaders.ElementAt(i - 1).Games</td>
-                        <td>@filteredLeaders.ElementAt(i-1).FantasyPoints</td>
+                        <td>@form.Rank(filteredLeaders, leader)</td>                       
+                        <td><a class="page-links" href="Players/@leader.PlayerId"> @leader.Name</a></td>
+                        <td style="color:@form.PositionColor(leader.Position)"><b>@leader.Position</b></td>
+                        <td>@leader.Games</td>
+                        <td>@leader.FantasyPoints</td>
                     </tr>
                 }
             </tbody>
@@ -88,13 +89,13 @@ else if(youTried && !badRequestError && filterWeekly && weeklyResults.Any())
             </tr>
         </thead>
         <tbody>
-                @for(int i = 1; i < weeklyResults.Count; i ++)
+                @foreach (var result in weeklyResults)
                 {
                     <tr>
-                        <td>@i</td>
-                        <td><a class="page-links" href="Players/@weeklyResults.ElementAt(i-1).PlayerId"> @weeklyResults.ElementAt(i-1).Name</a></td>
-                        <td>@weeklyResults.ElementAt(i-1).Position</td>
-                        <td>@weeklyResults.ElementAt(i-1).FantasyPoints</td>
+                        <td>@form.Rank(weeklyResults, result)</td>
+                        <td><a class="page-links" href="Players/@result.PlayerId"> @result.Name</a></td>
+                        <td style="color:@form.PositionColor(result.Position)"><b>@result.Position</b></td>
+                        <td>@result.FantasyPoints</td>
                     </tr>
                 }
             </tbody>
@@ -123,6 +124,8 @@ else if(youTried && badRequestError)
     private bool showAll = false;
 
     protected override bool ShouldRender() => shouldRender;
+
+    public Formatter form = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -188,5 +191,5 @@ else if(youTried && badRequestError)
             badRequestError = false;
         }
         shouldRender = true;
-    }
+    }   
 }
