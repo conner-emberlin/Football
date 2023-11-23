@@ -39,9 +39,10 @@ namespace Football.Projections.Services
             var projections = await _weekProjection.GetPlayerProjections(playerId);
             if (projections != null)
             {
+                var fantasy = await _fantasyService.GetWeeklyFantasy(playerId);
                 foreach (var projection in projections)
                 {
-                    var weeklyFantasy = (await _fantasyService.GetWeeklyFantasy(playerId)).FirstOrDefault(w => w.Week == projection.Week);
+                    var weeklyFantasy = fantasy.FirstOrDefault(w => w.Week == projection.Week);
                     if (weeklyFantasy != null && projection.ProjectedPoints > 0)
                     {
                         errors.Add(new WeeklyProjectionError
