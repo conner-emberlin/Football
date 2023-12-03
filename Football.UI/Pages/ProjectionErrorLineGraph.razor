@@ -22,6 +22,38 @@ else
 
 @if (error.Any())
 {
+    @if (analysis != null)
+    {
+        <div class="table_container">
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th>Season</th>
+                        <th>MSE</th>
+                        <th>RSqrd</th>
+                        <th>MAE</th>
+                        <th>MAPE</th>
+                        <th>AvgError</th>
+                        <th>AvgRankError</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@analysis.Season</td>
+                        <td>@Math.Round(analysis.MSE,2)</td>
+                        <td>@Math.Round(analysis.RSquared,2)</td>
+                        <td>@Math.Round(analysis.MAE,2)</td>
+                        <td>@Math.Round(analysis.MAPE,2)</td>
+                        <td>@Math.Round(analysis.AvgError,2)</td>
+                        <td>@Math.Round(analysis.AvgRankError,2)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <hr style="width:100%;text-align:left;margin-left:0">
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+    }
+
     <ApexChart TItem="WeeklyProjectionError"
                Height="400">
         <ApexPointSeries TItem="WeeklyProjectionError"
@@ -40,6 +72,7 @@ else
     </ApexChart>
     <hr style="width:100%;text-align:left;margin-left:0">
     <div style="height:10px;font-size:1px;">&nbsp;</div>
+
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
@@ -89,6 +122,8 @@ else
     protected override bool ShouldRender() => shouldRender;
 
     public List<WeeklyProjectionError>? error = [];
+    public WeeklyProjectionAnalysis? analysis { get; set; }
+
     public string name { get; set; } = "";
 
     TableSort tableSort = new();
@@ -98,7 +133,21 @@ else
         loading = true;
         shouldRender = true;
         youTried = true;
+        await GetWeeklyError();
+        await GetWeeklyAnalysis();
+        loading = false;
+        shouldRender = true;
+    }
 
+    public string Title() => "Projection Trends for " + name;
+
+    private void SetTable(string columnName)
+    {
+        error = tableSort.SortTable<WeeklyProjectionError>(error, columnName);
+    }
+
+    private async Task GetWeeklyError()
+    {
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/weekly-error/" + id);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
@@ -115,15 +164,20 @@ else
             }
         }
         else badRequestError = true;
-
-        loading = false;
-        shouldRender = true;
     }
 
-    public string Title() => "Projection Trends for " + name;
-
-    private void SetTable(string columnName)
+    private async Task GetWeeklyAnalysis()
     {
-        error = tableSort.SortTable<WeeklyProjectionError>(error, columnName);
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/weekly-analysis/player/" + id);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            analysis = await JsonSerializer.DeserializeAsync<WeeklyProjectionAnalysis>(responseStream, options);
+        }
+        else badRequestError = true;
     }
 }
