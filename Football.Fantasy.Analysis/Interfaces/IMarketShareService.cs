@@ -9,6 +9,7 @@ namespace Football.Fantasy.Analysis.Interfaces
         public Task<List<TargetShare>> GetTargetShares();
         public Task<TargetShare> GetTargetShare(int playerId);
         public Task<List<TeamTotals>> GetTeamTotals();
+        public Task<TeamTotals> GetTeamTotals(int teamId);
 
     }
 }

@@ -16,7 +16,7 @@ namespace Football.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class TeamController(IPlayersService playersService, IStatisticsService statisticsService, IFantasyAnalysisService fantasyAnalysisService,
-        IOptionsMonitor<Season> season, IFantasyDataService fantasyDataService) : ControllerBase
+        IOptionsMonitor<Season> season, IFantasyDataService fantasyDataService, IMarketShareService marketShareService) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -53,5 +53,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<WeeklyFantasy>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetWeeklyTeamFantasy([FromRoute] string team, [FromRoute] int week) => week > 0 ? Ok(await fantasyDataService.GetWeeklyTeamFantasy(team, week)) : BadRequest("Bad Request");
+
+        [HttpGet("totals/{teamId}")]
+        [ProducesResponseType(typeof(List<TeamTotals>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetTeamTotals([FromRoute] int teamId) => teamId > 0 ? Ok(await marketShareService.GetTeamTotals(teamId)) : BadRequest();
     }
 }

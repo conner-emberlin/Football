@@ -7,6 +7,7 @@ using Football.Projections.Models;
 using Football.Fantasy.Models;
 using Serilog;
 using Football.Players.Interfaces;
+using Football.Data.Models;
 
 namespace Football.Projections.Services
 {
@@ -119,6 +120,40 @@ namespace Football.Projections.Services
                     Position = position.ToString()
                 };
             }
+        }
+
+        public async Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(int playerId)
+        {
+            var weeklyFantasy = await _fantasyService.GetWeeklyFantasy(playerId);
+            List<WeekProjection> projections = [];
+            foreach (var wf in weeklyFantasy)
+            {
+                var proj = await _playersService.GetWeeklyProjection(_season.CurrentSeason, wf.Week, playerId);
+                if (proj > 0)
+                {
+                    projections.Add(new WeekProjection
+                    {
+                        Season = wf.Season,
+                        Week = wf.Week,
+                        PlayerId = playerId,
+                        ProjectedPoints = proj
+                    });
+                }
+            }
+            if (projections.Count > 0)
+            {
+                return new ()
+                {
+                    Season = _season.CurrentSeason,
+                    MSE = GetMeanSquaredError(projections, weeklyFantasy),
+                    RSquared = GetRSquared(projections, weeklyFantasy),
+                    MAE = GetMeanAbsoluteError(projections, weeklyFantasy),
+                    MAPE = GetMeanAbsolutePercentageError(projections, weeklyFantasy),
+                    AvgError = GetAverageError(projections, weeklyFantasy),
+                    AvgRankError = GetAverageRankError(projections, weeklyFantasy)
+                };
+            }
+            else return new();
         }
         public async Task<List<SeasonFlex>> SeasonFlexRankings()
         {

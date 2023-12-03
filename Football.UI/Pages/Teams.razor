@@ -102,6 +102,62 @@ else if (badRequestError)
         <p>Record: @teamRecord.Wins - @teamRecord.Losses</p>
     }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <h5>Team Leaders</h5>
+
+    @if (allPerformances.Any())
+    {
+        <div class="table_container">
+            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Name</th>
+                        <th>Total Fantasy</th>
+                        <th>Average Fantasy</th>
+                        <th>StdDev</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><b style="color:@form.PositionColor("QB")">QB</b></td>
+                        <td><a class="page-links" href="Players/@qbPerformance.PlayerId"> @qbPerformance.Name</a></td>
+                        <td>@Math.Round(qbPerformance.TotalFantasy, 2)</td>
+                        <td>@Math.Round(qbPerformance.AvgFantasy, 2)</td>
+                        <td>@Math.Round(qbPerformance.StdDev, 2)</td>
+                    </tr>
+                    @foreach (var rb in rbPerformance)
+                    {
+                        <tr>
+                            <td><b style="color:@form.PositionColor("RB")">RB</b></td>
+                            <td><a class="page-links" href="Players/@rb.PlayerId"> @rb.Name</a></td>
+                            <td>@Math.Round(rb.TotalFantasy, 2)</td>
+                            <td>@Math.Round(rb.AvgFantasy, 2)</td>
+                            <td>@Math.Round(rb.StdDev, 2)</td>
+                        </tr>
+                    }
+                    @foreach (var wr in wrPerformance)
+                    {
+                        <tr>
+                            <td><b style="color:@form.PositionColor("WR")">WR</b></td>
+                            <td><a class="page-links" href="Players/@wr.PlayerId"> @wr.Name</a></td>
+                            <td>@Math.Round(wr.TotalFantasy, 2)</td>
+                            <td>@Math.Round(wr.AvgFantasy, 2)</td>
+                            <td>@Math.Round(wr.StdDev, 2)</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td><b style="color:@form.PositionColor("TE")">TE</b></td>
+                        <td><a class="page-links" href="Players/@tePerformance.PlayerId"> @tePerformance.Name</a></td>
+                        <td>@Math.Round(tePerformance.TotalFantasy, 2)</td>
+                        <td>@Math.Round(tePerformance.AvgFantasy, 2)</td>
+                        <td>@Math.Round(tePerformance.StdDev, 2)</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    }
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
     <h5>Game Results</h5>
     @if (teamGameResults.Any())
     {
@@ -155,61 +211,7 @@ else if (badRequestError)
         </div>
     }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <h5>Team Leaders</h5>
-    
-    @if (allPerformances.Any())
-    {
-                <div class="table_container">
-            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
-                <thead>
-                    <tr>
-                        <th>Position</th>
-                        <th>Name</th>
-                        <th>Total Fantasy</th>
-                        <th>Average Fantasy</th>
-                        <th>StdDev</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><b style="color:@form.PositionColor("QB")">QB</b></td>
-                        <td><a class="page-links" href="Players/@qbPerformance.PlayerId"> @qbPerformance.Name</a></td>
-                        <td>@Math.Round(qbPerformance.TotalFantasy,2)</td>
-                        <td>@Math.Round(qbPerformance.AvgFantasy,2)</td>
-                        <td>@Math.Round(qbPerformance.StdDev,2)</td>
-                    </tr>
-                    @foreach (var rb in rbPerformance)
-                    {
-                        <tr>
-                            <td><b style="color:@form.PositionColor("RB")">RB</b></td>
-                            <td><a class="page-links" href="Players/@rb.PlayerId"> @rb.Name</a></td>
-                            <td>@Math.Round(rb.TotalFantasy,2)</td>
-                            <td>@Math.Round(rb.AvgFantasy,2)</td>
-                            <td>@Math.Round(rb.StdDev,2)</td>
-                        </tr>
-                    }
-                    @foreach (var wr in wrPerformance)
-                    {
-                        <tr>
-                            <td><b style="color:@form.PositionColor("WR")">WR</b></td>
-                            <td><a class="page-links" href="Players/@wr.PlayerId"> @wr.Name</a></td>
-                            <td>@Math.Round(wr.TotalFantasy,2)</td>
-                            <td>@Math.Round(wr.AvgFantasy,2)</td>
-                            <td>@Math.Round(wr.StdDev,2)</td>
-                        </tr>
-                    }
-                    <tr>
-                        <td><b style="color:@form.PositionColor("TE")">TE</b></td>
-                        <td><a class="page-links" href="Players/@tePerformance.PlayerId"> @tePerformance.Name</a></td>
-                        <td>@Math.Round(tePerformance.TotalFantasy,2)</td>
-                        <td>@Math.Round(tePerformance.AvgFantasy,2)</td>
-                        <td>@Math.Round(tePerformance.StdDev,2)</td>
-                    </tr>
 
-                </tbody>
-            </table>
-        </div>
-    }
 }
 
 @code {

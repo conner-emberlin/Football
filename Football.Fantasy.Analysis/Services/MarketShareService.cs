@@ -171,7 +171,6 @@ namespace Football.Fantasy.Analysis.Services
             }
             return share.Where(s => s.TotalFantasy > 0).OrderByDescending(s => s.FantasyShare).ToList();
         }
-
         public async Task<List<TeamTotals>> GetTeamTotals()
         {
             if (settingsService.GetFromCache<TeamTotals>(Cache.TeamTotals, out var cachedTotals))
@@ -182,94 +181,101 @@ namespace Football.Fantasy.Analysis.Services
             {
                 List<TeamTotals> totals = [];
                 var teams = await playersService.GetAllTeams();
-                var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
                 foreach (var team in teams)
                 {
-                    var totalFantasyQB = 0.0;
-                    var totalFantasyRB = 0.0;
-                    var totalFantasyWR = 0.0;
-                    var totalFantasyTE = 0.0;
-                    var totalRushAtt = 0.0;
-                    var totalRushYd = 0.0;
-                    var totalRushTd = 0.0;
-                    var totalTargets = 0.0;
-                    var totalReceptions = 0.0;
-                    var totalRecYds = 0.0;
-                    var totalRecTd = 0.0;
-
-                    var players = await playersService.GetPlayersByTeam(team.Team);
-                    foreach (var p in players)
-                    {
-                        var player = await playersService.GetPlayer(p.PlayerId);
-                        _ = Enum.TryParse(player.Position, out Position position);
-                        var fantasy = await fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team);
-                        if (position == Position.QB)
-                        {
-                            var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId, team.Team);
-                            totalFantasyQB += fantasy.Sum(f => f.FantasyPoints);
-                            totalRushAtt += stats.Sum(s => s.RushingAttempts);
-                            totalRushYd += stats.Sum(s => s.RushingYards);
-                            totalRushTd += stats.Sum(s => s.RushingTD);
-                        }
-                        else if (position == Position.RB)
-                        {
-                            var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId, team.Team);
-                            totalFantasyRB += fantasy.Sum(f => f.FantasyPoints);
-                            totalRushAtt += stats.Sum(s => s.RushingAtt);
-                            totalRushYd += stats.Sum(s => s.RushingYds);
-                            totalRushTd += stats.Sum(s => s.RushingTD);
-                            totalTargets += stats.Sum(s => s.Targets);
-                            totalReceptions += stats.Sum(s => s.Receptions);
-                            totalRecYds += stats.Sum(s => s.Yards);
-                            totalRecTd += stats.Sum(s => s.ReceivingTD);
-                        }
-                        else if (position == Position.WR)
-                        {
-                            var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId, team.Team);
-                            totalFantasyWR += fantasy.Sum(f => f.FantasyPoints);
-                            totalRushAtt += stats.Sum(s => s.RushingAtt);
-                            totalRushYd += stats.Sum(s => s.RushingYds);
-                            totalRushTd += stats.Sum(s => s.RushingTD);
-                            totalTargets += stats.Sum(s => s.Targets);
-                            totalReceptions += stats.Sum(s => s.Receptions);
-                            totalRecYds += stats.Sum(s => s.Yards);
-                            totalRecTd += stats.Sum(s => s.TD);
-                        }
-                        else if (position == Position.TE)
-                        {
-                            var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId, team.Team);
-                            totalFantasyTE += fantasy.Sum(f => f.FantasyPoints);
-                            totalRushAtt += stats.Sum(s => s.RushingAtt);
-                            totalRushYd += stats.Sum(s => s.RushingYds);
-                            totalRushTd += stats.Sum(s => s.RushingTD);
-                            totalTargets += stats.Sum(s => s.Targets);
-                            totalReceptions += stats.Sum(s => s.Receptions);
-                            totalRecYds += stats.Sum(s => s.Yards);
-                            totalRecTd += stats.Sum(s => s.TD);
-                        }
-                    }
-                    totals.Add(new TeamTotals
-                    {
-                        Team = team,
-                        Games = currentWeek - 1,
-                        TotalFantasy = Math.Round(totalFantasyQB + totalFantasyRB + totalFantasyWR + totalFantasyTE, 2),
-                        TotalFantasyQB = Math.Round(totalFantasyQB, 2),
-                        TotalFantasyRB = Math.Round(totalFantasyRB, 2),
-                        TotalFantasyWR = Math.Round(totalFantasyWR, 2),
-                        TotalFantasyTE = Math.Round(totalFantasyTE, 2),
-                        TotalRushAtt = Math.Round(totalRushAtt, 2),
-                        TotalRushYd = Math.Round(totalRushYd, 2),
-                        TotalRushTd = Math.Round(totalRushTd, 2),
-                        TotalTargets = Math.Round(totalTargets, 2),
-                        TotalReceptions = Math.Round(totalReceptions, 2),
-                        TotalRecYds = Math.Round(totalRecYds, 2),
-                        TotalRecTd = Math.Round(totalRecTd, 2)
-                    });
+                    totals.Add(await GetTeamTotals(team.TeamId));
                 }
                 var teamTotals = totals.OrderByDescending(t => t.TotalFantasy).ToList();
                 cache.Set(Cache.TeamTotals.ToString(), teamTotals);
                 return teamTotals;
             }
+        }
+
+        public async Task<TeamTotals> GetTeamTotals(int teamId)
+        {
+            var team = await playersService.GetTeam(teamId);
+            var players = await playersService.GetPlayersByTeam(team.Team);
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+
+            var totalFantasyQB = 0.0;
+            var totalFantasyRB = 0.0;
+            var totalFantasyWR = 0.0;
+            var totalFantasyTE = 0.0;
+            var totalRushAtt = 0.0;
+            var totalRushYd = 0.0;
+            var totalRushTd = 0.0;
+            var totalTargets = 0.0;
+            var totalReceptions = 0.0;
+            var totalRecYds = 0.0;
+            var totalRecTd = 0.0;
+
+            foreach (var p in players)
+            {
+                var player = await playersService.GetPlayer(p.PlayerId);
+                _ = Enum.TryParse(player.Position, out Position position);
+                var fantasy = await fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team);
+                if (position == Position.QB)
+                {
+                    var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId, team.Team);
+                    totalFantasyQB += fantasy.Sum(f => f.FantasyPoints);
+                    totalRushAtt += stats.Sum(s => s.RushingAttempts);
+                    totalRushYd += stats.Sum(s => s.RushingYards);
+                    totalRushTd += stats.Sum(s => s.RushingTD);
+                }
+                else if (position == Position.RB)
+                {
+                    var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId, team.Team);
+                    totalFantasyRB += fantasy.Sum(f => f.FantasyPoints);
+                    totalRushAtt += stats.Sum(s => s.RushingAtt);
+                    totalRushYd += stats.Sum(s => s.RushingYds);
+                    totalRushTd += stats.Sum(s => s.RushingTD);
+                    totalTargets += stats.Sum(s => s.Targets);
+                    totalReceptions += stats.Sum(s => s.Receptions);
+                    totalRecYds += stats.Sum(s => s.Yards);
+                    totalRecTd += stats.Sum(s => s.ReceivingTD);
+                }
+                else if (position == Position.WR)
+                {
+                    var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId, team.Team);
+                    totalFantasyWR += fantasy.Sum(f => f.FantasyPoints);
+                    totalRushAtt += stats.Sum(s => s.RushingAtt);
+                    totalRushYd += stats.Sum(s => s.RushingYds);
+                    totalRushTd += stats.Sum(s => s.RushingTD);
+                    totalTargets += stats.Sum(s => s.Targets);
+                    totalReceptions += stats.Sum(s => s.Receptions);
+                    totalRecYds += stats.Sum(s => s.Yards);
+                    totalRecTd += stats.Sum(s => s.TD);
+                }
+                else if (position == Position.TE)
+                {
+                    var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId, team.Team);
+                    totalFantasyTE += fantasy.Sum(f => f.FantasyPoints);
+                    totalRushAtt += stats.Sum(s => s.RushingAtt);
+                    totalRushYd += stats.Sum(s => s.RushingYds);
+                    totalRushTd += stats.Sum(s => s.RushingTD);
+                    totalTargets += stats.Sum(s => s.Targets);
+                    totalReceptions += stats.Sum(s => s.Receptions);
+                    totalRecYds += stats.Sum(s => s.Yards);
+                    totalRecTd += stats.Sum(s => s.TD);
+                }
+            }
+            return new TeamTotals
+            {
+                Team = team,
+                Games = currentWeek - 1,
+                TotalFantasy = Math.Round(totalFantasyQB + totalFantasyRB + totalFantasyWR + totalFantasyTE, 2),
+                TotalFantasyQB = Math.Round(totalFantasyQB, 2),
+                TotalFantasyRB = Math.Round(totalFantasyRB, 2),
+                TotalFantasyWR = Math.Round(totalFantasyWR, 2),
+                TotalFantasyTE = Math.Round(totalFantasyTE, 2),
+                TotalRushAtt = Math.Round(totalRushAtt, 2),
+                TotalRushYd = Math.Round(totalRushYd, 2),
+                TotalRushTd = Math.Round(totalRushTd, 2),
+                TotalTargets = Math.Round(totalTargets, 2),
+                TotalReceptions = Math.Round(totalReceptions, 2),
+                TotalRecYds = Math.Round(totalRecYds, 2),
+                TotalRecTd = Math.Round(totalRecTd, 2)
+            };
         }
     }
 }
