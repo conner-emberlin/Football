@@ -179,6 +179,21 @@ else if (youTried && badRequestError)
                             <td>@Math.Round(weeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
                         </tr>
                         <tr>
+                            <td><b>Avg</b></td>
+                            <td>-</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Completions))</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Attempts) )</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Yards) )</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.TD) )</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Int))</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Sacks))</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.RushingAttempts))</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.RushingYards))</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.RushingTD))</td>
+                            <td>@Math.Round(weeklyQBData.Average(w => w.Fumbles))</td>
+                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
+                        </tr>
+                        <tr>
                             <td><b>Pace</b></td>
                             <td>-</td>
                             <td>@Math.Round(weeklyQBData.Average(w => w.Completions)*17)</td>
@@ -298,6 +313,19 @@ else if (youTried && badRequestError)
                             <td>@Math.Round(weeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
                         </tr>
                         <tr>
+                            <td><b>Avg</b></td>
+                            <td>-</td>
+                            <td>@Math.Round(weeklyRBData.Average(w => w.RushingAtt) )</td>
+                            <td>@Math.Round(weeklyRBData.Average(w => w.RushingYds) )</td>
+                            <td>@Math.Round(weeklyRBData.Average(w => w.RushingTD) )</td>
+                            <td>@Math.Round(weeklyRBData.Average(w => w.Receptions))</td>
+                            <td>@Math.Round(weeklyRBData.Average(w => w.Targets) )</td>
+                            <td>@Math.Round(weeklyRBData.Average(w => w.Yards) )</td>
+                            <td>@Math.Round(weeklyRBData.Average(w => w.ReceivingTD))</td>
+                            <td>@Math.Round(weeklyRBData.Average(w => w.Fumbles) )</td>
+                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
+                        </tr>
+                        <tr>
                             <td><b>Pace</b></td>
                             <td>-</td>
                             <td>@Math.Round(weeklyRBData.Average(w => w.RushingAtt)*17)</td>
@@ -411,6 +439,20 @@ else if (youTried && badRequestError)
                             <td>@weeklyWRData.Sum(w => w.RushingTD)</td>
                             <td>@weeklyWRData.Sum(w => w.Fumbles)</td>
                             <td>@Math.Round(weeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
+                        </tr>
+                        <tr>
+                            <td><b>Avg</b></td>
+                            <td>-</td>
+                            <td>@Math.Round(weeklyWRData.Average(w => w.Receptions) )</td>
+                            <td>@Math.Round(weeklyWRData.Average(w => w.Targets))</td>
+                            <td>@Math.Round(weeklyWRData.Average(w => w.Yards) )</td>
+                            <td>-</td>
+                            <td>@Math.Round(weeklyWRData.Average(w => w.TD) )</td>
+                            <td>@Math.Round(weeklyWRData.Average(w => w.RushingAtt) )</td>
+                            <td>@Math.Round(weeklyWRData.Average(w => w.RushingYds))</td>
+                            <td>@Math.Round(weeklyWRData.Average(w => w.RushingTD) )</td>
+                            <td>@Math.Round(weeklyWRData.Average(w => w.Fumbles) )</td>
+                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
                         </tr>
                         <tr>
                             <td><b>Pace</b></td>
@@ -529,6 +571,20 @@ else if (youTried && badRequestError)
                             <td>@weeklyTEData.Sum(w => w.RushingTD)</td>
                             <td>@weeklyTEData.Sum(w => w.Fumbles)</td>
                             <td>@Math.Round(weeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
+                        </tr>
+                        <tr>
+                            <td><b>Avg</b></td>
+                            <td>-</td>
+                            <td>@Math.Round(weeklyTEData.Average(w => w.Receptions) )</td>
+                            <td>@Math.Round(weeklyTEData.Average(w => w.Targets))</td>
+                            <td>@Math.Round(weeklyTEData.Average(w => w.Yards))</td>
+                            <td>-</td>
+                            <td>@Math.Round(weeklyTEData.Average(w => w.TD) )</td>
+                            <td>@Math.Round(weeklyTEData.Average(w => w.RushingAtt) )</td>
+                            <td>@Math.Round(weeklyTEData.Average(w => w.RushingYds) )</td>
+                            <td>@Math.Round(weeklyTEData.Average(w => w.RushingTD))</td>
+                            <td>@Math.Round(weeklyTEData.Average(w => w.Fumbles) )</td>
+                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
                         </tr>
                         <tr>
                             <td><b>Pace</b></td>
