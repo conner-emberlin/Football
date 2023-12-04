@@ -6,6 +6,7 @@ using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Football.Enums;
+using Football.Players.Models;
 
 namespace Football.Fantasy.Analysis.Services
 {
@@ -76,5 +77,6 @@ namespace Football.Fantasy.Analysis.Services
             }
             else return 0;
         }
+
     }
 }

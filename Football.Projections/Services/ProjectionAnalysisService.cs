@@ -7,40 +7,23 @@ using Football.Projections.Models;
 using Football.Fantasy.Models;
 using Serilog;
 using Football.Players.Interfaces;
-using Football.Data.Models;
 
 namespace Football.Projections.Services
 {
-    public class ProjectionAnalysisService : IProjectionAnalysisService
+    public class ProjectionAnalysisService(IFantasyDataService fantasyService,
+        IOptionsMonitor<Season> season, IProjectionService<SeasonProjection> seasonProjection,
+        IProjectionService<WeekProjection> weekProjection, ILogger logger, IOptionsMonitor<Starters> starters, IPlayersService playersService) : IProjectionAnalysisService
     {
-        private readonly IFantasyDataService _fantasyService;
-        private readonly IProjectionService<SeasonProjection> _seasonProjection;
-        private readonly IProjectionService<WeekProjection> _weekProjection;
-        private readonly IPlayersService _playersService;
-        private readonly Season _season;
-        private readonly Starters _starters;
-        private readonly ILogger _logger;
-
-        public ProjectionAnalysisService(IFantasyDataService fantasyService, 
-            IOptionsMonitor<Season> season, IProjectionService<SeasonProjection> seasonProjection,
-            IProjectionService<WeekProjection> weekProjection, ILogger logger, IOptionsMonitor<Starters> starters, IPlayersService playersService)
-        {
-            _fantasyService = fantasyService;
-            _season = season.CurrentValue;
-            _seasonProjection = seasonProjection;
-            _weekProjection = weekProjection;
-            _playersService = playersService;
-            _logger = logger;
-            _starters = starters.CurrentValue;
-        }
+        private readonly Season _season = season.CurrentValue;
+        private readonly Starters _starters = starters.CurrentValue;
 
         public async Task<List<WeeklyProjectionError>> GetWeeklyProjectionError(int playerId)
         {
             List<WeeklyProjectionError> errors = [];
-            var projections = await _weekProjection.GetPlayerProjections(playerId);
+            var projections = await weekProjection.GetPlayerProjections(playerId);
             if (projections != null)
             {
-                var fantasy = await _fantasyService.GetWeeklyFantasy(playerId);
+                var fantasy = await fantasyService.GetWeeklyFantasy(playerId);
                 foreach (var projection in projections)
                 {
                     var weeklyFantasy = fantasy.FirstOrDefault(w => w.Week == projection.Week);
@@ -64,11 +47,11 @@ namespace Football.Projections.Services
         }
         public async Task<List<WeeklyProjectionError>> GetWeeklyProjectionError(Position position, int week)
         {
-            var projectionsExist = (_weekProjection.GetProjectionsFromSQL(position, week, out var projections));
+            var projectionsExist = (weekProjection.GetProjectionsFromSQL(position, week, out var projections));
             if (projectionsExist)
             {
                 List<WeeklyProjectionError> weeklyProjectionErrors = [];
-                var weeklyFantasy = (await _fantasyService.GetWeeklyFantasy(_season.CurrentSeason, week)).Where(w => w.Position == position.ToString());
+                var weeklyFantasy = (await fantasyService.GetWeeklyFantasy(_season.CurrentSeason, week)).Where(w => w.Position == position.ToString());
                 foreach (var projection in projections)
                 {
                     var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
@@ -94,10 +77,10 @@ namespace Football.Projections.Services
 
         public async Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(Position position, int week)
         {
-            var projectionsExist = (_weekProjection.GetProjectionsFromSQL(position, week, out var projections));
+            var projectionsExist = (weekProjection.GetProjectionsFromSQL(position, week, out var projections));
             if (projectionsExist)
             {
-                var weeklyFantasy = (await _fantasyService.GetWeeklyFantasy(_season.CurrentSeason, week)).Where(w => w.Position == position.ToString());
+                var weeklyFantasy = (await fantasyService.GetWeeklyFantasy(_season.CurrentSeason, week)).Where(w => w.Position == position.ToString());
                 return new()
                 {
                     Season = _season.CurrentSeason,
@@ -124,11 +107,11 @@ namespace Football.Projections.Services
 
         public async Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(int playerId)
         {
-            var weeklyFantasy = await _fantasyService.GetWeeklyFantasy(playerId);
+            var weeklyFantasy = await fantasyService.GetWeeklyFantasy(playerId);
             List<WeekProjection> projections = [];
             foreach (var wf in weeklyFantasy)
             {
-                var proj = await _playersService.GetWeeklyProjection(_season.CurrentSeason, wf.Week, playerId);
+                var proj = await playersService.GetWeeklyProjection(_season.CurrentSeason, wf.Week, playerId);
                 if (proj > 0)
                 {
                     projections.Add(new WeekProjection
@@ -158,10 +141,10 @@ namespace Football.Projections.Services
         public async Task<List<SeasonFlex>> SeasonFlexRankings()
         {
             List<SeasonFlex> flexRankings = [];
-            var qbProjections = (await _seasonProjection.GetProjections(Position.QB)).ToList();
-            var rbProjections = (await _seasonProjection.GetProjections(Position.RB)).ToList();
-            var wrProjections = (await _seasonProjection.GetProjections(Position.WR)).ToList();
-            var teProjections = (await _seasonProjection.GetProjections(Position.TE)).ToList();
+            var qbProjections = (await seasonProjection.GetProjections(Position.QB)).ToList();
+            var rbProjections = (await seasonProjection.GetProjections(Position.RB)).ToList();
+            var wrProjections = (await seasonProjection.GetProjections(Position.WR)).ToList();
+            var teProjections = (await seasonProjection.GetProjections(Position.TE)).ToList();
             try
             {
                 var rankings = qbProjections.Concat(rbProjections).Concat(wrProjections).Concat(teProjections).ToList();
@@ -183,16 +166,16 @@ namespace Football.Projections.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.ToString() + Environment.NewLine + ex.StackTrace);
+                logger.Error(ex.ToString() + Environment.NewLine + ex.StackTrace);
                 throw;
             }
         }
 
         public async Task<List<WeekProjection>> WeeklyFlexRankings()
         {            
-            var rbProjections = (await _weekProjection.GetProjections(Position.RB)).ToList();
-            var wrProjections = (await _weekProjection.GetProjections(Position.WR)).ToList();
-            var teProjections = (await _weekProjection.GetProjections(Position.TE)).ToList();
+            var rbProjections = (await weekProjection.GetProjections(Position.RB)).ToList();
+            var wrProjections = (await weekProjection.GetProjections(Position.WR)).ToList();
+            var teProjections = (await weekProjection.GetProjections(Position.TE)).ToList();
             var rankings = rbProjections.Concat(wrProjections).Concat(teProjections);
             return rankings.OrderByDescending(r => r.ProjectedPoints).ToList();
         }
@@ -307,10 +290,10 @@ namespace Football.Projections.Services
         {
             return position switch
             {
-                Position.QB => (await _seasonProjection.GetProjections(position)).ElementAt(_starters.QBStarters - 1).ProjectedPoints,
-                Position.RB => (await _seasonProjection.GetProjections(position)).ElementAt(_starters.RBStarters - 1).ProjectedPoints,
-                Position.WR => (await _seasonProjection.GetProjections(position)).ElementAt(_starters.WRStarters - 1).ProjectedPoints,
-                Position.TE => (await _seasonProjection.GetProjections(position)).ElementAt(_starters.TEStarters - 1).ProjectedPoints,
+                Position.QB => (await seasonProjection.GetProjections(position)).ElementAt(_starters.QBStarters - 1).ProjectedPoints,
+                Position.RB => (await seasonProjection.GetProjections(position)).ElementAt(_starters.RBStarters - 1).ProjectedPoints,
+                Position.WR => (await seasonProjection.GetProjections(position)).ElementAt(_starters.WRStarters - 1).ProjectedPoints,
+                Position.TE => (await seasonProjection.GetProjections(position)).ElementAt(_starters.TEStarters - 1).ProjectedPoints,
                 _ => 0,
             };
         }

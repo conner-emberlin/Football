@@ -37,6 +37,8 @@ namespace Football.Players.Services
         public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => await playersRepository.GetScheduleDetails(season, week);
         public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => await playersRepository.GetActiveInSeasonInjuries(season);
         public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await playersRepository.PostInSeasonInjury(injury);
+        public async Task<bool> UpdateInjury(InSeasonInjury injury) => await playersRepository.UpdateInjury(injury);
+        public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => await playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
         public async Task<List<PlayerInjury>> GetPlayerInjuries()
         {
             List<PlayerInjury> playerInjuries = [];
@@ -57,10 +59,6 @@ namespace Football.Players.Services
             }
             return playerInjuries;
         }
-
-        public async Task<bool> UpdateInjury(InSeasonInjury injury) => await playersRepository.UpdateInjury(injury);
-        public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => await playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
-
         public async Task<List<Player>> GetAllPlayers()
         {
             if (settingsService.GetFromCache<Player>(Cache.AllPlayers, out var cachedValues))
