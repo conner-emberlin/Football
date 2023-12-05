@@ -5,12 +5,16 @@ using Football.Data.Models;
 using Football.Models;
 using Microsoft.Extensions.Options;
 using Football.Statistics.Models;
+using Football.Players.Models;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Football.Statistics.Services
 {
-    public class AdvancedStatisticsService(IStatisticsService statisticsService, IPlayersService playersService, IOptionsMonitor<FiveThirtyEightValueSettings> value) : IAdvancedStatisticsService
+    public class AdvancedStatisticsService(IStatisticsService statisticsService, IPlayersService playersService, 
+        IOptionsMonitor<FiveThirtyEightValueSettings> value, IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settingsService) : IAdvancedStatisticsService
     {
         private readonly FiveThirtyEightValueSettings _value = value.CurrentValue;
+        private readonly Season _season = season.CurrentValue;
 
         public async Task<List<AdvancedQBStatistics>> GetAdvancedQBStatistics()
         {
@@ -78,6 +82,49 @@ namespace Football.Statistics.Services
                 return totalPlays > 0 ? totalYards / totalPlays : 0;
             }
             else return 0;
+        }
+
+        public async Task<List<StrengthOfSchedule>> RemainingStrengthOfSchedule()
+        {
+            if (settingsService.GetFromCache<StrengthOfSchedule>(Cache.RemainingSOS, out var cachedSOS))
+            {
+                return cachedSOS;
+            }
+            var teams = await playersService.GetAllTeams();
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            List<StrengthOfSchedule> sos = [];
+            foreach (var team in teams)
+            {
+                sos.Add(new StrengthOfSchedule
+                {
+                    TeamMap = team,
+                    CurrentWeek = currentWeek,
+                    Strength = await RemainingStrengthOfSchedule(team, currentWeek)
+                });
+            }
+            cache.Set(Cache.RemainingSOS.ToString(), sos);
+            return sos;
+        }
+        private async Task<double> RemainingStrengthOfSchedule(TeamMap teamMap, int currentWeek)
+        {
+            var schedule = (await playersService.GetTeamGames(teamMap.TeamId)).Where(g => g.Week >= currentWeek && g.OpposingTeamId > 0);
+            var or = 0.0;
+            var oor = 0.0;
+            foreach (var s in schedule)
+            {
+                or += await TeamWinPercentage(s.OpposingTeamId);
+                foreach (var oo in (await playersService.GetTeamGames(s.OpposingTeamId)).Where(g => g.Week < currentWeek && g.OpposingTeamId > 0))
+                {
+                    oor += await TeamWinPercentage(oo.OpposingTeamId);
+                }
+            }
+            return (2 * or + oor) / 3;
+
+        }
+        private async Task<double> TeamWinPercentage(int teamId)
+        {
+            var gameResults = (await statisticsService.GetGameResults(_season.CurrentSeason)).Where(g => g.HomeTeamId == teamId || g.AwayTeamId == teamId);
+            return (double)gameResults.Where(g => g.WinnerId == teamId).Count() / (double) gameResults.Count();                          
         }
     }
 }

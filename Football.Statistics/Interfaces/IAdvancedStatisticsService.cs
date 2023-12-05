@@ -8,6 +8,8 @@ namespace Football.Statistics.Interfaces
         public Task<double> FiveThirtyEightQBValue(int playerId);
         public Task<double> PasserRating(int playerId);
         public Task<double> QBYardsPerPlay(int playerId);
-        
+        public Task<List<StrengthOfSchedule>> RemainingStrengthOfSchedule();
+
+
     }
 }

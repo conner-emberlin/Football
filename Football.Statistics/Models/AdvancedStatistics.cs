@@ -10,4 +10,11 @@ namespace Football.Statistics.Models
         public double YardsPerPlay { get; set; }
         public double FiveThirtyEightRating { get; set; }
     }
+
+    public class StrengthOfSchedule
+    {
+        public TeamMap TeamMap { get; set; } = new();
+        public int CurrentWeek { get; set; }
+        public double Strength { get; set; }
+    }
 }

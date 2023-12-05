@@ -10,6 +10,7 @@
         MatchupRankings,
         TargetShares,
         StartOrSit,
-        TrendingPlayers
+        TrendingPlayers,
+        RemainingSOS
     }
 }
