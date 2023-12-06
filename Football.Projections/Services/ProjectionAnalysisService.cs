@@ -91,7 +91,7 @@ namespace Football.Projections.Services
                     MAE = GetMeanAbsoluteError(projections, weeklyFantasy),
                     MAPE = GetMeanAbsolutePercentageError(projections, weeklyFantasy),
                     AvgError = GetAverageError(projections, weeklyFantasy),
-                    AvgRankError = GetAverageRankError(projections, weeklyFantasy)
+                    AvgRankError = GetAverageRankError(projections, weeklyFantasy),
                 };
             }
             else
@@ -133,7 +133,8 @@ namespace Football.Projections.Services
                     MAE = GetMeanAbsoluteError(projections, weeklyFantasy),
                     MAPE = GetMeanAbsolutePercentageError(projections, weeklyFantasy),
                     AvgError = GetAverageError(projections, weeklyFantasy),
-                    AvgRankError = GetAverageRankError(projections, weeklyFantasy)
+                    AvgRankError = GetAverageRankError(projections, weeklyFantasy),
+                    AdjAvgError = GetAdjustedAverageError(projections, weeklyFantasy)
                 };
             }
             else return new();
@@ -209,6 +210,15 @@ namespace Football.Projections.Services
                 }
             }
             return count > 0 ? Math.Round(totalError / count) : 0;
+        }
+
+        private static double GetAdjustedAverageError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
+        {
+            var maxWeek = weeklyFantasy.OrderByDescending(w => w.FantasyPoints).First().Week;
+            var minWeek = weeklyFantasy.OrderBy(w => w.FantasyPoints).First().Week;
+            var adjustedProjections = projections.Where(p => p.Week != maxWeek && p.Week != minWeek);
+            var adjustedFantasy = weeklyFantasy.Where(p => p.Week != maxWeek && p.Week != minWeek);
+            return GetAverageError(adjustedProjections, adjustedFantasy);
         }
         private static double GetRSquared(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
         {

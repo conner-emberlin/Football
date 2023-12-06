@@ -30,6 +30,7 @@
         public double MAPE { get; set; }
         public double AvgError { get; set; }
         public double AvgRankError { get; set; }
+        public double AdjAvgError { get; set; }
     }
 
     public class WeeklyProjectionError

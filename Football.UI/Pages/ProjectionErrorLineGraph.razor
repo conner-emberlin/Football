@@ -35,6 +35,7 @@ else
                         <th>MAPE</th>
                         <th>AvgError</th>
                         <th>AvgRankError</th>
+                        <th>AdjAvgError</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,6 +47,7 @@ else
                         <td>@Math.Round(analysis.MAPE,2)</td>
                         <td>@Math.Round(analysis.AvgError,2)</td>
                         <td>@Math.Round(analysis.AvgRankError,2)</td>
+                        <td>@Math.Round(analysis.AdjAvgError,2)</td>
                     </tr>
                 </tbody>
             </table>
