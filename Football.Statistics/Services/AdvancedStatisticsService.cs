@@ -84,6 +84,17 @@ namespace Football.Statistics.Services
             else return 0;
         }
 
+        public async Task<double> YardsAllowedPerGame(int teamId)
+        {
+            var yards = 0.0;
+            var gameResults = (await statisticsService.GetGameResults(_season.CurrentSeason)).Where(g => g.HomeTeamId == teamId || g.AwayTeamId == teamId);
+            foreach (var g in gameResults)
+            {
+                yards += g.WinnerId == teamId ? g.LoserYards : g.WinnerYards;
+            }
+            return gameResults.Any() ? yards / gameResults.Count() : 0;
+        }
+
         public async Task<List<StrengthOfSchedule>> RemainingStrengthOfSchedule()
         {
             if (settingsService.GetFromCache<StrengthOfSchedule>(Cache.RemainingSOS, out var cachedSOS))
@@ -121,10 +132,32 @@ namespace Football.Statistics.Services
             return (2 * or + oor) / 3;
 
         }
+
+        public async Task<double> StrengthOfSchedule(int teamId, int atWeek)
+        {
+            var schedule = (await playersService.GetTeamGames(teamId)).Where(g => g.Week <= atWeek && g.OpposingTeamId > 0);
+            var or = 0.0;
+            var oor = 0.0;
+            foreach (var s in schedule)
+            {
+                or += await TeamWinPercentage(s.TeamId, atWeek);
+                foreach (var oo in (await playersService.GetTeamGames(s.OpposingTeamId)).Where(g => g.Week < atWeek && g.OpposingTeamId > 0))
+                {
+                    oor += await TeamWinPercentage(oo.OpposingTeamId, atWeek);
+                }
+            }
+            return (2 * or + oor) / 3;
+        }
         private async Task<double> TeamWinPercentage(int teamId)
         {
             var gameResults = (await statisticsService.GetGameResults(_season.CurrentSeason)).Where(g => g.HomeTeamId == teamId || g.AwayTeamId == teamId);
             return (double)gameResults.Where(g => g.WinnerId == teamId).Count() / (double) gameResults.Count();                          
+        }
+
+        private async Task<double> TeamWinPercentage(int teamId, int week)
+        {
+            var gameResults = (await statisticsService.GetGameResults(_season.CurrentSeason)).Where(g => (g.HomeTeamId == teamId || g.AwayTeamId == teamId) && g.Week <= week);
+            return (double)gameResults.Where(g => g.WinnerId == teamId).Count() / (double)gameResults.Count();
         }
     }
 }

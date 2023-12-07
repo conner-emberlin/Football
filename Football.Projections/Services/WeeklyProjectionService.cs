@@ -67,6 +67,7 @@ namespace Football.Projections.Services
                     Position.RB => await CalculateProjections(await RBProjectionModel(currentWeek), position),
                     Position.WR => await CalculateProjections(await WRProjectionModel(currentWeek), position),
                     Position.TE => await CalculateProjections(await TEProjectionModel(currentWeek), position),
+                    Position.DST => await CalculateProjections(await DSTProjectionModel(currentWeek), position),
                     _ => throw new NotImplementedException()
                 };
                 projections = await adjustmentService.AdjustmentEngine(projections.ToList());
@@ -88,13 +89,12 @@ namespace Football.Projections.Services
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = (int)settingsService.GetValueFromModel(model[i], Model.PlayerId);
-                var projectedPoints = settingsService.GetValueFromModel(model[i], Model.ProjectedPoints);
-
-                if (playerId > 0)
-                {
-                    var player = await playersService.GetPlayer(playerId);
+                var player = await playersService.GetPlayer(playerId);                
+                if (player != null && player.Position != Position.DST.ToString())
+                {                    
                     if (player.Active == 1)
                     {
+                        var projectedPoints = settingsService.GetValueFromModel(model[i], Model.ProjectedPoints);
                         var projection = WeightedWeeklyProjection(projectedPoints / _season.Games, results[i], currentWeek - 1);
                         var avgError = await GetAverageProjectionError(playerId);
 
@@ -108,6 +108,18 @@ namespace Football.Projections.Services
                             ProjectedPoints =  (2 * projection - avgError)/2
                         }); ;
                     }
+                }
+                else if(player != null && player.Position == Position.DST.ToString())
+                {
+                    projections.Add(new WeekProjection
+                    {
+                        PlayerId = playerId,
+                        Season = _season.CurrentSeason,
+                        Week = currentWeek,
+                        Name = player.Name,
+                        Position = player.Position,
+                        ProjectedPoints = results[i]
+                    });
                 }
             }
             return projections;
@@ -198,6 +210,21 @@ namespace Football.Projections.Services
                 }
             }
             return teModel;
+        }
+
+        private async Task<List<DSTModelWeek>> DSTProjectionModel(int currentWeek)
+        {
+            var players = await playersService.GetPlayersByPosition(Position.DST);
+            List<DSTModelWeek> dstModel = [];
+            foreach(var player in players)
+            {
+                var stats = await statisticsService.GetWeeklyData<WeeklyDataDST>(Position.DST, player.PlayerId);
+                if (stats.Count > 0)
+                {
+                    dstModel.Add(await regressionService.DSTModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                }
+            }
+            return dstModel;
         }
         private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) 
         {

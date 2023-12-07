@@ -14,6 +14,7 @@ namespace Football.Projections.Interfaces
         public WeeklyDataRB CalculateWeeklyAverage(List<WeeklyDataRB> weeks, int currentWeek);
         public WeeklyDataWR CalculateWeeklyAverage(List<WeeklyDataWR> weeks, int currentWeek);
         public WeeklyDataTE CalculateWeeklyAverage(List<WeeklyDataTE> weeks, int currentWeek);
+        public WeeklyDataDST CalculateWeeklyAverage(List<WeeklyDataDST> weeks, int currentWeek);
         public WeeklyFantasy CalculateWeeklyAverage(List<WeeklyFantasy> weeks, int currentWeek);
     }
 }

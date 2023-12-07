@@ -145,5 +145,25 @@ namespace Football.Projections.Services
                 TouchdownsPerGame = stat.TD
             };
         }
+
+        public async Task<DSTModelWeek> DSTModelWeek(WeeklyDataDST stat)
+        {
+            var teamId = await playerService.GetTeamId(stat.PlayerId);
+            var sos = await advancedStatisticsService.StrengthOfSchedule(teamId, stat.Week);
+            var ya = await advancedStatisticsService.YardsAllowedPerGame(teamId);
+            return new DSTModelWeek
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                SacksPerGame = stat.Sacks,
+                IntsPerGame = stat.Ints,
+                FumRecPerGame = stat.FumblesRecovered,
+                TotalTDPerGame = stat.SpecialTD + stat.DefensiveTD,
+                SaftiesPerGame = stat.Safties,
+                YardsAllowedPerGame = ya,
+                StrengthOfSchedule = sos
+            };
+        }
     }
 }

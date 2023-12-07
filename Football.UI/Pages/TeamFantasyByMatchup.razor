@@ -25,7 +25,7 @@
         graph.Add(new BarGraphComp { Label = "QB", TeamBar = qbTeam, OppBar = qbOpp });
         var rbTeam = teamFantasy.Where(t => t.Position == "RB").OrderByDescending(t => t.FantasyPoints).Take(2).ToList();
         var rbOpp = opponentFantasy.Where(t => t.Position == "RB").OrderByDescending(t => t.FantasyPoints).Take(2).ToList();
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < Math.Min(rbTeam.Count, rbOpp.Count); i++)
         {
             graph.Add(new BarGraphComp { Label = "RB", TeamBar = rbTeam.ElementAt(i), OppBar = rbOpp.ElementAt(i) });
         }

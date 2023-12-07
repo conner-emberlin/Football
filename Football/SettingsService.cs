@@ -31,6 +31,7 @@ namespace Football
             Position.RB => _projectionLimits.RBProjections,
             Position.WR => _projectionLimits.WRProjections,
             Position.TE => _projectionLimits.TEProjections,
+            Position.DST => _projectionLimits.DSTProjections,
             _ => 0
         };
 

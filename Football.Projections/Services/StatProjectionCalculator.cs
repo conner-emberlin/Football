@@ -379,5 +379,19 @@ namespace Football.Projections.Services
                 RushingTD = weeks.Average(w => w.RushingTD),
                 Fumbles = weeks.Average(w => w.Fumbles)
             };
+
+        public WeeklyDataDST CalculateWeeklyAverage(List<WeeklyDataDST> weeks, int currentWeek) => new()
+        {
+            PlayerId = weeks.First().PlayerId,
+            Season = weeks.First().Season,
+            Week = currentWeek,
+            Sacks = weeks.Average(w => w.Sacks),
+            Ints = weeks.Average(w => w.Ints),
+            FumblesRecovered = weeks.Average(w => w.FumblesRecovered),
+            ForcedFumbles = weeks.Average(w => w.ForcedFumbles),
+            DefensiveTD = weeks.Average(w => w.DefensiveTD),
+            Safties = weeks.Average(w => w.Safties),
+            SpecialTD = weeks.Average(w => w.SpecialTD),
+        };
     }
 }

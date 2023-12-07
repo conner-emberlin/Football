@@ -70,4 +70,18 @@
         public int Week { get; set; }
         public double ProjectedPoints { get; set; }
     }
+
+    public class DSTModelWeek
+    {
+        public int PlayerId { get; set; }
+        public int Season { get; set; }
+        public int Week { get; set; }
+        public double SacksPerGame { get; set; }
+        public double IntsPerGame { get; set; }
+        public double FumRecPerGame { get; set; }
+        public double TotalTDPerGame { get; set; }
+        public double SaftiesPerGame { get; set; }
+        public double YardsAllowedPerGame { get; set; }
+        public double StrengthOfSchedule { get; set; }
+    }
 }
