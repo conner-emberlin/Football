@@ -41,6 +41,7 @@ namespace Football
             Position.RB => _boomBust.RBBoom,
             Position.WR => _boomBust.WRBoom,
             Position.TE => _boomBust.TEBoom,
+            Position.DST => _boomBust.DSTBoom,
             _ => 0
         };
 
@@ -50,6 +51,7 @@ namespace Football
             Position.RB => _boomBust.RBBust,
             Position.WR => _boomBust.WRBust,
             Position.TE => _boomBust.TEBust,
+            Position.DST => _boomBust.DSTBust,
             _ => 0
         };
 

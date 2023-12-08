@@ -107,6 +107,8 @@ namespace Football.Models
         public double WRBust { get; set; }
         public double TEBoom { get; set; }
         public double TEBust { get; set; }
+        public double DSTBoom { get; set; }
+        public double DSTBust { get; set; }
     }
 
     public class GeoDistance

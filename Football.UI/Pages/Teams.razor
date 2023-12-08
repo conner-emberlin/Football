@@ -152,6 +152,13 @@ else if (badRequestError)
                         <td>@Math.Round(tePerformance.AvgFantasy, 2)</td>
                         <td>@Math.Round(tePerformance.StdDev, 2)</td>
                     </tr>
+                    <tr>
+                        <td><b style="color:@form.PositionColor("DST")">DST</b></td>
+                        <td><a class="page-links" href="Players/@dstPerformance.PlayerId"> @dstPerformance.Name</a></td>
+                        <td>@Math.Round(dstPerformance.TotalFantasy, 2)</td>
+                        <td>@Math.Round(dstPerformance.AvgFantasy, 2)</td>
+                        <td>@Math.Round(dstPerformance.StdDev, 2)</td>
+                    </tr>
 
                 </tbody>
             </table>
@@ -243,9 +250,10 @@ else if (badRequestError)
     public List<FantasyPerformance> rbPerformance = new();
     public List<FantasyPerformance> wrPerformance = new();
     public FantasyPerformance tePerformance = new();
+    public FantasyPerformance dstPerformance = new();
 
     public Formatter form = new();
-    
+
     protected override bool ShouldRender() => shouldRender;
 
     protected override async Task OnInitializedAsync()
@@ -364,6 +372,7 @@ else if (badRequestError)
             rbPerformance = allPerformances.Where(p => p.Position == "RB").OrderByDescending(p => p.TotalFantasy).Take(2).ToList();
             wrPerformance = allPerformances.Where(p => p.Position == "WR").OrderByDescending(p => p.TotalFantasy).Take(3).ToList();
             tePerformance = allPerformances.Where(p => p.Position == "TE").OrderByDescending(p => p.TotalFantasy).First();
+            dstPerformance = allPerformances.Where(p => p.Position == "DST").First();
         }       
     }
 
