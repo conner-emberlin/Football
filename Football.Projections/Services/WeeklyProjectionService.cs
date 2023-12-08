@@ -111,6 +111,7 @@ namespace Football.Projections.Services
                 }
                 else if(player != null && player.Position == Position.DST.ToString())
                 {
+                    var avgError = await GetAverageProjectionError(playerId);
                     projections.Add(new WeekProjection
                     {
                         PlayerId = playerId,
@@ -118,7 +119,7 @@ namespace Football.Projections.Services
                         Week = currentWeek,
                         Name = player.Name,
                         Position = player.Position,
-                        ProjectedPoints = results[i]
+                        ProjectedPoints = (2 * results[i] - avgError) / 2
                     });
                 }
             }
