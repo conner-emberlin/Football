@@ -41,6 +41,10 @@
         var teTeam = teamFantasy.Where(t => t.Position == "TE").OrderByDescending(t => t.FantasyPoints).First();
         var teOpp = opponentFantasy.Where(t => t.Position == "TE").OrderByDescending(t => t.FantasyPoints).First();
         graph.Add(new BarGraphComp { Label = "TE", TeamBar = teTeam, OppBar = teOpp });
+        var dstTeam = teamFantasy.Where(t => t.Position == "DST").First();
+        var dstOpp = opponentFantasy.Where(t => t.Position == "DST").First();
+        graph.Add(new BarGraphComp { Label = "DST", TeamBar = dstTeam, OppBar = dstOpp });
+
         var teamLogo = string.Format("{0}/{1}.png", "https://localhost:7176/Logos", team);
         var oppLogo = string.Format("{0}/{1}.png", "https://localhost:7176/Logos", opponent);
 
@@ -84,6 +88,11 @@
                         <td><b style="color:@form.PositionColor("TE")">TE</b></td>
                         <td><a class="page-links" href="@PlayerPage(teTeam.PlayerId)">@teTeam.Name</a>: @teTeam.FantasyPoints</td>
                         <td><a class="page-links" href="@PlayerPage(teOpp.PlayerId)">@teOpp.Name</a>: @teOpp.FantasyPoints</td>
+                    </tr>
+                    <tr>
+                        <td><b style="color:@form.PositionColor("DST")">DST</b></td>
+                        <td><a class="page-links" href="@PlayerPage(dstTeam.PlayerId)">@dstTeam.Name</a>: @dstTeam.FantasyPoints</td>
+                        <td><a class="page-links" href="@PlayerPage(dstOpp.PlayerId)">@dstOpp.Name</a>: @dstOpp.FantasyPoints</td>
                     </tr>
                 </tbody>                                          
             </table>

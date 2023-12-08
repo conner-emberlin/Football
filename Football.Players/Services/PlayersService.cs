@@ -90,11 +90,11 @@ namespace Football.Players.Services
         public async Task<List<PlayerTeam>> GetPlayersByTeam(string team) 
         { 
             var playerTeams = await playersRepository.GetPlayersByTeam(team, _season.CurrentSeason);
-            var teamId = await GetTeamId(team);
+            var teamMap = await GetTeam(await GetTeamId(team));
             playerTeams.Add(new PlayerTeam
             {
-                PlayerId = teamId,
-                Name = (await GetTeam(teamId)).TeamDescription,
+                PlayerId = teamMap.PlayerId,
+                Name = teamMap.TeamDescription,
                 Season = _season.CurrentSeason,
                 Team = team
             });
