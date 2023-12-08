@@ -22,8 +22,7 @@ namespace Football.Players.Services
         public async Task<List<QuarterbackChange>> GetQuarterbackChanges(int season) => await playersRepository.GetQuarterbackChanges(season);
         public async Task<double> GetEPA(int playerId, int season) => await playersRepository.GetEPA(playerId, season);
         public async Task<double> GetSeasonProjection(int season, int playerId) => await playersRepository.GetSeasonProjection(season, playerId);
-        public async Task<double> GetWeeklyProjection(int season, int week, int playerId) => await playersRepository.GetWeeklyProjection(season, week, playerId);
-        public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId) => await playersRepository.GetPlayerTeam(season, playerId);
+        public async Task<double> GetWeeklyProjection(int season, int week, int playerId) => await playersRepository.GetWeeklyProjection(season, week, playerId);        
         public async Task<TeamMap> GetTeam(int teamId) => await playersRepository.GetTeam(teamId);
         public async Task<int> GetTeamId(string teamName) => await playersRepository.GetTeamId(teamName);
         public async Task<int> GetTeamId(int playerId) => await playersRepository.GetTeamId(playerId);
@@ -39,6 +38,22 @@ namespace Football.Players.Services
         public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await playersRepository.PostInSeasonInjury(injury);
         public async Task<bool> UpdateInjury(InSeasonInjury injury) => await playersRepository.UpdateInjury(injury);
         public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => await playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
+        public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId)
+        {
+            var player = await GetPlayer(playerId);
+            if (player.Position == Position.DST.ToString())
+            {
+                var team = await GetTeam(await GetTeamId(playerId));
+                return new PlayerTeam
+                {
+                    PlayerId = playerId,
+                    Name = team.TeamDescription,
+                    Season = season,
+                    Team = team.Team
+                };
+            }
+            else return await playersRepository.GetPlayerTeam(season, playerId);
+        }
         public async Task<List<PlayerInjury>> GetPlayerInjuries()
         {
             List<PlayerInjury> playerInjuries = [];
@@ -75,6 +90,14 @@ namespace Football.Players.Services
         public async Task<List<PlayerTeam>> GetPlayersByTeam(string team) 
         { 
             var playerTeams = await playersRepository.GetPlayersByTeam(team, _season.CurrentSeason);
+            var teamId = await GetTeamId(team);
+            playerTeams.Add(new PlayerTeam
+            {
+                PlayerId = teamId,
+                Name = (await GetTeam(teamId)).TeamDescription,
+                Season = _season.CurrentSeason,
+                Team = team
+            });
             var teamChanges = await GetInSeasonTeamChanges();
             var formerPlayers = teamChanges.Where(t => t.PreviousTeam == team);
             if (formerPlayers.Any())

@@ -76,7 +76,7 @@
 
 
 @code {
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST" };
     public string Position { get; set; } = "Quarterback";
     public Position positionEnum { get; set; }
     public List<MatchupRanking> Rankings = new();
@@ -99,6 +99,7 @@
             "Runningback" => Enums.Position.RB,
             "Wide Receiver" => Enums.Position.WR,
             "Tight End" => Enums.Position.TE,
+            "DST" => Enums.Position.DST,
             _ => Enums.Position.QB
         };
     }
