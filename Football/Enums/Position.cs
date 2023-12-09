@@ -7,6 +7,7 @@
         WR,
         TE,
         DST,
+        K,
         FLEX
     }
 }

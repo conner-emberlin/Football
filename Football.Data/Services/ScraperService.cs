@@ -156,6 +156,29 @@ namespace Football.Data.Services
             return players;
         }
 
+        public List<FantasyProsStringParseK> ParseFantasyProsKData(string[] strings)
+        {
+            List<FantasyProsStringParseK> players = [];
+            for (int i = 0; i < strings.Length - 15; i += 15)
+            {
+                FantasyProsStringParseK parse = new()
+                {
+                    Name = FormatName(strings[i]),
+                    FieldGoals = double.Parse(Regex.Match(strings[i].Trim(), @"\d+$", RegexOptions.RightToLeft).Value),
+                    FieldGoalAttempts = double.Parse(strings[i+1].Trim()),
+                    OneNineteen = double.Parse(strings[i+4].Trim()),
+                    TwentyTwentyNine = double.Parse(strings[i+5].Trim()),
+                    ThirtyThirtyNine = double.Parse(strings[i+6].Trim()),
+                    FourtyFourtyNine = double.Parse(strings[i+7].Trim()),
+                    Fifty = double.Parse(strings[i+8].Trim()),
+                    ExtraPoints = double.Parse(strings[i+9].Trim()),
+                    ExtraPointAttempts = double.Parse(strings[i+10].Trim()),
+                    Games = double.Parse(strings[i+11].Trim())
+                };
+                players.Add(parse);
+            }
+            return players;
+        }
         public async Task<int> DownloadHeadShots(string position)
         {
             var web = new HtmlWeb();

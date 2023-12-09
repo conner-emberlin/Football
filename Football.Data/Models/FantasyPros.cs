@@ -71,6 +71,21 @@
         public double Games { get; set; }
     }
 
+    public class FantasyProsStringParseK
+    {
+        public string Name { get; set; } = "";
+        public double FieldGoals { get; set; }
+        public double FieldGoalAttempts { get; set; }
+        public double OneNineteen { get; set; }
+        public double TwentyTwentyNine { get; set; }
+        public double ThirtyThirtyNine { get; set; }
+        public double FourtyFourtyNine { get; set; }
+        public double Fifty { get; set; }
+        public double ExtraPoints { get; set; }
+        public double ExtraPointAttempts { get; set; }
+        public double Games { get; set; }
+    }
+
     public class FantasyProsADP
     {
         public string Name { get; set; } = "";

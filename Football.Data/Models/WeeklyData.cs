@@ -31,6 +31,13 @@
         public int Week { get; set; }
         public int PlayerId { get; set; }
     }
+
+    public class WeeklyDataK : FantasyProsStringParseK
+    {
+        public int Season { get; set; }
+        public int Week { get; set; }
+        public int PlayerId { get; set; }
+    }
     public class WeeklyRosterPercent : FantasyProsRosterPercent
     {
         public int Season { get; set; }

@@ -29,6 +29,7 @@ namespace Football.Api.Controllers
                     Position.WR => Ok(await weeklyDataService.UploadWeeklyWRData(season, week)),
                     Position.TE => Ok(await weeklyDataService.UploadWeeklyTEData(season, week)),
                     Position.DST => Ok(await weeklyDataService.UploadWeeklyDSTData(season, week)),
+                    Position.K => Ok(await weeklyDataService.UploadWeeklyKData(season, week)),
                     _ => BadRequest()
                 };
             }

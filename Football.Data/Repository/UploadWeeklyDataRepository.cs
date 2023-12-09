@@ -65,6 +65,15 @@ namespace Football.Data.Repository
             return count;
         }
 
+        public async Task<int> UploadWeeklyKData(List<WeeklyDataK> players)
+        {
+            var query = $@"INSERT INTO [dbo].WeeklyKData (Season, Week, PlayerId, FieldGoals, FieldGoalAttempts, OneNineteen, TwentyTwentyNine,
+                           ThirtyThirtyNine, FourtyFourtyNine, Fifty, ExtraPoints, ExtraPointAttempts)
+                            Values (@Season, @Week, @PlayerId, @FieldGoals, @FieldGoalAttempts, @OneNineteen, @TwentyTwentyNine,
+                           @ThirtyThirtyNine, @FourtyFourtyNine, @Fifty, @ExtraPoints, @ExtraPointAttempts)";
+            return await dbConnection.ExecuteAsync(query, players);
+        }
+
         public async Task<int> UploadWeeklyGameResults(List<GameResult> results)
         {
             var query = $@"INSERT INTO [dbo].GameResults

@@ -43,6 +43,13 @@ namespace Football.Data.Services
             var players = await WeeklyDataDST(scraperService.ParseFantasyProsDSTData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             return await uploadWeeklyDataRepository.UploadWeeklyDSTData(players);
         }
+
+        public async Task<int> UploadWeeklyKData(int season, int week)
+        {
+            var url = FantasyProsURLFormatter(Position.K.ToString(), season.ToString(), week.ToString());
+            var players = await WeeklyDataK(scraperService.ParseFantasyProsKData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
+            return await uploadWeeklyDataRepository.UploadWeeklyKData(players);
+        }
         public async Task<int> UploadWeeklyGameResults(int season, int week)
         {
             var results = await GameResult(await scraperService.ScrapeGameScores(week), season);
@@ -267,6 +274,46 @@ namespace Football.Data.Services
                         DefensiveTD = p.DefensiveTD,
                         Safties = p.Safties,
                         SpecialTD = p.SpecialTD,
+                        Games = p.Games
+                    });
+                }
+                else
+                {
+                    logger.Information("{name} did not play in week {week}", p.Name, week);
+                }
+            }
+            return weeklyData;
+        }
+
+        private async Task<List<WeeklyDataK>> WeeklyDataK(List<FantasyProsStringParseK> players, int season, int week)
+        {
+            List<WeeklyDataK> weeklyData = [];
+            foreach (var p in players)
+            {
+                var playerId = await playerService.GetPlayerId(p.Name);
+                if (playerId == 0)
+                {
+                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.K.ToString(), Active = 1 });
+                    logger.Information("New player created: {p}", p.Name);
+                    playerId = await playerService.GetPlayerId(p.Name);
+                }
+                if (p.Games > 0)
+                {
+                    weeklyData.Add(new WeeklyDataK
+                    {
+                        Season = season,
+                        Week = week,
+                        PlayerId = playerId,
+                        Name = p.Name,
+                        FieldGoals = p.FieldGoals,
+                        FieldGoalAttempts = p.FieldGoalAttempts,
+                        OneNineteen = p.OneNineteen,
+                        TwentyTwentyNine = p.TwentyTwentyNine,
+                        ThirtyThirtyNine = p.ThirtyThirtyNine,
+                        FourtyFourtyNine = p.FourtyFourtyNine,
+                        Fifty = p.Fifty,
+                        ExtraPoints = p.ExtraPoints,
+                        ExtraPointAttempts = p.ExtraPointAttempts,
                         Games = p.Games
                     });
                 }
