@@ -72,6 +72,11 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<WeeklyDataDST>>> GetWeeklyDataDST(int playerId) => playerId > 0 ? Ok(await statisticsService.GetWeeklyData<WeeklyDataDST>(Position.DST, playerId)) : BadRequest();
 
+        [HttpGet("data/weekly/k/{playerId}")]
+        [ProducesResponseType(typeof(List<WeeklyDataK>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<WeeklyDataK>>> GetWeeklyDataK(int playerId) => playerId > 0 ? Ok(await statisticsService.GetWeeklyData<WeeklyDataK>(Position.K, playerId)) : BadRequest();
+
         [HttpGet("team/{playerId}")]
         [ProducesResponseType(typeof(PlayerTeam), 200)]
         [ProducesResponseType(typeof(string), 400)]
