@@ -168,6 +168,27 @@ namespace Football.Fantasy.Services
             };
         }
 
+        public WeeklyFantasy CalculateFantasy(WeeklyDataK stat)
+        {
+            var points = stat.ExtraPoints * _scoring.ExtraPoint
+                         + (stat.ExtraPointAttempts - stat.ExtraPoints) * _scoring.ExtraPointMissed
+                         + (stat.FieldGoalAttempts - stat.FieldGoals) * _scoring.FGMissed
+                         + (stat.OneNineteen + stat.TwentyTwentyNine + stat.ThirtyThirtyNine) * _scoring.FGLessThanFourty
+                         + stat.FourtyFourtyNine * _scoring.FGFourtyFifty
+                         + stat.Fifty * _scoring.FGGreaterThanFifty;
+
+            return new WeeklyFantasy
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                Games = stat.Games,
+                FantasyPoints = points,
+                Name = stat.Name,
+                Position = Position.K.ToString()
+            };
+        }
+
 
     }
 }

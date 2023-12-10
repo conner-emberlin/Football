@@ -405,6 +405,7 @@ namespace Football.Data.Services
                 "RB" => 16,
                 "WR" => 15,
                 "TE" => 15,
+                "K" => 15,
                 _ => 0
             };
         }

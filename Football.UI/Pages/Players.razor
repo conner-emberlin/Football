@@ -726,6 +726,49 @@ else if (youTried && badRequestError)
             </div>
         }
     }
+    else if(playerPosition == "K")
+    {
+        @if (weeklyKData.Count > 0)
+        {
+            <div class="table_container">
+                <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+                    <thead>
+                        <tr>
+                            <th>Season</th>
+                            <th>Week</th>
+                            <th>FG</th>
+                            <th>FGA</th>
+                            <th>1-19</th>
+                            <th>20-29</th>
+                            <th>30-39</th>
+                            <th>40-49</th>
+                            <th>50+</th>
+                            <th>XP</th>
+                            <th>XPA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stat in weeklyKData)
+                        {
+                            <tr>
+                                <td>@stat.Season</td>
+                                <td>@stat.Week</td>
+                                <td>@stat.FieldGoals</td>
+                                <td>@stat.FieldGoalAttempts</td>
+                                <td>@stat.OneNineteen</td>
+                                <td>@stat.TwentyTwentyNine</td>
+                                <td>@stat.ThirtyThirtyNine</td>
+                                <td>@stat.FourtyFourtyNine</td>
+                                <td>@stat.Fifty</td>
+                                <td>@stat.ExtraPoints</td>
+                                <td>@stat.ExtraPointAttempts</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
 }
  
 @code{
@@ -761,6 +804,7 @@ else if (youTried && badRequestError)
     List<WeeklyDataWR> weeklyWRData { get; set; } = new();
     List<WeeklyDataTE> weeklyTEData { get; set; } = new();
     List<WeeklyDataDST> weeklyDSTData { get; set; } = new();
+    List<WeeklyDataK> weeklyKData { get; set; } = new();
     List<WeeklyFantasy> weeklyFantasy { get; set; } = new();
 
     SeasonFantasy? runningTotal { get; set; } = new();
@@ -846,6 +890,7 @@ else if (youTried && badRequestError)
             case "WR": await GetWRSeasonData(); await GetWRWeeklyData(); break;
             case "TE": await GetTESeasonData(); await GetTEWeeklyData(); break;
             case "DST":await GetDSTSeasonData(); await GetDSTWeeklyData(); break;
+            case "K": await GetKWeeklyData(); break;
             default: break;
         }
 
@@ -987,6 +1032,23 @@ else if (youTried && badRequestError)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
             weeklyTEData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataTE>>(responseStream, options)).OrderBy(d => d.Week).ToList();
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+
+    private async Task GetKWeeklyData()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/weekly/k/" + playerId.ToString());
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            weeklyKData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataK>>(responseStream, options)).OrderBy(d => d.Week).ToList();
         }
         else
         {

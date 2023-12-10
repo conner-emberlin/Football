@@ -35,6 +35,12 @@ namespace Football.Models
         public double TwentyEightToThirtyFourPointsAllowed { get; set; }
         public double ThirtyFiveToFourtyFivePointsAllowed { get; set; }
         public double FourtySixOrMorePointsAllowed { get; set; }
+        public double ExtraPoint { get; set; }
+        public double ExtraPointMissed { get; set; }
+        public double FGMissed { get; set; }
+        public double FGLessThanFourty { get; set; }
+        public double FGFourtyFifty { get; set; }
+        public double FGGreaterThanFifty { get; set; }
     }
 
     public class ProjectionLimits

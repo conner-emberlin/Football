@@ -83,6 +83,12 @@ namespace Football.Fantasy.Services
                         weeklyFantasy.Add(calculator.CalculateFantasy(data));
                     }
                     break;
+                case Position.K:
+                    foreach (var data in await statistics.GetWeeklyData<WeeklyDataK>(position, season, week))
+                    {
+                        weeklyFantasy.Add(calculator.CalculateFantasy(data));
+                    }
+                    break;
                 case Position.DST:
                     var stats = await statistics.GetWeeklyData<WeeklyDataDST>(position, season, week);
                     var teams = await playersService.GetAllTeams();

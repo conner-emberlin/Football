@@ -14,5 +14,6 @@ namespace Football.Fantasy.Interfaces
         public SeasonFantasy CalculateFantasy(SeasonDataTE stat);
         public WeeklyFantasy CalculateFantasy(WeeklyDataTE stat);
         public WeeklyFantasy CalculateFantasy(WeeklyDataDST stat, WeeklyDataDST opponentStat, GameResult result, int teamId);
+        public WeeklyFantasy CalculateFantasy(WeeklyDataK stat);
     }
 }
