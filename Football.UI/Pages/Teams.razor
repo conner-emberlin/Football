@@ -159,6 +159,13 @@ else if (badRequestError)
                         <td>@Math.Round(dstPerformance.AvgFantasy, 2)</td>
                         <td>@Math.Round(dstPerformance.StdDev, 2)</td>
                     </tr>
+                    <tr>
+                        <td><b style="color:@form.PositionColor("K")">K</b></td>
+                        <td><a class="page-links" href="Players/@kPerformance.PlayerId"> @kPerformance.Name</a></td>
+                        <td>@Math.Round(kPerformance.TotalFantasy, 2)</td>
+                        <td>@Math.Round(kPerformance.AvgFantasy, 2)</td>
+                        <td>@Math.Round(kPerformance.StdDev, 2)</td>
+                    </tr>
 
                 </tbody>
             </table>
@@ -251,6 +258,7 @@ else if (badRequestError)
     public List<FantasyPerformance> wrPerformance = new();
     public FantasyPerformance tePerformance = new();
     public FantasyPerformance dstPerformance = new();
+    public FantasyPerformance kPerformance = new();
 
     public Formatter form = new();
 
@@ -373,6 +381,7 @@ else if (badRequestError)
             wrPerformance = allPerformances.Where(p => p.Position == "WR").OrderByDescending(p => p.TotalFantasy).Take(3).ToList();
             tePerformance = allPerformances.Where(p => p.Position == "TE").OrderByDescending(p => p.TotalFantasy).First();
             dstPerformance = allPerformances.Where(p => p.Position == "DST").First();
+            kPerformance = allPerformances.Where(p => p.Position == "K").First();
         }       
     }
 
