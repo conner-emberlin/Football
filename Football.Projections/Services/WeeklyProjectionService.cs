@@ -42,18 +42,14 @@ namespace Football.Projections.Services
         public bool GetProjectionsFromCache(Position position, out IEnumerable<WeekProjection> cachedValues)
         {
             if (cache.TryGetValue(position.ToString() + Cache.WeeklyProjections.ToString(), out cachedValues!))
-            {
                 return cachedValues.Any();
-            }
             else return false;
         }
         public async Task<IEnumerable<WeekProjection>> GetProjections(Position position)
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             if (GetProjectionsFromCache(position, out var cachedValues))
-            {
                 return cachedValues;
-            }
             else if (GetProjectionsFromSQL(position, currentWeek, out var projectionsSQL))
             {
                 cache.Set(position.ToString() + Cache.WeeklyProjections.ToString(), projectionsSQL);
@@ -130,7 +126,7 @@ namespace Football.Projections.Services
         {
             var weeklyProjections = await GetPlayerProjections(playerId);
             var weeklyFantasy = await fantasyService.GetWeeklyFantasy(playerId);
-            if (weeklyProjections != null && weeklyFantasy.Any() && weeklyProjections.Count() > _settings.ErrorAdjustmentWeek - 1)
+            if (weeklyProjections != null && weeklyFantasy.Count > 0 && weeklyProjections.Count() > _settings.ErrorAdjustmentWeek - 1)
             {
                 var diffs = weeklyProjections.Join(weeklyFantasy, wp => wp.Week, wf => wf.Week, (wp, wf) => new { WeekProjection = wp, WeeklyFantasy = wf })
                                             .Select(r => r.WeekProjection.ProjectedPoints - r.WeeklyFantasy.FantasyPoints);
@@ -164,9 +160,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId);
                 if (stats.Count > 0)
-                {
                     qbModel.Add(await regressionService.QBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
-                }
             }
             return qbModel;
         }
@@ -178,9 +172,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, player.PlayerId);
                 if (stats.Count > 0)
-                {
                     rbModel.Add(await regressionService.RBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
-                }
             }
             return rbModel;
         }
@@ -192,9 +184,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, player.PlayerId);
                 if (stats.Count > 0)
-                {
                     wrModel.Add(await regressionService.WRModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
-                }
             }
             return wrModel;
         }
@@ -206,9 +196,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, player.PlayerId);
                 if (stats.Count > 0)
-                {
                     teModel.Add(await regressionService.TEModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
-                }
             }
             return teModel;
         }
@@ -221,9 +209,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataDST>(Position.DST, player.PlayerId);
                 if (stats.Count > 0)
-                {
                     dstModel.Add(await regressionService.DSTModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
-                }
             }
             return dstModel;
         }

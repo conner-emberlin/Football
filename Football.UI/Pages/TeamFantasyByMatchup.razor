@@ -45,6 +45,12 @@
         var dstOpp = opponentFantasy.Where(t => t.Position == "DST").First();
         graph.Add(new BarGraphComp { Label = "DST", TeamBar = dstTeam, OppBar = dstOpp });
 
+        var kTeam = teamFantasy.Where(t => t.Position == "K").OrderByDescending(t => t.FantasyPoints).FirstOrDefault();
+        var kOpp = opponentFantasy.Where(t => t.Position == "K").OrderByDescending(t => t.FantasyPoints).FirstOrDefault();
+
+        if (kTeam != null && kOpp != null)
+            graph.Add(new BarGraphComp { Label = "K", TeamBar = kTeam, OppBar = kOpp });
+
         var teamLogo = string.Format("{0}/{1}.png", "https://localhost:7176/Logos", team);
         var oppLogo = string.Format("{0}/{1}.png", "https://localhost:7176/Logos", opponent);
 
@@ -94,6 +100,12 @@
                         <td><a class="page-links" href="@PlayerPage(dstTeam.PlayerId)">@dstTeam.Name</a>: @dstTeam.FantasyPoints</td>
                         <td><a class="page-links" href="@PlayerPage(dstOpp.PlayerId)">@dstOpp.Name</a>: @dstOpp.FantasyPoints</td>
                     </tr>
+                    @if (kTeam != null && kOpp != null)
+                    {
+                    <td><b style="color:@form.PositionColor("K")">K</b></td>
+                    <td><a class="page-links" href="@PlayerPage(kTeam.PlayerId)">@kTeam.Name</a>: @kTeam.FantasyPoints</td>
+                    <td><a class="page-links" href="@PlayerPage(kOpp.PlayerId)">@kOpp.Name</a>: @kOpp.FantasyPoints</td>
+                    }
                 </tbody>                                          
             </table>
         </div>

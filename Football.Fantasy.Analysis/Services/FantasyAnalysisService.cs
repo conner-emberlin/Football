@@ -53,9 +53,7 @@ namespace Football.Fantasy.Analysis.Services
                     var player = await playersService.GetPlayer(p.PlayerId);
                     var fp = await GetFantasyPerformance(player);
                     if (fp != null)
-                    {
-                        teamFantasyPerformances.Add(fp);
-                    }
+                       teamFantasyPerformances.Add(fp);
                 }
             }
             return teamFantasyPerformances;
@@ -68,9 +66,7 @@ namespace Football.Fantasy.Analysis.Services
             {
                 var fantasyPerformance = await GetFantasyPerformance(player);
                 if (fantasyPerformance != null)
-                {
-                    fantasyPerformances.Add(fantasyPerformance);
-                }
+                   fantasyPerformances.Add(fantasyPerformance);
             }
             return fantasyPerformances.Where(f => f.AvgFantasy > 0).OrderByDescending(f => f.AvgFantasy).ToList();
         }
@@ -238,10 +234,7 @@ namespace Football.Fantasy.Analysis.Services
             var count = fantasyPoints.Count();
             var sumOfSquares = 0.0;
             foreach (var fp in fantasyPoints)
-            {
                 sumOfSquares += Math.Pow(fp - mean, 2);
-            }
-
             return sumOfSquares / count;
         }
 

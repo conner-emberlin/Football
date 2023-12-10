@@ -18,9 +18,7 @@ namespace Football.Fantasy.Analysis.Services
         public async Task<List<MatchupRanking>> PositionalMatchupRankings(Position position)
         {
             if (settings.GetFromCache<MatchupRanking>(position, Cache.MatchupRankings, out var cachedValues))
-            {
                 return cachedValues;
-            }
             else
             {
                 List<MatchupRanking> rankings = [];
@@ -40,9 +38,7 @@ namespace Football.Fantasy.Analysis.Services
                             {
                                 var weeklyFantasy = (await fantasyDataService.GetWeeklyFantasy(player.PlayerId, game.OpposingTeam)).Where(w => w.Week == game.Week).FirstOrDefault();
                                 if (weeklyFantasy != null)
-                                {
                                     fpTotal += weeklyFantasy.FantasyPoints;
-                                }
                             }
                         }
                     }

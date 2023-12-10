@@ -18,7 +18,8 @@ namespace Football.Leagues.Services
         public async Task<int> UploadSleeperPlayerMap()
         {
             var sleeperPlayers = await sleeperLeagueService.GetSleeperPlayers();
-            var playerMap = await GetSleeperPlayerMap(sleeperPlayers);
+            var existingMaps = await leagueAnalysisRepository.GetSleeperPlayerMaps();
+            var playerMap = (await GetSleeperPlayerMap(sleeperPlayers)).Where(s => !existingMaps.Any(e => e.PlayerId == s.PlayerId)).ToList();
             return await leagueAnalysisRepository.UploadSleeperPlayerMap(playerMap);
         }
 
@@ -114,6 +115,7 @@ namespace Football.Leagues.Services
             }
         }
         private async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => await leagueAnalysisRepository.GetSleeperPlayerMap(sleeperId);
+        private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMaps() => await leagueAnalysisRepository.GetSleeperPlayerMaps();
         private async Task<Tuple<SleeperUser, SleeperLeague?>?> GetCurrentSleeperLeague(string username)
         {
             var sleeperUser = await sleeperLeagueService.GetSleeperUser(username);

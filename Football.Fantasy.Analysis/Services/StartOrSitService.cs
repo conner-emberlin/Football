@@ -28,9 +28,7 @@ namespace Football.Fantasy.Analysis.Services
             foreach (var playerId in playerIds)
             {           
                 if (settingsService.GetFromCache<StartOrSit>(playerId, Cache.StartOrSit, out var startOrSit))
-                {
                     startOrSits.Add(startOrSit);
-                }
                 else {
                     var team = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
                     if (team != null)
@@ -94,13 +92,11 @@ namespace Football.Fantasy.Analysis.Services
                 {
                     var homeLocation = await playersService.GetTeamLocation(scheduleDetail.HomeTeamId);
                     if (homeLocation.Indoor == 1)
-                    {
                         return new Weather
                         {
                             GameTime = FormatTime(scheduleDetail.Time, scheduleDetail.Date),
                             Temperature = "Indoor"
                         };
-                    }
                     var forecast = await newsService.GetWeatherAPI(homeLocation.Zip);
                     if (forecast != null)
                     {
@@ -111,29 +107,13 @@ namespace Football.Fantasy.Analysis.Services
                             var forecastHour = forecastDay.hour.First(h => h.time == time);
                             return forecastHour != null ? Weather(forecastHour) : new Weather { };
                         }
-                        else
-                        {
-                            return new Weather { };
-                        }
+                        else return new Weather { };
                     }
-                    else
-                    {
-                        logger.Information("Unable to find forecast for zip {0}", homeLocation.Zip);
-                        return new Weather { };
-                    }
+                    else return new Weather { };
                 }
-                else 
-                { 
-                    logger.Information("Team {0} is on BYE", playerTeam.Team); 
-                    return new Weather { }; 
-                }
-
+                else return new Weather { };
             }
-            else
-            {
-                logger.Information("{0} is not assigned to a team. Unable to retrieve forecast.", playerId);
-                return new Weather { };
-            }
+            else return new Weather { };
         }
 
         public async Task<List<PlayerComparison>> GetPlayerComparisons(int playerId)
@@ -197,15 +177,9 @@ namespace Football.Fantasy.Analysis.Services
                     var bookmaker = teamOdds.bookmakers.FirstOrDefault(b => b.key == _oddsAPI.DefaultBookmaker);
                     return bookmaker != null ? MatchLines(bookmaker, teamMap) : new MatchLines { };
                 }
-                else
-                {
-                    return new MatchLines { };
-                }
+                else return new MatchLines { };
             }
-            else
-            {
-                return new MatchLines { };
-            }
+            else return new MatchLines { };
         }
 
         private static MatchLines MatchLines(Bookmaker bookMaker, TeamMap teamMap)
@@ -221,25 +195,19 @@ namespace Football.Fantasy.Analysis.Services
                             foreach (var outcome in market.outcomes)
                             {
                                 if (outcome.name == teamMap.TeamDescription)
-                                {
                                     matchLines.Line = outcome.point;
-                                }
                             }                                                      
                         break;
                         case Enums.Market.totals: 
                             if (market.outcomes.Count > 0)
-                            {
                                 matchLines.OverUnder = market.outcomes.First().point;
-                            }   
-                        break;
+                            break;
                         default: break;
                     }
                 }
             }
             if (matchLines.OverUnder != null && matchLines.Line != null)
-            {
                 matchLines.ImpliedTeamTotal = matchLines.OverUnder / 2 - matchLines.Line / 2;
-            }
             return matchLines;
         }
 
@@ -264,10 +232,7 @@ namespace Football.Fantasy.Analysis.Services
                 return date + gameTime;
 
             }
-            else
-            {
-                return string.Empty;
-            }
+            else return string.Empty;
         }
 
     }

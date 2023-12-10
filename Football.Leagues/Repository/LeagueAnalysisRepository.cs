@@ -17,5 +17,11 @@ namespace Football.Leagues.Repository
             var query = $@"SELECT * FROM [dbo].SleeperPlayerMap WHERE SleeperPlayerId = @sleeperId";
             return (await connection.QueryAsync<SleeperPlayerMap>(query, new { sleeperId })).FirstOrDefault();
         }
+
+        public async Task<List<SleeperPlayerMap>> GetSleeperPlayerMaps()
+        {
+            var query = $@"SELECT * FROM [dbo].SleeperPlayerMap";
+            return (await connection.QueryAsync<SleeperPlayerMap>(query)).ToList();
+        }
     }
 }

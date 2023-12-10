@@ -6,5 +6,6 @@ namespace Football.Leagues.Interfaces
     {
         public Task<int> UploadSleeperPlayerMap(List<SleeperPlayerMap> playerMap);
         public Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId);
+        public Task<List<SleeperPlayerMap>> GetSleeperPlayerMaps();
     }
 }

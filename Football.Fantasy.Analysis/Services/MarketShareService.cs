@@ -25,9 +25,7 @@ namespace Football.Fantasy.Analysis.Services
         public async Task<List<TargetShare>> GetTargetShares()
         {
             if (settingsService.GetFromCache<TargetShare>(Cache.TargetShares, out var cachedShares))
-            {
                 return cachedShares;
-            }
             else
             {
                 var teams = await playersService.GetAllTeams();
@@ -174,17 +172,13 @@ namespace Football.Fantasy.Analysis.Services
         public async Task<List<TeamTotals>> GetTeamTotals()
         {
             if (settingsService.GetFromCache<TeamTotals>(Cache.TeamTotals, out var cachedTotals))
-            {
                 return cachedTotals;
-            }
             else
             {
                 List<TeamTotals> totals = [];
                 var teams = await playersService.GetAllTeams();
                 foreach (var team in teams)
-                {
                     totals.Add(await GetTeamTotals(team.TeamId));
-                }
                 var teamTotals = totals.OrderByDescending(t => t.TotalFantasy).ToList();
                 cache.Set(Cache.TeamTotals.ToString(), teamTotals);
                 return teamTotals;

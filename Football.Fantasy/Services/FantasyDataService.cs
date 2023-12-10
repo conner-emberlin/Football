@@ -28,27 +28,19 @@ namespace Football.Fantasy.Services
             {
                 case Position.QB: 
                     foreach(var data in await statistics.GetSeasonData<SeasonDataQB>(position, season, false))
-                    {
                         seasonFantasy.Add(calculator.CalculateFantasy(data));
-                    }
                     break;
                 case Position.RB:
                     foreach (var data in await statistics.GetSeasonData<SeasonDataRB>(position, season, false))
-                    {
                         seasonFantasy.Add(calculator.CalculateFantasy(data));
-                    }
                     break;
                 case Position.WR:
                     foreach (var data in await statistics.GetSeasonData<SeasonDataWR>(position, season, false))
-                    {
                         seasonFantasy.Add(calculator.CalculateFantasy(data));
-                    }
                     break;
                 case Position.TE:
                     foreach (var data in await statistics.GetSeasonData<SeasonDataTE>(position, season, false))
-                    {
                         seasonFantasy.Add(calculator.CalculateFantasy(data));
-                    }
                     break;
                 default: throw new NotImplementedException();
             }
@@ -61,33 +53,23 @@ namespace Football.Fantasy.Services
             {
                 case Position.QB: 
                     foreach(var data in await statistics.GetWeeklyData<WeeklyDataQB>(position, season, week))
-                    {
                         weeklyFantasy.Add(calculator.CalculateFantasy(data));
-                    }
                     break;
                 case Position.RB:
                     foreach (var data in await statistics.GetWeeklyData<WeeklyDataRB>(position, season, week))
-                    {
                         weeklyFantasy.Add(calculator.CalculateFantasy(data));
-                    }
                     break;
                 case Position.WR:
                     foreach (var data in await statistics.GetWeeklyData<WeeklyDataWR>(position, season, week))
-                    {
                         weeklyFantasy.Add(calculator.CalculateFantasy(data));
-                    }
                     break;
                 case Position.TE:
                     foreach (var data in await statistics.GetWeeklyData<WeeklyDataTE>(position, season, week))
-                    {
                         weeklyFantasy.Add(calculator.CalculateFantasy(data));
-                    }
                     break;
                 case Position.K:
                     foreach (var data in await statistics.GetWeeklyData<WeeklyDataK>(position, season, week))
-                    {
                         weeklyFantasy.Add(calculator.CalculateFantasy(data));
-                    }
                     break;
                 case Position.DST:
                     var stats = await statistics.GetWeeklyData<WeeklyDataDST>(position, season, week);
@@ -101,9 +83,7 @@ namespace Football.Fantasy.Services
                         var opponentStat = stats.First(s => s.PlayerId == opponentPID);
 
                         if(teamId > 0 && gameResult != null) 
-                        {
-                            weeklyFantasy.Add(calculator.CalculateFantasy(data, opponentStat, gameResult, teamId));                               
-                        }
+                            weeklyFantasy.Add(calculator.CalculateFantasy(data, opponentStat, gameResult, teamId));
                     }
                     break;
                 default: throw new NotImplementedException();
@@ -116,18 +96,14 @@ namespace Football.Fantasy.Services
             var teamChanges = await playersService.GetInSeasonTeamChanges();
             if (teamChanges.Any(t => t.PlayerId == playerId))
             {
-                List<WeeklyFantasy> filteredFantasy = new();
+                List<WeeklyFantasy> filteredFantasy = [];
                 var teamChange = teamChanges.First(t => t.PlayerId == playerId);
                 foreach (var fantasy in allFantasy)
                 {
                     if (teamChange.PreviousTeam == team && fantasy.Week < teamChange.WeekEffective)
-                    {
                         filteredFantasy.Add(fantasy);
-                    }
                     else if(teamChange.NewTeam == team && fantasy.Week >= teamChange.WeekEffective)
-                    {
                         filteredFantasy.Add(fantasy);
-                    }
                 }
                 return filteredFantasy;
             }
@@ -142,9 +118,7 @@ namespace Football.Fantasy.Services
             {
                 var weeklyFantasy = (await GetWeeklyFantasy(player.PlayerId, team)).FirstOrDefault(f => f.Week == week);
                 if(weeklyFantasy != null)
-                {
                     teamFantasy.Add(weeklyFantasy);
-                }
             }
             return teamFantasy;
         }
@@ -158,9 +132,7 @@ namespace Football.Fantasy.Services
                 foreach (var s in await GetWeeklyFantasy(_season.CurrentSeason, i))
                 {
                     if (s.Position == position.ToString())
-                    {
                         weeklyFantasy.Add(s);
-                    }                   
                 }
             }
             return weeklyFantasy;
@@ -168,9 +140,7 @@ namespace Football.Fantasy.Services
         public async Task<List<SeasonFantasy>> GetCurrentFantasyTotals(int season)
         {
             if (settingsService.GetFromCache<SeasonFantasy>(Cache.SeasonTotals, out var cachedTotals))
-            {
                 return cachedTotals;
-            }
             else
             {
                 var currentWeek = await playersService.GetCurrentWeek(season);
@@ -178,9 +148,7 @@ namespace Football.Fantasy.Services
                 for (int i = 1; i < currentWeek; i++)
                 {
                     foreach (var s in await GetWeeklyFantasy(season, i))
-                    {
                         weeklyFantasy.Add(s);
-                    }
                 }
                 var leaders = weeklyFantasy.GroupBy(w => w.PlayerId)
                                     .Select(gw => new SeasonFantasy
