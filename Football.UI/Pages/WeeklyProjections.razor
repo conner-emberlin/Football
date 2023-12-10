@@ -92,7 +92,7 @@ else if (players.Count > 0)
     protected override bool ShouldRender() => shouldRender;
     private bool badRequestError;
     private List<WeekProjectionWithTeam> players = new();
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Flex" };
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker", "Flex" };
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
     private bool loading { get; set; }
@@ -139,6 +139,9 @@ else if (players.Count > 0)
                 break;
             case "dst":
                 PositionEnum = "DST";
+                break;
+            case "kicker":
+                PositionEnum = "K";
                 break;
             case "flex":
                 PositionEnum = "FLEX";

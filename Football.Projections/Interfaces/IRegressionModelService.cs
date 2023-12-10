@@ -14,5 +14,6 @@ namespace Football.Projections.Interfaces
         public Task<WRModelWeek> WRModelWeek(WeeklyDataWR stat);
         public Task<TEModelWeek> TEModelWeek(WeeklyDataTE stat);
         public Task<DSTModelWeek> DSTModelWeek(WeeklyDataDST stat);
+        public Task<KModelWeek> KModelWeek(WeeklyDataK stat);
     }
 }

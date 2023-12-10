@@ -165,5 +165,23 @@ namespace Football.Projections.Services
                 StrengthOfSchedule = sos
             };
         }
+
+        public async Task<KModelWeek> KModelWeek(WeeklyDataK stat)
+        {
+            var playerTeam = await playerService.GetPlayerTeam(_season.CurrentSeason, stat.PlayerId);
+            var sos = playerTeam != null ? await advancedStatisticsService.StrengthOfSchedule(await playerService.GetTeamId(playerTeam.Team), stat.Week) : 0;
+            return new KModelWeek
+            {
+                PlayerId = stat.PlayerId,
+                Season = stat.Season,
+                Week = stat.Week,
+                ExtraPointAttsPerGame = stat.ExtraPoints,
+                ExtraPointsPerGame = stat.ExtraPointAttempts,
+                FieldGoalsPerGame = stat.FieldGoals,
+                FieldGoalAttemptsPerGame = stat.FieldGoalAttempts,
+                FiftyPlusFieldGoalsPerGame = stat.Fifty,
+                StrengthOfSchedule = sos
+            };
+        }
     }
 }

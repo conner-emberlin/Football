@@ -64,6 +64,7 @@ namespace Football.Projections.Services
                     Position.WR => await CalculateProjections(await WRProjectionModel(currentWeek), position),
                     Position.TE => await CalculateProjections(await TEProjectionModel(currentWeek), position),
                     Position.DST => await CalculateProjections(await DSTProjectionModel(currentWeek), position),
+                    Position.K => await CalculateProjections(await KProjectionModel(currentWeek), position),
                     _ => throw new NotImplementedException()
                 };
                 projections = await adjustmentService.AdjustmentEngine(projections.ToList());
@@ -86,7 +87,7 @@ namespace Football.Projections.Services
             {
                 var playerId = (int)settingsService.GetValueFromModel(model[i], Model.PlayerId);
                 var player = await playersService.GetPlayer(playerId);                
-                if (player != null && player.Position != Position.DST.ToString())
+                if (player != null && player.Position != Position.DST.ToString() && player.Position != Position.K.ToString())
                 {                    
                     if (player.Active == 1)
                     {
@@ -105,7 +106,7 @@ namespace Football.Projections.Services
                         }); ;
                     }
                 }
-                else if(player != null && player.Position == Position.DST.ToString())
+                else if(player != null && (player.Position == Position.DST.ToString() || player.Position == Position.K.ToString()))
                 {
                     var avgError = await GetAverageProjectionError(playerId);
                     projections.Add(new WeekProjection
@@ -212,6 +213,20 @@ namespace Football.Projections.Services
                     dstModel.Add(await regressionService.DSTModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
             }
             return dstModel;
+        }
+
+        private async Task<List<KModelWeek>> KProjectionModel(int currentWeek)
+        {
+            var players = await playersService.GetPlayersByPosition(Position.K);
+            List<KModelWeek> kModel = [];
+            foreach(var player in players)
+            {
+                var stats = await statisticsService.GetWeeklyData<WeeklyDataK>(Position.K, player.PlayerId);
+                if (stats.Count > 0)
+                    kModel.Add(await regressionService.KModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                
+            }
+            return kModel;
         }
         private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) 
         {

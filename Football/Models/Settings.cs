@@ -50,6 +50,7 @@ namespace Football.Models
         public int WRProjections { get; set; }
         public int TEProjections { get; set; }
         public int DSTProjections { get; set; }
+        public int KProjections { get; set; }
         public int ErrorAdjustmentWeek { get; set; }
     }
 

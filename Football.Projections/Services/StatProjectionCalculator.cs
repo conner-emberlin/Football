@@ -393,5 +393,21 @@ namespace Football.Projections.Services
             Safties = weeks.Average(w => w.Safties),
             SpecialTD = weeks.Average(w => w.SpecialTD),
         };
+
+        public WeeklyDataK CalculateWeeklyAverage(List<WeeklyDataK> weeks, int currentWeek) => new()
+        {
+            PlayerId = weeks.First().PlayerId,
+            Season = weeks.First().Season,
+            Week = currentWeek,
+            FieldGoals = weeks.Average(w => w.FieldGoals),
+            FieldGoalAttempts = weeks.Average(w => w.FieldGoalAttempts),
+            OneNineteen = weeks.Average(w => w.OneNineteen),
+            TwentyTwentyNine = weeks.Average(w => w.TwentyTwentyNine),
+            ThirtyThirtyNine = weeks.Average(w => w.ThirtyThirtyNine),
+            FourtyFourtyNine = weeks.Average(w => w.FourtyFourtyNine),
+            Fifty = weeks.Average(w => w.Fifty),
+            ExtraPoints = weeks.Average(w => w.ExtraPoints),
+            ExtraPointAttempts = weeks.Average(w => w.ExtraPointAttempts)
+        };
     }
 }

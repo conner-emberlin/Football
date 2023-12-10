@@ -27,10 +27,10 @@ namespace Football.Leagues.Services
         {
             List<MatchupProjections> matchupProjections = [];
             var leagueTuple = await GetCurrentSleeperLeague(username);
-            if (leagueTuple is not null)
+            if (leagueTuple != null)
             {
                 var (user, league) = leagueTuple;
-                if (league is not null)
+                if (league != null)
                 {
                     var rosters = await sleeperLeagueService.GetSleeperRosters(league.LeagueId);
                     var matchups = await sleeperLeagueService.GetSleeperMatchups(league.LeagueId, week);
@@ -82,9 +82,7 @@ namespace Football.Leagues.Services
         public async Task<List<TrendingPlayer>> GetTrendingPlayers()
         {
             if (settingsService.GetFromCache<TrendingPlayer>(Cache.TrendingPlayers, out var cachedTrending))
-            {
                 return cachedTrending;
-            }
             else
             {
                 var sleeperTrendingPlayers = await sleeperLeagueService.GetSleeperTrendingPlayers();
@@ -119,10 +117,10 @@ namespace Football.Leagues.Services
         private async Task<Tuple<SleeperUser, SleeperLeague?>?> GetCurrentSleeperLeague(string username)
         {
             var sleeperUser = await sleeperLeagueService.GetSleeperUser(username);
-            if (sleeperUser is not null)
+            if (sleeperUser != null)
             {
                 var userLeagues = await sleeperLeagueService.GetSleeperLeagues(sleeperUser.UserId);
-                if (userLeagues is not null)
+                if (userLeagues != null)
                 {
                     var league = userLeagues.FirstOrDefault(u => u.Season == _season.CurrentSeason.ToString() && u.Status == "in_season");
                     return Tuple.Create(sleeperUser, league);
@@ -135,21 +133,21 @@ namespace Football.Leagues.Services
         {
             List<Player> sleeperStarters = [];
             var tuple = await GetCurrentSleeperLeague(username);
-            if (tuple is not null)
+            if (tuple != null)
             {
                 var (sleeperUser, currentLeague) = tuple;
-                if (currentLeague is not null)
+                if (currentLeague != null)
                 {
                     var roster = (await sleeperLeagueService.GetSleeperRosters(currentLeague.LeagueId))!
                                 .FirstOrDefault(r => r.OwnerId == sleeperUser.UserId);
-                    if (roster is not null)
+                    if (roster != null)
                     {
                         foreach (var starter in roster.Starters)
                         {
                             if (int.TryParse(starter, out var sleeperId))
                             {
                                 var sleeperMap = await GetSleeperPlayerMap(sleeperId);
-                                if (sleeperMap is not null)
+                                if (sleeperMap != null)
                                 {
                                     sleeperStarters.Add(await playersService.GetPlayer(sleeperMap.PlayerId));
                                 }
@@ -168,7 +166,7 @@ namespace Football.Leagues.Services
                 if (int.TryParse(starter, out var sleeperId))
                 {
                     var sleeperMap = await GetSleeperPlayerMap(sleeperId);
-                    if (sleeperMap is not null)
+                    if (sleeperMap != null)
                     {
                         var player = await playersService.GetPlayer(sleeperMap.PlayerId);
                         var projection = await playersService.GetWeeklyProjection(_season.CurrentSeason, week, player.PlayerId);

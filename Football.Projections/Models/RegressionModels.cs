@@ -84,4 +84,17 @@
         public double YardsAllowedPerGame { get; set; }
         public double StrengthOfSchedule { get; set; }
     }
+
+    public class KModelWeek
+    {
+        public int PlayerId { get; set; }
+        public int Season { get; set; }
+        public int Week { get; set; }
+        public double ExtraPointsPerGame { get; set; }
+        public double ExtraPointAttsPerGame { get; set; }
+        public double FieldGoalsPerGame { get; set; }
+        public double FieldGoalAttemptsPerGame { get; set; }
+        public double FiftyPlusFieldGoalsPerGame { get; set; }
+        public double StrengthOfSchedule { get; set; }
+    }
 }
