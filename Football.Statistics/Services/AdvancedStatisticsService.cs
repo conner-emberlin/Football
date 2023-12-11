@@ -89,18 +89,14 @@ namespace Football.Statistics.Services
             var yards = 0.0;
             var gameResults = (await statisticsService.GetGameResults(_season.CurrentSeason)).Where(g => g.HomeTeamId == teamId || g.AwayTeamId == teamId);
             foreach (var g in gameResults)
-            {
                 yards += g.WinnerId == teamId ? g.LoserYards : g.WinnerYards;
-            }
             return gameResults.Any() ? yards / gameResults.Count() : 0;
         }
 
         public async Task<List<StrengthOfSchedule>> RemainingStrengthOfSchedule()
         {
             if (settingsService.GetFromCache<StrengthOfSchedule>(Cache.RemainingSOS, out var cachedSOS))
-            {
                 return cachedSOS;
-            }
             var teams = await playersService.GetAllTeams();
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             List<StrengthOfSchedule> sos = [];
@@ -125,9 +121,7 @@ namespace Football.Statistics.Services
             {
                 or += await TeamWinPercentage(s.OpposingTeamId);
                 foreach (var oo in (await playersService.GetTeamGames(s.OpposingTeamId)).Where(g => g.Week < currentWeek && g.OpposingTeamId > 0))
-                {
                     oor += await TeamWinPercentage(oo.OpposingTeamId);
-                }
             }
             return (2 * or + oor) / 3;
 
@@ -142,9 +136,7 @@ namespace Football.Statistics.Services
             {
                 or += await TeamWinPercentage(s.TeamId, atWeek);
                 foreach (var oo in (await playersService.GetTeamGames(s.OpposingTeamId)).Where(g => g.Week < atWeek && g.OpposingTeamId > 0))
-                {
                     oor += await TeamWinPercentage(oo.OpposingTeamId, atWeek);
-                }
             }
             return (2 * or + oor) / 3;
         }

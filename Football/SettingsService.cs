@@ -43,6 +43,7 @@ namespace Football
             Position.WR => _boomBust.WRBoom,
             Position.TE => _boomBust.TEBoom,
             Position.DST => _boomBust.DSTBoom,
+            Position.K => _boomBust.KBoom,
             _ => 0
         };
 
@@ -53,7 +54,9 @@ namespace Football
             Position.WR => _boomBust.WRBust,
             Position.TE => _boomBust.TEBust,
             Position.DST => _boomBust.DSTBust,
+            Position.K => _boomBust.KBust,
             _ => 0
+
         };
 
         public double GoodWeek(Position position)

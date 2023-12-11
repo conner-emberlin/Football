@@ -149,7 +149,6 @@ namespace Football.Projections.Services
         public async Task<DSTModelWeek> DSTModelWeek(WeeklyDataDST stat)
         {
             var teamId = await playerService.GetTeamId(stat.PlayerId);
-            var sos = await advancedStatisticsService.StrengthOfSchedule(teamId, stat.Week);
             var ya = await advancedStatisticsService.YardsAllowedPerGame(teamId);
             return new DSTModelWeek
             {
@@ -162,14 +161,12 @@ namespace Football.Projections.Services
                 TotalTDPerGame = stat.SpecialTD + stat.DefensiveTD,
                 SaftiesPerGame = stat.Safties,
                 YardsAllowedPerGame = ya,
-                StrengthOfSchedule = sos
             };
         }
 
         public async Task<KModelWeek> KModelWeek(WeeklyDataK stat)
         {
             var playerTeam = await playerService.GetPlayerTeam(_season.CurrentSeason, stat.PlayerId);
-            var sos = playerTeam != null ? await advancedStatisticsService.StrengthOfSchedule(await playerService.GetTeamId(playerTeam.Team), stat.Week) : 0;
             return new KModelWeek
             {
                 PlayerId = stat.PlayerId,
@@ -180,7 +177,6 @@ namespace Football.Projections.Services
                 FieldGoalsPerGame = stat.FieldGoals,
                 FieldGoalAttemptsPerGame = stat.FieldGoalAttempts,
                 FiftyPlusFieldGoalsPerGame = stat.Fifty,
-                StrengthOfSchedule = sos
             };
         }
     }

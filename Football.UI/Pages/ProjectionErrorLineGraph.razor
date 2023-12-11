@@ -159,7 +159,7 @@ else
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             error = await JsonSerializer.DeserializeAsync<List<WeeklyProjectionError>>(responseStream, options);
-            if (error != null)
+            if (error.Count > 0)
             {
                 error = error.OrderBy(f => f.Week).ToList();
                 name = error.Select(f => f.Name).First();

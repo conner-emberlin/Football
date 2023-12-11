@@ -25,10 +25,7 @@ namespace Football.Projections.Services
 
             var position = seasonProjections.First().Position;
             if (position == Position.WR.ToString())
-            {
                 seasonProjections = await QuarterbackChangeAdjustment(seasonProjections);
-            }
-
             return seasonProjections;
         }
         public async Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections)
@@ -44,11 +41,8 @@ namespace Football.Projections.Services
             foreach(var s in seasonProjections)
             {
                 var gamesInjured = await playerService.GetPlayerInjuries(s.PlayerId, _season.CurrentSeason);
-                if ( gamesInjured > 0)
-                {
-                    logger.Information("Injury adjustment of {p} weeks for player {t}: {v}", gamesInjured, s.PlayerId, s.Name);
+                if (gamesInjured > 0)
                     s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * gamesInjured;
-                }
             }
             return seasonProjections;
         }
@@ -120,14 +114,11 @@ namespace Football.Projections.Services
                         {
                             var ratio = opponentRank.AvgPointsAllowed / avgMatchup.AvgPointsAllowed;
                             var tamperedRatio = ratio > 1 ? Math.Min(ratio, _weeklyTunings.TamperedMax) : Math.Max(ratio, _weeklyTunings.TamperedMin);
-                            w.ProjectedPoints = w.ProjectedPoints * (tamperedRatio + 1) / 2;
+                            w.ProjectedPoints = w.Position != Position.DST.ToString() ? w.ProjectedPoints * (tamperedRatio + 1) / 2 : tamperedRatio * w.ProjectedPoints;
                         }
                     }
-                    else
-                    {
-                        logger.Information("{0} is on BYE", team);
+                    else 
                         w.ProjectedPoints = 0;
-                    }
                 }
             }
             return weekProjections;

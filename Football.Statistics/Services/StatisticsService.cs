@@ -44,13 +44,9 @@ namespace Football.Statistics.Services
                 {
                     var week = (int)settingsService.GetValueFromModel(data, Model.Week);
                     if (teamChange.PreviousTeam == team && week < teamChange.WeekEffective)
-                    {
                         filteredData.Add(data);
-                    }
                     else if(teamChange.NewTeam == team && week >= teamChange.WeekEffective)
-                    {
                         filteredData.Add(data);
-                    }
                 }
                 return filteredData;
             }

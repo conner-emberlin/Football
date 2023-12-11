@@ -110,7 +110,7 @@
 
 
 @code {
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST" };
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
     public string Position { get; set; } = "Quarterback";
     public Position positionEnum { get; set; }
     public List<FantasyPerformance> FantasyPerformances = new();
@@ -135,6 +135,7 @@
             "Wide Receiver" => Enums.Position.WR,
             "Tight End" => Enums.Position.TE,
             "DST" => Enums.Position.DST,
+            "Kicker" => Enums.Position.K,
             _ => Enums.Position.QB
         };
     }

@@ -12,10 +12,7 @@ namespace Football.Projections.Services
             var columnCount = settings.GetPropertiesFromModel<T>().Count + 1;
             var rows = new List<Vector<double>>();
             foreach (var m in model)
-            {
                 rows.Add(TransformModel(m));
-            }
-
             return CreateMatrix(rows, rowCount, columnCount);
         }
         public Vector<double> DependentVector<T>(List<T> dependents, Model value)
@@ -24,9 +21,7 @@ namespace Football.Projections.Services
             var prop = settings.GetPropertiesFromModel<T>().First(p => p.ToString()!.Contains(value.ToString()));
             var vec = Vector<double>.Build.Dense(len);
             for (int i = 0; i < len; i++)
-            {                
                 vec[i] = Convert.ToDouble(prop.GetValue(dependents[i]));
-            }
             return vec;
         }
         private Vector<double> TransformModel<T>(T modelItem)

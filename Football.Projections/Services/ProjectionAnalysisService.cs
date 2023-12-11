@@ -236,11 +236,8 @@ namespace Football.Projections.Services
                     count++;
                 }
             }
-            var mean = observedFantasyPoints.Average();
             foreach (var ofp in observedFantasyPoints)
-            {
-                totalSumOfSquares += Math.Pow(ofp - mean, 2);
-            }
+                totalSumOfSquares += Math.Pow(ofp - observedFantasyPoints.Average(), 2);
             return totalSumOfSquares > 0 ? 1 - (residualSumOfSquares / totalSumOfSquares) : 0;
         }
     

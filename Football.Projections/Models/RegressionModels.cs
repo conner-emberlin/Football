@@ -82,7 +82,6 @@
         public double TotalTDPerGame { get; set; }
         public double SaftiesPerGame { get; set; }
         public double YardsAllowedPerGame { get; set; }
-        public double StrengthOfSchedule { get; set; }
     }
 
     public class KModelWeek
@@ -95,6 +94,5 @@
         public double FieldGoalsPerGame { get; set; }
         public double FieldGoalAttemptsPerGame { get; set; }
         public double FiftyPlusFieldGoalsPerGame { get; set; }
-        public double StrengthOfSchedule { get; set; }
     }
 }
