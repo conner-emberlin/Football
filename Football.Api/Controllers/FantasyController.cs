@@ -24,16 +24,11 @@ namespace Football.Api.Controllers
         [HttpPost("data/{position}/{season}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> PostSeasonFantasy( int season, string position)
+        public async Task<ActionResult<int>> PostSeasonFantasy(int season, string position)
         {
             if (season > 0 && Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
-            {
                 return Ok(await fantasyDataService.PostSeasonFantasy(season, positionEnum));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
+            else return BadRequest();
         }
         [HttpPost("data/{position}/{season}/{week}")]
         [ProducesResponseType(typeof(int), 200)]

@@ -36,7 +36,7 @@ namespace Football.Data.Services
                 rosterPercent.Add(new FantasyProsRosterPercent
                 {
                     Name = FormatName(strings[i]),
-                    RosterPercent = double.Parse(strings[i + len - 1][0 ..strings[i + len - 1].IndexOf("%")])
+                    RosterPercent = double.Parse(strings[i + len - 1][0 ..strings[i + len - 1].IndexOf('%')])
                 }); 
             }
             return rosterPercent;
