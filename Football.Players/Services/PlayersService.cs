@@ -77,9 +77,7 @@ namespace Football.Players.Services
         public async Task<List<Player>> GetAllPlayers()
         {
             if (settingsService.GetFromCache<Player>(Cache.AllPlayers, out var cachedValues))
-            {
                 return cachedValues;
-            }
             else
             {
                 var players = await playersRepository.GetAllPlayers();
@@ -98,8 +96,7 @@ namespace Football.Players.Services
                 Season = _season.CurrentSeason,
                 Team = team
             });
-            var teamChanges = await GetInSeasonTeamChanges();
-            var formerPlayers = teamChanges.Where(t => t.PreviousTeam == team);
+            var formerPlayers = (await GetInSeasonTeamChanges()).Where(t => t.PreviousTeam == team);
             if (formerPlayers.Any())
             {
                 foreach (var formerPlayer in formerPlayers)
@@ -119,23 +116,13 @@ namespace Football.Players.Services
         public async Task<List<Schedule>> GetUpcomingGames(int playerId)
         {
             var team = await GetPlayerTeam(_season.CurrentSeason, playerId);
-            if (team != null)
-            {
-                var teamId = await GetTeamId(team.Team);
-                var currentWeek = await GetCurrentWeek(_season.CurrentSeason);
-                return await playersRepository.GetUpcomingGames(teamId, _season.CurrentSeason, currentWeek);
-            }
-            else return [];
+            return team != null ? await playersRepository.GetUpcomingGames(await GetTeamId(team.Team), _season.CurrentSeason, await GetCurrentWeek(_season.CurrentSeason)) : [];
         }
 
         public async Task<int> PostInSeasonTeamChange(InSeasonTeamChange teamChange)
         {
-            var recordUpdated = await playersRepository.UpdateCurrentTeam(teamChange.PlayerId, teamChange.NewTeam, _season.CurrentSeason);
-            if (recordUpdated)
-            {
-                return await playersRepository.PostTeamChange(teamChange);
-            }
-            else return 0;
+            return await playersRepository.UpdateCurrentTeam(teamChange.PlayerId, teamChange.NewTeam, _season.CurrentSeason) ?
+                   await playersRepository.PostTeamChange(teamChange) : 0;
         }
     }
 }

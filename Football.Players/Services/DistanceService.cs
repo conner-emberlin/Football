@@ -15,24 +15,16 @@ namespace Football.Players.Services
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             var scheduleDetails = await playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
             var playerTeam = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
-            if (playerTeam is not null)
+            if (playerTeam != null)
             {
                 var teamId = await playersService.GetTeamId(playerTeam.Team);
                 var scheduleDetail = scheduleDetails.FirstOrDefault(s => s.HomeTeamId == teamId || s.AwayTeamId == teamId);
-                if (scheduleDetail is null)
-                {
+                if (scheduleDetail == null)
                     return 0;
-                }
                 else if (scheduleDetail.HomeTeamId == teamId)
-                {
                     return 0;
-                }
                 else
-                {
-                    var location1 = await playersService.GetTeamLocation(teamId);
-                    var location2 = await playersService.GetTeamLocation(scheduleDetail.HomeTeamId);
-                    return GetDistance(location1, location2);
-                }
+                    return GetDistance(await playersService.GetTeamLocation(teamId), await playersService.GetTeamLocation(scheduleDetail.HomeTeamId));
             }
             else return 0;
         }
@@ -48,9 +40,8 @@ namespace Football.Players.Services
                   + Math.Cos(Radians(location1.Latitude)) 
                   * Math.Cos(Radians(location2.Latitude))
                   * Math.Pow(Math.Sin(longDiff / 2), 2);
-            var c = 2 * Math.Asin(Math.Min(1, Math.Sqrt(a)));
 
-            return _geo.RadiusMiles * c;
+            return _geo.RadiusMiles * 2 * Math.Asin(Math.Min(1, Math.Sqrt(a)));
         }
 
         private TeamLocation FormatCoordinates(TeamLocation location)

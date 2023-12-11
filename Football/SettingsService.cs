@@ -6,23 +6,14 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Football
 {
-    public class SettingsService : ISettingsService
+    public class SettingsService(IOptionsMonitor<ProjectionLimits> projectionLimits, IOptionsMonitor<BoomBustSettings> boomBust, IOptionsMonitor<WaiverWireSettings> wireSettings,
+         IMemoryCache cache, IOptionsMonitor<StartOrSitSettings> startOrSitSettings) : ISettingsService
     {
-        private readonly ProjectionLimits _projectionLimits;
-        private readonly BoomBustSettings _boomBust;
-        private readonly WaiverWireSettings _wireSettings;
-        private readonly StartOrSitSettings _startOrSitSettings;
-        private readonly IMemoryCache _cache;
-
-        public SettingsService(IOptionsMonitor<ProjectionLimits> projectionLimits, IOptionsMonitor<BoomBustSettings> boomBust, IOptionsMonitor<WaiverWireSettings> wireSettings,
-             IMemoryCache cache, IOptionsMonitor<StartOrSitSettings> startOrSitSettings)
-        {
-            _projectionLimits = projectionLimits.CurrentValue;
-            _boomBust = boomBust.CurrentValue;
-            _cache = cache;
-            _wireSettings = wireSettings.CurrentValue;
-            _startOrSitSettings = startOrSitSettings.CurrentValue;
-        }
+        private readonly ProjectionLimits _projectionLimits = projectionLimits.CurrentValue;
+        private readonly BoomBustSettings _boomBust = boomBust.CurrentValue;
+        private readonly WaiverWireSettings _wireSettings = wireSettings.CurrentValue;
+        private readonly StartOrSitSettings _startOrSitSettings = startOrSitSettings.CurrentValue;
+        private readonly IMemoryCache _cache = cache;
 
         public int GetProjectionsCount(Position position) => position switch
         {
@@ -86,14 +77,7 @@ namespace Football
         public double GetValueFromModel<T>(T model, Model value)
         {
             var prop = typeof(T).GetProperties().First(p => p.ToString()!.Contains(value.ToString()));
-            if (prop != null)
-            {
-                return Convert.ToDouble(prop.GetValue(model));
-            }
-            else
-            {
-                return 0;
-            }
+            return prop != null ? Convert.ToDouble(prop.GetValue(model)) : 0;
         }
 
         public List<PropertyInfo> GetPropertiesFromModel<T>()
@@ -107,25 +91,9 @@ namespace Football
                                             && !p.ToString()!.Contains(Model.Position.ToString())
                                             ).ToList();
         }
-
-        public bool GetFromCache<T>(Cache cache, out List<T> cachedValues)
-        {
-            if (_cache.TryGetValue(cache.ToString(), out cachedValues))
-            {
-                return cachedValues.Any();
-            }
-            else return false;
-        }
-
-        public bool GetFromCache<T>(Position position, Cache cache, out List<T> cachedValues)
-        {
-            if (_cache.TryGetValue(position.ToString() + cache.ToString(), out cachedValues))
-            {
-                return cachedValues.Any();
-            }
-            else return false;
-        }
-        public bool GetFromCache<T>(int id, Cache cache, out T cachedValue) => _cache.TryGetValue(id.ToString() + cache.ToString(), out cachedValue);
+        public bool GetFromCache<T>(Cache cache, out List<T> cachedValues) => _cache.TryGetValue(cache.ToString(), out cachedValues!) && cachedValues.Count > 0;
+        public bool GetFromCache<T>(Position position, Cache cache, out List<T> cachedValues) => _cache.TryGetValue(position.ToString() + cache.ToString(), out cachedValues!) && cachedValues.Count > 0;
+        public bool GetFromCache<T>(int id, Cache cache, out T cachedValue) => _cache.TryGetValue(id.ToString() + cache.ToString(), out cachedValue!);
 
     }
 }
