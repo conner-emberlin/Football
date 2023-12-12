@@ -81,7 +81,7 @@ namespace Football.Projections.Services
             if (projectionsExist)
             {
                 var weeklyFantasy = (await fantasyService.GetWeeklyFantasy(_season.CurrentSeason, week)).Where(w => w.Position == position.ToString());
-                return new()
+                return new WeeklyProjectionAnalysis
                 {
                     Season = _season.CurrentSeason,
                     Week = week,
@@ -96,7 +96,7 @@ namespace Football.Projections.Services
             }
             else
             {
-                return new() 
+                return new WeeklyProjectionAnalysis 
                 { 
                     Season = _season.CurrentSeason,
                     Week = week,
@@ -125,7 +125,7 @@ namespace Football.Projections.Services
             }
             if (projections.Count > 0)
             {
-                return new ()
+                return new WeeklyProjectionAnalysis
                 {
                     Season = _season.CurrentSeason,
                     MSE = GetMeanSquaredError(projections, weeklyFantasy),
@@ -142,34 +142,25 @@ namespace Football.Projections.Services
         public async Task<List<SeasonFlex>> SeasonFlexRankings()
         {
             List<SeasonFlex> flexRankings = [];
-            var qbProjections = (await seasonProjection.GetProjections(Position.QB)).ToList();
-            var rbProjections = (await seasonProjection.GetProjections(Position.RB)).ToList();
-            var wrProjections = (await seasonProjection.GetProjections(Position.WR)).ToList();
-            var teProjections = (await seasonProjection.GetProjections(Position.TE)).ToList();
-            try
+            var rankings = (await seasonProjection.GetProjections(Position.QB))
+                           .Concat(await seasonProjection.GetProjections(Position.RB))
+                           .Concat(await seasonProjection.GetProjections(Position.WR))
+                           .Concat(await seasonProjection.GetProjections(Position.TE)).ToList();
+            foreach (var rank in rankings)
             {
-                var rankings = qbProjections.Concat(rbProjections).Concat(wrProjections).Concat(teProjections).ToList();
-                foreach (var rank in rankings)
+                if (Enum.TryParse(rank.Position, out Position position))
                 {
-                    if (Enum.TryParse(rank.Position, out Position position))
+                    flexRankings.Add(new SeasonFlex
                     {
-                        flexRankings.Add(new SeasonFlex
-                        {
-                            PlayerId = rank.PlayerId,
-                            Name = rank.Name,
-                            Position = rank.Position,
-                            ProjectedPoints = rank.ProjectedPoints,
-                            Vorp = rank.ProjectedPoints - await GetReplacementPoints(position)
-                        });
-                    }
+                        PlayerId = rank.PlayerId,
+                        Name = rank.Name,
+                        Position = rank.Position,
+                        ProjectedPoints = rank.ProjectedPoints,
+                        Vorp = rank.ProjectedPoints - await GetReplacementPoints(position)
+                    });
                 }
-                return flexRankings.OrderByDescending(f => f.Vorp).ToList();
             }
-            catch (Exception ex)
-            {
-                logger.Error(ex.ToString() + Environment.NewLine + ex.StackTrace);
-                throw;
-            }
+            return flexRankings.OrderByDescending(f => f.Vorp).ToList();
         }
 
         public async Task<List<WeekProjection>> WeeklyFlexRankings()

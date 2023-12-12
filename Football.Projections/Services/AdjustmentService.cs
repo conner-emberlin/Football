@@ -57,9 +57,7 @@ namespace Football.Projections.Services
             foreach (var wp in weeklyProjections)
             {
                 if (injuredPlayerProjections.Any(ip => ip.WeekProjection.PlayerId == wp.PlayerId))
-                {
                     wp.ProjectedPoints = 0;
-                }
             }
             return weeklyProjections;
         }
@@ -70,10 +68,7 @@ namespace Football.Projections.Services
             {
                 var gamesSuspended = await playerService.GetPlayerSuspensions(s.PlayerId, _season.CurrentSeason);
                 if (gamesSuspended > 0)
-                {
-                    logger.Information("Suspension adjustment of {p} days for player {t}: {v}", gamesSuspended, s.PlayerId, s.Name);
                     s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * gamesSuspended;
-                }
             }
             return seasonProjections;
         }
@@ -88,8 +83,7 @@ namespace Football.Projections.Services
                     logger.Information("QB Change found for player {p}: {n}. The New QB is {q}.", s.PlayerId, s.Name, changeRecord.CurrentQB);
                     var previousEPA = await playerService.GetEPA(changeRecord.PreviousQB, _season.CurrentSeason - 1);
                     var currentEPA = await playerService.GetEPA(changeRecord.CurrentQB, _season.CurrentSeason - 1);
-                    var ratio = EPARatio(previousEPA, currentEPA);
-                    s.ProjectedPoints *= ratio;
+                    s.ProjectedPoints *= EPARatio(previousEPA, currentEPA);
                 }
             }
             return seasonProjections;

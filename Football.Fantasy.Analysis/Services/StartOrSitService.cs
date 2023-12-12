@@ -72,11 +72,7 @@ namespace Football.Fantasy.Analysis.Services
                 startOrSits.ForEach(s => s.Start = s.Player.PlayerId == starter);
                 return startOrSits;
             }
-            else
-            {
-                return Enumerable.Empty<StartOrSit>().ToList();
-            }
-
+            else return Enumerable.Empty<StartOrSit>().ToList();
         }
 
         public async Task<Weather> GetWeather(int playerId)

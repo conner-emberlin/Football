@@ -8,33 +8,28 @@ namespace Football.Projections.Services
     {
         public Matrix<double> RegressorMatrix<T>(List<T> model)
         {
-            var rowCount = model.Count;
-            var columnCount = settings.GetPropertiesFromModel<T>().Count + 1;
             var rows = new List<Vector<double>>();
             foreach (var m in model)
                 rows.Add(TransformModel(m));
-            return CreateMatrix(rows, rowCount, columnCount);
+            return CreateMatrix(rows, model.Count, settings.GetPropertiesFromModel<T>().Count + 1);
         }
         public Vector<double> DependentVector<T>(List<T> dependents, Model value)
         {
-            var len = dependents.Count;
             var prop = settings.GetPropertiesFromModel<T>().First(p => p.ToString()!.Contains(value.ToString()));
-            var vec = Vector<double>.Build.Dense(len);
-            for (int i = 0; i < len; i++)
+            var vec = Vector<double>.Build.Dense(dependents.Count);
+            for (int i = 0; i < dependents.Count; i++)
                 vec[i] = Convert.ToDouble(prop.GetValue(dependents[i]));
             return vec;
         }
         private Vector<double> TransformModel<T>(T modelItem)
         {
             var properties = settings.GetPropertiesFromModel<T>();
-            var columnCount = properties.Count + 1;
-            var vec = Vector<double>.Build.Dense(columnCount);
+            var vec = Vector<double>.Build.Dense(properties.Count + 1);
             vec[0] = 1;
             var index = 1;
             foreach (var property in properties)
             {
-                var value = Convert.ToDouble(property.GetValue(modelItem));
-                vec[index] = value;
+                vec[index] = Convert.ToDouble(property.GetValue(modelItem));
                 index++;
             }
             return vec;
@@ -42,14 +37,10 @@ namespace Football.Projections.Services
         private static Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount)
         {
             var matrix = Matrix<double>.Build.Dense(rowCount, columnCount);
-
             for (int i = 0; i < rowCount; i++)
             {
                 for (int j = 0; j < columnCount; j++)
-                {
-                    var tempVec = rows[i];
-                    matrix[i, j] = tempVec[j];
-                }
+                    matrix[i, j] = rows[i][j];
             }
             return matrix;
         }
