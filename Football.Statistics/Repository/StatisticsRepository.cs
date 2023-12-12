@@ -20,7 +20,7 @@ namespace Football.Statistics.Repository
             return (await dbConnection.QueryAsync<T>(query, new { playerId })).ToList();
         }
 
-        public async Task<List<T>> GetWeeklyData<T>(Position positin)
+        public async Task<List<T>> GetWeeklyData<T>(Position position)
         {
             var query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}]";
             return (await dbConnection.QueryAsync<T>(query)).ToList();
