@@ -48,27 +48,20 @@
     public class QBModelWeek : QBModelSeason
     {
         public int Week { get; set; }
-        public double ProjectedPoints { get; set; }
-        public double FiveThirtyEightValue { get; set; }
-        public double PasserRating { get; set; }
     }
 
     public class RBModelWeek : RBModelSeason
     {
         public int Week { get; set; }
-        public double ProjectedPoints { get; set; }
-        public double RBTargetShare { get; set; }
     }
 
     public class WRModelWeek : WRModelSeason
     {
         public int Week { get; set; }
-        public double ProjectedPoints { get; set; }
     }
     public class TEModelWeek : TEModelSeason
     {
         public int Week { get; set; }
-        public double ProjectedPoints { get; set; }
     }
 
     public class DSTModelWeek

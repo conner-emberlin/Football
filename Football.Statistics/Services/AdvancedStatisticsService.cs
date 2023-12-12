@@ -93,6 +93,16 @@ namespace Football.Statistics.Services
             return gameResults.Any() ? yards / gameResults.Count() : 0;
         }
 
+        public async Task<double> YardsAllowed(int teamId, int week)
+        {
+            var gameResults = (await statisticsService.GetGameResults(_season.CurrentSeason))
+                              .Where(g => (g.HomeTeamId == teamId || g.AwayTeamId == teamId) 
+                                          && g.Week == week).FirstOrDefault();
+            if (gameResults != null)
+                return gameResults.WinnerId == teamId ? gameResults.LoserYards : gameResults.WinnerYards;
+            else return 0;
+        }
+
         public async Task<List<StrengthOfSchedule>> RemainingStrengthOfSchedule()
         {
             if (settingsService.GetFromCache<StrengthOfSchedule>(Cache.RemainingSOS, out var cachedSOS))

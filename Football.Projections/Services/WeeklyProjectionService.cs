@@ -16,7 +16,7 @@ namespace Football.Projections.Services
 {
     public class WeeklyProjectionService(IRegressionModelService regressionService, IFantasyDataService fantasyService,
     IMemoryCache cache,IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
-    IStatisticsService statisticsService, IOptionsMonitor<Season> season,
+    IStatisticsService statisticsService, IOptionsMonitor<Season> season, IAdvancedStatisticsService advancedStatisticsService,
     IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository,
     IOptionsMonitor<WeeklyTunings> weeklyTunings, ISettingsService settingsService, IOptionsMonitor<ProjectionLimits> settings) : IProjectionService<WeekProjection>
     {
@@ -161,7 +161,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId);
                 if (stats.Count > 0)
-                    qbModel.Add(await regressionService.QBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    qbModel.Add(regressionService.QBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
             }
             return qbModel;
         }
@@ -173,7 +173,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, player.PlayerId);
                 if (stats.Count > 0)
-                    rbModel.Add(await regressionService.RBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    rbModel.Add(regressionService.RBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
             }
             return rbModel;
         }
@@ -185,7 +185,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, player.PlayerId);
                 if (stats.Count > 0)
-                    wrModel.Add(await regressionService.WRModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    wrModel.Add(regressionService.WRModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
             }
             return wrModel;
         }
@@ -197,7 +197,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, player.PlayerId);
                 if (stats.Count > 0)
-                    teModel.Add(await regressionService.TEModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    teModel.Add(regressionService.TEModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
             }
             return teModel;
         }
@@ -209,8 +209,9 @@ namespace Football.Projections.Services
             foreach(var player in players)
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataDST>(Position.DST, player.PlayerId);
+                var yardsAllowed = await advancedStatisticsService.YardsAllowedPerGame(await playersService.GetTeamId(player.PlayerId));
                 if (stats.Count > 0)
-                    dstModel.Add(await regressionService.DSTModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    dstModel.Add(regressionService.DSTModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek), yardsAllowed));
             }
             return dstModel;
         }
@@ -223,7 +224,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataK>(Position.K, player.PlayerId);
                 if (stats.Count > 0)
-                    kModel.Add(await regressionService.KModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    kModel.Add(regressionService.KModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
                 
             }
             return kModel;

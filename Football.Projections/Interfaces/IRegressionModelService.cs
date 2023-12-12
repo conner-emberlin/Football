@@ -9,11 +9,11 @@ namespace Football.Projections.Interfaces
         public RBModelSeason RBModelSeason(SeasonDataRB stat);
         public WRModelSeason WRModelSeason(SeasonDataWR stat);
         public TEModelSeason TEModelSeason(SeasonDataTE stat);
-        public Task<QBModelWeek> QBModelWeek(WeeklyDataQB stat);
-        public Task<RBModelWeek> RBModelWeek(WeeklyDataRB stat);
-        public Task<WRModelWeek> WRModelWeek(WeeklyDataWR stat);
-        public Task<TEModelWeek> TEModelWeek(WeeklyDataTE stat);
-        public Task<DSTModelWeek> DSTModelWeek(WeeklyDataDST stat);
-        public Task<KModelWeek> KModelWeek(WeeklyDataK stat);
+        public QBModelWeek QBModelWeek(WeeklyDataQB stat);
+        public RBModelWeek RBModelWeek(WeeklyDataRB stat);
+        public WRModelWeek WRModelWeek(WeeklyDataWR stat);
+        public TEModelWeek TEModelWeek(WeeklyDataTE stat);
+        public DSTModelWeek DSTModelWeek(WeeklyDataDST stat, double yardsAllowed);
+        public KModelWeek KModelWeek(WeeklyDataK stat);
     }
 }
