@@ -44,7 +44,11 @@ namespace Football.Statistics.Repository
                                 AND [Week] = @week";
             return (await dbConnection.QueryAsync<WeeklyRosterPercent>(query, new { season, week })).ToList();
         }
-
+        public async Task<List<SnapCount>?> GetSnapCounts(int playerId)
+        {
+            var query = $@"SELECT * FROM [dbo].SnapCount WHERE [PlayerId] = @playerId";
+            return (await dbConnection.QueryAsync<SnapCount>(query, new {playerId})).ToList();
+        }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(Position position) => string.Format("Season{0}Data", position.ToString());
         private static string GetSeasonQueryWhere(bool isPlayer) => isPlayer ? "[PlayerId] = @queryParam" : "[Season] = @queryParam";

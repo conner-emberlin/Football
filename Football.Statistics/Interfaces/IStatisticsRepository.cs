@@ -11,6 +11,7 @@ namespace Football.Statistics.Interfaces
         public Task<List<T>> GetWeeklyData<T>(Position position, int playerId);
         public Task<List<T>> GetWeeklyData<T>(Position position);
         public Task<List<T>> GetSeasonData<T>(Position position, int queryParam, bool isPlayer);
+        public Task<List<SnapCount>?> GetSnapCounts(int playerId);
 
     }
 }
