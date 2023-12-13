@@ -39,6 +39,7 @@ namespace Football.Fantasy.Analysis.Services
                 {
                     Player  = player,
                     Season = season,
+                    TotalSnaps = totalSnaps,
                     SnapsPerGame = snapCounts.Average(s => s.Snaps),
                     FantasyPointsPerSnap = await FantasyPointsPerSnap(player, season, totalSnaps),
                     RushAttsPerSnap = rushAtts/totalSnaps,
