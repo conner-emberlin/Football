@@ -29,12 +29,11 @@ namespace Football.Projections.Services
                 SacksPerGame = stat.Sacks / stat.Games
             };
         }
-        public async Task<QBModelWeek> QBModelWeek(WeeklyDataQB stat)
+        public async Task<QBModelWeek> QBModelWeek(WeeklyDataQB stat, SnapCount snaps)
         {
             var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
             var fiveThirtyEightValue = await advancedStatisticsService.FiveThirtyEightQBValue(stat.PlayerId);
             var passerRating = await advancedStatisticsService.PasserRating(stat.PlayerId);
-            var snaps = await statisticsService.GetSnapCounts(stat.PlayerId);
 
             return new QBModelWeek
             {
@@ -51,7 +50,7 @@ namespace Football.Projections.Services
                 SacksPerGame = stat.Sacks,
                 FiveThirtyEightValue = fiveThirtyEightValue,
                 PasserRating = passerRating,
-                SnapsPerGame = snaps != null ? snaps.Select(s => s.Snaps).Average() : 0
+                SnapsPerGame = snaps.Snaps
             };
         }
         public RBModelSeason RBModelSeason(SeasonDataRB stat)
@@ -69,11 +68,10 @@ namespace Football.Projections.Services
                 ReceivingTouchdownsPerGame = stat.ReceivingTD / stat.Games
             };
         }
-        public async Task<RBModelWeek> RBModelWeek(WeeklyDataRB stat)
+        public async Task<RBModelWeek> RBModelWeek(WeeklyDataRB stat, SnapCount snaps)
         {
             var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
             var targetShare = (await marketShareService.GetTargetShare(stat.PlayerId)).RBTargetShare;
-            var snaps = await statisticsService.GetSnapCounts(stat.PlayerId);
 
             return new RBModelWeek
             {
@@ -89,7 +87,7 @@ namespace Football.Projections.Services
                 ReceivingYardsPerGame = stat.Yards,
                 ReceivingTouchdownsPerGame = stat.ReceivingTD,
                 RBTargetShare = targetShare,
-                SnapsPerGame = snaps.Count > 0 ? snaps.Select(s => s.Snaps).Average() : 0
+                SnapsPerGame = snaps.Snaps
             };
         }
         public WRModelSeason WRModelSeason(SeasonDataWR stat)
@@ -105,10 +103,9 @@ namespace Football.Projections.Services
                 TouchdownsPerGame = stat.TD / stat.Games
             };
         }
-        public async Task<WRModelWeek> WRModelWeek(WeeklyDataWR stat)
+        public async Task<WRModelWeek> WRModelWeek(WeeklyDataWR stat, SnapCount snaps)
         {
             var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
-            var snaps = await statisticsService.GetSnapCounts(stat.PlayerId);
 
             return new WRModelWeek
             {
@@ -121,7 +118,7 @@ namespace Football.Projections.Services
                 YardsPerGame = stat.Yards,
                 YardsPerReception = stat.Receptions > 0 ? stat.Yards/stat.Receptions : 0,
                 TouchdownsPerGame = stat.TD,
-                SnapsPerGame = snaps != null ? snaps.Select(s => s.Snaps).Average() : 0
+                SnapsPerGame = snaps.Snaps
             };
         }
         public TEModelSeason TEModelSeason(SeasonDataTE stat)
@@ -137,10 +134,9 @@ namespace Football.Projections.Services
                 TouchdownsPerGame = stat.TD / stat.Games
             };
         }
-        public async Task<TEModelWeek> TEModelWeek(WeeklyDataTE stat)
+        public async Task<TEModelWeek> TEModelWeek(WeeklyDataTE stat, SnapCount snaps)
         {
             var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
-            var snaps = await statisticsService.GetSnapCounts(stat.PlayerId);
 
             return new TEModelWeek
             {
@@ -153,7 +149,7 @@ namespace Football.Projections.Services
                 YardsPerGame = stat.Yards,
                 YardsPerReception = stat.Receptions > 0 ? stat.Yards / stat.Receptions : 0,
                 TouchdownsPerGame = stat.TD,
-                SnapsPerGame = snaps != null ? snaps.Select(s => s.Snaps).Average() : 0
+                SnapsPerGame = snaps.Snaps
             };
         }
 

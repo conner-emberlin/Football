@@ -409,5 +409,15 @@ namespace Football.Projections.Services
             ExtraPoints = weeks.Average(w => w.ExtraPoints),
             ExtraPointAttempts = weeks.Average(w => w.ExtraPointAttempts)
         };
+
+        public SnapCount CalculateWeeklyAverage(List<SnapCount> snaps, int currentWeek) => new()
+        {
+            PlayerId = snaps.First().PlayerId,
+            Season = snaps.First().Season,
+            Week = currentWeek,
+            Name = snaps.First().Name,
+            Position = snaps.First().Position,
+            Snaps = snaps.Average(s => s.Snaps)
+        };
     }
 }

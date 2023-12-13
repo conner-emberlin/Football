@@ -17,5 +17,6 @@ namespace Football.Projections.Interfaces
         public WeeklyDataDST CalculateWeeklyAverage(List<WeeklyDataDST> weeks, int currentWeek);
         public WeeklyDataK CalculateWeeklyAverage(List<WeeklyDataK> weeks, int currentWeek);
         public WeeklyFantasy CalculateWeeklyAverage(List<WeeklyFantasy> weeks, int currentWeek);
+        public SnapCount CalculateWeeklyAverage(List<SnapCount> snaps, int currentWeek);
     }
 }

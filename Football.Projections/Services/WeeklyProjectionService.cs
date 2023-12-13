@@ -160,8 +160,9 @@ namespace Football.Projections.Services
             foreach (var player in players)
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId);
-                if (stats.Count > 0)
-                    qbModel.Add(await regressionService.QBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                var snaps = await statisticsService.GetSnapCounts(player.PlayerId);
+                if (stats.Count > 0 && snaps.Count > 0)
+                    qbModel.Add(await regressionService.QBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek), statCalculator.CalculateWeeklyAverage(snaps, currentWeek)));
             }
             return qbModel;
         }
@@ -172,8 +173,9 @@ namespace Football.Projections.Services
             foreach (var player in players)
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, player.PlayerId);
-                if (stats.Count > 0)
-                    rbModel.Add(await regressionService.RBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                var snaps = await statisticsService.GetSnapCounts(player.PlayerId);
+                if (stats.Count > 0 && snaps.Count > 0)
+                    rbModel.Add(await regressionService.RBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek), statCalculator.CalculateWeeklyAverage(snaps, currentWeek)));
             }
             return rbModel;
         }
@@ -184,8 +186,9 @@ namespace Football.Projections.Services
             foreach (var player in players)
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, player.PlayerId);
-                if (stats.Count > 0)
-                    wrModel.Add(await regressionService.WRModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                var snaps = await statisticsService.GetSnapCounts(player.PlayerId);
+                if (stats.Count > 0 && snaps.Count > 0)
+                    wrModel.Add(await regressionService.WRModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek), statCalculator.CalculateWeeklyAverage(snaps, currentWeek)));
             }
             return wrModel;
         }
@@ -196,8 +199,9 @@ namespace Football.Projections.Services
             foreach (var player in players)
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, player.PlayerId);
-                if (stats.Count > 0)
-                    teModel.Add(await regressionService.TEModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                var snaps = await statisticsService.GetSnapCounts(player.PlayerId);
+                if (stats.Count > 0 && snaps.Count > 0)
+                    teModel.Add(await regressionService.TEModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek), statCalculator.CalculateWeeklyAverage(snaps, currentWeek)));
             }
             return teModel;
         }
