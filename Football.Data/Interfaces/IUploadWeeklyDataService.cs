@@ -10,6 +10,7 @@
         public Task<int> UploadWeeklyKData(int season, int week);
         public Task<int> UploadWeeklyGameResults(int season, int week);
         public Task<int> UploadWeeklyRosterPercentages(int season, int week, string position);
+        public Task<int> UploadWeeklySnapCounts(int season, int week, string position);
 
     }
 }

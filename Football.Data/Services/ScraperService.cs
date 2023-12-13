@@ -395,6 +395,52 @@ namespace Football.Data.Services
             return t;
         }
 
+        public async Task<List<FantasyProsSnapCount>> ScrapeSnapCounts(string position, int week)
+        {
+            var task = await Task.Run(() =>
+            {
+                var url = string.Format("{0}/{1}.php?week={2}&range=week", _scraping.SnapCountURL, position.ToLower(), week.ToString());
+                var web = new HtmlWeb();
+                HtmlDocument doc = web.Load(url);
+                var tempdata = doc.DocumentNode.SelectNodes(_scraping.SnapCountXPath)[0].InnerHtml;
+                List<FantasyProsSnapCount> snaps = [];
+                var strings = tempdata.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                foreach (var s in strings)
+                {
+                    var temp = s.Split(new string[] { "<td", "<a" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    for (int i = temp.Count - 1; i >= 0; i--)
+                    {
+                        if (temp[i].Contains("player-name") && !temp[i].Contains("aria") && temp[i].Contains("</"))
+                        {
+                            var start = temp[i].IndexOf('>') + 1;
+                            temp[i] = temp[i][start..];
+                            var end = temp[i].IndexOf('<');
+                            temp[i] = temp[i][0..end];
+
+                        }
+                        else if (temp[i].Contains("center") && temp[i].Contains("</"))
+                        {
+                            var start = temp[i].IndexOf('>') + 1;
+                            temp[i] = temp[i][start..];
+                            var end = temp[i].IndexOf('<');
+                            temp[i] = temp[i][0..end];
+                        }
+                        else
+                            temp.Remove(temp[i]);
+                    }
+                    if (temp.Count > 2)
+                    {
+                        snaps.Add(new FantasyProsSnapCount
+                        {
+                            Name = temp[0],
+                            Snaps = double.TryParse(temp[2], out var snapCount) ? snapCount : 0
+                        });
+                    }
+                }
+                return snaps;
+            });
+            return task;
+        }
         private static string FormatName(string name) => Regex.Replace(Regex.Replace(name, @"[\d-]", string.Empty), @"\(.*\)", string.Empty).Trim();
 
         private static int GetFantasyProsTableLength(string position)

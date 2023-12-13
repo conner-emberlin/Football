@@ -99,4 +99,10 @@
         public double RosterPercent { get; set; }
     }
 
+    public class FantasyProsSnapCount
+    {
+        public string Name { get; set; } = "";
+        public double Snaps { get; set;}
+    }
+
 }

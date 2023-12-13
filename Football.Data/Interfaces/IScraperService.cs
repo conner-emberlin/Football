@@ -19,5 +19,6 @@ namespace Football.Data.Interfaces
         public List<FantasyProsRosterPercent> ParseFantasyProsRosterPercent(string[] strings, string position);
         public Task<List<ProFootballReferenceGameScores>> ScrapeGameScores(int week);
         public Task<List<FantasyProsADP>> ScrapeADP(string position);
+        public Task<List<FantasyProsSnapCount>> ScrapeSnapCounts(string position, int week);
     }
 }

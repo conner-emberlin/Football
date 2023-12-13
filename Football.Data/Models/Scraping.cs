@@ -9,5 +9,7 @@
         public string UploadScheduleXPath { get; set; } = "";
         public string RedZoneURL { get; set; } = "";
         public string RedZoneXPath { get; set; } = "";
+        public string SnapCountURL { get; set; } = "";
+        public string SnapCountXPath { get; set; } = "";
     }
 }

@@ -12,5 +12,6 @@ namespace Football.Data.Interfaces
         public Task<int> UploadWeeklyKData(List<WeeklyDataK> players);
         public Task<int> UploadWeeklyGameResults(List<GameResult> results);
         public Task<int> UploadWeeklyRosterPercentages(List<WeeklyRosterPercent> rosterPercentages, List<int> ignoreList);
+        public Task<int> UploadWeeklySnapCounts(List<SnapCount> snapCounts);
     }
 }

@@ -63,6 +63,13 @@ namespace Football.Data.Services
             return await uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages, await playerService.GetIgnoreList());
         }
 
+        public async Task<int> UploadWeeklySnapCounts(int season, int week, string position)
+        {
+            var data = await scraperService.ScrapeSnapCounts(position, week);
+            var snapCounts = await SnapCount(data, season, week);
+            return await uploadWeeklyDataRepository.UploadWeeklySnapCounts(snapCounts);
+        }
+
         private async Task<List<WeeklyRosterPercent>> WeeklyRosterPercent(List<FantasyProsRosterPercent> rosterPercents, int season, int week)
         {
             List<WeeklyRosterPercent> rosterPercentages = new();
@@ -352,6 +359,29 @@ namespace Football.Data.Services
                 });
             }
             return results;
+        }
+
+        private async Task<List<SnapCount>> SnapCount(List<FantasyProsSnapCount> snaps, int season, int week)
+        {
+            List<SnapCount> snapCounts = [];
+            foreach (var s in snaps)
+            {
+                var playerId = await playerService.GetPlayerId(s.Name);
+                if (playerId > 0 && s.Snaps > 0)
+                {
+                    var player = await playerService.GetPlayer(playerId);
+                    snapCounts.Add(new SnapCount
+                    {
+                        Season = season,
+                        Week = week,
+                        PlayerId = playerId,
+                        Name = s.Name,
+                        Position = player.Position,
+                        Snaps = s.Snaps
+                    });
+                }
+            }
+            return snapCounts;
         }
         private string FantasyProsURLFormatter(string position, string year, string week) => string.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
     }

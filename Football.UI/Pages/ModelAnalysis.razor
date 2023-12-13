@@ -108,7 +108,7 @@ else if (ProjectionAnalyses.Any())
     private bool badRequestError;
 
     private List<WeeklyProjectionAnalysis>? ProjectionAnalyses = new();
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End"};
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker"};
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
     private bool loading { get; set; }
@@ -148,6 +148,12 @@ else if (ProjectionAnalyses.Any())
                 break;
             case "tight end":
                 PositionEnum = "TE";
+                break;
+            case "dst":
+                PositionEnum = "DST";
+                break;
+            case "kicker":
+                PositionEnum = "K";
                 break;
             default: PositionEnum = "QB"; break;
         }

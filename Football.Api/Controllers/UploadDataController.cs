@@ -110,11 +110,17 @@ namespace Football.Api.Controllers
         [HttpPost("adp/{position}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> ScrapeADP(string position) => Ok(await seasonDataService.UploadADP(_season.CurrentSeason, position));
+        public async Task<ActionResult<int>> UploadADP(string position) => Ok(await seasonDataService.UploadADP(_season.CurrentSeason, position));
 
         [HttpPost("sleeper-map")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await leagueAnalysisService.UploadSleeperPlayerMap());
+
+        [HttpPost("snaps/{position}/{season}/{week}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UploadWeeklySnapCounts(string position, int season, int week) => Ok(await weeklyDataService.UploadWeeklySnapCounts(season, week, position));
+
     }
 }

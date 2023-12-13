@@ -98,5 +98,12 @@ namespace Football.Data.Repository
             }
             return count;
         }
+
+        public async Task<int> UploadWeeklySnapCounts(List<SnapCount> snapCounts)
+        {
+            var query = $@"INSERT INTO [dbo].SnapCount (Season, Week, PlayerId, Name, Position, Snaps)
+                            VALUES (@Season, @Week, @PlayerId, @Name, @Position, @Snaps)";
+            return await dbConnection.ExecuteAsync(query, snapCounts);
+        }
     }
 }
