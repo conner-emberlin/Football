@@ -31,9 +31,9 @@ namespace Football.Fantasy.Analysis.Services
             var totalSnaps = snapCounts.Select(s => s.Snaps).DefaultIfEmpty(0).Sum();
             if (snapCounts.Any() && totalSnaps > 0)
             {
-                var rushAtts = await RushAttempts(player, season);
-                var targets = await Targets(player, season);
-                var passAtts = player.Position == Position.QB.ToString() ? await PassAttempts(player, season) : 0;
+                var rushAtts = await RushAttempts(player, season, snapCounts.Select(s => s.Week));
+                var targets = await Targets(player, season, snapCounts.Select(s => s.Week));
+                var passAtts = player.Position == Position.QB.ToString() ? await PassAttempts(player, season, snapCounts.Select(s => s.Week)) : 0;
 
                 return new SnapCountAnalysis
                 {
@@ -58,16 +58,16 @@ namespace Football.Fantasy.Analysis.Services
             return 0;
         }
 
-        private async Task<double> RushAttempts(Player player, int season)
+        private async Task<double> RushAttempts(Player player, int season, IEnumerable<int> weeks)
         {
             if (Enum.TryParse(player.Position, out Position position))
             {
                 var rushAtts = position switch
                 {
-                    Position.QB => (await statisticsService.GetWeeklyData<WeeklyDataQB>(position, player.PlayerId)).Where(w => w.Season == season).Select(w => w.RushingAttempts).DefaultIfEmpty(0).Sum(),
-                    Position.RB => (await statisticsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId)).Where(w => w.Season == season).Select(w => w.RushingAtt).DefaultIfEmpty(0).Sum(),
-                    Position.WR => (await statisticsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId)).Where(w => w.Season == season).Select(w => w.RushingAtt).DefaultIfEmpty(0).Sum(),
-                    Position.TE => (await statisticsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId)).Where(w => w.Season == season).Select(w => w.RushingAtt).DefaultIfEmpty(0).Sum(),
+                    Position.QB => (await statisticsService.GetWeeklyData<WeeklyDataQB>(position, player.PlayerId)).Where(w => w.Season == season && weeks.Contains(w.Week)).Select(w => w.RushingAttempts).DefaultIfEmpty(0).Sum(),
+                    Position.RB => (await statisticsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId)).Where(w => w.Season == season && weeks.Contains(w.Week)).Select(w => w.RushingAtt).DefaultIfEmpty(0).Sum(),
+                    Position.WR => (await statisticsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId)).Where(w => w.Season == season && weeks.Contains(w.Week)).Select(w => w.RushingAtt).DefaultIfEmpty(0).Sum(),
+                    Position.TE => (await statisticsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId)).Where(w => w.Season == season && weeks.Contains(w.Week)).Select(w => w.RushingAtt).DefaultIfEmpty(0).Sum(),
                     _ => 0
                 };
                 return rushAtts;
@@ -75,15 +75,15 @@ namespace Football.Fantasy.Analysis.Services
             return 0;
         }
 
-        private async Task<double> Targets(Player player, int season)
+        private async Task<double> Targets(Player player, int season, IEnumerable<int> weeks)
         {
             if (Enum.TryParse(player.Position, out Position position))
             {
                 var rushAtts = position switch
                 {
-                    Position.RB => (await statisticsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId)).Where(w => w.Season == season).Select(w => w.Targets).DefaultIfEmpty(0).Sum(),
-                    Position.WR => (await statisticsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId)).Where(w => w.Season == season).Select(w => w.Targets).DefaultIfEmpty(0).Sum(),
-                    Position.TE => (await statisticsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId)).Where(w => w.Season == season).Select(w => w.Targets).DefaultIfEmpty(0).Sum(),
+                    Position.RB => (await statisticsService.GetWeeklyData<WeeklyDataRB>(position, player.PlayerId)).Where(w => w.Season == season && weeks.Contains(w.Week)).Select(w => w.Targets).DefaultIfEmpty(0).Sum(),
+                    Position.WR => (await statisticsService.GetWeeklyData<WeeklyDataWR>(position, player.PlayerId)).Where(w => w.Season == season && weeks.Contains(w.Week)).Select(w => w.Targets).DefaultIfEmpty(0).Sum(),
+                    Position.TE => (await statisticsService.GetWeeklyData<WeeklyDataTE>(position, player.PlayerId)).Where(w => w.Season == season && weeks.Contains(w.Week)).Select(w => w.Targets).DefaultIfEmpty(0).Sum(),
                     _ => 0
                 };
                 return rushAtts;
@@ -91,6 +91,6 @@ namespace Football.Fantasy.Analysis.Services
             return 0;
         }
 
-        private async Task<double> PassAttempts(Player player, int season) => (await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId)).Where(w => w.Season == season).Select(w => w.Attempts).DefaultIfEmpty(0).Sum();
+        private async Task<double> PassAttempts(Player player, int season, IEnumerable<int> weeks) => (await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId)).Where(w => w.Season == season && weeks.Contains(w.Week)).Select(w => w.Attempts).DefaultIfEmpty(0).Sum();
     }
 }

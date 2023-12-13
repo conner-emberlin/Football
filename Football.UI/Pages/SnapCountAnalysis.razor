@@ -62,11 +62,14 @@
                             <span class="sort-link" onclick="@(() => SetTable("RushAttsPerSnap"))">Rush/Snap</span>
                             <span class="oi @(tableSort.GetSortStyle("RushAttsPerSnap"))"></span>
                         </th>
+                    @if (snapCounts.First().Player.Position != "QB")
+                    {
                         <th>
-                          <span class="sort-link" onclick="@(() => SetTable("TargetsPerSnap"))">Tgts/Snap</span>
-                          <span class="oi @(tableSort.GetSortStyle("TargetsPerSnap"))"></span>
+                            <span class="sort-link" onclick="@(() => SetTable("TargetsPerSnap"))">Tgts/Snap</span>
+                            <span class="oi @(tableSort.GetSortStyle("TargetsPerSnap"))"></span>
                         </th>
-                        <th>
+                    }
+                    <th>
                             <span class="sort-link" onclick="@(() => SetTable("Utilization"))">Util%</span>
                             <span class="oi @(tableSort.GetSortStyle("Utilization"))"></span>
                         </th>
@@ -84,8 +87,11 @@
                             <td>@Math.Round(s.SnapsPerGame, 2)</td>
                             <td>@Math.Round(s.FantasyPointsPerSnap, 2)</td>
                             <td>@Math.Round(s.RushAttsPerSnap, 2)</td>
+                        @if (s.Player.Position != "QB")
+                        {
                             <td>@Math.Round(s.TargetsPerSnap, 2)</td>
-                            <td>@Math.Round(s.Utilization * 100)</td>
+                        }
+                        <td>@Math.Round(s.Utilization * 100)</td>
                             <td><a href=""> <i class="oi oi-graph" /></a></td>
                         </tr>
                     }
@@ -98,7 +104,7 @@
     private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
     public string Position { get; set; } = "Quarterback";
     public Position positionEnum { get; set; } = Enums.Position.QB;
-    public List<Football.Fantasy.Analysis.Models.SnapCountAnalysis> snapCounts = new();
+    public List<Football.Fantasy.Analysis.Models.SnapCountAnalysis>? snapCounts = new();
 
     public bool loading { get; set; } = false;
     public bool badRequestError { get; set; } = false;
@@ -136,6 +142,7 @@
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             snapCounts = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Analysis.Models.SnapCountAnalysis>>(responseStream, options);
+            snapCounts = snapCounts.OrderByDescending(s => s.TotalSnaps).ToList();
             badRequestError = false;
         }
         else
