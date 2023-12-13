@@ -44,7 +44,7 @@ namespace Football.Statistics.Repository
                                 AND [Week] = @week";
             return (await dbConnection.QueryAsync<WeeklyRosterPercent>(query, new { season, week })).ToList();
         }
-        public async Task<List<SnapCount>?> GetSnapCounts(int playerId)
+        public async Task<List<SnapCount>> GetSnapCounts(int playerId)
         {
             var query = $@"SELECT * FROM [dbo].SnapCount WHERE [PlayerId] = @playerId";
             return (await dbConnection.QueryAsync<SnapCount>(query, new {playerId})).ToList();

@@ -10,7 +10,7 @@ using Football.Statistics.Interfaces;
 namespace Football.Projections.Services
 {
     public class RegressionModelService(IPlayersService playerService, IAdvancedStatisticsService advancedStatisticsService, IMarketShareService marketShareService,
-        IOptionsMonitor<Season> season) : IRegressionModelService
+        IOptionsMonitor<Season> season, IStatisticsService statisticsService) : IRegressionModelService
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -34,6 +34,7 @@ namespace Football.Projections.Services
             var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
             var fiveThirtyEightValue = await advancedStatisticsService.FiveThirtyEightQBValue(stat.PlayerId);
             var passerRating = await advancedStatisticsService.PasserRating(stat.PlayerId);
+            var snaps = await statisticsService.GetSnapCounts(stat.PlayerId);
 
             return new QBModelWeek
             {
@@ -44,12 +45,13 @@ namespace Football.Projections.Services
                 PassingAttemptsPerGame = stat.Attempts,
                 PassingYardsPerGame = stat.Yards,
                 PassingTouchdownsPerGame = stat.TD,
-                RushingAttemptsPerGame= stat.RushingAttempts,
+                RushingAttemptsPerGame = stat.RushingAttempts,
                 RushingYardsPerGame = stat.RushingYards,
                 RushingTouchdownsPerGame = stat.RushingTD,
                 SacksPerGame = stat.Sacks,
                 FiveThirtyEightValue = fiveThirtyEightValue,
-                PasserRating = passerRating
+                PasserRating = passerRating,
+                SnapsPerGame = snaps != null ? snaps.Select(s => s.Snaps).Average() : 0
             };
         }
         public RBModelSeason RBModelSeason(SeasonDataRB stat)
@@ -71,6 +73,8 @@ namespace Football.Projections.Services
         {
             var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
             var targetShare = (await marketShareService.GetTargetShare(stat.PlayerId)).RBTargetShare;
+            var snaps = await statisticsService.GetSnapCounts(stat.PlayerId);
+
             return new RBModelWeek
             {
                 PlayerId = stat.PlayerId,
@@ -84,7 +88,8 @@ namespace Football.Projections.Services
                 ReceptionsPerGame = stat.Receptions,
                 ReceivingYardsPerGame = stat.Yards,
                 ReceivingTouchdownsPerGame = stat.ReceivingTD,
-                RBTargetShare = targetShare
+                RBTargetShare = targetShare,
+                SnapsPerGame = snaps.Count > 0 ? snaps.Select(s => s.Snaps).Average() : 0
             };
         }
         public WRModelSeason WRModelSeason(SeasonDataWR stat)
@@ -103,6 +108,8 @@ namespace Football.Projections.Services
         public async Task<WRModelWeek> WRModelWeek(WeeklyDataWR stat)
         {
             var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
+            var snaps = await statisticsService.GetSnapCounts(stat.PlayerId);
+
             return new WRModelWeek
             {
                 PlayerId = stat.PlayerId,
@@ -113,7 +120,8 @@ namespace Football.Projections.Services
                 ReceptionsPerGame = stat.Receptions,
                 YardsPerGame = stat.Yards,
                 YardsPerReception = stat.Receptions > 0 ? stat.Yards/stat.Receptions : 0,
-                TouchdownsPerGame = stat.TD
+                TouchdownsPerGame = stat.TD,
+                SnapsPerGame = snaps != null ? snaps.Select(s => s.Snaps).Average() : 0
             };
         }
         public TEModelSeason TEModelSeason(SeasonDataTE stat)
@@ -132,6 +140,8 @@ namespace Football.Projections.Services
         public async Task<TEModelWeek> TEModelWeek(WeeklyDataTE stat)
         {
             var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
+            var snaps = await statisticsService.GetSnapCounts(stat.PlayerId);
+
             return new TEModelWeek
             {
                 PlayerId = stat.PlayerId,
@@ -142,7 +152,8 @@ namespace Football.Projections.Services
                 ReceptionsPerGame = stat.Receptions,
                 YardsPerGame = stat.Yards,
                 YardsPerReception = stat.Receptions > 0 ? stat.Yards / stat.Receptions : 0,
-                TouchdownsPerGame = stat.TD
+                TouchdownsPerGame = stat.TD,
+                SnapsPerGame = snaps != null ? snaps.Select(s => s.Snaps).Average() : 0
             };
         }
 

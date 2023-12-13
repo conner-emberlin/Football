@@ -51,6 +51,7 @@
         public double ProjectedPoints { get; set; }
         public double FiveThirtyEightValue { get; set; }
         public double PasserRating { get; set; }
+        public double SnapsPerGame { get; set; }
     }
 
     public class RBModelWeek : RBModelSeason
@@ -58,17 +59,20 @@
         public int Week { get; set; }
         public double ProjectedPoints { get; set; }
         public double RBTargetShare { get; set; }
+        public double SnapsPerGame { get; set; }
     }
 
     public class WRModelWeek : WRModelSeason
     {
         public int Week { get; set; }
         public double ProjectedPoints { get; set; }
+        public double SnapsPerGame { get; set; }
     }
     public class TEModelWeek : TEModelSeason
     {
         public int Week { get; set; }
         public double ProjectedPoints { get; set; }
+        public double SnapsPerGame { get; set; }
     }
 
     public class DSTModelWeek
