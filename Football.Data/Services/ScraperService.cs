@@ -7,7 +7,6 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text.RegularExpressions;
-using System.Net.Http;
 
 namespace Football.Data.Services
 {
@@ -247,8 +246,8 @@ namespace Football.Data.Services
             List<PlayerTeam> playerTeams = [];
             for (int i = 0; i < strings.Length - len; i += len)
             {
-                int start = strings[i].IndexOf("(") + 1;
-                int end = strings[i].IndexOf(")", start);
+                int start = strings[i].IndexOf('(') + 1;
+                int end = strings[i].IndexOf(')', start);
 
                 playerTeams.Add(new PlayerTeam
                 {
@@ -264,9 +263,7 @@ namespace Football.Data.Services
             List<Schedule> schedules = [];
 
             foreach (var s in str)
-            {
                 games.Add([.. s.Split(homeSeparator, StringSplitOptions.RemoveEmptyEntries)]);
-            }
             foreach (var g in games)
             {
                 for (int i = 0; i < g.Count; i++)
@@ -313,7 +310,7 @@ namespace Football.Data.Services
                 var web = new HtmlWeb();
                 HtmlDocument doc = web.Load(url);
                 var tempdata = doc.DocumentNode.SelectNodes(xpath)[0].InnerHtml;
-                var strings = tempdata.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                var strings = tempdata.Split(separator, StringSplitOptions.RemoveEmptyEntries).ToList();
                 strings = strings.Where(s => !s.Contains("aria-label") && s.Contains("data-stat")).ToList();
                 List<List<string>> splits = [];
                 foreach (var s in strings)
@@ -335,7 +332,7 @@ namespace Football.Data.Services
                         {
                             doc.LoadHtml(split[index]);
                             split[index] = doc.DocumentNode.InnerText;
-                            var ind = split[index].IndexOf(">");
+                            var ind = split[index].IndexOf('>');
                             if (ind > -1)
                             {
                                 split[index] = split[index][ind..].Trim();
@@ -372,7 +369,7 @@ namespace Football.Data.Services
                 var url = string.Format("{0}{1}.php", "https://www.fantasypros.com/nfl/adp/", position.Trim().ToLower());
                 var xpath = "//*[@id=\"data\"]/tbody";
                 var data = ScrapeData(url, xpath);
-                var colCount = position.Trim().ToLower() == "qb" ? 9 : 7;
+                var colCount = position.Trim().Equals("qb", StringComparison.CurrentCultureIgnoreCase) ? 9 : 7;
                 List<FantasyProsADP> adp = [];
                 for (int i = 0; i < data.Length - colCount; i += colCount)
                 {
@@ -404,7 +401,7 @@ namespace Football.Data.Services
                 HtmlDocument doc = web.Load(url);
                 var tempdata = doc.DocumentNode.SelectNodes(_scraping.SnapCountXPath)[0].InnerHtml;
                 List<FantasyProsSnapCount> snaps = [];
-                var strings = tempdata.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                var strings = tempdata.Split(separator, StringSplitOptions.RemoveEmptyEntries).ToList();
                 foreach (var s in strings)
                 {
                     var temp = s.Split(new string[] { "<td", "<a" }, StringSplitOptions.RemoveEmptyEntries).ToList();
