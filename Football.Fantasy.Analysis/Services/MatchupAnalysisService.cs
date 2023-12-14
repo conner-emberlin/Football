@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Football.Enums;
 using Football.Players.Models;
+using Football.Fantasy.Models;
 
 namespace Football.Fantasy.Analysis.Services
 {
@@ -74,5 +75,21 @@ namespace Football.Fantasy.Analysis.Services
             else return 0;
         }
 
+        public async Task<List<WeeklyFantasy>> GetTopOpponents(Position position, int teamId)
+        {
+            List<WeeklyFantasy> opponentFantasy = [];
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            var schedule = (await playersService.GetTeamGames(teamId)).Where(g => g.Week < currentWeek && g.OpposingTeam != "BYE");
+            foreach (var s in schedule)
+            {
+                var oppFantasy = (await fantasyDataService.GetWeeklyTeamFantasy(s.OpposingTeam, s.Week))
+                                 .Where(f => f.Position == position.ToString())
+                                 .OrderByDescending(f => f.FantasyPoints)
+                                 .FirstOrDefault();
+                if (oppFantasy != null)
+                    opponentFantasy.Add(oppFantasy);                
+            }
+            return opponentFantasy;
+        }
     }
 }

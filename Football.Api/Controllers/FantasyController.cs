@@ -79,6 +79,11 @@ namespace Football.Api.Controllers
         public async Task<ActionResult<MatchupRanking>> GetMatchupRankings(string position) => Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum) ? 
             Ok(await matchupAnalysisService.PositionalMatchupRankings(positionEnum)) : BadRequest("Bad Request");
 
+        [HttpGet("top-opponents/{teamId}/{position}")]
+        [ProducesResponseType(typeof(List<WeeklyFantasy>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> GetTopOpponents(int teamId, string position) => Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum) ? Ok(await matchupAnalysisService.GetTopOpponents(positionEnum, teamId)) : BadRequest();
+
         [HttpGet("team-totals")]
         [ProducesResponseType(typeof(List<TeamTotals>), 200)]
         [ProducesResponseType(typeof(string), 400)]
