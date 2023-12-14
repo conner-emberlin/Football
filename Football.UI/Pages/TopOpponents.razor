@@ -1,0 +1,185 @@
+﻿@page "/top-opponents/{teamId}/{position}"
+<PageTitle>Top Opponents</PageTitle>
+
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Data.Models;
+@using Football.Fantasy.Models;
+@using Football.Fantasy.Analysis.Models;
+@using Football.Players.Models;
+@using Football.UI.Helpers;
+@using ApexCharts;
+@inject IHttpClientFactory ClientFactory
+
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+else
+{
+    <h4>@GetHeader()</h4>
+}
+
+@if (opponents.Any())
+{
+    <ApexChart TItem="WeeklyFantasyWithTeam"
+               Height="400">
+        <ApexPointSeries TItem="WeeklyFantasyWithTeam"
+                         Items="opponents"
+                         Name="Fantasy Pts"
+                         SeriesType="SeriesType.Line"
+                         XValue="e => e.Week"
+                         YValue="e=> (decimal)e.FantasyPoints" />
+    </ApexChart>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <hr style="width:100%;text-align:left;margin-left:0">
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Week</th>
+                    <th>Name</th>
+                    <th>Team</th>
+                    <th>FantasyPts</th>
+                    <th>AvgFantasyPts</th>
+                    <th>Diff</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var op in opponents)
+                {
+                    var logoPhotoPath = op.Team != null ?
+                    "https://localhost:7176/Logos/" + op.Team!.Team + ".png"
+                    : "https://localhost:7176/Logos/nfl.png";
+
+                    var diff = @Math.Round(op.FantasyPoints - op.AverageFantasy, 2);
+
+                    <tr>
+                        <td>@op.Week</td>
+                        <td><a class="page-links" href="Players/@op.PlayerId"> @op.Name</a></td>
+                        <td><img src="@logoPhotoPath" width="30" height="30"></td>
+                        <td>@Math.Round(op.FantasyPoints, 2)</td>
+                        <td>@Math.Round(op.AverageFantasy, 2)</td>
+                        <td><b><text style="@DiffColor(diff)">@diff</text></b></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if (youTried && badRequestError)
+{
+    <text>Something Went Wrong.</text>
+}
+
+@code {
+    [Parameter]
+    public string teamId { get; set; } = "";
+    [Parameter]
+    public string position { get; set; } = "";
+
+    public List<WeeklyFantasyWithTeam>? opponents = new();
+    public TeamMap team = new();
+
+    public bool badRequestError = false;
+    public bool youTried = false;
+    private bool shouldRender;
+    private bool loading = false;
+
+    public Formatter form = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    public string GetHeader() => string.Format("{0} - Top {1} Opponents", team.TeamDescription, position);
+    private string DiffColor(double diff) => diff >= 0 ? "color:green" : "color:red";
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        await GetTeamMap();
+        await GetTopOpponents();
+        loading = false;
+        shouldRender = true;
+    }
+
+    public async Task GetTopOpponents()
+    {
+        var url = string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Fantasy/top-opponents", teamId, position);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            opponents = await JsonSerializer.DeserializeAsync<List<WeeklyFantasyWithTeam>>(responseStream, options);
+            if (opponents.Any())
+            {
+                foreach (var o in opponents)
+                {
+                    o.Team = await GetPlayerTeam(o.PlayerId);
+                    o.AverageFantasy = await GetAverageFantasy(o.PlayerId);
+                }
+            }
+        }
+    }
+
+    public async Task GetTeamMap()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/all");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            var allTeams = await JsonSerializer.DeserializeAsync<List<TeamMap>>(responseStream, options);
+            team = allTeams.First(a => a.TeamId.ToString() == teamId);
+        }
+    }
+
+    public async Task<PlayerTeam?> GetPlayerTeam(int playerId)
+    {
+        var url = string.Format("{0}/{1}", "https://localhost:7028/api/Player/team", playerId);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            return await JsonSerializer.DeserializeAsync<PlayerTeam>(responseStream, options);
+        }
+        return null;
+    }
+
+    public async Task<double> GetAverageFantasy(int playerId)
+    {
+        var url = string.Format("{0}/{1}", "https://localhost:7028/api/Fantasy/data/weekly", playerId);
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            var allFantasy = await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options);
+            return allFantasy != null && allFantasy.Count > 0 ? allFantasy.Average(a => a.FantasyPoints) : 0;
+        }
+        return 0;
+    }
+
+    public class WeeklyFantasyWithTeam : WeeklyFantasy
+    {
+        public PlayerTeam? Team { get; set; }
+        public double AverageFantasy { get; set; }
+    }
+}
+

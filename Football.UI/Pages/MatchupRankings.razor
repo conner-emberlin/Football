@@ -55,6 +55,7 @@
                         <span class="sort-link" onclick="@(() => SetTable("AvgPointsAllowed"))">Avg Pts</span>
                         <span class="oi @(tableSort.GetSortStyle("AvgPointsAllowed"))"></span>
                     </th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -65,6 +66,9 @@
                         <td>@Rankings.ElementAt(i-1).GamesPlayed</td>
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).PointsAllowed,2)</td>
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).AvgPointsAllowed,2)</td>
+                        <td>
+                            <a href="top-opponents/@Rankings.ElementAt(i-1).Team.TeamId/@Rankings.ElementAt(i-1).Position"> <i class="oi oi-magnifying-glass" /></a>
+                        </td>
                     </tr>
                 }
             </tbody>

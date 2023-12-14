@@ -22,7 +22,7 @@ namespace Football.Api.Controllers
 
         [HttpGet("all")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<Player>>> GetAllTeams() => Ok(await playersService.GetAllTeams());
+        public async Task<ActionResult<List<TeamMap>>> GetAllTeams() => Ok(await playersService.GetAllTeams());
 
         [HttpGet("players/{team}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
