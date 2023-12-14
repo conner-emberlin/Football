@@ -127,7 +127,7 @@ namespace Football.Fantasy.Analysis.Services
                 if (schedule != null && playerProjection > 0)
                 {       
                     var opponentId = schedule.HomeTeamId == teamId ? schedule.AwayTeamId : schedule.HomeTeamId;
-                    var opponentSchedule = (await playersService.GetTeamGames(opponentId)).Where(s => s.Week < currentWeek);
+                    var opponentSchedule = (await playersService.GetTeamGames(opponentId)).Where(s => s.Week < currentWeek && s.OpposingTeam != "BYE");
                     foreach (var match in opponentSchedule)
                     {
                         var otherPlayers = await playersService.GetPlayersByTeam(match.OpposingTeam);
