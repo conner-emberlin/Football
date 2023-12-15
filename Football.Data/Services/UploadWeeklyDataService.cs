@@ -15,64 +15,91 @@ namespace Football.Data.Services
 
         public async Task<int> UploadWeeklyQBData(int season, int week)
         {
+            logger.Information("Uploading QB Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.QB.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataQB(scraperService.ParseFantasyProsQBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await uploadWeeklyDataRepository.UploadWeeklyQBData(players, await playerService.GetIgnoreList());
+            var added = await uploadWeeklyDataRepository.UploadWeeklyQBData(players, await playerService.GetIgnoreList());
+            logger.Information("QB upload complete. {0} records added", added);
+            return added;
         }
         public async Task<int> UploadWeeklyRBData(int season, int week)
         {
+            logger.Information("Uploadeding RB Data for week {0", week);
             var url = FantasyProsURLFormatter(Position.RB.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataRB(scraperService.ParseFantasyProsRBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await uploadWeeklyDataRepository.UploadWeeklyRBData(players, await playerService.GetIgnoreList());
+            var added = await uploadWeeklyDataRepository.UploadWeeklyRBData(players, await playerService.GetIgnoreList());
+            logger.Information("RB upload complete. {0} records added", added);
+            return added;
         }
         public async Task<int> UploadWeeklyWRData(int season, int week)
         {
+            logger.Information("Uploading WR Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.WR.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataWR(scraperService.ParseFantasyProsWRData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await uploadWeeklyDataRepository.UploadWeeklyWRData(players, await playerService.GetIgnoreList());
+            var added = await uploadWeeklyDataRepository.UploadWeeklyWRData(players, await playerService.GetIgnoreList());
+            logger.Information("WR upload complete. {0} records added", added);
+            return added;
         }
         public async Task<int> UploadWeeklyTEData(int season, int week)
         {
+            logger.Information("Uploading TE Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.TE.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataTE(scraperService.ParseFantasyProsTEData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await uploadWeeklyDataRepository.UploadWeeklyTEData(players, await playerService.GetIgnoreList());
+            var added = await uploadWeeklyDataRepository.UploadWeeklyTEData(players, await playerService.GetIgnoreList());
+            logger.Information("TE upload complete. {0} records added");
+            return added;
         }
         public async Task<int> UploadWeeklyDSTData(int season, int week)
         {
+            logger.Information("Uploading DST Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.DST.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataDST(scraperService.ParseFantasyProsDSTData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await uploadWeeklyDataRepository.UploadWeeklyDSTData(players);
+            var added = await uploadWeeklyDataRepository.UploadWeeklyDSTData(players);
+            logger.Information("DST upload complete. {0} records added");
+            return added;
         }
 
         public async Task<int> UploadWeeklyKData(int season, int week)
         {
+            logger.Information("Upliading K Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.K.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataK(scraperService.ParseFantasyProsKData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            return await uploadWeeklyDataRepository.UploadWeeklyKData(players);
+            var added = await uploadWeeklyDataRepository.UploadWeeklyKData(players);
+            logger.Information("K upload complete. {0} records added", added);
+            return added;
         }
         public async Task<int> UploadWeeklyGameResults(int season, int week)
         {
+            logger.Information("Uploading Game Results for week {0}", week);
             var results = await GameResult(await scraperService.ScrapeGameScores(week), season);
-            return await uploadWeeklyDataRepository.UploadWeeklyGameResults(results);
+            var added = await uploadWeeklyDataRepository.UploadWeeklyGameResults(results);
+            logger.Information("Game Result upload complete. {0} records added", added);
+            return added;
         }
         public async Task<int> UploadWeeklyRosterPercentages(int season, int week, string position)
         {
+            logger.Information("Uploading week {0} Roster Percentages for position {1}", week, position);
             var url = FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
             var data = scraperService.ParseFantasyProsRosterPercent(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position);
             var rosterPercentages = await WeeklyRosterPercent(data, season, week);
-            return await uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages, await playerService.GetIgnoreList());
+            var added = await uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages, await playerService.GetIgnoreList());
+            logger.Information("Roster Percentage upload complete. {0} records added", added);
+            return added;
         }
 
         public async Task<int> UploadWeeklySnapCounts(int season, int week, string position)
         {
+            logger.Information("Uploading week {0} Snap Counts for position {1}", week, position);
             var data = await scraperService.ScrapeSnapCounts(position, week);
             var snapCounts = await SnapCount(data, season, week);
-            return await uploadWeeklyDataRepository.UploadWeeklySnapCounts(snapCounts);
+            var added = await uploadWeeklyDataRepository.UploadWeeklySnapCounts(snapCounts);
+            logger.Information("Snap Count upload complete. {0} records added");
+            return added;
         }
 
         private async Task<List<WeeklyRosterPercent>> WeeklyRosterPercent(List<FantasyProsRosterPercent> rosterPercents, int season, int week)
         {
-            List<WeeklyRosterPercent> rosterPercentages = new();
+            List<WeeklyRosterPercent> rosterPercentages = [];
             foreach (var rp in rosterPercents.Where(rp => rp.RosterPercent > 0.0))
             {
                 var playerId = await playerService.GetPlayerId(rp.Name);
@@ -93,7 +120,7 @@ namespace Football.Data.Services
         }
         private async Task<List<WeeklyDataQB>> WeeklyDataQB(List<FantasyProsStringParseQB> players, int season, int week)
         {
-            List<WeeklyDataQB> weeklyData = new();
+            List<WeeklyDataQB> weeklyData = [];
             foreach(var p in players)
             {
                 var playerId = await playerService.GetPlayerId(p.Name);
@@ -135,7 +162,7 @@ namespace Football.Data.Services
 
         private async Task<List<WeeklyDataRB>> WeeklyDataRB(List<FantasyProsStringParseRB> players, int season, int week)
         {
-            List<WeeklyDataRB> weeklyData = new();
+            List<WeeklyDataRB> weeklyData = [];
             foreach (var p in players)
             {
                 var playerId = await playerService.GetPlayerId(p.Name);
@@ -174,7 +201,7 @@ namespace Football.Data.Services
         }
         private async Task<List<WeeklyDataWR>> WeeklyDataWR(List<FantasyProsStringParseWR> players, int season, int week)
         {
-            List<WeeklyDataWR> weeklyData = new();
+            List<WeeklyDataWR> weeklyData = [];
             foreach (var p in players)
             {
                 var playerId = await playerService.GetPlayerId(p.Name);
@@ -215,7 +242,7 @@ namespace Football.Data.Services
 
         private async Task<List<WeeklyDataTE>> WeeklyDataTE(List<FantasyProsStringParseTE> players, int season, int week)
         {
-            List<WeeklyDataTE> weeklyData = new();
+            List<WeeklyDataTE> weeklyData = [];
             foreach (var p in players)
             {
                 var playerId = await playerService.GetPlayerId(p.Name);
@@ -256,7 +283,7 @@ namespace Football.Data.Services
 
         private async Task<List<WeeklyDataDST>> WeeklyDataDST(List<FantasyProsStringParseDST> players, int season, int week)
         {
-            List<WeeklyDataDST> weeklyData = new();
+            List<WeeklyDataDST> weeklyData = [];
             foreach (var p in players)
             {
                 var playerId = await playerService.GetPlayerId(p.Name);
@@ -334,7 +361,7 @@ namespace Football.Data.Services
 
         private async Task<List<GameResult>> GameResult(List<ProFootballReferenceGameScores> games, int season)
         {
-            List<GameResult> results = new();
+            List<GameResult> results = [];
             foreach (var g in games)
             {
                 var winnerId = await playerService.GetTeamIdFromDescription(g.Winner);
