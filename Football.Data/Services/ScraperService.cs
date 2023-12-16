@@ -86,6 +86,28 @@ namespace Football.Data.Services
             return players;
         }
 
+        public List<FantasyProsStringParseRB> ParseFantasyProsRedZoneRB(string[] strings)
+        {
+            List<FantasyProsStringParseRB> players = [];
+            for (int i = 0; i < strings.Length - 17; i += 17)
+            {
+                FantasyProsStringParseRB parse = new()
+                {
+                    Name = FormatName(strings[i]),
+                    RushingAtt = double.Parse(Regex.Match(strings[i].Trim(), @"\d+$", RegexOptions.RightToLeft).Value),
+                    RushingYds = double.Parse(strings[i + 1].Trim()),
+                    RushingTD = double.Parse(strings[i + 3].Trim()),
+                    Receptions = double.Parse(strings[i + 5].Trim()),
+                    Targets = double.Parse(strings[i + 6].Trim()),
+                    Yards = double.Parse(strings[i + 8].Trim()),
+                    ReceivingTD = double.Parse(strings[i + 10].Trim()),
+                    Fumbles = double.Parse(strings[i + 12].Trim()),
+                    Games = double.Parse(strings[i + 13].Trim()),
+                };
+                players.Add(parse);
+            }
+            return players;
+        }
         public List<FantasyProsStringParseQB> ParseFantasyProsQBData(string[] strings)
         {
             List<FantasyProsStringParseQB> players = [];

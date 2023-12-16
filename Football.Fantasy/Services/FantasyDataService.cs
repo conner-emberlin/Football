@@ -13,7 +13,7 @@ namespace Football.Fantasy.Services
 {
     public class FantasyDataService(IFantasyDataRepository fantasyData, IFantasyCalculator calculator,
         IStatisticsService statistics, IPlayersService playersService,
-        IMemoryCache cache, IOptionsMonitor<Season> season, ISettingsService settingsService) : IFantasyDataService
+        IMemoryCache cache, IOptionsMonitor<Season> season, ISettingsService settingsService, ILogger logger) : IFantasyDataService
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -49,6 +49,7 @@ namespace Football.Fantasy.Services
         public async Task<int> PostWeeklyFantasy(int season, int week, Position position)
         {
             List<WeeklyFantasy> weeklyFantasy = [];
+            logger.Information("Upoading week {0} fantasy for position {1}", week, position.ToString());
             switch (position)
             {
                 case Position.QB: 
@@ -88,7 +89,9 @@ namespace Football.Fantasy.Services
                     break;
                 default: throw new NotImplementedException();
             }
-            return await fantasyData.PostWeeklyFantasy(weeklyFantasy);
+            var added = await fantasyData.PostWeeklyFantasy(weeklyFantasy);
+            logger.Information("{0} fantasy upload complete. {1} records added", position.ToString(), added);
+            return added;
         }
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId, string team)
         {

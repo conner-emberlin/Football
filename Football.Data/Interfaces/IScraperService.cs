@@ -20,5 +20,6 @@ namespace Football.Data.Interfaces
         public Task<List<ProFootballReferenceGameScores>> ScrapeGameScores(int week);
         public Task<List<FantasyProsADP>> ScrapeADP(string position);
         public Task<List<FantasyProsSnapCount>> ScrapeSnapCounts(string position, int week);
+        public List<FantasyProsStringParseRB> ParseFantasyProsRedZoneRB(string[] strings);
     }
 }

@@ -61,13 +61,24 @@ namespace Football.Data.Services
 
         public async Task<int> UploadWeeklyKData(int season, int week)
         {
-            logger.Information("Upliading K Data for week {0}", week);
+            logger.Information("Uploading K Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.K.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataK(scraperService.ParseFantasyProsKData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             var added = await uploadWeeklyDataRepository.UploadWeeklyKData(players);
             logger.Information("K upload complete. {0} records added", added);
             return added;
         }
+
+        public async Task<int> UploadWeeklyRedZoneRB(int season, int week, int yardline)
+        {
+            logger.Information("Uploading RB Redzone data for week {0}", week);
+            var url = RedZoneURL(Position.RB.ToString(), season, week, yardline);
+            var players = await WeeklyRedZoneRB(scraperService.ParseFantasyProsRedZoneRB(scraperService.ScrapeData(url, _scraping.RedZoneXPath)), season, week, yardline);
+            var added = await uploadWeeklyDataRepository.UploadWeeklyRedZoneRB(players, await playerService.GetIgnoreList());
+            logger.Information("RB Redzone upload complete. {0} records added", added);
+            return added;
+        }
+
         public async Task<int> UploadWeeklyGameResults(int season, int week)
         {
             logger.Information("Uploading Game Results for week {0}", week);
@@ -181,6 +192,47 @@ namespace Football.Data.Services
                         Week = week,
                         PlayerId = playerId,
                         Name = p.Name,
+                        RushingAtt = p.RushingAtt,
+                        RushingYds = p.RushingYds,
+                        RushingTD = p.RushingTD,
+                        Receptions = p.Receptions,
+                        Targets = p.Targets,
+                        Yards = p.Yards,
+                        ReceivingTD = p.ReceivingTD,
+                        Fumbles = p.Fumbles,
+                        Games = p.Games
+                    });
+                }
+                else
+                {
+                    logger.Information("{name} did not play in week {week}", p.Name, week);
+                }
+            }
+            return weeklyData;
+        }
+
+        private async Task<List<WeeklyRedZoneRB>> WeeklyRedZoneRB(List<FantasyProsStringParseRB> players, int season, int week, int yardline)
+        {
+            List<WeeklyRedZoneRB> weeklyData = [];
+            foreach (var p in players)
+            {
+                var playerId = await playerService.GetPlayerId(p.Name);
+                if (playerId == 0)
+                {
+                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.RB.ToString(), Active = 1 });
+                    logger.Information("New player created: {p}", p.Name);
+                    playerId = await playerService.GetPlayerId(p.Name);
+                }
+                var player = await playerService.GetPlayer(playerId);
+                if (p.Games > 0 && player.Position == Position.RB.ToString())
+                {
+                    weeklyData.Add(new WeeklyRedZoneRB
+                    {
+                        Season = season,
+                        Week = week,
+                        PlayerId = playerId,
+                        Name = p.Name,
+                        Yardline = yardline,
                         RushingAtt = p.RushingAtt,
                         RushingYds = p.RushingYds,
                         RushingTD = p.RushingTD,
@@ -411,5 +463,6 @@ namespace Football.Data.Services
             return snapCounts;
         }
         private string FantasyProsURLFormatter(string position, string year, string week) => string.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
+        private string RedZoneURL(string position, int season, int week, int yardline) => string.Format("{0}{1}.php?year={2}&week={3}&yardline={4}&range=week", _scraping.RedZoneURL, position.ToLower(), season, week, yardline);
     }
 }

@@ -154,5 +154,6 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<SnapCountAnalysis>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> GetSnapCountAnalysis([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await snapCountService.GetSnapCountAnalysis(posEnum, _season.CurrentSeason)) : BadRequest();
+
     }
 }

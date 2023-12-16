@@ -62,4 +62,9 @@
         public string Position { get; set; } = "";
     }
 
+    public class WeeklyRedZoneRB : WeeklyDataRB
+    {
+        public int Yardline { get; set; }
+    }
+
 }

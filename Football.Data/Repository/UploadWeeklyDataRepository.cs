@@ -2,6 +2,7 @@
 using Football.Data.Models;
 using Dapper;
 using System.Data;
+using Football.Players.Models;
 
 namespace Football.Data.Repository
 {
@@ -104,6 +105,18 @@ namespace Football.Data.Repository
             var query = $@"INSERT INTO [dbo].SnapCount (Season, Week, PlayerId, Name, Position, Snaps)
                             VALUES (@Season, @Week, @PlayerId, @Name, @Position, @Snaps)";
             return await dbConnection.ExecuteAsync(query, snapCounts);
+        }
+
+        public async Task<int> UploadWeeklyRedZoneRB(List<WeeklyRedZoneRB> players, List<int> ignoreList)
+        {
+            var query = $@"INSERT INTO [dbo].WeeklyRedZoneRB (Season, Week, PlayerId, Name, Yardline, RushingAtt, RushingYds, RushingTD, Receptions, Targets, Yards, ReceivingTD, Fumbles)
+                            VALUES(@Season, @Week, @PlayerId, @Name, @Yardline, @RushingAtt, @RushingYds, @RushingTD, @Receptions, @Targets, @Yards, @ReceivingTD, @Fumbles)";
+            var count = 0;
+            foreach (var player in players)
+            {
+                count += !ignoreList.Contains(player.PlayerId) ? await dbConnection.ExecuteAsync(query, player) : 0;
+            }
+            return count;
         }
     }
 }

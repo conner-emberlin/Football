@@ -1,0 +1,77 @@
+﻿@page "/snaps-graph/{id}"
+<PageTitle>Snap Trends</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Data.Models;
+@using ApexCharts;
+@inject IHttpClientFactory ClientFactory
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+else
+{
+    <h4>@Title()</h4>
+}
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (snaps.Any())
+{
+    <ApexChart TItem="SnapCount"
+               Height="400">
+        <ApexPointSeries TItem="SnapCount"
+                         Items="snaps"
+                         Name="Snaps"
+                         SeriesType="SeriesType.Line"
+                         XValue="e => e.Week"
+                         YValue="e=> (decimal)e.Snaps" />
+    </ApexChart>
+}
+
+@code {
+    [Parameter]
+    public string id { get; set; } = "";
+
+    private bool loading { get; set; } = false;
+    public bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+    public bool youTried = false;
+    protected override bool ShouldRender() => shouldRender;
+
+    public List<SnapCount>? snaps = [];
+    public string name { get; set; } = "";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        shouldRender = true;
+        youTried = true;
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/player/snap-counts/" + id);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            snaps = await JsonSerializer.DeserializeAsync<List<SnapCount>>(responseStream, options);
+            if (snaps.Any())
+            {
+                snaps = snaps.OrderBy(f => f.Week).ToList();
+                name = snaps.Select(f => f.Name).First();
+            }
+        }
+        else badRequestError = true;
+
+        loading = false;
+        shouldRender = true;
+    }
+
+    public string Title() => "Snap Trends for " + name;
+}

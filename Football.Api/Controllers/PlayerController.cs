@@ -126,5 +126,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<AdvancedQBStatistics>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<List<AdvancedQBStatistics>>> GetAdvancedQBStatistics() => Ok(await advancedStatisticsService.GetAdvancedQBStatistics());
+
+        [HttpGet("snap-counts/{playerId}")]
+        [ProducesResponseType(typeof(List<SnapCount>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> GetSnapCounts([FromRoute] int playerId) => Ok(await statisticsService.GetSnapCounts(playerId));
     }
 }
