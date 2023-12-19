@@ -46,7 +46,7 @@ namespace Football.Data.Services
             var url = FantasyProsURLFormatter(Position.TE.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataTE(scraperService.ParseFantasyProsTEData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             var added = await uploadWeeklyDataRepository.UploadWeeklyTEData(players, await playerService.GetIgnoreList());
-            logger.Information("TE upload complete. {0} records added");
+            logger.Information("TE upload complete. {0} records added", added);
             return added;
         }
         public async Task<int> UploadWeeklyDSTData(int season, int week)
@@ -55,7 +55,7 @@ namespace Football.Data.Services
             var url = FantasyProsURLFormatter(Position.DST.ToString(), season.ToString(), week.ToString());
             var players = await WeeklyDataDST(scraperService.ParseFantasyProsDSTData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
             var added = await uploadWeeklyDataRepository.UploadWeeklyDSTData(players);
-            logger.Information("DST upload complete. {0} records added");
+            logger.Information("DST upload complete. {0} records added", added);
             return added;
         }
 
@@ -104,7 +104,7 @@ namespace Football.Data.Services
             var data = await scraperService.ScrapeSnapCounts(position, week);
             var snapCounts = await SnapCount(data, season, week);
             var added = await uploadWeeklyDataRepository.UploadWeeklySnapCounts(snapCounts);
-            logger.Information("Snap Count upload complete. {0} records added");
+            logger.Information("Snap Count upload complete. {0} records added", added);
             return added;
         }
 
@@ -163,10 +163,6 @@ namespace Football.Data.Services
                         Games = p.Games
                     });
                 }
-                else
-                {
-                    logger.Information("{name} did not play in week {week}", p.Name, week);
-                }
             }
             return weeklyData;
         }
@@ -202,10 +198,6 @@ namespace Football.Data.Services
                         Fumbles = p.Fumbles,
                         Games = p.Games
                     });
-                }
-                else
-                {
-                    logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -244,10 +236,6 @@ namespace Football.Data.Services
                         Games = p.Games
                     });
                 }
-                else
-                {
-                    logger.Information("{name} did not play in week {week}", p.Name, week);
-                }
             }
             return weeklyData;
         }
@@ -283,10 +271,6 @@ namespace Football.Data.Services
                         Fumbles = p.Fumbles,
                         Games = p.Games,
                     });
-                }
-                else
-                {
-                    logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -325,10 +309,6 @@ namespace Football.Data.Services
                         Games = p.Games
                     });
                 }
-                else
-                {
-                    logger.Information("{name} did not play in week {week}", p.Name, week);
-                }
             }
             return weeklyData;
         }
@@ -362,10 +342,6 @@ namespace Football.Data.Services
                         SpecialTD = p.SpecialTD,
                         Games = p.Games
                     });
-                }
-                else
-                {
-                    logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
@@ -402,10 +378,6 @@ namespace Football.Data.Services
                         ExtraPointAttempts = p.ExtraPointAttempts,
                         Games = p.Games
                     });
-                }
-                else
-                {
-                    logger.Information("{name} did not play in week {week}", p.Name, week);
                 }
             }
             return weeklyData;
