@@ -79,6 +79,14 @@ namespace Football.Data.Services
             return added;
         }
 
+        public async Task<int> UploadWeeklyRedZoneQB(int season, int week, int yardline)
+        {
+            logger.Information("Uploading QB Redzone data for week {0}", week);
+            var url = RedZoneURL(Position.QB.ToString(), season, week, yardline);
+            var players = scraperService.ParseFantasyProsRedZoneQB(scraperService.ScrapeData(url, _scraping.RedZoneXPath));
+            return 0;
+        }
+
         public async Task<int> UploadWeeklyGameResults(int season, int week)
         {
             logger.Information("Uploading Game Results for week {0}", week);

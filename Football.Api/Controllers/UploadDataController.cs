@@ -125,7 +125,7 @@ namespace Football.Api.Controllers
         [HttpPost("red-zone/{season}/{week}/{yardline}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadRedZone(int season, int week, int yardline) => Ok(await weeklyDataService.UploadWeeklyRedZoneRB(season,week,yardline));
+        public async Task<ActionResult<int>> UploadRedZone(int season, int week, int yardline) => Ok(await weeklyDataService.UploadWeeklyRedZoneQB(season,week,yardline));
 
     }
 }

@@ -132,6 +132,31 @@ namespace Football.Data.Services
             }
             return players;
         }
+
+        public List<FantasyProsStringParseQB> ParseFantasyProsRedZoneQB(string[] strings)
+        {
+            List<FantasyProsStringParseQB> players = [];
+            for (int i = 0; i < strings.Length - 16; i += 16)
+            {
+                FantasyProsStringParseQB parse = new()
+                {
+                    Name = FormatName(strings[i]),
+                    Completions = double.Parse(Regex.Match(strings[i].Trim(), @"\d+$", RegexOptions.RightToLeft).Value),
+                    Attempts = double.Parse(strings[i + 1].Trim()),
+                    Yards = double.Parse(strings[i + 3].Trim()),
+                    TD = double.Parse(strings[i + 5].Trim()),
+                    Int = double.Parse(strings[i + 6].Trim()),
+                    Sacks = double.Parse(strings[i + 7].Trim()),
+                    RushingAttempts = double.Parse(strings[i + 8].Trim()),
+                    RushingYards = double.Parse(strings[i + 9].Trim()),
+                    RushingTD = double.Parse(strings[i + 10].Trim()),
+                    Fumbles = double.Parse(strings[i + 12].Trim()),
+                    Games = double.Parse(strings[i + 13].Trim()),
+                };
+                players.Add(parse);
+            }
+            return players;
+        }
         public List<FantasyProsStringParseTE> ParseFantasyProsTEData(string[] strings)
         {
             List<FantasyProsStringParseTE> players = [];
@@ -451,7 +476,7 @@ namespace Football.Data.Services
                     {
                         snaps.Add(new FantasyProsSnapCount
                         {
-                            Name = temp[0],
+                            Name = FormatName(temp[0]),
                             Snaps = double.TryParse(temp[2], out var snapCount) ? snapCount : 0
                         });
                     }
