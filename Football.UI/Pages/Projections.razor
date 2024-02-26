@@ -3,6 +3,7 @@
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @using Football.Projections.Models;
+@using Football.Fantasy.Analysis.Models;
 @inject IHttpClientFactory ClientFactory
 
 <h4>Season Projections</h4>
@@ -54,7 +55,12 @@ else if(players.Count > 0)
                 <th>Position</th>
                 <th>Total Points</th>
                 <th>PPG</th>
-            </tr>
+                    @if (seasonOver)
+                    {
+                        <th>ActualTotal</th>
+                        <th>ActualPPG</th>
+                    }
+                </tr>
         </thead>
         <tbody>
         @for (int i = 1; i <= players.Count; i ++)
@@ -65,7 +71,21 @@ else if(players.Count > 0)
             <td>@players.ElementAt(i-1).Position</td>
             <td>@Math.Round((double)players.ElementAt(i-1).ProjectedPoints,2)</td>
             <td>@Math.Round((double)players.ElementAt(i-1).ProjectedPoints/17,2)</td>
-            </tr>
+                        @if (seasonOver)
+                        {
+                            var sa = GetSeasonProjectionAnalysis(players.ElementAt(i - 1).PlayerId);
+                            if (sa != null && sa.WeeksPlayed > 0)
+                            {
+                                <td>@Math.Round(sa.TotalFantasy,2)</td>
+                                <td>@Math.Round(sa.TotalFantasy/sa.WeeksPlayed, 2)</td>
+                            }
+                            else
+                            {
+                                <td>--</td>
+                                <td>--</td>
+                            }
+                        }
+                    </tr>
         }
         </tbody>
     </table>
@@ -81,7 +101,22 @@ else if(players.Count > 0)
     public string PositionEnum { get; set; } = "1";
     private bool loading { get; set; }
     int count = 0;
+    public bool seasonOver { get; set; } = false;
+    public List<SeasonProjectionAnalysis>? analysis;
 
+    protected override async Task OnInitializedAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/current-week");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            seasonOver = await JsonSerializer.DeserializeAsync<int>(responseStream, options) == 18;
+        }
+    }
     public async Task UploadProjections()
     {
         var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Projection/season/" + @PositionEnum);
@@ -125,7 +160,7 @@ else if(players.Count > 0)
                 break;
             default: PositionEnum = "QB"; break;
         }
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/season/" + @PositionEnum);          
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/season/" + PositionEnum);          
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -134,6 +169,7 @@ else if(players.Count > 0)
             var options = new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
             using var responseStream = await response.Content.ReadAsStreamAsync();
             players = await JsonSerializer.DeserializeAsync<List<SeasonProjection>>(responseStream, options);
+            analysis = await GetSeasonProjectionAnalyses(PositionEnum);
             badRequestError = false;
         }
         else
@@ -142,6 +178,25 @@ else if(players.Count > 0)
         }
         loading = false;
         shouldRender = true;
+    }
+
+    public async Task<List<SeasonProjectionAnalysis>?> GetSeasonProjectionAnalyses(string position)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/season-projection-analysis/" + @PositionEnum);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            return await JsonSerializer.DeserializeAsync<List<SeasonProjectionAnalysis>>(responseStream, options);
+        }
+        else return null;
+    }
+    private SeasonProjectionAnalysis? GetSeasonProjectionAnalysis(int playerId)
+    {
+        return analysis.FirstOrDefault(a => a.Player.PlayerId == playerId);
     }
 }
 

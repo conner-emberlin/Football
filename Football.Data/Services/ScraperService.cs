@@ -387,7 +387,7 @@ namespace Football.Data.Services
                             split[index] = Regex.Replace(split[index], ">", string.Empty);
                         }
                     }
-                    if (int.Parse(split[0]) == week)
+                    if (int.TryParse(split[0], out var w) && w == week)
                     {
                         scores.Add(new ProFootballReferenceGameScores
                         {
