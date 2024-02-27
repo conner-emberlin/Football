@@ -167,8 +167,6 @@ namespace Football.Players.Repository
             var query = $@"SELECT COALESCE(Max(Week), 0) + 1 
                         FROM [dbo].WeeklyQBData
                         WHERE [Season] = @season";
-
-            var t = await _dbConnection.QueryAsync<int>(query, new { season });
             return (await _dbConnection.QueryAsync<int>(query, new { season })).FirstOrDefault();
         }
         public async Task<List<Schedule>> GetUpcomingGames(int teamId, int season, int currentWeek)
