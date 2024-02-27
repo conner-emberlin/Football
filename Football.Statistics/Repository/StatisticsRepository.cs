@@ -11,7 +11,7 @@ namespace Football.Statistics.Repository
         public async Task<List<T>> GetWeeklyData<T>(Position position, int season, int week)
         {
             var query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}] WHERE [Season] = @season";
-            if (week > 0) query += "AND [Week] = @week";
+            if (week > 0) query += " AND [Week] = @week";
             return (await dbConnection.QueryAsync<T>(query, new { season, week })).ToList();
         }
         public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId)
