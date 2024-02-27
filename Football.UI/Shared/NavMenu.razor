@@ -1,4 +1,9 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@inject IHttpClientFactory ClientFactory
+
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">Football.ui</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -20,52 +25,55 @@
             </NavLink>
         </div>
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="teams">
-                <span class="oi oi-people" aria-hidden="true"></span> Teams
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weeklyprojections">
-                <span class="oi oi-calendar" aria-hidden="true"></span> Weekly Projections
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
             <NavLink class="nav-link" href="projections">
                 <span class="oi oi-eye" aria-hidden="true"></span> Season Projections
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="leagueprojections">
-                <span class="oi oi-clipboard" aria-hidden="true"></span> League Projections
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="modelanalysis">
-                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Model Analysis
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="leaders">
-                <span class="oi oi-badge" aria-hidden="true"></span> Fantasy Leaders
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fantasyanalysis">
-                <span class="oi oi-pulse" aria-hidden="true"></span> Fantasy Analysis
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fantasydistribution">
-                <span class="oi oi-beaker" aria-hidden="true"></span> Fantasy Distribution
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="startorsit">
-                <span class="oi oi-check" aria-hidden="true"></span> Start or Sit
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="matchuprankings">
+        @if (seasonActive)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="teams">
+                    <span class="oi oi-people" aria-hidden="true"></span> Teams
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="weeklyprojections">
+                    <span class="oi oi-calendar" aria-hidden="true"></span> Weekly Projections
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="leagueprojections">
+                    <span class="oi oi-clipboard" aria-hidden="true"></span> League Projections
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="modelanalysis">
+                    <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Model Analysis
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="leaders">
+                    <span class="oi oi-badge" aria-hidden="true"></span> Fantasy Leaders
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="fantasyanalysis">
+                    <span class="oi oi-pulse" aria-hidden="true"></span> Fantasy Analysis
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="fantasydistribution">
+                    <span class="oi oi-beaker" aria-hidden="true"></span> Fantasy Distribution
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="startorsit">
+                    <span class="oi oi-check" aria-hidden="true"></span> Start or Sit
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="matchuprankings">
                 <span class="oi oi-project" aria-hidden="true"></span> Matchup Rankings
             </NavLink>
         </div>
@@ -94,19 +102,31 @@
                 <span class="oi oi-heart" aria-hidden="true"></span> Manange Injuries
             </NavLink>
         </div>
-
-
-
+        }
     </nav>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
-
+    private bool seasonActive = false;
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/current-week");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            seasonActive = await JsonSerializer.DeserializeAsync<int>(responseStream, options) > 1;
+        }
     }
 }

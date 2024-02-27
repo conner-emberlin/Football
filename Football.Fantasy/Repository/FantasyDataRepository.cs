@@ -37,8 +37,8 @@ namespace Football.Fantasy.Repository
         {
             var query = $@"SELECT [PlayerId], [Name], [Position], [Season], [Week], [Games], [FantasyPoints]
                         FROM [dbo].WeeklyFantasyData
-                        WHERE [Season] = @season
-                                AND [Week] = @week";
+                        WHERE [Season] = @season";
+            if (week > 0) query += "AND [Week] = @week";
             return (await dbConnection.QueryAsync<WeeklyFantasy>(query, new { season, week })).ToList();
         }
     }

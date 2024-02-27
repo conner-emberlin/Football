@@ -920,7 +920,7 @@ else if (youTried && badRequestError)
         if (response.IsSuccessStatusCode)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            seasonQBData = await JsonSerializer.DeserializeAsync<List<SeasonDataQB>>(responseStream, options);
+            seasonQBData = (await JsonSerializer.DeserializeAsync<List<SeasonDataQB>>(responseStream, options)).OrderByDescending(s => s.Season).ToList();
         }
         else
         {
@@ -953,7 +953,7 @@ else if (youTried && badRequestError)
         if (response.IsSuccessStatusCode)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            seasonRBData = await JsonSerializer.DeserializeAsync<List<SeasonDataRB>>(responseStream, options);
+            seasonRBData = (await JsonSerializer.DeserializeAsync<List<SeasonDataRB>>(responseStream, options)).OrderByDescending(s => s.Season).ToList();
         }
         else
         {
@@ -985,7 +985,7 @@ else if (youTried && badRequestError)
         if (response.IsSuccessStatusCode)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            seasonWRData = await JsonSerializer.DeserializeAsync<List<SeasonDataWR>>(responseStream, options);
+            seasonWRData = (await JsonSerializer.DeserializeAsync<List<SeasonDataWR>>(responseStream, options)).OrderByDescending(s => s.Season).ToList();
         }
         else
         {
@@ -1017,7 +1017,7 @@ else if (youTried && badRequestError)
         if (response.IsSuccessStatusCode)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            seasonTEData = await JsonSerializer.DeserializeAsync<List<SeasonDataTE>>(responseStream, options);
+            seasonTEData = (await JsonSerializer.DeserializeAsync<List<SeasonDataTE>>(responseStream, options)).OrderByDescending(s => s.Season).ToList();
         }
         else
         {
@@ -1090,7 +1090,7 @@ else if (youTried && badRequestError)
         if (response.IsSuccessStatusCode)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            seasonDSTData = await JsonSerializer.DeserializeAsync<List<SeasonDataDST>>(responseStream, options);
+            seasonDSTData = (await JsonSerializer.DeserializeAsync<List<SeasonDataDST>>(responseStream, options)).OrderByDescending(s => s.Season).ToList();
         }
         else
         {
@@ -1196,6 +1196,7 @@ else if (youTried && badRequestError)
             trendingPlayers = await JsonSerializer.DeserializeAsync<List<TrendingPlayer>>(responseStream, options);
         }
     }
+
 
     #endregion
 

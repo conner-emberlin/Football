@@ -50,32 +50,32 @@ namespace Football.Api.Controllers
         [HttpGet("data/weekly/qb/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataQB>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataQB>>> GetWeeklyDataQB(int playerId) => playerId > 0 ? Ok(await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, playerId)) : BadRequest();
+        public async Task<ActionResult<List<WeeklyDataQB>>> GetWeeklyDataQB(int playerId) => playerId > 0 ? Ok((await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, playerId)).Where(w => w.Season == _season.CurrentSeason).ToList()) : BadRequest();
 
         [HttpGet("data/weekly/rb/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataRB>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataRB>>> GetWeeklyDataRB(int playerId) => playerId > 0 ? Ok(await statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, playerId)) : BadRequest();
+        public async Task<ActionResult<List<WeeklyDataRB>>> GetWeeklyDataRB(int playerId) => playerId > 0 ? Ok((await statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, playerId)).Where(w => w.Season == _season.CurrentSeason).ToList()) : BadRequest();
 
         [HttpGet("data/weekly/wr/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataWR>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataWR>>> GetWeeklyDataWR(int playerId) => playerId > 0 ? Ok(await statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, playerId)) : BadRequest();
+        public async Task<ActionResult<List<WeeklyDataWR>>> GetWeeklyDataWR(int playerId) => playerId > 0 ? Ok((await statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, playerId)).Where(w => w.Season == _season.CurrentSeason).ToList()) : BadRequest();
 
         [HttpGet("data/weekly/te/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataTE>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataTE>>> GetWeeklyDataTE(int playerId) => playerId > 0 ? Ok(await statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, playerId)) : BadRequest();
+        public async Task<ActionResult<List<WeeklyDataTE>>> GetWeeklyDataTE(int playerId) => playerId > 0 ? Ok((await statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, playerId)).Where(w => w.Season == _season.CurrentSeason).ToList()) : BadRequest();
 
         [HttpGet("data/weekly/dst/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataDST>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataDST>>> GetWeeklyDataDST(int playerId) => playerId > 0 ? Ok(await statisticsService.GetWeeklyData<WeeklyDataDST>(Position.DST, playerId)) : BadRequest();
+        public async Task<ActionResult<List<WeeklyDataDST>>> GetWeeklyDataDST(int playerId) => playerId > 0 ?  Ok((await statisticsService.GetWeeklyData<WeeklyDataDST>(Position.DST, playerId)).Where(w => w.Season == _season.CurrentSeason).ToList()) : BadRequest();
 
         [HttpGet("data/weekly/k/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataK>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<WeeklyDataK>>> GetWeeklyDataK(int playerId) => playerId > 0 ? Ok(await statisticsService.GetWeeklyData<WeeklyDataK>(Position.K, playerId)) : BadRequest();
+        public async Task<ActionResult<List<WeeklyDataK>>> GetWeeklyDataK(int playerId) => playerId > 0 ? Ok((await statisticsService.GetWeeklyData<WeeklyDataK>(Position.K, playerId)).Where(w => w.Season == _season.CurrentSeason).ToList()) : BadRequest();
 
         [HttpGet("team/{playerId}")]
         [ProducesResponseType(typeof(PlayerTeam), 200)]

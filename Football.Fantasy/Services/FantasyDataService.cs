@@ -42,6 +42,27 @@ namespace Football.Fantasy.Services
                     foreach (var data in await statistics.GetSeasonData<SeasonDataTE>(position, season, false))
                         seasonFantasy.Add(calculator.CalculateFantasy(data));
                     break;
+                case Position.DST:
+                case Position.K:
+                    var weeklyFantasy = (await fantasyData.GetWeeklyFantasy(season, 0)).Where(w => w.Position == position.ToString())
+                                        .GroupBy(f => f.PlayerId, f => f, (key, f) => new { PlayerId = key, Fantasy = f.ToList() });
+                    foreach (var group in weeklyFantasy)
+                    {
+                        var total = 0.0;
+                        foreach (var week in group.Fantasy)
+                            total += week.FantasyPoints;
+                        seasonFantasy.Add(new SeasonFantasy
+                        {
+                            PlayerId = group.PlayerId,
+                            Season = _season.CurrentSeason - 1,
+                            Games = _season.Games,
+                            FantasyPoints = total,
+                            Name = group.Fantasy.First().Name,
+                            Position = position.ToString()
+                        }) ;
+                    }
+                    break;
+
                 default: throw new NotImplementedException();
             }
             return await fantasyData.PostSeasonFantasy(seasonFantasy);
