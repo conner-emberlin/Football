@@ -61,10 +61,10 @@ namespace Football.Fantasy.Analysis.Services
         public async Task<int> GetMatchupRanking(int playerId)
         {
             var team = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
-            if (team != null)
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            if (team != null && currentWeek < _season.Weeks)
             {
-                var teamId = await playersService.GetTeamId(team.Team);
-                var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+                var teamId = await playersService.GetTeamId(team.Team);               
                 var opponentId = (await playersService.GetTeamGames(teamId)).Where(g => g.Week == currentWeek).First().OpposingTeamId;
                 var player = await playersService.GetPlayer(playerId);
                 _ = Enum.TryParse(player.Position, out Position position);
