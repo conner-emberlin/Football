@@ -3,11 +3,14 @@ using Football.Projections.Models;
 using Dapper;
 using System.Data;
 using Football.Enums;
+using Football.Models;
+using Microsoft.Extensions.Options;
 
 namespace Football.Projections.Repository
 {
-    public class ProjectionRepository(IDbConnection dbConnection) : IProjectionRepository
+    public class ProjectionRepository(IDbConnection dbConnection, IOptionsMonitor<Season> season) : IProjectionRepository
     {
+        private readonly Season _season = season.CurrentValue;
         public async Task<int> PostSeasonProjections(List<SeasonProjection> projections)
         {
             var query = $@"INSERT INTO [dbo].SeasonProjections (PlayerId, Season, Name, Position, ProjectedPoints)
@@ -38,10 +41,12 @@ namespace Football.Projections.Repository
         public IEnumerable<WeekProjection> GetWeeklyProjectionsFromSQL(Position position, int week)
         {
             var pos = position.ToString();
+            var season = _season.CurrentSeason;
             var query = $@"SELECT * FROM [dbo].WeeklyProjections
                         WHERE [Position] = @pos
+                            AND [Season] = @season
                             AND [Week] = @week";
-            return  dbConnection.Query<WeekProjection>(query, new { pos, week });
+            return  dbConnection.Query<WeekProjection>(query, new { pos, season, week });
         }
         public IEnumerable<SeasonProjection> GetSeasonProjectionsFromSQL(Position position, int season)
         {

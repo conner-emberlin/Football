@@ -38,8 +38,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Football.Leagues", "Footbal
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{2ADA2AE8-89AD-4523-9184-EBD899D5352A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Football.API.Tests", "Football.API.Tests\Football.API.Tests.csproj", "{71797233-84CE-4C98-9A26-C37A95B571A7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,10 +92,6 @@ Global
 		{5CDC8335-C354-4576-9082-15274939B26E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CDC8335-C354-4576-9082-15274939B26E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CDC8335-C354-4576-9082-15274939B26E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{71797233-84CE-4C98-9A26-C37A95B571A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{71797233-84CE-4C98-9A26-C37A95B571A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{71797233-84CE-4C98-9A26-C37A95B571A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{71797233-84CE-4C98-9A26-C37A95B571A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -115,7 +109,6 @@ Global
 		{6B999E64-AB2B-4793-AF85-60561C7AC920} = {E6BF8781-5BB2-4F2C-9458-8AB104929E49}
 		{A65029F9-BA4E-44C3-A17C-A202D30D958C} = {E6BF8781-5BB2-4F2C-9458-8AB104929E49}
 		{5CDC8335-C354-4576-9082-15274939B26E} = {E6BF8781-5BB2-4F2C-9458-8AB104929E49}
-		{71797233-84CE-4C98-9A26-C37A95B571A7} = {2ADA2AE8-89AD-4523-9184-EBD899D5352A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8FD994A3-851F-46A2-9EC6-92E822DE3C77}
