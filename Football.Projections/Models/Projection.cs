@@ -1,4 +1,6 @@
-﻿namespace Football.Projections.Models
+﻿using Football.Players.Models;
+
+namespace Football.Projections.Models
 {
     public class SeasonProjection
     {
@@ -43,5 +45,13 @@
         public double FantasyPoints { get; set; }
         public double ProjectedPoints { get; set; }
         public double Error { get; set; }
+    }
+
+    public class SeasonProjectionAnalysis
+    {
+        public Player Player { get; set; } = new();
+        public double TotalFantasy { get; set; }
+        public int WeeksPlayed { get; set; }
+        public double SeasonFantasyProjection { get; set; }
     }
 }

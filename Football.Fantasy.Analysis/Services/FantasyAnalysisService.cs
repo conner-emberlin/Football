@@ -212,28 +212,7 @@ namespace Football.Fantasy.Analysis.Services
             return CleanPercentageAmounts(fantasyPercentages);
         }
 
-        public async Task<List<SeasonProjectionAnalysis>> GetSeasonProjectionAnalyses(Position position)
-        {
-            var players = await playersService.GetPlayersByPosition(position);
-            var season = _season.CurrentSeason;
-            List<SeasonProjectionAnalysis> analyses = [];
-            foreach (var player in players)
-            {
-                var seasonProjection = await playersService.GetSeasonProjection(season, player.PlayerId);
-                if (seasonProjection > 0)
-                {
-                    var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(player.PlayerId);
-                    analyses.Add(new SeasonProjectionAnalysis
-                    {
-                        Player = player,
-                        TotalFantasy = weeklyFantasy.Sum(w => w.FantasyPoints),
-                        WeeksPlayed = weeklyFantasy.Count,
-                        SeasonFantasyProjection = seasonProjection
-                });
-                }
-            }
-            return analyses;
-        }
+
 
         private static List<FantasyPercentage> CleanPercentageAmounts(List<FantasyPercentage> fantasyPercentages)
         {

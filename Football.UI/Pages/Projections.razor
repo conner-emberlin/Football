@@ -182,7 +182,7 @@ else if(players.Count > 0)
 
     public async Task<List<SeasonProjectionAnalysis>?> GetSeasonProjectionAnalyses(string position)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/season-projection-analysis/" + @PositionEnum);
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/season-projection-analysis/" + @PositionEnum);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
