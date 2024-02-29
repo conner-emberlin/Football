@@ -165,18 +165,18 @@ namespace Football.Projections.Services
             return flexRankings.OrderByDescending(f => f.Vorp).ToList();
         }
 
-        public async Task<List<SeasonProjectionAnalysis>> GetSeasonProjectionAnalyses(Position position)
+        public async Task<List<SeasonProjectionError>> GetSeasonProjectionError(Position position)
         {
             var players = await playersService.GetPlayersByPosition(position);
             var season = _season.CurrentSeason;
-            List<SeasonProjectionAnalysis> analyses = [];
+            List<SeasonProjectionError> analyses = [];
             foreach (var player in players)
             {
                 var seasonProjection = await playersService.GetSeasonProjection(season, player.PlayerId);
                 if (seasonProjection > 0)
                 {
                     var weeklyFantasy = await fantasyService.GetWeeklyFantasy(player.PlayerId);
-                    analyses.Add(new SeasonProjectionAnalysis
+                    analyses.Add(new SeasonProjectionError
                     {
                         Player = player,
                         TotalFantasy = weeklyFantasy.Sum(w => w.FantasyPoints),

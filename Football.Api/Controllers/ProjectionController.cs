@@ -160,9 +160,9 @@ namespace Football.Api.Controllers
             return projection != null ? Ok(await seasonProjectionService.DeleteProjection(projection)) : BadRequest();
         }
 
-        [HttpGet("season-projection-analysis/{position}")]
-        [ProducesResponseType(typeof(List<SeasonProjectionAnalysis>), 200)]
+        [HttpGet("season-projection-error/{position}")]
+        [ProducesResponseType(typeof(List<SeasonProjectionError>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<IActionResult> GetSesasonProjectionAnalyses([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetSeasonProjectionAnalyses(posEnum)) : BadRequest();
+        public async Task<IActionResult> GetSesasonProjectionError([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetSeasonProjectionError(posEnum)) : BadRequest();
     }
 }

@@ -48,17 +48,19 @@ else if(players.Count > 0)
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Total Points</th>
-                <th>PPG</th>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Total Points</th>
+                    <th>PPG</th>
                     @if (seasonOver)
                     {
                         <th>ActualTotal</th>
                         <th>ActualPPG</th>
+                        <th>TotalError</th>
+                        <th>PPGError</th>
                     }
                 </tr>
         </thead>
@@ -78,9 +80,13 @@ else if(players.Count > 0)
                             {
                                 <td>@Math.Round(sa.TotalFantasy,2)</td>
                                 <td>@Math.Round(sa.TotalFantasy/sa.WeeksPlayed, 2)</td>
+                                <td>@Math.Round(sa.TotalFantasy - sa.SeasonFantasyProjection, 2)</td>
+                                <td>@Math.Round((sa.SeasonFantasyProjection/17) - (sa.TotalFantasy/sa.WeeksPlayed), 2)</td>
                             }
                             else
                             {
+                                <td>--</td>
+                                <td>--</td>
                                 <td>--</td>
                                 <td>--</td>
                             }
@@ -102,7 +108,7 @@ else if(players.Count > 0)
     private bool loading { get; set; }
     int count = 0;
     public bool seasonOver { get; set; } = false;
-    public List<SeasonProjectionAnalysis>? analysis;
+    public List<SeasonProjectionError>? analysis;
 
     protected override async Task OnInitializedAsync()
     {
@@ -180,9 +186,9 @@ else if(players.Count > 0)
         shouldRender = true;
     }
 
-    public async Task<List<SeasonProjectionAnalysis>?> GetSeasonProjectionAnalyses(string position)
+    public async Task<List<SeasonProjectionError>?> GetSeasonProjectionAnalyses(string position)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/season-projection-analysis/" + @PositionEnum);
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/season-projection-error/" + @PositionEnum);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -190,11 +196,11 @@ else if(players.Count > 0)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<List<SeasonProjectionAnalysis>>(responseStream, options);
+            return await JsonSerializer.DeserializeAsync<List<SeasonProjectionError>>(responseStream, options);
         }
         else return null;
     }
-    private SeasonProjectionAnalysis? GetSeasonProjectionAnalysis(int playerId)
+    private SeasonProjectionError? GetSeasonProjectionAnalysis(int playerId)
     {
         return analysis.FirstOrDefault(a => a.Player.PlayerId == playerId);
     }

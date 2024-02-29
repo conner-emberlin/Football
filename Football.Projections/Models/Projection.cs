@@ -47,7 +47,7 @@ namespace Football.Projections.Models
         public double Error { get; set; }
     }
 
-    public class SeasonProjectionAnalysis
+    public class SeasonProjectionError
     {
         public Player Player { get; set; } = new();
         public double TotalFantasy { get; set; }
