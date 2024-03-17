@@ -97,11 +97,11 @@ namespace Football.Projections.Services
             foreach (var w in weekProjections)
             {
                 var team = await playerService.GetPlayerTeam(_season.CurrentSeason, w.PlayerId);
-                if (team != null) 
+                if (team != null)
                 {
                     var teamId = await playerService.GetTeamId(team.Team);
-                    var matchup = (await playerService.GetTeamGames(teamId)).First(m => m.Week == w.Week);
-                    if (matchup.OpposingTeam != "BYE")
+                    var matchup = (await playerService.GetTeamGames(teamId)).FirstOrDefault(m => m.Week == w.Week);
+                    if (matchup != null && matchup.OpposingTeam != "BYE")
                     {
                         var opponentRank = matchupRanks.FirstOrDefault(mr => mr.Team.TeamId == matchup.OpposingTeamId);
                         if (opponentRank != null)
@@ -111,9 +111,11 @@ namespace Football.Projections.Services
                             w.ProjectedPoints = w.Position != Position.DST.ToString() ? w.ProjectedPoints * (tamperedRatio + 1) / 2 : tamperedRatio * w.ProjectedPoints;
                         }
                     }
-                    else 
+                    else
                         w.ProjectedPoints = 0;
                 }
+                else
+                    w.ProjectedPoints = 0;
             }
             return weekProjections;
         }
