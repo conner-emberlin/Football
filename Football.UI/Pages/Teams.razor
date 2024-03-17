@@ -118,55 +118,72 @@ else if (badRequestError)
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><b style="color:@form.PositionColor("QB")">QB</b></td>
+                    @if (qbPerformance != null)
+                    {
+                        <tr>
+                            <td><b style="color:@form.PositionColor("QB")">QB</b></td>
                         <td><a class="page-links" href="Players/@qbPerformance.PlayerId"> @qbPerformance.Name</a></td>
                         <td>@Math.Round(qbPerformance.TotalFantasy, 2)</td>
                         <td>@Math.Round(qbPerformance.AvgFantasy, 2)</td>
                         <td>@Math.Round(qbPerformance.StdDev, 2)</td>
                     </tr>
-                    @foreach (var rb in rbPerformance)
+                    }
+                    @if (rbPerformance.Any())
+                    {
+                        @foreach (var rb in rbPerformance)
+                        {
+                            <tr>
+                                <td><b style="color:@form.PositionColor("RB")">RB</b></td>
+                                <td><a class="page-links" href="Players/@rb.PlayerId"> @rb.Name</a></td>
+                                <td>@Math.Round(rb.TotalFantasy, 2)</td>
+                                <td>@Math.Round(rb.AvgFantasy, 2)</td>
+                                <td>@Math.Round(rb.StdDev, 2)</td>
+                            </tr>
+                        }
+                    }
+                    @if (wrPerformance.Any())
+                    {
+                        @foreach (var wr in wrPerformance)
+                        {
+                            <tr>
+                                <td><b style="color:@form.PositionColor("WR")">WR</b></td>
+                                <td><a class="page-links" href="Players/@wr.PlayerId"> @wr.Name</a></td>
+                                <td>@Math.Round(wr.TotalFantasy, 2)</td>
+                                <td>@Math.Round(wr.AvgFantasy, 2)</td>
+                                <td>@Math.Round(wr.StdDev, 2)</td>
+                            </tr>
+                        }
+                    }
+                    @if (tePerformance != null)
                     {
                         <tr>
-                            <td><b style="color:@form.PositionColor("RB")">RB</b></td>
-                            <td><a class="page-links" href="Players/@rb.PlayerId"> @rb.Name</a></td>
-                            <td>@Math.Round(rb.TotalFantasy, 2)</td>
-                            <td>@Math.Round(rb.AvgFantasy, 2)</td>
-                            <td>@Math.Round(rb.StdDev, 2)</td>
-                        </tr>
-                    }
-                    @foreach (var wr in wrPerformance)
-                    {
-                        <tr>
-                            <td><b style="color:@form.PositionColor("WR")">WR</b></td>
-                            <td><a class="page-links" href="Players/@wr.PlayerId"> @wr.Name</a></td>
-                            <td>@Math.Round(wr.TotalFantasy, 2)</td>
-                            <td>@Math.Round(wr.AvgFantasy, 2)</td>
-                            <td>@Math.Round(wr.StdDev, 2)</td>
-                        </tr>
-                    }
-                    <tr>
-                        <td><b style="color:@form.PositionColor("TE")">TE</b></td>
+                            <td><b style="color:@form.PositionColor("TE")">TE</b></td>
                         <td><a class="page-links" href="Players/@tePerformance.PlayerId"> @tePerformance.Name</a></td>
                         <td>@Math.Round(tePerformance.TotalFantasy, 2)</td>
                         <td>@Math.Round(tePerformance.AvgFantasy, 2)</td>
                         <td>@Math.Round(tePerformance.StdDev, 2)</td>
                     </tr>
-                    <tr>
-                        <td><b style="color:@form.PositionColor("DST")">DST</b></td>
+                    }
+                    @if (dstPerformance != null)
+                    {
+                        <tr>
+                            <td><b style="color:@form.PositionColor("DST")">DST</b></td>
                         <td><a class="page-links" href="Players/@dstPerformance.PlayerId"> @dstPerformance.Name</a></td>
                         <td>@Math.Round(dstPerformance.TotalFantasy, 2)</td>
                         <td>@Math.Round(dstPerformance.AvgFantasy, 2)</td>
                         <td>@Math.Round(dstPerformance.StdDev, 2)</td>
                     </tr>
-                    <tr>
-                        <td><b style="color:@form.PositionColor("K")">K</b></td>
+                    }
+                    @if (kPerformance != null)
+                    {
+                        <tr>
+                            <td><b style="color:@form.PositionColor("K")">K</b></td>
                         <td><a class="page-links" href="Players/@kPerformance.PlayerId"> @kPerformance.Name</a></td>
                         <td>@Math.Round(kPerformance.TotalFantasy, 2)</td>
                         <td>@Math.Round(kPerformance.AvgFantasy, 2)</td>
                         <td>@Math.Round(kPerformance.StdDev, 2)</td>
                     </tr>
-
+                    }
                 </tbody>
             </table>
         </div>
@@ -376,12 +393,12 @@ else if (badRequestError)
             using var responseStream = await response.Content.ReadAsStreamAsync();
             allPerformances = await JsonSerializer.DeserializeAsync<List<FantasyPerformance>>(responseStream, options);
 
-            qbPerformance = allPerformances.Where(p => p.Position == "QB").OrderByDescending(p => p.TotalFantasy).First();
+            qbPerformance = allPerformances.Where(p => p.Position == "QB").OrderByDescending(p => p.TotalFantasy).FirstOrDefault();
             rbPerformance = allPerformances.Where(p => p.Position == "RB").OrderByDescending(p => p.TotalFantasy).Take(2).ToList();
             wrPerformance = allPerformances.Where(p => p.Position == "WR").OrderByDescending(p => p.TotalFantasy).Take(3).ToList();
-            tePerformance = allPerformances.Where(p => p.Position == "TE").OrderByDescending(p => p.TotalFantasy).First();
-            dstPerformance = allPerformances.Where(p => p.Position == "DST").First();
-            kPerformance = allPerformances.Where(p => p.Position == "K").First();
+            tePerformance = allPerformances.Where(p => p.Position == "TE").OrderByDescending(p => p.TotalFantasy).FirstOrDefault();
+            dstPerformance = allPerformances.Where(p => p.Position == "DST").FirstOrDefault();
+            kPerformance = allPerformances.Where(p => p.Position == "K").FirstOrDefault();
         }       
     }
 

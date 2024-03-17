@@ -73,8 +73,8 @@ namespace Football.Fantasy.Analysis.Services
 
         public async Task<FantasyPerformance?> GetFantasyPerformance(Player player)
         {
-            var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(player.PlayerId);
-            if (weeklyFantasy.Count > 0)
+            var weeklyFantasy = (await fantasyDataService.GetWeeklyFantasy(player.PlayerId)).Where(f => f.Season == _season.CurrentSeason);
+            if (weeklyFantasy.Any())
             {
                 var variance = CalculateVariance(weeklyFantasy.Select(w => w.FantasyPoints));
                 return new FantasyPerformance
