@@ -103,13 +103,10 @@ namespace Football.Fantasy.Analysis.Services
                             var forecastHour = forecastDay.hour.First(h => h.time == time);
                             return forecastHour != null ? Weather(forecastHour) : new Weather { };
                         }
-                        else return new Weather { };
                     }
-                    else return new Weather { };
                 }
-                else return new Weather { };
             }
-            else return new Weather { };
+            return new Weather { };
         }
 
         public async Task<List<PlayerComparison>> GetPlayerComparisons(int playerId)
@@ -173,9 +170,8 @@ namespace Football.Fantasy.Analysis.Services
                     var bookmaker = teamOdds.bookmakers.FirstOrDefault(b => b.key == _oddsAPI.DefaultBookmaker);
                     return bookmaker != null ? MatchLines(bookmaker, teamMap) : new MatchLines { };
                 }
-                else return new MatchLines { };
             }
-            else return new MatchLines { };
+            return new MatchLines { };
         }
 
         private static MatchLines MatchLines(Bookmaker bookMaker, TeamMap teamMap)
@@ -228,7 +224,7 @@ namespace Football.Fantasy.Analysis.Services
                 return date + gameTime;
 
             }
-            else return string.Empty;
+            return string.Empty;
         }
 
     }

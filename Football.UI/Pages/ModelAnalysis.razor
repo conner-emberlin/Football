@@ -36,6 +36,11 @@
 
 else if (ProjectionAnalyses.Any())
 {
+    @if (SeasonOver())
+    {
+        
+
+    }
 
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
@@ -115,6 +120,8 @@ else if (ProjectionAnalyses.Any())
     int count = 0;
 
     public TableSort tableSort = new();
+
+    public bool SeasonOver() => ProjectionAnalyses?.Count > 0 ? ProjectionAnalyses.Max(p => p.Week) == 18 : false;
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();

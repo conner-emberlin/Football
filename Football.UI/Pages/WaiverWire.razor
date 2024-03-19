@@ -68,7 +68,7 @@ else if (youTried && badRequestError)
 
     protected override bool ShouldRender() => shouldRender;
 
-    public string GetHeader() => "Waiver Wire - Week " + candidates.First().Week.ToString();
+    public string GetHeader() => candidates.Any() ? "Waiver Wire - Week " + candidates.First().Week.ToString() : "Waiver Wire";
 
     protected override async Task OnInitializedAsync()
     {
