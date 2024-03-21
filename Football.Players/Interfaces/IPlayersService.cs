@@ -38,5 +38,6 @@ namespace Football.Players.Interfaces
         public Task<bool> UpdateInjury(InSeasonInjury injury);
         public Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges();
         public Task<int> PostInSeasonTeamChange(InSeasonTeamChange teamChange);
+        public Task<int> InactivatePlayers(List<int> playerIds);
     }
 }

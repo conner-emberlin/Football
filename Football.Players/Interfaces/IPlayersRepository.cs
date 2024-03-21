@@ -37,5 +37,6 @@ namespace Football.Players.Interfaces
         public Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges(int season);
         public Task<bool> UpdateCurrentTeam(int playerId, string newTeam, int season);
         public Task<int> PostTeamChange(InSeasonTeamChange teamChange);
+        public Task<int> InactivatePlayers(List<int> playerIds);
     }
 }

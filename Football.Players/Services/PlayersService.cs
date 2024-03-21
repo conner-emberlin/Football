@@ -38,6 +38,8 @@ namespace Football.Players.Services
         public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await playersRepository.PostInSeasonInjury(injury);
         public async Task<bool> UpdateInjury(InSeasonInjury injury) => await playersRepository.UpdateInjury(injury);
         public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => await playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
+
+        public async Task<int> InactivatePlayers(List<int> playerIds) => await playersRepository.InactivatePlayers(playerIds);
         public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId)
         {
             var player = await GetPlayer(playerId);

@@ -264,5 +264,13 @@ namespace Football.Players.Repository
                            VALUES (@Season, @PlayerId, @PreviousTeam, @NewTeam, @WeekEffective)";
             return await _dbConnection.ExecuteAsync(query, teamChange);
         }
+
+        public async Task<int> InactivatePlayers(List<int> playerIds)
+        {
+            var query = $@"UPDATE [dbo].Players
+                            Set [Active] = 0
+                            WHERE [PlayerId] IN @playerIds";
+            return await _dbConnection.ExecuteAsync(query, new { playerIds });
+        }
     }
 }

@@ -131,5 +131,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<SnapCount>), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> GetSnapCounts([FromRoute] int playerId) => Ok(await statisticsService.GetSnapCounts(playerId));
+
+        [HttpPost("inactivate")]
+        [ProducesResponseType(typeof(List<int>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> InactivatePlayers([FromBody] List<int> playerIds) => Ok(await playersService.InactivatePlayers(playerIds));
     }
 }
