@@ -23,11 +23,11 @@ namespace Football.Api.Controllers
         public async Task<ActionResult<List<Player>>> GetAllPlayers([FromQuery] int active, [FromQuery] string position = "") 
         {
             var allPlayers = await playersService.GetAllPlayers();
-            var filteredPlayers =  active == 1 && position != string.Empty? allPlayers.Where(p => p.Active == 1 && p.Position == position).ToList() 
-                                : active == 1 && position == string.Empty ? allPlayers.Where(p => p.Active == 1).ToList()
-                                : position != string.Empty && active != 1 ? allPlayers.Where(p => p.Position == position).ToList()
+            var filteredPlayers =  active == 1 && position != string.Empty? allPlayers.Where(p => p.Active == 1 && p.Position == position)
+                                : active == 1 && position == string.Empty ? allPlayers.Where(p => p.Active == 1)
+                                : position != string.Empty && active != 1 ? allPlayers.Where(p => p.Position == position)
                                 : allPlayers;
-            return Ok(filteredPlayers);
+            return Ok(filteredPlayers.OrderBy(p => p.Name));
         }
 
         [HttpGet("data/qb/{playerId}")]

@@ -1,0 +1,133 @@
+﻿@page "/ManagePlayers"
+<PageTitle>Manage Players</PageTitle>
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Players.Models;
+@inject IHttpClientFactory ClientFactory
+
+<h4>Manage Players</h4>
+<div>
+    @foreach (var position in Positions)
+    {
+
+        <input type="radio" name="players" id=" @position" value="@position"
+               @onchange="SetPosition"
+               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+        <label for="@position ">@position</label>
+
+    }
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="GetPlayers">
+    Submit
+</button>
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+@if (badRequestError)
+{
+    <p>Unexpected Error. Please try again.</p>
+}
+
+else if (players.Any())
+{
+
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in players)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+@code {
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+    private bool badRequestError;
+
+    private List<Player>? players = new();
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
+    public string Position { get; set; } = "Quarterback";
+    public string PositionEnum { get; set; } = "1";
+    private bool loading { get; set; }
+    int count = 0;
+
+    public void SetPosition(ChangeEventArgs args)
+    {
+        Position = args.Value.ToString();
+        if (players != null)
+        {
+            players.Clear();
+        }
+    }
+
+    public async Task GetPlayers()
+    {
+        loading = true;
+        shouldRender = true;
+
+        if (players is not null)
+        {
+            players.Clear();
+        }
+
+        switch (Position.ToLower())
+        {
+            case "quarterback":
+                PositionEnum = "QB";
+                break;
+            case "runningback":
+                PositionEnum = "RB";
+                break;
+            case "wide receiver":
+                PositionEnum = "WR";
+                break;
+            case "tight end":
+                PositionEnum = "TE";
+                break;
+            case "dst":
+                PositionEnum = "DST";
+                break;
+            case "kicker":
+                PositionEnum = "K";
+                break;
+            default: PositionEnum = "QB"; break;
+        }
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players?position=" + @PositionEnum);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            players = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+        loading = false;
+        shouldRender = true;
+    }
+
+}
+
+
+

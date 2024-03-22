@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Pages\ActivePlayers.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Blazor-ApexCharts" Version="2.1.0" />
     <PackageReference Include="BootstrapBlazor" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
@@ -24,18 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Football.Api\Football.Api.csproj" />
     <ProjectReference Include="..\Football\Football.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Pages\ActivePlayers.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Pages\ActivePlayers.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Pages\ActivePlayers.razor" />
   </ItemGroup>
 
 </Project>
