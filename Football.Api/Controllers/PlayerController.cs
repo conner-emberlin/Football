@@ -20,7 +20,11 @@ namespace Football.Api.Controllers
         [HttpGet("data/players")]
         [ProducesResponseType(typeof(List<Player>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<Player>>> GetAllPlayers() => Ok(await playersService.GetAllPlayers());
+        public async Task<ActionResult<List<Player>>> GetAllPlayers([FromQuery] int active) 
+        {
+            var allPlayers = await playersService.GetAllPlayers();
+            return active == 1 ? allPlayers.Where(p => p.Active == 1).ToList() : allPlayers;
+        }
 
         [HttpGet("data/qb/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataQB>), 200)]
