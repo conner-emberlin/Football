@@ -143,6 +143,7 @@ namespace Football.Api.Controllers
         [HttpPost("inactivate")]
         [ProducesResponseType(typeof(List<int>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<IActionResult> InactivatePlayers([FromBody] List<int> playerIds) => Ok(await playersService.InactivatePlayers(playerIds));
+        public async Task<IActionResult> InactivatePlayers([FromBody] List<int> playerIds) => playerIds.Count > 0 ? Ok(await playersService.InactivatePlayers(playerIds)) : BadRequest();
+
     }
 }

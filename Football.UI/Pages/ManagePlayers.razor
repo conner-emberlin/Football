@@ -2,6 +2,7 @@
 <PageTitle>Manage Players</PageTitle>
 @using System.Text.Json
 @using System.Text.Json.Serialization
+@using System.Text;
 @using Football.Players.Models;
 @inject IHttpClientFactory ClientFactory
 
@@ -21,7 +22,17 @@
 <button class="button-22" role="button" @onclick="GetPlayers">
     Submit
 </button>
-
+@if (players.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <button class="button-22" role="button" @onclick="PlayersInactivated">
+        Update
+    </button>
+}
+@if (playersUpdated > 0)
+{
+    <text> @playersUpdated players inactivated</text>
+}
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 
 @if (loading)
@@ -42,13 +53,23 @@ else if (players.Any())
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Inactivate</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var p in players)
-                {
+                {                    
+                    bool Checked = false;
+                    if (inactivePlayers.Contains(p.PlayerId))
+                    {
+                        Checked = true;
+                    }
                     <tr>
                         <td>@p.Name</td>
+                        <td>
+                            <input type="checkbox" checked=@Checked
+                                   @onchange="eventArgs => { CheckboxClicked(p.PlayerId); }" />
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -66,6 +87,8 @@ else if (players.Any())
     public string PositionEnum { get; set; } = "1";
     private bool loading { get; set; }
     int count = 0;
+    List<int> inactivePlayers = [];
+    int playersUpdated { get; set; }
 
     public void SetPosition(ChangeEventArgs args)
     {
@@ -74,6 +97,8 @@ else if (players.Any())
         {
             players.Clear();
         }
+        inactivePlayers.Clear();
+        playersUpdated = 0;
     }
 
     public async Task GetPlayers()
@@ -81,10 +106,9 @@ else if (players.Any())
         loading = true;
         shouldRender = true;
 
-        if (players is not null)
-        {
+        if (players != null)
             players.Clear();
-        }
+        inactivePlayers.Clear();
 
         switch (Position.ToLower())
         {
@@ -108,7 +132,7 @@ else if (players.Any())
                 break;
             default: PositionEnum = "QB"; break;
         }
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players?position=" + @PositionEnum);
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players?active=1&position=" + @PositionEnum);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -127,6 +151,46 @@ else if (players.Any())
         shouldRender = true;
     }
 
+    public async Task PlayersInactivated()
+    {
+        loading = true;
+        playersUpdated = 0;
+        if (inactivePlayers.Any())
+        {
+            var json = JsonSerializer.Serialize(inactivePlayers);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var client = ClientFactory.CreateClient();
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/player/inactivate") { Content = content };
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                using var responseStream = response.Content.ReadAsStream();
+                playersUpdated = JsonSerializer.Deserialize<int>(responseStream, options);
+            }
+            else
+            {
+                badRequestError = true;
+            }
+        }
+        else badRequestError = true;
+        loading = false;
+        if (players != null)
+        {
+            players.Clear();
+            await GetPlayers();
+        }
+
+        shouldRender = true;
+    }
+
+    public void CheckboxClicked(int playerId)
+    {
+        if (inactivePlayers.Contains(playerId)) 
+            inactivePlayers.Remove(playerId);
+        else 
+            inactivePlayers.Add(playerId);
+    }
 }
 
 
