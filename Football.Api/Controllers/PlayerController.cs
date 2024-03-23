@@ -141,7 +141,7 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetSnapCounts([FromRoute] int playerId) => Ok(await statisticsService.GetSnapCounts(playerId));
 
         [HttpPost("inactivate")]
-        [ProducesResponseType(typeof(List<int>), 200)]
+        [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> InactivatePlayers([FromBody] List<int> playerIds) => playerIds.Count > 0 ? Ok(await playersService.InactivatePlayers(playerIds)) : BadRequest();
 
