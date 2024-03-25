@@ -29,6 +29,11 @@ namespace Football.Api.Controllers
                                 : allPlayers;
             return Ok(filteredPlayers.OrderBy(p => p.Name));
         }
+        [HttpPost("add")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> CreatePlayer([FromBody] Player player) => Ok(await playersService.CreatePlayer(player));
+
 
         [HttpGet("data/qb/{playerId}")]
         [ProducesResponseType(typeof(List<SeasonDataQB>), 200)]
