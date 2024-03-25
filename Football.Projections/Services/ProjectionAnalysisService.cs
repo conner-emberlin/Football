@@ -209,6 +209,15 @@ namespace Football.Projections.Services
             return new SeasonProjectionAnalysis { };
         }
 
+        public async Task<List<SeasonProjectionAnalysis>> GetAllSeasonProjectionAnalyses(Position position)
+        {
+            var seasons = await playersService.GetSeasons();
+            List<SeasonProjectionAnalysis> spa = [];
+            foreach (var season in seasons)
+                spa.Add(await GetSeasonProjectionAnalysis(position, season));
+            return spa;
+        }
+
         public async Task<List<WeekProjection>> WeeklyFlexRankings()
         {            
             var rbProjections = (await weekProjection.GetProjections(Position.RB)).ToList();

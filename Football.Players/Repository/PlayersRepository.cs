@@ -272,5 +272,13 @@ namespace Football.Players.Repository
                             WHERE [PlayerId] IN @playerIds";
             return await _dbConnection.ExecuteAsync(query, new { playerIds });
         }
+
+        public async Task<List<int>> GetSeasons()
+        {
+            var query = $@"SELECT DISTINCT [Season]
+                            FROM [dbo].Schedule
+                            ORDER BY [Season] DESC";
+            return (await _dbConnection.QueryAsync<int>(query)).ToList();
+        }
     }
 }

@@ -166,8 +166,13 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetSesasonProjectionError([FromRoute] string position, [FromQuery] int season) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetSeasonProjectionError(posEnum, season)) : BadRequest();
 
         [HttpGet("season-projection-analysis/{position}")]
-        [ProducesResponseType(typeof(List<SeasonProjectionAnalysis>), 200)]
+        [ProducesResponseType(typeof(SeasonProjectionAnalysis), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> GetSesasonProjectionAnalysis([FromRoute] string position, [FromQuery] int season) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetSeasonProjectionAnalysis(posEnum, season)) : BadRequest();
+
+        [HttpGet("season-projection-analysis/all/{position}")]
+        [ProducesResponseType(typeof(List<SeasonProjectionAnalysis>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> GetAllSesasonProjectionAnalyses([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetAllSeasonProjectionAnalyses(posEnum)) : BadRequest();
     }
 }
