@@ -12,8 +12,8 @@ namespace Football.Projections.Interfaces
         public Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(int playerId);
         public Task<List<SeasonFlex>> SeasonFlexRankings();
         public Task<List<WeekProjection>> WeeklyFlexRankings();
-        public Task<List<SeasonProjectionError>> GetSeasonProjectionError(Position position);
-        public Task<SeasonProjectionAnalysis> GetSeasonProjectionAnalysis(Position position);
+        public Task<List<SeasonProjectionError>> GetSeasonProjectionError(Position position, int season = 0);
+        public Task<SeasonProjectionAnalysis> GetSeasonProjectionAnalysis(Position position, int season = 0);
 
     }
 }

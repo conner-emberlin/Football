@@ -22,7 +22,13 @@ namespace Football.Projections.Services
     {
         private readonly Season _season = season.CurrentValue;
 
-        public async Task<bool> DeleteProjection(SeasonProjection projection) => await projectionRepository.DeleteSeasonProjection(projection.PlayerId, projection.Season);
+        public async Task<bool> DeleteProjection(SeasonProjection projection)
+        {
+           var recordDeleted  = await projectionRepository.DeleteSeasonProjection(projection.PlayerId, projection.Season);
+            if (recordDeleted)
+                cache.Remove(projection.Position + Cache.SeasonProjections.ToString());
+            return recordDeleted;
+        }
         public async Task<IEnumerable<SeasonProjection>?> GetPlayerProjections(int playerId) => await projectionRepository.GetSeasonProjection(playerId);
         public async Task<int> PostProjections(List<SeasonProjection> projections) => await projectionRepository.PostSeasonProjections(projections);
 

@@ -165,31 +165,31 @@ namespace Football.Projections.Services
             return flexRankings.OrderByDescending(f => f.Vorp).ToList();
         }
 
-        public async Task<List<SeasonProjectionError>> GetSeasonProjectionError(Position position)
+        public async Task<List<SeasonProjectionError>> GetSeasonProjectionError(Position position, int priorSeason = 0)
         {
             var players = await playersService.GetPlayersByPosition(position);
-            var season = _season.CurrentSeason;
+            var season = priorSeason > 0 ? priorSeason : _season.CurrentSeason;
             List<SeasonProjectionError> analyses = [];
             foreach (var player in players)
             {
                 var seasonProjection = await playersService.GetSeasonProjection(season, player.PlayerId);
                 if (seasonProjection > 0)
                 {
-                    var weeklyFantasy = await fantasyService.GetWeeklyFantasy(player.PlayerId);
+                    var weeklyFantasy = (await fantasyService.GetWeeklyFantasy(player.PlayerId)).Where(w => w.Season == season);
                     analyses.Add(new SeasonProjectionError
                     {
                         Player = player,
                         TotalFantasy = weeklyFantasy.Sum(w => w.FantasyPoints),
-                        WeeksPlayed = weeklyFantasy.Count,
+                        WeeksPlayed = weeklyFantasy.Count(),
                         SeasonFantasyProjection = seasonProjection
                     });
                 }
             }
             return analyses;
         }
-        public async Task<SeasonProjectionAnalysis> GetSeasonProjectionAnalysis(Position position)
+        public async Task<SeasonProjectionAnalysis> GetSeasonProjectionAnalysis(Position position, int season = 0)
         {
-            var projectionErrors = await GetSeasonProjectionError(position);
+            var projectionErrors = await GetSeasonProjectionError(position, season);
             var count = projectionErrors.Count;
             if (count > 0)
             {
@@ -199,7 +199,7 @@ namespace Football.Projections.Services
                 var totalSumOfSquares = observedPoints.Sum(p => Math.Pow(p - observedPoints.Average(), 2));
                 return new SeasonProjectionAnalysis
                 {
-                    Season = _season.CurrentSeason,
+                    Season = season > 0 ? season : _season.CurrentSeason,
                     Position = position.ToString(),
                     MSE = count > 0 ? Math.Round(sumOfSquares / count, 3) : 0,
                     RSquared = totalSumOfSquares > 0 ? 1 - (sumOfSquares / totalSumOfSquares) : 0,
