@@ -40,18 +40,14 @@ namespace Football.Projections.Services
         public bool GetProjectionsFromCache(Position position, out IEnumerable<SeasonProjection> cachedValues)
         {
             if (cache.TryGetValue(position.ToString() + Cache.SeasonProjections.ToString(), out cachedValues!))
-            {
                 return cachedValues.Any();
-            }
-            else return false;
+            return false;
         }
         
         public async Task<IEnumerable<SeasonProjection>> GetProjections(Position position)
         {
             if (GetProjectionsFromCache(position, out var cachedProj))
-            {
                 return cachedProj;
-            }
             else if(GetProjectionsFromSQL(position, _season.CurrentSeason, out var projectionsSQL))
             {
                 cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), projectionsSQL);
@@ -130,9 +126,7 @@ namespace Football.Projections.Services
             {
                 var stats = (await statisticsService.GetSeasonData<SeasonDataQB>(Position.QB, player.PlayerId, true));
                 if (stats.Count > 0)
-                {
                     qbModel.Add(regressionService.QBModelSeason(statCalculator.CalculateStatProjection(stats)));
-                }
             }
             return qbModel;
         }
@@ -144,9 +138,7 @@ namespace Football.Projections.Services
             {
                 var stats = (await statisticsService.GetSeasonData<SeasonDataRB>(Position.RB, player.PlayerId, true));
                 if (stats.Count > 0)
-                {
                     rbModel.Add(regressionService.RBModelSeason(statCalculator.CalculateStatProjection(stats)));
-                }
             }
             return rbModel;
         }
@@ -158,9 +150,7 @@ namespace Football.Projections.Services
             {
                 var stats = (await statisticsService.GetSeasonData<SeasonDataWR>(Position.WR, player.PlayerId, true));
                 if (stats.Count > 0)
-                {
                     wrModel.Add(regressionService.WRModelSeason(statCalculator.CalculateStatProjection(stats)));
-                }
             }
             return wrModel;
         }
@@ -172,9 +162,7 @@ namespace Football.Projections.Services
             {
                 var stats = (await statisticsService.GetSeasonData<SeasonDataTE>(Position.TE, player.PlayerId, true));
                 if (stats.Count > 0)
-                {
                     teModel.Add(regressionService.TEModelSeason(statCalculator.CalculateStatProjection(stats)));
-                }
             }
             return teModel;
         }
