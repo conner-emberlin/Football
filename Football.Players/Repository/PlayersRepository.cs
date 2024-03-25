@@ -280,5 +280,12 @@ namespace Football.Players.Repository
                             ORDER BY [Season] DESC";
             return (await _dbConnection.QueryAsync<int>(query)).ToList();
         }
+
+        public async Task<bool> CreateRookie(Rookie rookie)
+        {
+            var query = $@"INSERT INTO [dbo].Rookie (PlayerId, TeamDrafted, Position, RookieSeason, DraftPosition, DeclareAge)
+                            VALUES (@PlayerId, @TeamDrafted, @Position, @RookieSeason, @DraftPosition, @DeclareAge)";
+            return await _dbConnection.ExecuteAsync(query, rookie) > 0;
+        }
     }
 }

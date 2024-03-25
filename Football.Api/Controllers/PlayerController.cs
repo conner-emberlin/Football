@@ -150,5 +150,16 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<IActionResult> InactivatePlayers([FromBody] List<int> playerIds) => playerIds.Count > 0 ? Ok(await playersService.InactivatePlayers(playerIds)) : BadRequest();
 
+        [HttpPost("add-rookie")]
+        [ProducesResponseType(typeof(bool), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<IActionResult> CreateRookie([FromBody] Player player, string teamDrafted, int rookieSeason, int draftPosition, int declareAge)
+        {
+            if (player.Name != string.Empty && player.Position != string.Empty && Enum.TryParse(player.Position, out Position _))
+            {
+                return Ok(await playersService.CreateRookie(player, teamDrafted, rookieSeason, draftPosition, declareAge));
+            }
+            else return BadRequest();
+        }
     }
 }
