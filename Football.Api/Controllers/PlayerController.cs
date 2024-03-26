@@ -161,15 +161,13 @@ namespace Football.Api.Controllers
                 var existingPlayerId = await playersService.GetPlayerId(model.Name);
                 if (existingPlayerId == 0)
                 {
-                    _= await playersService.CreatePlayer(new Player { Name = model.Name, Position = model.Position, Active = 1 });
+                    _= await playersService.CreatePlayer(new Player { Name = model.Name, Position = model.Position, Active = model.Active });
                     var playerId = await playersService.GetPlayerId(model.Name);
                     if(playerId > 0)
                         return Ok(await playersService.CreateRookie(new Rookie { PlayerId = playerId, Position = model.Position, DeclareAge = model.DeclareAge, DraftPosition = model.DraftPosition, RookieSeason = model.RookieSeason, TeamDrafted = model.TeamDrafted }));
                 }
                 else
-                {
                     return Ok(await playersService.CreateRookie(new Rookie { PlayerId = existingPlayerId, Position = model.Position, DeclareAge = model.DeclareAge, DraftPosition = model.DraftPosition, RookieSeason = model.RookieSeason, TeamDrafted = model.TeamDrafted }));
-                }
             }
             return BadRequest();
         }
