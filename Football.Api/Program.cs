@@ -33,6 +33,7 @@ using Football.Leagues.Services;
 using Football.Leagues.Interfaces;
 using Football.Leagues.Models;
 using Football.Leagues.Repository;
+using Football.Api;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -113,6 +114,8 @@ builder.Services.Configure<SleeperSettings>(builder.Configuration.GetSection("Sl
 builder.Services.Configure<GeoDistance>(builder.Configuration.GetSection("GeoDistance"));
 builder.Services.Configure<FiveThirtyEightValueSettings>(builder.Configuration.GetSection("FiveThirtyEightValueSettings"));
 builder.Services.Configure<StartOrSitSettings>(builder.Configuration.GetSection("StartOrSitSettings"));
+
+builder.Services.AddAutoMapper(typeof(ApiModelAutomapperProfile));
 
 var app = builder.Build();
 

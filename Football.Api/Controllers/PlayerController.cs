@@ -8,13 +8,14 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using Football.Statistics.Models;
+using AutoMapper;
 
 namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IDistanceService distanceService,
-        IOptionsMonitor<Season> season, IAdvancedStatisticsService advancedStatisticsService) : ControllerBase
+        IOptionsMonitor<Season> season, IAdvancedStatisticsService advancedStatisticsService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -157,17 +158,26 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> CreateRookie([FromBody] RookiePlayerModel model)
         {
             if (model.Name != string.Empty && model.Position != string.Empty && Enum.TryParse(model.Position, out Position _))
-            {
+            {                
+                var rookie = mapper.Map<Rookie>(model);
                 var existingPlayerId = await playersService.GetPlayerId(model.Name);
                 if (existingPlayerId == 0)
                 {
-                    _= await playersService.CreatePlayer(new Player { Name = model.Name, Position = model.Position, Active = model.Active });
+                    _= await playersService.CreatePlayer(mapper.Map<Player>(model));
                     var playerId = await playersService.GetPlayerId(model.Name);
                     if(playerId > 0)
-                        return Ok(await playersService.CreateRookie(new Rookie { PlayerId = playerId, Position = model.Position, DeclareAge = model.DeclareAge, DraftPosition = model.DraftPosition, RookieSeason = model.RookieSeason, TeamDrafted = model.TeamDrafted }));
+                    {                       
+                        rookie.PlayerId = playerId;
+                        return Ok(await playersService.CreateRookie(rookie));
+                    }
+                        
                 }
                 else
-                    return Ok(await playersService.CreateRookie(new Rookie { PlayerId = existingPlayerId, Position = model.Position, DeclareAge = model.DeclareAge, DraftPosition = model.DraftPosition, RookieSeason = model.RookieSeason, TeamDrafted = model.TeamDrafted }));
+                {
+                    rookie.PlayerId = existingPlayerId;
+                    return Ok(await playersService.CreateRookie(rookie));
+                }
+
             }
             return BadRequest();
         }
