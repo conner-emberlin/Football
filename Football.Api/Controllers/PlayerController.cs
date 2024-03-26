@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Football.Models;
 using Football.Enums;
+using Football.Api.Models;
 using Football.Data.Models;
 using Football.Statistics.Interfaces;
 using Football.Players.Interfaces;
@@ -153,13 +154,24 @@ namespace Football.Api.Controllers
         [HttpPost("add-rookie")]
         [ProducesResponseType(typeof(bool), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<IActionResult> CreateRookie([FromBody] Player player, string teamDrafted, int rookieSeason, int draftPosition, int declareAge)
+        public async Task<IActionResult> CreateRookie([FromBody] RookiePlayerModel model)
         {
-            if (player.Name != string.Empty && player.Position != string.Empty && Enum.TryParse(player.Position, out Position _))
+            if (model.Name != string.Empty && model.Position != string.Empty && Enum.TryParse(model.Position, out Position _))
             {
-                return Ok(await playersService.CreateRookie(player, teamDrafted, rookieSeason, draftPosition, declareAge));
+                var existingPlayerId = await playersService.GetPlayerId(model.Name);
+                if (existingPlayerId == 0)
+                {
+                    _= await playersService.CreatePlayer(new Player { Name = model.Name, Position = model.Position, Active = 1 });
+                    var playerId = await playersService.GetPlayerId(model.Name);
+                    if(playerId > 0)
+                        return Ok(await playersService.CreateRookie(new Rookie { PlayerId = playerId, Position = model.Position, DeclareAge = model.DeclareAge, DraftPosition = model.DraftPosition, RookieSeason = model.RookieSeason, TeamDrafted = model.TeamDrafted }));
+                }
+                else
+                {
+                    return Ok(await playersService.CreateRookie(new Rookie { PlayerId = existingPlayerId, Position = model.Position, DeclareAge = model.DeclareAge, DraftPosition = model.DraftPosition, RookieSeason = model.RookieSeason, TeamDrafted = model.TeamDrafted }));
+                }
             }
-            else return BadRequest();
+            return BadRequest();
         }
     }
 }

@@ -1,0 +1,117 @@
+﻿@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Football.Players.Models;
+@using Football.Api.Models;
+@using System.Text;
+@inject IHttpClientFactory ClientFactory
+@page "/AddRookie/"
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+else{
+<div class="table_container">
+    <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Active</th>
+                <th>TeamDrafted</th>
+                <th>RookieSeason</th>
+                <th>DraftPosition</th>
+                <th>Age</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <input type="text" class="form-control" placeholder="Name" @bind="@player.Name" />
+                </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Position" @bind="@player.Position" />
+                </td>
+                    <td>
+                        <input type="text" class="form-control" placeholder="Position" @bind="@player.Active" />
+                    </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Team Drafted" @bind="@player.TeamDrafted" />
+                </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Rookie Season" @bind="@player.RookieSeason" />
+                </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Draft Position" @bind="@player.DraftPosition" />
+                </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Age Declared" @bind="@player.DeclareAge" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-link" @onclick="() => CancellAdd()">
+                        <i class="oi oi-circle-x" />
+                    </button>
+                    <button type="button" class="btn btn-link" @onclick="() => AddRookie()">
+                        <i class="oi oi-circle-check" />
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+}
+@if (rookieAdded)
+{
+    <text>Rookie added.</text>
+}
+else
+{
+    <text>Something went wrong.</text>
+}
+
+  
+@if (badRequestError)
+{
+    <text>Something Went Wrong. Please Try Again.</text>
+}
+
+
+@code {
+
+    public bool badRequestError = false;
+    private bool shouldRender;
+    private bool loading = false;
+
+    private bool adding = false;
+    public bool rookieAdded { get; set; }
+    public RookiePlayerModel player = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    private void CancellAdd()
+    {
+        adding = false;
+        shouldRender = true;
+        player = new RookiePlayerModel();
+    }
+
+    private async Task AddRookie()
+    {
+        adding = false;
+        loading = true;
+        var json = JsonSerializer.Serialize(player);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var client = ClientFactory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/add-rookieson") { Content = content };
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = response.Content.ReadAsStream();
+            rookieAdded = await JsonSerializer.DeserializeAsync<bool>(responseStream, options);
+        }
+        else rookieAdded = false;
+        loading = false;
+    }
+
+}

@@ -40,29 +40,6 @@ namespace Football.Players.Services
         public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => await playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
         public async Task<List<int>> GetSeasons() => await playersRepository.GetSeasons();
         public async Task<bool> CreateRookie(Rookie rookie) => await playersRepository.CreateRookie(rookie);
-        public async Task<bool> CreateRookie(Player player, string teamDrafted, int rookieSeason, int draftPosition, int declareAge)
-        {
-            var playerCreated = await CreatePlayer(player);
-            if (playerCreated > 0)
-            {
-                var playerId = await GetPlayerId(player.Name);
-                if (playerId > 0)
-                {
-                    var rookie = new Rookie
-                    {
-                        PlayerId = playerId,
-                        TeamDrafted = teamDrafted,
-                        Position = player.Position,
-                        RookieSeason = rookieSeason,
-                        DraftPosition = draftPosition,
-                        DeclareAge = declareAge
-                    };
-                    return await CreateRookie(rookie);
-                }
-            }
-            return false;
-        }
-
         public async Task<int> InactivatePlayers(List<int> playerIds) 
         {
             var updated = await playersRepository.InactivatePlayers(playerIds);
