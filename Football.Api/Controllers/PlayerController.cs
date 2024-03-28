@@ -181,5 +181,23 @@ namespace Football.Api.Controllers
             }
             return BadRequest();
         }
+
+        [HttpGet("rookies/all")]
+        [ProducesResponseType(typeof(List<RookiePlayerModel>), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<List<RookiePlayerModel>>> GetAllRookies()
+        {
+            List<RookiePlayerModel> models = [];
+            var rookies = await playersService.GetAllRookies();
+            foreach (var rookie in rookies)
+            {
+                var player = await playersService.GetPlayer(rookie.PlayerId);
+                var rmp = mapper.Map<RookiePlayerModel>(rookie);
+                rmp.Name = player.Name;
+                rmp.Active = player.Active;
+                models.Add(rmp);
+            }
+            return Ok(models.OrderByDescending(m => m.RookieSeason).ThenBy(m => m.Position).ThenBy(m => m.Name).ToList());
+        }
     }
 }

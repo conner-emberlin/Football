@@ -4,6 +4,7 @@
 @using System.Text.Json.Serialization
 @using System.Text;
 @using Football.Players.Models;
+@using Football.Api.Models;
 @inject IHttpClientFactory ClientFactory
 
 <h4>Manage Players</h4>
@@ -77,13 +78,45 @@ else if (players.Any())
         </table>
     </div>
 }
+
+else if (rookies.Any())
+{
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Draft Year</th>
+                    <th>Position</th>
+                    <th>Name</th>
+                    <th>Team Drafted</th>
+                    <th>DraftPos</th>
+                    <th>Declare Age</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in rookies)
+                {
+                    <tr>
+                        <td>@r.RookieSeason</td>
+                        <td>@r.Position</td>
+                        <td>@r.Name</td>
+                        <td>@r.TeamDrafted</td>
+                        <td>@r.DraftPosition</td>
+                        <td>@r.DeclareAge</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
 @code {
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
     private bool badRequestError;
 
     private List<Player>? players = new();
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
+    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker", "Rookies" };
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
     private bool loading { get; set; }
@@ -91,13 +124,17 @@ else if (players.Any())
     List<int> inactivePlayers = [];
     int playersUpdated { get; set; }
 
+    bool rookieAdded { get; set; }
+
+    List<RookiePlayerModel>? rookies = [];
+
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
         if (players != null)
-        {
             players.Clear();
-        }
+        if (rookies != null)
+            rookies.Clear();
         inactivePlayers.Clear();
         playersUpdated = 0;
     }
@@ -111,45 +148,54 @@ else if (players.Any())
             players.Clear();
         inactivePlayers.Clear();
 
-        switch (Position.ToLower())
+        if (Position.ToLower() != "rookies")
         {
-            case "quarterback":
-                PositionEnum = "QB";
-                break;
-            case "runningback":
-                PositionEnum = "RB";
-                break;
-            case "wide receiver":
-                PositionEnum = "WR";
-                break;
-            case "tight end":
-                PositionEnum = "TE";
-                break;
-            case "dst":
-                PositionEnum = "DST";
-                break;
-            case "kicker":
-                PositionEnum = "K";
-                break;
-            default: PositionEnum = "QB"; break;
-        }
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players?active=1&position=" + @PositionEnum);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            players = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
-            badRequestError = false;
+            switch (Position.ToLower())
+            {
+                case "quarterback":
+                    PositionEnum = "QB";
+                    break;
+                case "runningback":
+                    PositionEnum = "RB";
+                    break;
+                case "wide receiver":
+                    PositionEnum = "WR";
+                    break;
+                case "tight end":
+                    PositionEnum = "TE";
+                    break;
+                case "dst":
+                    PositionEnum = "DST";
+                    break;
+                case "kicker":
+                    PositionEnum = "K";
+                    break;
+                default: PositionEnum = "QB"; break;
+            }
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players?active=1&position=" + @PositionEnum);
+            request.Headers.Add("Accept", "application/json");
+            var client = ClientFactory.CreateClient();
+            var response = await client.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                players = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
+                badRequestError = false;
+            }
+            else
+            {
+                badRequestError = true;
+            }
+            loading = false;
+            shouldRender = true;
         }
         else
         {
-            badRequestError = true;
+            await GetRookies();
+            loading = false;
+            shouldRender = true;
         }
-        loading = false;
-        shouldRender = true;
     }
 
     public async Task PlayersInactivated()
@@ -185,6 +231,25 @@ else if (players.Any())
         shouldRender = true;
     }
 
+    public async Task GetRookies()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/rookies/all");
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            rookies = await JsonSerializer.DeserializeAsync<List<RookiePlayerModel>>(responseStream, options);
+            badRequestError = false;
+        }
+        else
+        {
+            badRequestError = true;
+        }
+    }
+
     public void CheckboxClicked(int playerId)
     {
         if (inactivePlayers.Contains(playerId)) 
@@ -192,6 +257,8 @@ else if (players.Any())
         else 
             inactivePlayers.Add(playerId);
     }
+
+
 }
 
 

@@ -341,14 +341,9 @@ namespace Football.Projections.Services
         }
         private async Task<double> GetReplacementPoints(Position position)
         {
-            return position switch
-            {
-                Position.QB => (await seasonProjection.GetProjections(position)).ElementAt(_starters.QBStarters - 1).ProjectedPoints,
-                Position.RB => (await seasonProjection.GetProjections(position)).ElementAt(_starters.RBStarters - 1).ProjectedPoints,
-                Position.WR => (await seasonProjection.GetProjections(position)).ElementAt(_starters.WRStarters - 1).ProjectedPoints,
-                Position.TE => (await seasonProjection.GetProjections(position)).ElementAt(_starters.TEStarters - 1).ProjectedPoints,
-                _ => 0,
-            };
+            var projections = await seasonProjection.GetProjections(position);
+            var replacementIndex = (int)Math.Round((double)projections.Count() / 2);
+            return projections.ElementAt(replacementIndex).ProjectedPoints;
         }
     }
 }

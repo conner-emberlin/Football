@@ -287,5 +287,11 @@ namespace Football.Players.Repository
                             VALUES (@PlayerId, @TeamDrafted, @Position, @RookieSeason, @DraftPosition, @DeclareAge)";
             return await _dbConnection.ExecuteAsync(query, rookie) > 0;
         }
+
+        public async Task<List<Rookie>> GetAllRookies()
+        {
+            var query = $@"SELECT * FROM [dbo].Rookie";
+            return (await _dbConnection.QueryAsync<Rookie>(query)).ToList();
+        }
     }
 }
