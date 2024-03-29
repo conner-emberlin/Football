@@ -6,11 +6,12 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
+using AutoMapper;
 
 namespace Football.Data.Services
 {
     public class UploadSeasonDataService(IScraperService scraperService, IUploadSeasonDataRepository uploadSeasonDataRepository,
-         ILogger logger, IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playerService, IOptionsMonitor<Season> season) : IUploadSeasonDataService
+         ILogger logger, IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playerService, IMapper mapper, IOptionsMonitor<Season> season) : IUploadSeasonDataService
     {
         private readonly WeeklyScraping _scraping = scraping.CurrentValue;
         private readonly Season _season = season.CurrentValue;
@@ -94,31 +95,15 @@ namespace Football.Data.Services
                     logger.Information("New player created: {p}", p.Name);
                     playerId = await playerService.GetPlayerId(p.Name);
                 }
-
                 if (p.Games > 0)
                 {
-                    seasonData.Add(new SeasonDataQB
-                    {
-                        Season = season,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        Completions = p.Completions,
-                        Attempts = p.Attempts,
-                        Yards = p.Yards,
-                        TD = p.TD,
-                        Int = p.Int,
-                        Sacks = p.Sacks,
-                        RushingAttempts = p.RushingAttempts,
-                        RushingYards = p.RushingYards,
-                        RushingTD = p.RushingTD,
-                        Fumbles = p.Fumbles,
-                        Games = p.Games
-                    });
+                    var sd = mapper.Map<SeasonDataQB>(p);
+                    sd.Season = season;
+                    sd.PlayerId = playerId;
+                    seasonData.Add(sd);
                 }
                 else
-                {
                     logger.Information("{name} does not exist in the Players table", p.Name);
-                }
             }
             return seasonData;
         }
@@ -137,26 +122,13 @@ namespace Football.Data.Services
                 }
                 if (p.Games > 0)
                 {
-                    seasonData.Add(new SeasonDataRB
-                    {
-                        Season = season,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        RushingAtt = p.RushingAtt,
-                        RushingYds = p.RushingYds,
-                        RushingTD = p.RushingTD,
-                        Receptions = p.Receptions,
-                        Targets = p.Targets,
-                        Yards = p.Yards,
-                        ReceivingTD = p.ReceivingTD,
-                        Fumbles = p.Fumbles,
-                        Games = p.Games
-                    });
+                    var sd = mapper.Map<SeasonDataRB>(p);
+                    sd.Season = season;
+                    sd.PlayerId = playerId;
+                    seasonData.Add(sd);
                 }
                 else
-                {
                     logger.Information("{name} does not exist in the Players table", p.Name);
-                }
             }
             return seasonData;
         }
@@ -174,27 +146,13 @@ namespace Football.Data.Services
                 }
                 if (p.Games > 0)
                 {
-                    seasonData.Add(new SeasonDataWR
-                    {
-                        Season = season,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        Receptions = p.Receptions,
-                        Targets = p.Targets,
-                        Yards = p.Yards,
-                        Long = p.Long,
-                        TD = p.TD,
-                        RushingAtt = p.RushingAtt,
-                        RushingYds = p.RushingYds,
-                        RushingTD = p.RushingTD,
-                        Fumbles = p.Fumbles,
-                        Games = p.Games,
-                    });
+                    var sd = mapper.Map<SeasonDataWR>(p);
+                    sd.Season = season;
+                    sd.PlayerId = playerId;
+                    seasonData.Add(sd);
                 }
                 else
-                {
                     logger.Information("{name} does not exist in the Players table", p.Name);
-                }
             }
             return seasonData;
         }
@@ -213,27 +171,13 @@ namespace Football.Data.Services
                 }
                 if ( p.Games > 0)
                 {
-                    seasonData.Add(new SeasonDataTE
-                    {
-                        Season = season,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        Receptions = p.Receptions,
-                        Targets = p.Targets,
-                        Yards = p.Yards,
-                        Long = p.Long,
-                        TD = p.TD,
-                        RushingAtt = p.RushingAtt,
-                        RushingYds = p.RushingYds,
-                        RushingTD = p.RushingTD,
-                        Fumbles = p.Fumbles,
-                        Games = p.Games
-                    });
+                    var sd = mapper.Map<SeasonDataTE>(p);
+                    sd.Season = season;
+                    sd.PlayerId = playerId;
+                    seasonData.Add(sd);
                 }
                 else
-                {
                     logger.Information("{name} does not exist in the Players table", p.Name);
-                }
             }
             return seasonData;
         }

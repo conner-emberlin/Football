@@ -115,7 +115,7 @@ builder.Services.Configure<GeoDistance>(builder.Configuration.GetSection("GeoDis
 builder.Services.Configure<FiveThirtyEightValueSettings>(builder.Configuration.GetSection("FiveThirtyEightValueSettings"));
 builder.Services.Configure<StartOrSitSettings>(builder.Configuration.GetSection("StartOrSitSettings"));
 
-builder.Services.AddAutoMapper(typeof(ApiModelAutomapperProfile));
+builder.Services.AddAutoMapper(typeof(ApiModelAutomapperProfile), typeof(Football.Data.AutomapperProfile));
 
 var app = builder.Build();
 
