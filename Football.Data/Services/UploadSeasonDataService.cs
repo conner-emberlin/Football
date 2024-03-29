@@ -91,7 +91,7 @@ namespace Football.Data.Services
                 var playerId = await playerService.GetPlayerId(p.Name);
                 if(playerId == 0)
                 {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.QB.ToString(), Active = 1 });
+                    await playerService.CreatePlayer(mapper.Map<Player>(p));
                     logger.Information("New player created: {p}", p.Name);
                     playerId = await playerService.GetPlayerId(p.Name);
                 }
@@ -116,7 +116,7 @@ namespace Football.Data.Services
                 var playerId = await playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.RB.ToString(), Active = 1 });
+                    await playerService.CreatePlayer(mapper.Map<Player>(p));
                     logger.Information("New player created: {p}", p.Name);
                     playerId = await playerService.GetPlayerId(p.Name);
                 }
@@ -140,7 +140,7 @@ namespace Football.Data.Services
                 var playerId = await playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.WR.ToString(), Active = 1 });
+                    await playerService.CreatePlayer(mapper.Map<Player>(p));
                     logger.Information("New player created: {p}", p.Name);
                     playerId = await playerService.GetPlayerId(p.Name);
                 }
@@ -165,7 +165,7 @@ namespace Football.Data.Services
                 var playerId = await playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
                 {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.TE.ToString(), Active = 1 });
+                    await playerService.CreatePlayer(mapper.Map<Player>(p));
                     logger.Information("New player created: {p}", p.Name);
                     playerId = await playerService.GetPlayerId(p.Name);
                 }
