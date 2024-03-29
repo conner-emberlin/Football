@@ -5,11 +5,12 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
+using AutoMapper;
 
 namespace Football.Data.Services
 {
     public class UploadWeeklyDataService(IScraperService scraperService, IUploadWeeklyDataRepository uploadWeeklyDataRepository,
-        IPlayersService playerService, ILogger logger, IOptionsMonitor<WeeklyScraping> scraping) : IUploadWeeklyDataService
+        IPlayersService playerService, ILogger logger, IMapper mapper, IOptionsMonitor<WeeklyScraping> scraping) : IUploadWeeklyDataService
     {
         private readonly WeeklyScraping _scraping = scraping.CurrentValue;
 
@@ -79,14 +80,6 @@ namespace Football.Data.Services
             return added;
         }
 
-        public async Task<int> UploadWeeklyRedZoneQB(int season, int week, int yardline)
-        {
-            logger.Information("Uploading QB Redzone data for week {0}", week);
-            var url = RedZoneURL(Position.QB.ToString(), season, week, yardline);
-            var players = scraperService.ParseFantasyProsRedZoneQB(scraperService.ScrapeData(url, _scraping.RedZoneXPath));
-            return 0;
-        }
-
         public async Task<int> UploadWeeklyGameResults(int season, int week)
         {
             logger.Information("Uploading Game Results for week {0}", week);
@@ -152,24 +145,11 @@ namespace Football.Data.Services
                 var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.QB.ToString())
                 {
-                    weeklyData.Add(new WeeklyDataQB
-                    {
-                        Season = season,
-                        Week = week,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        Completions = p.Completions,
-                        Attempts = p.Attempts,
-                        Yards = p.Yards,
-                        TD = p.TD,
-                        Int = p.Int,
-                        Sacks = p.Sacks,
-                        RushingAttempts = p.RushingAttempts,
-                        RushingYards = p.RushingYards,
-                        RushingTD = p.RushingTD,
-                        Fumbles = p.Fumbles,
-                        Games = p.Games
-                    });
+                    var wd= mapper.Map<WeeklyDataQB>(p);
+                    wd.Season = season;
+                    wd.Week = week;
+                    wd.PlayerId = playerId;
+                    weeklyData.Add(wd);
                 }
             }
             return weeklyData;
@@ -190,22 +170,11 @@ namespace Football.Data.Services
                 var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.RB.ToString())
                 {
-                    weeklyData.Add(new WeeklyDataRB
-                    {
-                        Season = season,
-                        Week = week,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        RushingAtt = p.RushingAtt,
-                        RushingYds = p.RushingYds,
-                        RushingTD = p.RushingTD,
-                        Receptions = p.Receptions,
-                        Targets = p.Targets,
-                        Yards = p.Yards,
-                        ReceivingTD = p.ReceivingTD,
-                        Fumbles = p.Fumbles,
-                        Games = p.Games
-                    });
+                    var wd = mapper.Map<WeeklyDataRB>(p);
+                    wd.Season = season;
+                    wd.Week = week;
+                    wd.PlayerId = playerId;
+                    weeklyData.Add(wd);
                 }
             }
             return weeklyData;
@@ -262,23 +231,11 @@ namespace Football.Data.Services
                 var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.WR.ToString())
                 {
-                    weeklyData.Add(new WeeklyDataWR
-                    {
-                        Season = season,
-                        Week = week,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        Receptions = p.Receptions,
-                        Targets = p.Targets,
-                        Yards = p.Yards,
-                        Long = p.Long,
-                        TD = p.TD,
-                        RushingAtt = p.RushingAtt,
-                        RushingYds = p.RushingYds,
-                        RushingTD = p.RushingTD,
-                        Fumbles = p.Fumbles,
-                        Games = p.Games,
-                    });
+                    var wd = mapper.Map<WeeklyDataWR>(p);
+                    wd.Season = season;
+                    wd.Week = week;
+                    wd.PlayerId = playerId;
+                    weeklyData.Add(wd);
                 }
             }
             return weeklyData;
@@ -299,23 +256,11 @@ namespace Football.Data.Services
                 var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.TE.ToString())
                 {
-                    weeklyData.Add(new WeeklyDataTE
-                    {
-                        Season = season,
-                        Week = week,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        Receptions = p.Receptions,
-                        Targets = p.Targets,
-                        Yards = p.Yards,
-                        Long = p.Long,
-                        TD = p.TD,
-                        RushingAtt = p.RushingAtt,
-                        RushingYds = p.RushingYds,
-                        RushingTD = p.RushingTD,
-                        Fumbles = p.Fumbles,
-                        Games = p.Games
-                    });
+                    var wd = mapper.Map<WeeklyDataTE>(p);
+                    wd.Season = season;
+                    wd.Week = week;
+                    wd.PlayerId = playerId;
+                    weeklyData.Add(wd);
                 }
             }
             return weeklyData;
@@ -335,21 +280,11 @@ namespace Football.Data.Services
                 }
                 if (p.Games > 0)
                 {
-                    weeklyData.Add(new WeeklyDataDST
-                    {
-                        Season = season,
-                        Week = week,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        Sacks = p.Sacks,
-                        Ints = p.Ints,
-                        FumblesRecovered = p.FumblesRecovered,
-                        ForcedFumbles = p.ForcedFumbles,
-                        DefensiveTD = p.DefensiveTD,
-                        Safties = p.Safties,
-                        SpecialTD = p.SpecialTD,
-                        Games = p.Games
-                    });
+                    var wd = mapper.Map<WeeklyDataDST>(p);
+                    wd.Season = season;
+                    wd.Week = week;
+                    wd.PlayerId = playerId;
+                    weeklyData.Add(wd);
                 }
             }
             return weeklyData;
@@ -369,23 +304,11 @@ namespace Football.Data.Services
                 }
                 if (p.Games > 0)
                 {
-                    weeklyData.Add(new WeeklyDataK
-                    {
-                        Season = season,
-                        Week = week,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        FieldGoals = p.FieldGoals,
-                        FieldGoalAttempts = p.FieldGoalAttempts,
-                        OneNineteen = p.OneNineteen,
-                        TwentyTwentyNine = p.TwentyTwentyNine,
-                        ThirtyThirtyNine = p.ThirtyThirtyNine,
-                        FourtyFourtyNine = p.FourtyFourtyNine,
-                        Fifty = p.Fifty,
-                        ExtraPoints = p.ExtraPoints,
-                        ExtraPointAttempts = p.ExtraPointAttempts,
-                        Games = p.Games
-                    });
+                    var wd = mapper.Map<WeeklyDataK>(p);
+                    wd.Season = season;
+                    wd.Week = week;
+                    wd.PlayerId = playerId;
+                    weeklyData.Add(wd);
                 }
             }
             return weeklyData;

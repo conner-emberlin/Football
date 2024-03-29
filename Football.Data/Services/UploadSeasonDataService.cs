@@ -188,28 +188,11 @@ namespace Football.Data.Services
             foreach (var p in players)
             {
                 var playerId = await playerService.GetPlayerId(p.Name);
-                if (playerId == 0)
+                if (p.Games > 0 && playerId > 0)
                 {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.DST.ToString(), Active = 1 });
+                    await playerService.CreatePlayer(mapper.Map<Player>(p));
                     logger.Information("New player created: {p}", p.Name);
                     playerId = await playerService.GetPlayerId(p.Name);
-                }
-                if (p.Games > 0)
-                {
-                    seasonData.Add(new SeasonDataDST
-                    {
-                        Season = season,
-                        PlayerId = playerId,
-                        Name = p.Name,
-                        Sacks = p.Sacks,
-                        Ints = p.Ints,
-                        FumblesRecovered = p.FumblesRecovered,
-                        ForcedFumbles = p.ForcedFumbles,
-                        DefensiveTD = p.DefensiveTD,
-                        Safties = p.Safties,
-                        SpecialTD = p.SpecialTD,
-                        Games = p.Games
-                    });
                 }
                 else
                 {
