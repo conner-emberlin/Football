@@ -7,8 +7,6 @@ using Football.Projections.Models;
 using Football.Fantasy.Models;
 using Serilog;
 using Football.Players.Interfaces;
-using Football.Fantasy.Analysis.Models;
-using Football.Fantasy.Services;
 
 namespace Football.Projections.Services
 {

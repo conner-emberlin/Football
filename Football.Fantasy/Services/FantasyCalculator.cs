@@ -1,4 +1,5 @@
-﻿using Football.Data.Models;
+﻿using AutoMapper;
+using Football.Data.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.Models;
@@ -7,24 +8,17 @@ using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Services
 {
-    public class FantasyCalculator(IOptionsMonitor<FantasyScoring> scoring) : IFantasyCalculator
+    public class FantasyCalculator(IOptionsMonitor<FantasyScoring> scoring, IMapper mapper) : IFantasyCalculator
     {
         private readonly FantasyScoring _scoring = scoring.CurrentValue;
 
         public SeasonFantasy CalculateFantasy(SeasonDataQB stat)
         {
-            var points = _scoring.PointsPerPassingTouchdown * stat.TD + _scoring.PointsPerTouchdown * stat.RushingTD
+            var seasonFantasy = mapper.Map<SeasonFantasy>(stat);
+            seasonFantasy.FantasyPoints = _scoring.PointsPerPassingTouchdown * stat.TD + _scoring.PointsPerTouchdown * stat.RushingTD
                         + _scoring.PointsPerPassingYard * stat.Yards + _scoring.PointsPerYard * stat.RushingYards
                         - _scoring.PointsPerFumble * stat.Fumbles - _scoring.PointsPerInterception * stat.Int;
-            return new SeasonFantasy
-            {
-                PlayerId = stat.PlayerId,
-                Season = stat.Season,
-                Games = stat.Games,
-                FantasyPoints = points,
-                Name = stat.Name,
-                Position = Position.QB.ToString()
-            };
+            return seasonFantasy;
         }
         public WeeklyFantasy CalculateFantasy(WeeklyDataQB stat)
         {
@@ -44,18 +38,11 @@ namespace Football.Fantasy.Services
         }
         public SeasonFantasy CalculateFantasy(SeasonDataRB stat)
         {
-            var points = _scoring.PointsPerYard * stat.RushingYds + _scoring.PointsPerTouchdown * stat.RushingTD
+            var seasonFantasy = mapper.Map<SeasonFantasy>(stat);
+            seasonFantasy.FantasyPoints = _scoring.PointsPerYard * stat.RushingYds + _scoring.PointsPerTouchdown * stat.RushingTD
                         + _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerTouchdown * stat.ReceivingTD
                         + _scoring.PointsPerYard * stat.Yards - _scoring.PointsPerFumble * stat.Fumbles;
-            return new SeasonFantasy
-            {
-                PlayerId = stat.PlayerId,
-                Season = stat.Season,
-                Games = stat.Games,
-                FantasyPoints = points,
-                Name = stat.Name,
-                Position = Position.RB.ToString()
-            };
+            return seasonFantasy;
         }
         public WeeklyFantasy CalculateFantasy(WeeklyDataRB stat)
         {
@@ -75,18 +62,11 @@ namespace Football.Fantasy.Services
         }
         public SeasonFantasy CalculateFantasy(SeasonDataWR stat)
         {
-            var points = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
+            var seasonFantasy = mapper.Map<SeasonFantasy>(stat);
+            seasonFantasy.FantasyPoints = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
                         + _scoring.PointsPerTouchdown * stat.TD + _scoring.PointsPerYard * stat.RushingYds
                         + _scoring.PointsPerTouchdown * stat.RushingTD - _scoring.PointsPerFumble * stat.Fumbles;
-            return new SeasonFantasy
-            {
-                PlayerId = stat.PlayerId,
-                Season = stat.Season,
-                Games = stat.Games,
-                FantasyPoints = points,
-                Name = stat.Name,
-                Position = Position.WR.ToString()
-            };
+            return seasonFantasy;
         }
         public WeeklyFantasy CalculateFantasy(WeeklyDataWR stat)
         {
@@ -106,18 +86,11 @@ namespace Football.Fantasy.Services
         }
         public SeasonFantasy CalculateFantasy(SeasonDataTE stat)
         {
-            var points = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
+            var seasonFantasy = mapper.Map<SeasonFantasy>(stat);
+            seasonFantasy.FantasyPoints = _scoring.PointsPerReception * stat.Receptions + _scoring.PointsPerYard * stat.Yards
                         + _scoring.PointsPerTouchdown * stat.TD + _scoring.PointsPerYard * stat.RushingYds
                         + _scoring.PointsPerTouchdown * stat.RushingTD - _scoring.PointsPerFumble * stat.Fumbles;
-            return new SeasonFantasy
-            {
-                PlayerId = stat.PlayerId,
-                Season = stat.Season,
-                Games = stat.Games,
-                FantasyPoints = points,
-                Name = stat.Name,
-                Position = Position.TE.ToString()
-            };
+            return seasonFantasy;
         }
         public WeeklyFantasy CalculateFantasy(WeeklyDataTE stat)
         {
