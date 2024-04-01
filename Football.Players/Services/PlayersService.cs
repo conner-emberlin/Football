@@ -4,10 +4,12 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using AutoMapper;
 
 namespace Football.Players.Services
 {
-    public class PlayersService(IPlayersRepository playersRepository, IMemoryCache cache, IOptionsMonitor<Season> season, ISettingsService settingsService) : IPlayersService
+    public class PlayersService(IPlayersRepository playersRepository, IMemoryCache cache, IOptionsMonitor<Season> season, 
+        ISettingsService settingsService, IMapper mapper) : IPlayersService
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -69,17 +71,9 @@ namespace Football.Players.Services
             var injuries = await GetActiveInSeasonInjuries(_season.CurrentSeason);
             foreach (var injury in injuries)
             {
-                var player = await GetPlayer(injury.PlayerId);
-                playerInjuries.Add(new PlayerInjury
-                {
-                    InjuryId = injury.InjuryId,
-                    Season = injury.Season,
-                    PlayerId = injury.PlayerId,
-                    InjuryStartWeek = injury.InjuryStartWeek,
-                    InjuryEndWeek = injury.InjuryEndWeek,
-                    Description = injury.Description,
-                    Player = player
-                });
+                var playerInjury = mapper.Map<PlayerInjury>(injury);
+                playerInjury.Player = await GetPlayer(injury.PlayerId);
+                playerInjuries.Add(playerInjury);
             }
             return playerInjuries;
         }

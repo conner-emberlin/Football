@@ -118,7 +118,8 @@ builder.Services.Configure<StartOrSitSettings>(builder.Configuration.GetSection(
 builder.Services.AddAutoMapper(
     typeof(ApiModelAutomapperProfile), 
     typeof(Football.Data.AutomapperProfile),
-    typeof(Football.Fantasy.AutomapperProfile));
+    typeof(Football.Fantasy.AutomapperProfile),
+    typeof(Football.Players.AutomapperProfile));
 
 var app = builder.Build();
 
