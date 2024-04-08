@@ -1,3 +1,5 @@
+using Football;
+using Football.Api;
 using Football.Models;
 using Football.Data.Interfaces;
 using Football.Data.Models;
@@ -9,7 +11,12 @@ using Football.Fantasy.Services;
 using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Analysis.Services;
 using Football.Fantasy.MockDraft.Interfaces;
+using Football.Fantasy.MockDraft.Repository;
 using Football.Fantasy.MockDraft.Services;
+using Football.Leagues.Interfaces;
+using Football.Leagues.Services;
+using Football.Leagues.Models;
+using Football.Leagues.Repository;
 using Football.News.Interfaces;
 using Football.News.Models;
 using Football.News.Services;
@@ -17,6 +24,7 @@ using Football.Players.Interfaces;
 using Football.Players.Repository;
 using Football.Players.Services;
 using Football.Projections.Interfaces;
+using Football.Projections.Models;
 using Football.Projections.Repository;
 using Football.Projections.Services;
 using Football.Statistics.Interfaces;
@@ -26,21 +34,12 @@ using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 using System.Data;
 using System.Data.SqlClient;
-using Football;
-using Football.Fantasy.MockDraft.Repository;
-using Football.Projections.Models;
-using Football.Leagues.Services;
-using Football.Leagues.Interfaces;
-using Football.Leagues.Models;
-using Football.Leagues.Repository;
-using Football.Api;
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
+    options.AddPolicy(name: "_myAllowSpecificOrigins",
                       policy =>
                       {
                           policy.WithOrigins("https://localhost:7176/");
@@ -119,7 +118,9 @@ builder.Services.AddAutoMapper(
     typeof(ApiModelAutomapperProfile), 
     typeof(Football.Data.AutomapperProfile),
     typeof(Football.Fantasy.AutomapperProfile),
-    typeof(Football.Players.AutomapperProfile));
+    typeof(Football.Players.AutomapperProfile),
+    typeof(Football.Projections.AutomapperProfile)
+    );
 
 var app = builder.Build();
 

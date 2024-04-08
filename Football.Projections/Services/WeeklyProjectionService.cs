@@ -10,7 +10,7 @@ using Football.Statistics.Interfaces;
 using MathNet.Numerics.LinearRegression;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Serilog;
+using AutoMapper;
 
 namespace Football.Projections.Services
 {
@@ -18,7 +18,8 @@ namespace Football.Projections.Services
     IMemoryCache cache,IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
     IStatisticsService statisticsService, IOptionsMonitor<Season> season,
     IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository,
-    IOptionsMonitor<WeeklyTunings> weeklyTunings, ISettingsService settingsService, IOptionsMonitor<ProjectionLimits> settings) : IProjectionService<WeekProjection>
+    IOptionsMonitor<WeeklyTunings> weeklyTunings, ISettingsService settingsService, IOptionsMonitor<ProjectionLimits> settings,
+    IMapper mapper) : IProjectionService<WeekProjection>
     {
         private readonly Season _season = season.CurrentValue;
         private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
@@ -227,7 +228,7 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataK>(Position.K, player.PlayerId);
                 if (stats.Count > 0)
-                    kModel.Add(await regressionService.KModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                    kModel.Add(mapper.Map<KModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
                 
             }
             return kModel;

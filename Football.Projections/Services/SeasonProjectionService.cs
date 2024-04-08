@@ -12,13 +12,15 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using MathNet.Numerics.LinearRegression;
 using MathNet.Numerics.LinearAlgebra;
+using AutoMapper;
 
 namespace Football.Projections.Services
 {
     public class SeasonProjectionService(IRegressionModelService regressionService, IFantasyDataService fantasyService,
     IMemoryCache cache, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
     IStatisticsService statisticsService, IOptionsMonitor<Season> season, IPlayersService playersService,
-    IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService) : IProjectionService<SeasonProjection>
+    IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService,
+    IMapper mapper) : IProjectionService<SeasonProjection>
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -126,7 +128,7 @@ namespace Football.Projections.Services
             {
                 var stats = (await statisticsService.GetSeasonData<SeasonDataQB>(Position.QB, player.PlayerId, true));
                 if (stats.Count > 0)
-                    qbModel.Add(regressionService.QBModelSeason(statCalculator.CalculateStatProjection(stats)));
+                    qbModel.Add(mapper.Map<QBModelSeason>(statCalculator.CalculateStatProjection(stats)));
             }
             return qbModel;
         }
@@ -176,9 +178,9 @@ namespace Football.Projections.Services
                 var coeff = await HistoricalRookieRegression(historicalRookies);
                 var currentRookies = await playersService.GetCurrentRookies(_season.CurrentSeason, position.ToString());
                 var model = matrixCalculator.RegressorMatrix(currentRookies);
-                var predictions = (model * coeff).ToList();
+                var projections = (model * coeff).ToList();
 
-                for (int i = 0; i < predictions.Count; i++)
+                for (int i = 0; i < projections.Count; i++)
                 {
                     var rookie = currentRookies.ElementAt(i);
                     rookieProjections.Add(new SeasonProjection
@@ -187,7 +189,7 @@ namespace Football.Projections.Services
                         Name = (await playersService.GetPlayer(rookie.PlayerId)).Name,
                         Season = _season.CurrentSeason,
                         Position = rookie.Position,
-                        ProjectedPoints = predictions[i]
+                        ProjectedPoints = projections[i]
                     });
                 }
             }

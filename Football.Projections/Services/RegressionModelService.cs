@@ -10,25 +10,9 @@ using Football.Statistics.Interfaces;
 namespace Football.Projections.Services
 {
     public class RegressionModelService(IPlayersService playerService, IAdvancedStatisticsService advancedStatisticsService, IMarketShareService marketShareService,
-        IOptionsMonitor<Season> season, IStatisticsService statisticsService) : IRegressionModelService
+        IOptionsMonitor<Season> season) : IRegressionModelService
     {
         private readonly Season _season = season.CurrentValue;
-
-        public QBModelSeason QBModelSeason(SeasonDataQB stat)
-        {
-            return new QBModelSeason
-            {
-                PlayerId = stat.PlayerId,
-                Season = stat.Season,
-                PassingAttemptsPerGame = stat.Attempts / stat.Games,
-                PassingYardsPerGame = stat.Yards / stat.Games,
-                PassingTouchdownsPerGame = stat.TD / stat.Games,
-                RushingAttemptsPerGame = stat.RushingAttempts / stat.Games,
-                RushingYardsPerGame = stat.RushingYards / stat.Games,
-                RushingTouchdownsPerGame = stat.RushingTD / stat.Games,
-                SacksPerGame = stat.Sacks / stat.Games
-            };
-        }
         public async Task<QBModelWeek> QBModelWeek(WeeklyDataQB stat, SnapCount snaps)
         {
             var projection = await playerService.GetSeasonProjection(_season.CurrentSeason, stat.PlayerId);
@@ -168,22 +152,6 @@ namespace Football.Projections.Services
                 TotalTDPerGame = stat.SpecialTD + stat.DefensiveTD,
                 SaftiesPerGame = stat.Safties,
                 YardsAllowedPerGame = ya,
-            };
-        }
-
-        public async Task<KModelWeek> KModelWeek(WeeklyDataK stat)
-        {
-            var playerTeam = await playerService.GetPlayerTeam(_season.CurrentSeason, stat.PlayerId);
-            return new KModelWeek
-            {
-                PlayerId = stat.PlayerId,
-                Season = stat.Season,
-                Week = stat.Week,
-                ExtraPointAttsPerGame = stat.ExtraPoints,
-                ExtraPointsPerGame = stat.ExtraPointAttempts,
-                FieldGoalsPerGame = stat.FieldGoals,
-                FieldGoalAttemptsPerGame = stat.FieldGoalAttempts,
-                FiftyPlusFieldGoalsPerGame = stat.Fifty,
             };
         }
     }
