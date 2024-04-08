@@ -16,7 +16,7 @@ using AutoMapper;
 
 namespace Football.Projections.Services
 {
-    public class SeasonProjectionService(IRegressionModelService regressionService, IFantasyDataService fantasyService,
+    public class SeasonProjectionService(IFantasyDataService fantasyService,
     IMemoryCache cache, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
     IStatisticsService statisticsService, IOptionsMonitor<Season> season, IPlayersService playersService,
     IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService,
@@ -140,7 +140,7 @@ namespace Football.Projections.Services
             {
                 var stats = (await statisticsService.GetSeasonData<SeasonDataRB>(Position.RB, player.PlayerId, true));
                 if (stats.Count > 0)
-                    rbModel.Add(regressionService.RBModelSeason(statCalculator.CalculateStatProjection(stats)));
+                    rbModel.Add(mapper.Map<RBModelSeason>(statCalculator.CalculateStatProjection(stats)));
             }
             return rbModel;
         }
@@ -152,7 +152,7 @@ namespace Football.Projections.Services
             {
                 var stats = (await statisticsService.GetSeasonData<SeasonDataWR>(Position.WR, player.PlayerId, true));
                 if (stats.Count > 0)
-                    wrModel.Add(regressionService.WRModelSeason(statCalculator.CalculateStatProjection(stats)));
+                    wrModel.Add(mapper.Map<WRModelSeason>(statCalculator.CalculateStatProjection(stats)));
             }
             return wrModel;
         }
@@ -164,7 +164,7 @@ namespace Football.Projections.Services
             {
                 var stats = (await statisticsService.GetSeasonData<SeasonDataTE>(Position.TE, player.PlayerId, true));
                 if (stats.Count > 0)
-                    teModel.Add(regressionService.TEModelSeason(statCalculator.CalculateStatProjection(stats)));
+                    teModel.Add(mapper.Map<TEModelSeason>(statCalculator.CalculateStatProjection(stats)));
             }
             return teModel;
         }

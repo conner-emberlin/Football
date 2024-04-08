@@ -2,6 +2,7 @@
 using Football.Enums;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
+using Football.Fantasy.Analysis.Interfaces;
 using Football.Models;
 using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
@@ -14,12 +15,12 @@ using AutoMapper;
 
 namespace Football.Projections.Services
 {
-    public class WeeklyProjectionService(IRegressionModelService regressionService, IFantasyDataService fantasyService,
+    public class WeeklyProjectionService(IFantasyDataService fantasyService,
     IMemoryCache cache,IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
     IStatisticsService statisticsService, IOptionsMonitor<Season> season,
     IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository,
     IOptionsMonitor<WeeklyTunings> weeklyTunings, ISettingsService settingsService, IOptionsMonitor<ProjectionLimits> settings,
-    IMapper mapper) : IProjectionService<WeekProjection>
+    IMapper mapper, IAdvancedStatisticsService advancedStats, IMarketShareService shareService) : IProjectionService<WeekProjection>
     {
         private readonly Season _season = season.CurrentValue;
         private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
@@ -163,7 +164,14 @@ namespace Football.Projections.Services
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId);
                 var snaps = await statisticsService.GetSnapCounts(player.PlayerId);
                 if (stats.Count > 0 && snaps.Count > 0)
-                    qbModel.Add(await regressionService.QBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek), statCalculator.CalculateWeeklyAverage(snaps, currentWeek)));
+                {
+                    var model = mapper.Map<QBModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek));
+                    model.SnapsPerGame = (statCalculator.CalculateWeeklyAverage(snaps, currentWeek)).Snaps;
+                    model.PasserRating = await advancedStats.PasserRating(player.PlayerId);
+                    model.FiveThirtyEightValue = await advancedStats.FiveThirtyEightQBValue(player.PlayerId);
+                    model.ProjectedPoints = await playersService.GetSeasonProjection(_season.CurrentSeason, player.PlayerId);
+                    qbModel.Add(model);
+                }                   
             }
             return qbModel;
         }
@@ -176,7 +184,13 @@ namespace Football.Projections.Services
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, player.PlayerId);
                 var snaps = await statisticsService.GetSnapCounts(player.PlayerId);
                 if (stats.Count > 0 && snaps.Count > 0)
-                    rbModel.Add(await regressionService.RBModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek), statCalculator.CalculateWeeklyAverage(snaps, currentWeek)));
+                {
+                    var model = mapper.Map<RBModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek));
+                    model.SnapsPerGame = (statCalculator.CalculateWeeklyAverage(snaps, currentWeek)).Snaps;
+                    model.RBTargetShare = (await shareService.GetTargetShare(player.PlayerId)).RBTargetShare;
+                    model.ProjectedPoints = await playersService.GetSeasonProjection(_season.CurrentSeason, player.PlayerId);
+                    rbModel.Add(model);
+                }
             }
             return rbModel;
         }
@@ -189,7 +203,12 @@ namespace Football.Projections.Services
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, player.PlayerId);
                 var snaps = await statisticsService.GetSnapCounts(player.PlayerId);
                 if (stats.Count > 0 && snaps.Count > 0)
-                    wrModel.Add(await regressionService.WRModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek), statCalculator.CalculateWeeklyAverage(snaps, currentWeek)));
+                {
+                    var model = mapper.Map<WRModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek));
+                    model.SnapsPerGame = (statCalculator.CalculateWeeklyAverage(snaps, currentWeek)).Snaps;
+                    model.ProjectedPoints = await playersService.GetSeasonProjection(_season.CurrentSeason, player.PlayerId);
+                    wrModel.Add(model);
+                }
             }
             return wrModel;
         }
@@ -202,7 +221,12 @@ namespace Football.Projections.Services
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, player.PlayerId);
                 var snaps = await statisticsService.GetSnapCounts(player.PlayerId);
                 if (stats.Count > 0 && snaps.Count > 0)
-                    teModel.Add(await regressionService.TEModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek), statCalculator.CalculateWeeklyAverage(snaps, currentWeek)));
+                {
+                    var model = mapper.Map<TEModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek));
+                    model.SnapsPerGame = (statCalculator.CalculateWeeklyAverage(snaps, currentWeek)).Snaps;
+                    model.ProjectedPoints = await playersService.GetSeasonProjection(_season.CurrentSeason, player.PlayerId);
+                    teModel.Add(model);
+                }
             }
             return teModel;
         }
@@ -215,7 +239,11 @@ namespace Football.Projections.Services
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataDST>(Position.DST, player.PlayerId);
                 if (stats.Count > 0)
-                    dstModel.Add(await regressionService.DSTModelWeek(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
+                {
+                    var model = mapper.Map<DSTModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek));
+                    model.YardsAllowedPerGame = await advancedStats.YardsAllowedPerGame(await playersService.GetTeamId(player.PlayerId));
+                    dstModel.Add(model);
+                }
             }
             return dstModel;
         }
