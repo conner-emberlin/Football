@@ -23,12 +23,81 @@
 <button class="button-22" role="button" @onclick="GetPlayers">
     Submit
 </button>
-@if (players.Any())
+@if (players.Any() && Position != "Rookies")
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <button class="button-22" role="button" @onclick="PlayersInactivated">
         Update
     </button>
+}
+else if(Position== "Rookies")
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <button class="button-22" role="button" @onclick="AddRookie">
+        Add
+    </button>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    @if (rookieAdded)
+    {
+        <text>Rookie added</text>
+    }
+    else if (youTriedToAddRookie && !rookieAdded)
+    {
+        <text>Bad Request. Try again.</text>
+    }
+    @if (addRookie)
+    {
+        <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>                   
+                    <th>Name</th>
+                    <th>Pos</th>
+                    <th>Active</th>
+                    <th>Team</th>
+                    <th>Season</th>
+                    <th>Pick#</th>
+                    <th>Age</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Name" @bind="@newRookie.Name" />
+                    </td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Pos" @bind="@newRookie.Position" />
+                    </td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Active" @bind="@newRookie.Active" />
+                    </td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Team" @bind="@newRookie.TeamDrafted" />
+                    </td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Season" @bind="@newRookie.RookieSeason" />
+                    </td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Pick#" @bind="@newRookie.DraftPosition" />
+                    </td>
+                    <td>
+                      <input type="text" class="form-control" placeholder="Age" @bind="@newRookie.DeclareAge" />
+                    </td>
+                    <td>
+                       <button type="button" class="btn btn-link" @onclick="() => CancelRookieAdd()">
+                          <i class="oi oi-circle-x" />
+                       </button>
+                       <button type="button" class="btn btn-link" @onclick="() => AddRookie(newRookie)">
+                          <i class="oi oi-circle-check" />
+                       </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        
+    }
 }
 
 @if (playersUpdated > 0)
@@ -124,9 +193,12 @@ else if (rookies.Any())
     List<int> inactivePlayers = [];
     int playersUpdated { get; set; }
 
-    bool rookieAdded { get; set; }
+    bool addRookie { get; set; } = false;
+    bool rookieAdded { get; set; } = false;
+    bool youTriedToAddRookie { get; set; } = false;
 
     List<RookiePlayerModel>? rookies = [];
+    RookiePlayerModel newRookie = new();
 
     public void SetPosition(ChangeEventArgs args)
     {
@@ -137,6 +209,9 @@ else if (rookies.Any())
             rookies.Clear();
         inactivePlayers.Clear();
         playersUpdated = 0;
+        addRookie = false;
+        rookieAdded = false;
+        youTriedToAddRookie = false;
     }
 
     public async Task GetPlayers()
@@ -258,7 +333,36 @@ else if (rookies.Any())
             inactivePlayers.Add(playerId);
     }
 
-
+    private void AddRookie() => addRookie = !addRookie;
+    private async Task AddRookie(RookiePlayerModel newRookie)
+    {
+        addRookie = false;
+        youTriedToAddRookie = true;
+        var json = JsonSerializer.Serialize(newRookie);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var client = ClientFactory.CreateClient();
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/add-rookie")
+            {
+                Content = content
+            };
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = response.Content.ReadAsStream();
+            rookieAdded = await JsonSerializer.DeserializeAsync<bool>(responseStream, options);
+            newRookie = new RookiePlayerModel { };
+            await GetPlayers();
+        }
+        else rookieAdded = false;
+    }
+    private void CancelRookieAdd()
+    {
+        addRookie = false;
+        newRookie = new RookiePlayerModel { };
+        youTriedToAddRookie = false;
+        shouldRender = true;
+    }
 }
 
 

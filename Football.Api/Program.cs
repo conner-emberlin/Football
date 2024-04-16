@@ -50,10 +50,12 @@ string dboFoootballConnectionString = builder.Configuration.GetConnectionString(
 using var log = new LoggerConfiguration().WriteTo.Seq("http://localhost:5341/").CreateLogger();
 MemoryCacheEntryOptions cache = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(120)).SetAbsoluteExpiration(TimeSpan.FromSeconds(3600)).SetPriority(CacheItemPriority.Normal);
 
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
+
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IScraperService, ScraperService>();
 builder.Services.AddScoped<IUploadWeeklyDataService, UploadWeeklyDataService>();
@@ -92,7 +94,6 @@ builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballC
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
 builder.Services.AddSingleton<JsonOptions>();
-
 
 builder.Services.Configure<Season>(builder.Configuration.GetSection("Season"));
 builder.Services.Configure<ReplacementLevels>(builder.Configuration.GetSection("ReplacementLevels"));
