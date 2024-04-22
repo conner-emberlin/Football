@@ -11,6 +11,7 @@
 @using Football.UI.Helpers;
 
 @inject IHttpClientFactory ClientFactory
+@inject NavigationManager NavigationManager
 
 @if (!badRequestError && players.Any())
 {
@@ -47,13 +48,22 @@ else if (youTried && badRequestError)
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="spinner"></div>
 }
+else if (!loading && !playerSelected)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <button class="button-22" role="button" @onclick="@(()=>NavigationManager.NavigateTo("/ManagePlayers"))">
+        Manage
+    </button>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <button class="button-22" role="button" @onclick="@(()=>NavigationManager.NavigateTo("/Injuries"))">
+        Injuries
+    </button>
+}
 @if(!playerSelected && showTrending && trendingPlayers.Any())
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-
     <h5>Trending Players</h5>
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
