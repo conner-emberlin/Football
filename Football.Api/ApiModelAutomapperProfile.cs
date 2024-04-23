@@ -13,10 +13,9 @@ namespace Football.Api
                     .ForMember(rpm => rpm.TeamDrafted, o => o.Ignore())
                     .ForMember(rpm => rpm.DeclareAge, o => o.Ignore())
                     .ForMember(rpm => rpm.RookieSeason, o => o.Ignore());
-            CreateMap<RookiePlayerModel, Rookie>()
-                    .ReverseMap()
-                    .ForMember(rpm => rpm.Name, o => o.Ignore())
-                    .ForMember(rpm => rpm.Active, o => o.Ignore());
+
+            CreateMap<RookiePlayerModel, Rookie>();
+            CreateMap<Rookie, RookiePlayerModel>();
         }
     }
 }
