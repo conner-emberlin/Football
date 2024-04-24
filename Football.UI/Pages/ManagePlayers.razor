@@ -37,13 +37,9 @@ else if(Position== "Rookies")
         Add
     </button>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
-    @if (rookieAdded)
+    @if (rookieAdded && !addRookie)
     {
         <text>Rookie added</text>
-    }
-    else if (youTriedToAddRookie && !rookieAdded)
-    {
-        <text>Bad Request. Try again.</text>
     }
     @if (addRookie)
     {
@@ -333,7 +329,11 @@ else if (rookies.Any())
             inactivePlayers.Add(playerId);
     }
 
-    private void AddRookie() => addRookie = !addRookie;
+    private void AddRookie() { 
+
+        addRookie = !addRookie;
+        newRookie = new();
+    }
     private async Task AddRookie(RookiePlayerModel newRookie)
     {
         addRookie = false;
