@@ -1,8 +1,12 @@
 ﻿using Moq;
 using Moq.AutoMock;
+using AutoMapper;
 using Football.Players.Services;
 using Football.Players.Interfaces;
 using Football.Players.Models;
+using Football.Models;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Football.Tests
 {
@@ -10,32 +14,78 @@ namespace Football.Tests
     {
         private readonly AutoMocker _mock;
         private readonly PlayersService _sut;
-        private readonly Mock<IPlayersRepository> _mockPlayersRepository;
+        private readonly Season _season;
+        private readonly TeamMap _teamMap;
+        private readonly Player _playerDST;
+        private readonly int _playerId = 1;
+        private readonly string _team = "TM";
+        private readonly int _teamId = 10;
 
-        private readonly int _season = 2023;
+        private readonly Mock<IPlayersRepository> _mockPlayersRepository;
+        private readonly Mock<IOptionsMonitor<Season>> _mockSeason;
+        private readonly Mock<IMemoryCache> _mockMemoryCache;
+        private readonly Mock<ISettingsService> _mockSettingsService;
+        private readonly Mock<IMapper> _mapper;
 
         public PlayersServiceShould()
         {
             _mock = new AutoMocker();
+            _season = new Season { CurrentSeason = 2023 };
+            _teamMap = new() { TeamId = _teamId, Team = _team, TeamDescription = "Team Name", PlayerId = _playerId };
+            _playerDST = new() { Name = "Team Name", Active = 1, PlayerId = _playerId, Position = "DST" };
+
             _mockPlayersRepository = _mock.GetMock<IPlayersRepository>();
-            _sut = _mock.CreateInstance<PlayersService>();
+            _mockSeason = _mock.GetMock<IOptionsMonitor<Season>>();
+            _mockMemoryCache = _mock.GetMock<IMemoryCache>();
+            _mockSettingsService = _mock.GetMock<ISettingsService>();
+            _mapper = _mock.GetMock<IMapper>();
+
+            _mockSeason.Setup(s => s.CurrentValue).Returns(_season);
+            _mockPlayersRepository.Setup(pr => pr.GetPlayer(_playerId)).ReturnsAsync(_playerDST);
+            _mockPlayersRepository.Setup(s => s.GetTeam(_teamId)).ReturnsAsync(_teamMap);
+            _mockPlayersRepository.Setup(ps => ps.GetTeamId(_playerId)).ReturnsAsync(_teamId);
+            _mockPlayersRepository.Setup(ps => ps.GetTeamId(_teamMap.Team)).ReturnsAsync(_teamId);
+
+            _sut = new PlayersService(_mockPlayersRepository.Object, _mockMemoryCache.Object, _mockSeason.Object, _mockSettingsService.Object, _mapper.Object);
         }
 
         [Fact]
         public async Task GetPlayerTeam_DST_ReturnsNameAsDescriptionAndIsNotNull()
         {
-            //Arrange
-            var player = new Player { Name = "Team Name", Active = 1, PlayerId = 1, Position = "DST" };
-            _mockPlayersRepository.Setup(pr => pr.GetPlayer(1)).ReturnsAsync(player);
-            _mockPlayersRepository.Setup(ps => ps.GetTeamId(1)).ReturnsAsync(10);
-            _mockPlayersRepository.Setup(ps => ps.GetTeam(10)).ReturnsAsync(new TeamMap { TeamId = 10, Team = "TM", TeamDescription = "Team Name", PlayerId = 1 });
-
-            //Act
-            var actual = await _sut.GetPlayerTeam(_season, 1);
-
-            //Assert
+            var actual = await _sut.GetPlayerTeam(_season.CurrentSeason, _playerId);
             Assert.NotNull(actual);
-            Assert.Equal("Team Name", actual.Name);
+            Assert.Equal(_playerDST.Name, actual.Name);
+        }
+
+        [Fact] 
+        public async Task GetPlayersByTeam_IncludesFormerPlayers()
+        {
+            List<PlayerTeam> playerTeams = [];
+            List<InSeasonTeamChange> teamChanges = [];
+            var formerPlayer = new Player { Name = "Former", PlayerId = 3, Active = 1, Position = "QB" };
+            var inSeasonTeamChange = new InSeasonTeamChange { PlayerId = 3, PreviousTeam = _team, NewTeam = "NEW", Season = _season.CurrentSeason, WeekEffective = 10 };
+            teamChanges.Add(inSeasonTeamChange);
+
+            _mockPlayersRepository.Setup(pr => pr.GetPlayersByTeam(_teamMap.Team, It.IsAny<int>())).ReturnsAsync(playerTeams);
+            _mockPlayersRepository.Setup(ps => ps.GetInSeasonTeamChanges(It.IsAny<int>())).ReturnsAsync(teamChanges);
+            _mockPlayersRepository.Setup(pr => pr.GetPlayer(inSeasonTeamChange.PlayerId)).ReturnsAsync(formerPlayer);
+            
+            var expected = new PlayerTeam { Name = "Former", PlayerId = 3, Season = _season.CurrentSeason, Team = _team };
+            var actual = await _sut.GetPlayersByTeam(_team);
+
+            Assert.Contains(actual, pt => pt.Name == expected.Name && pt.Team == expected.Team && pt.PlayerId == expected.PlayerId);
+        }
+
+        [Fact]
+        public async Task GetPlayersByTeam_IncludesTeamDST()
+        {
+            List<PlayerTeam> playerTeams = [];
+            List<InSeasonTeamChange> teamChanges = [];
+            _mockPlayersRepository.Setup(pr => pr.GetPlayersByTeam(_teamMap.Team, It.IsAny<int>())).ReturnsAsync(playerTeams);
+            _mockPlayersRepository.Setup(ps => ps.GetInSeasonTeamChanges(It.IsAny<int>())).ReturnsAsync(teamChanges);
+
+            var actual = await _sut.GetPlayersByTeam(_team);
+            Assert.Contains(actual, pt => pt.PlayerId == _playerId && pt.Team == _team);
         }
     }
 }
