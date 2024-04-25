@@ -23,11 +23,10 @@ namespace Football.Projections.Services
             var projections = await weekProjection.GetPlayerProjections(playerId);
             if (projections != null)
             {
-                var fantasy = await fantasyService.GetWeeklyFantasy(playerId);
+                var fantasy = (await fantasyService.GetWeeklyFantasy(playerId)).ToDictionary(f => f.Week);
                 foreach (var projection in projections)
                 {
-                    var weeklyFantasy = fantasy.FirstOrDefault(w => w.Week == projection.Week);
-                    if (weeklyFantasy != null && projection.ProjectedPoints > 0)
+                    if (fantasy[projection.Week] != null && projection.ProjectedPoints > 0)
                     {
                         errors.Add(new WeeklyProjectionError
                         {
@@ -37,8 +36,8 @@ namespace Football.Projections.Services
                             PlayerId = playerId,
                             Name = projection.Name,
                             ProjectedPoints = projection.ProjectedPoints,
-                            FantasyPoints = weeklyFantasy.FantasyPoints,
-                            Error = Math.Abs(projection.ProjectedPoints - weeklyFantasy.FantasyPoints)
+                            FantasyPoints = fantasy[projection.Week].FantasyPoints,
+                            Error = Math.Abs(projection.ProjectedPoints - fantasy[projection.Week].FantasyPoints)
                         });
                     }
                 }
@@ -143,9 +142,9 @@ namespace Football.Projections.Services
         {
             List<SeasonFlex> flexRankings = [];
             var rankings = (await seasonProjection.GetProjections(Position.QB))
-                           .Concat(await seasonProjection.GetProjections(Position.RB))
-                           .Concat(await seasonProjection.GetProjections(Position.WR))
-                           .Concat(await seasonProjection.GetProjections(Position.TE)).ToList();
+                           .Union(await seasonProjection.GetProjections(Position.RB))
+                           .Union(await seasonProjection.GetProjections(Position.WR))
+                           .Union(await seasonProjection.GetProjections(Position.TE)).ToList();
             foreach (var rank in rankings)
             {
                 if (Enum.TryParse(rank.Position, out Position position))
@@ -221,7 +220,7 @@ namespace Football.Projections.Services
             var rbProjections = (await weekProjection.GetProjections(Position.RB)).ToList();
             var wrProjections = (await weekProjection.GetProjections(Position.WR)).ToList();
             var teProjections = (await weekProjection.GetProjections(Position.TE)).ToList();
-            var rankings = rbProjections.Concat(wrProjections).Concat(teProjections);
+            var rankings = rbProjections.Union(wrProjections).Union(teProjections);
             return rankings.OrderByDescending(r => r.ProjectedPoints).ToList();
         }
         private static double GetMeanSquaredError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)

@@ -84,11 +84,12 @@ namespace Football.Projections.Services
             var dependentVector = matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
             var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
             var results = regressorMatrix * coefficients;
-            
+            var players = (await playersService.GetPlayersByPosition(position)).ToDictionary(p => p.PlayerId);
+
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = (int)settingsService.GetValueFromModel(model[i], Model.PlayerId);
-                var player = await playersService.GetPlayer(playerId);                
+                var player = players[playerId];               
                 if (player != null && player.Position != Position.DST.ToString() && player.Position != Position.K.ToString())
                 {                    
                     if (player.Active == 1)
