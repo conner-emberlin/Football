@@ -1,6 +1,8 @@
 ﻿using Moq;
 using Moq.AutoMock;
 using AutoMapper;
+using Xunit;
+using Football.Players;
 using Football.Players.Services;
 using Football.Players.Interfaces;
 using Football.Players.Models;
@@ -17,6 +19,7 @@ namespace Football.Tests
         private readonly Season _season;
         private readonly TeamMap _teamMap;
         private readonly Player _playerDST;
+        private readonly IMapper _mapper;
         private readonly int _playerId = 1;
         private readonly string _team = "TM";
         private readonly int _teamId = 10;
@@ -25,7 +28,6 @@ namespace Football.Tests
         private readonly Mock<IOptionsMonitor<Season>> _mockSeason;
         private readonly Mock<IMemoryCache> _mockMemoryCache;
         private readonly Mock<ISettingsService> _mockSettingsService;
-        private readonly Mock<IMapper> _mapper;
 
         public PlayersServiceShould()
         {
@@ -33,12 +35,12 @@ namespace Football.Tests
             _season = new Season { CurrentSeason = 2023 };
             _teamMap = new() { TeamId = _teamId, Team = _team, TeamDescription = "Team Name", PlayerId = _playerId };
             _playerDST = new() { Name = "Team Name", Active = 1, PlayerId = _playerId, Position = "DST" };
+            _mapper = new Mapper(new MapperConfiguration(cfg => cfg.AddProfile(new AutomapperProfile())));
 
             _mockPlayersRepository = _mock.GetMock<IPlayersRepository>();
             _mockSeason = _mock.GetMock<IOptionsMonitor<Season>>();
             _mockMemoryCache = _mock.GetMock<IMemoryCache>();
             _mockSettingsService = _mock.GetMock<ISettingsService>();
-            _mapper = _mock.GetMock<IMapper>();
 
             _mockSeason.Setup(s => s.CurrentValue).Returns(_season);
             _mockPlayersRepository.Setup(pr => pr.GetPlayer(_playerId)).ReturnsAsync(_playerDST);
@@ -46,7 +48,7 @@ namespace Football.Tests
             _mockPlayersRepository.Setup(ps => ps.GetTeamId(_playerId)).ReturnsAsync(_teamId);
             _mockPlayersRepository.Setup(ps => ps.GetTeamId(_teamMap.Team)).ReturnsAsync(_teamId);
 
-            _sut = new PlayersService(_mockPlayersRepository.Object, _mockMemoryCache.Object, _mockSeason.Object, _mockSettingsService.Object, _mapper.Object);
+            _sut = new PlayersService(_mockPlayersRepository.Object, _mockMemoryCache.Object, _mockSeason.Object, _mockSettingsService.Object, _mapper);
         }
 
         [Fact]

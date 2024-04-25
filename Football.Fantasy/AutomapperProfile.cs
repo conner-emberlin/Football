@@ -37,11 +37,11 @@ namespace Football.Fantasy
                      .ForMember(sf => sf.Position, o => o.MapFrom(sf => Enums.Position.TE.ToString()))
                      .ForMember(sf => sf.Games, o => o.MapFrom(sf => 1))
                      .ForMember(sf => sf.FantasyPoints, o => o.Ignore());
-            CreateMap<WeeklyDataQB, WeeklyFantasy>()
+            CreateMap<WeeklyDataDST, WeeklyFantasy>()
                      .ForMember(sf => sf.Position, o => o.MapFrom(sf => Enums.Position.DST.ToString()))
                      .ForMember(sf => sf.Games, o => o.MapFrom(sf => 1))
                      .ForMember(sf => sf.FantasyPoints, o => o.Ignore());
-            CreateMap<WeeklyDataQB, WeeklyFantasy>()
+            CreateMap<WeeklyDataK, WeeklyFantasy>()
                     .ForMember(sf => sf.Position, o => o.MapFrom(sf => Enums.Position.K.ToString()))
                     .ForMember(sf => sf.Games, o => o.MapFrom(sf => 1))
                     .ForMember(sf => sf.FantasyPoints, o => o.Ignore());
