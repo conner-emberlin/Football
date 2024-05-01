@@ -1,5 +1,4 @@
 ﻿using Football.Models;
-using Football.Data.Models;
 using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
 using Football.Statistics.Interfaces;

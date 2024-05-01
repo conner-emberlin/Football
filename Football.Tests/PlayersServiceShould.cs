@@ -20,6 +20,7 @@ namespace Football.Tests
         private readonly TeamMap _teamMap;
         private readonly Player _playerDST;
         private readonly IMapper _mapper;
+
         private readonly int _playerId = 1;
         private readonly string _team = "TM";
         private readonly int _teamId = 10;
