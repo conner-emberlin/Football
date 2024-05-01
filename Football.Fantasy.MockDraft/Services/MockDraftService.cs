@@ -1,5 +1,4 @@
 ﻿using Football.Fantasy.MockDraft.Models;
-using Football.Players.Models;
 using Football.Fantasy.MockDraft.Interfaces;
 using Football.Enums;
 using Football.Models;
@@ -8,44 +7,25 @@ using Football.Data.Models;
 
 namespace Football.Fantasy.MockDraft.Services
 {
-    public class MockDraftService : IMockDraftService
+    public class MockDraftService(IMockDraftRepository mockDraftRepository, IOptionsMonitor<MockDraftSettings> settings, IOptionsMonitor<Season> season) : IMockDraftService
     {
-        private readonly IMockDraftRepository _mockDraftRepository;
-        private readonly MockDraftSettings _settings;
-        private readonly Season _season;
-        public MockDraftService(IMockDraftRepository mockDraftRepository, IOptionsMonitor<MockDraftSettings> settings, IOptionsMonitor<Season> season) 
-        {
-            _mockDraftRepository = mockDraftRepository;
-            _settings = settings.CurrentValue;
-            _season = season.CurrentValue;
-        }
+        private readonly MockDraftSettings _settings = settings.CurrentValue;
+        private readonly Season _season = season.CurrentValue;
 
         public async Task<List<Position>> GetTeamNeeds(FantasyTeam team)
         {
             return await Task.Run(() =>
             {
-                List<Position> needs = new();
+                List<Position> needs = [];
                 var qbCount = team.Players.Count(p => p.Position == Position.QB.ToString());
                 var rbCount = team.Players.Count(p => p.Position == Position.RB.ToString());
                 var wrCount = team.Players.Count(p => p.Position == Position.WR.ToString());
                 var teCount = team.Players.Count(p => p.Position == Position.TE.ToString());
 
-                if (qbCount < _settings.QBStarters)
-                {
-                    needs.Add(Position.QB);
-                }
-                if (rbCount < _settings.RBStarters)
-                {
-                    needs.Add(Position.RB);
-                }
-                if (wrCount < _settings.WRStarters)
-                {
-                    needs.Add(Position.WR);
-                }
-                if (teCount < _settings.TEStarters)
-                {
-                    needs.Add(Position.TE);
-                }
+                if (qbCount < _settings.QBStarters) needs.Add(Position.QB);
+                if (rbCount < _settings.RBStarters) needs.Add(Position.RB);
+                if (wrCount < _settings.WRStarters) needs.Add(Position.WR);
+                if (teCount < _settings.TEStarters) needs.Add(Position.TE);
                 return needs;
             });
         }
@@ -54,23 +34,17 @@ namespace Football.Fantasy.MockDraft.Services
         {
             var t = await Task.Run(() =>
             {
-                if (teamNeeds.Any())
+                if (teamNeeds.Count > 0)
                 {
-                    List<SeasonADP> playerChoice = new();
+                    List<SeasonADP> playerChoice = [];
                     foreach (var need in teamNeeds)
                     {
                         var tempP = availablePlayers.Where(p => p.Position == need.ToString()).Take(3).ToList();
-                        foreach (var t in tempP)
-                        {
-                            playerChoice.Add(t);
-                        }
+                        foreach (var t in tempP) playerChoice.Add(t);
                     }
                     return playerChoice;
                 }
-                else
-                {
-                    return availablePlayers.Take(5).ToList();
-                }
+                return availablePlayers.Take(5).ToList();
             });
             return t;
         }
@@ -82,11 +56,11 @@ namespace Football.Fantasy.MockDraft.Services
                 return players.ElementAt(rnd.Next(players.Count - 1));
             });
         }
-        public async Task<List<SeasonADP>> GetAvailablePlayers(Mock mock) => await _mockDraftRepository.GetAvailablePlayers(mock, _season.CurrentSeason);
-        public async Task<int> AddPlayerToTeam(MockDraftResults result) => await _mockDraftRepository.AddPlayerToTeam(result);
+        public async Task<List<SeasonADP>> GetAvailablePlayers(Mock mock) => await mockDraftRepository.GetAvailablePlayers(mock, _season.CurrentSeason);
+        public async Task<int> AddPlayerToTeam(MockDraftResults result) => await mockDraftRepository.AddPlayerToTeam(result);
         public async Task<Mock> CreateMockDraft(MockDraftParameters param)
         {
-            var mockDraftId = await _mockDraftRepository.CreateMockDraft(param.TeamCount, param.UserPosition);
+            var mockDraftId = await mockDraftRepository.CreateMockDraft(param.TeamCount, param.UserPosition);
             if (mockDraftId > 0)
             {
                 var teams = await PopulateFantasyTeams(mockDraftId, param.UserPosition, param.TeamCount, param.TeamName);
@@ -131,6 +105,6 @@ namespace Football.Fantasy.MockDraft.Services
             }
             return teams;
         }
-        public async Task<int> CreateFantasyTeam(int mockDraftId, int draftPosition, string teamName) => await _mockDraftRepository.CreateFantasyTeam(mockDraftId, draftPosition, teamName);
+        public async Task<int> CreateFantasyTeam(int mockDraftId, int draftPosition, string teamName) => await mockDraftRepository.CreateFantasyTeam(mockDraftId, draftPosition, teamName);
     }
 }
