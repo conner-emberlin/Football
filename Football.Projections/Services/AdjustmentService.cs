@@ -91,31 +91,34 @@ namespace Football.Projections.Services
 
         private async Task<List<WeekProjection>> MatchupAdjustment(List<WeekProjection> weekProjections)
         {
-            var t = Enum.TryParse(weekProjections.First().Position, out Position position);
+            _= Enum.TryParse(weekProjections.First().Position, out Position position);
             var matchupRanks = await mathupAnalysisService.PositionalMatchupRankings(position);
-            var avgMatchup = matchupRanks.ElementAt((int)Math.Round((double)(matchupRanks.Count/2)));
-            foreach (var w in weekProjections)
+            if (matchupRanks.Count > 0)
             {
-                var team = await playerService.GetPlayerTeam(_season.CurrentSeason, w.PlayerId);
-                if (team != null)
+                var avgMatchup = matchupRanks.ElementAt((int)Math.Floor((double)(matchupRanks.Count / 2)));
+                foreach (var w in weekProjections)
                 {
-                    var teamId = await playerService.GetTeamId(team.Team);
-                    var matchup = (await playerService.GetTeamGames(teamId)).FirstOrDefault(m => m.Week == w.Week);
-                    if (matchup != null && matchup.OpposingTeam != "BYE")
+                    var team = await playerService.GetPlayerTeam(_season.CurrentSeason, w.PlayerId);
+                    if (team != null)
                     {
-                        var opponentRank = matchupRanks.FirstOrDefault(mr => mr.Team.TeamId == matchup.OpposingTeamId);
-                        if (opponentRank != null)
+                        var teamId = await playerService.GetTeamId(team.Team);
+                        var matchup = (await playerService.GetTeamGames(teamId)).FirstOrDefault(m => m.Week == w.Week);
+                        if (matchup != null && matchup.OpposingTeam != "BYE")
                         {
-                            var ratio = opponentRank.AvgPointsAllowed / avgMatchup.AvgPointsAllowed;
-                            var tamperedRatio = ratio > 1 ? Math.Min(ratio, _weeklyTunings.TamperedMax) : Math.Max(ratio, _weeklyTunings.TamperedMin);
-                            w.ProjectedPoints = w.Position != Position.DST.ToString() ? w.ProjectedPoints * (tamperedRatio + 1) / 2 : tamperedRatio * w.ProjectedPoints;
+                            var opponentRank = matchupRanks.FirstOrDefault(mr => mr.Team.TeamId == matchup.OpposingTeamId);
+                            if (opponentRank != null)
+                            {
+                                var ratio = opponentRank.AvgPointsAllowed / avgMatchup.AvgPointsAllowed;
+                                var tamperedRatio = ratio > 1 ? Math.Min(ratio, _weeklyTunings.TamperedMax) : Math.Max(ratio, _weeklyTunings.TamperedMin);
+                                w.ProjectedPoints = w.Position != Position.DST.ToString() ? w.ProjectedPoints * (tamperedRatio + 1) / 2 : tamperedRatio * w.ProjectedPoints;
+                            }
                         }
+                        else
+                            w.ProjectedPoints = 0;
                     }
                     else
                         w.ProjectedPoints = 0;
                 }
-                else
-                    w.ProjectedPoints = 0;
             }
             return weekProjections;
         }

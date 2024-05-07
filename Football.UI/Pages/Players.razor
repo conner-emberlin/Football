@@ -840,6 +840,7 @@ else if (!loading && !playerSelected)
     {
         loading = true;
         shouldRender = true;
+        
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players");
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
