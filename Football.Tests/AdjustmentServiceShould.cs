@@ -20,7 +20,15 @@ namespace Football.Tests
         private readonly Position _position = Position.QB;
         private readonly string _team = "TM";
         private readonly int _teamId = 10;
+        private readonly int _week = 11;
+        private readonly int _projectedPoints = 100;
+        private readonly MatchupRanking _m1;
+        private readonly MatchupRanking _m2;
+        private readonly MatchupRanking _m3;
         private readonly TeamMap _teamMap;
+        private readonly TeamMap _tm1;
+        private readonly TeamMap _tm2;
+        private readonly TeamMap _tm3;
         private readonly PlayerTeam _playerTeam;
 
         private readonly AutoMocker _mock;
@@ -44,6 +52,14 @@ namespace Football.Tests
             _tunings = new Tunings { RBFloor = 160, LeadRBFactor = 2.4, Weight = 0.63, SecondYearWRLeap = 1.04, SecondYearQBLeap = 1.04, SecondYearRBLeap = 1.04, NewQBFloor = 0.08, NewQBCeiling = 1.20 };
             _weeklyTunings = new WeeklyTunings { RecentWeekWeight = 0.55, ProjectionWeight = 0.75, TamperedMin = 0.8, TamperedMax = 1.2 };
             _teamMap = new() { Team = _team, TeamId = _teamId, PlayerId = 20, TeamDescription = "Team" };
+
+            _tm1 = new() { Team = "TM1", TeamId = 11, PlayerId = 20, TeamDescription = "Team1" };
+            _tm2 = new() { Team = "TM2", TeamId = 12, PlayerId = 21, TeamDescription = "Team2" };
+            _tm3 = new() { Team = "TM3", TeamId = 13, PlayerId = 22, TeamDescription = "Team3" };
+
+            _m1 = new() { Team = _tm1, GamesPlayed = 10, AvgPointsAllowed = 10, PointsAllowed = 100, Position = _position.ToString() };
+            _m2 = new() { Team = _tm2, GamesPlayed = 10, AvgPointsAllowed = 20, PointsAllowed = 200, Position = _position.ToString() };
+            _m3 = new() { Team = _tm3, GamesPlayed = 10, AvgPointsAllowed = 30, PointsAllowed = 300, Position = _position.ToString() };
             _playerTeam = new() { Name = "Player", PlayerId = _playerId, Season = _season.CurrentSeason, Team = _team };
 
             _mockPlayersService = _mock.GetMock<IPlayersService>();
@@ -129,6 +145,40 @@ namespace Football.Tests
 
             Assert.NotNull(observed);
             Assert.Equal(0, observed.ProjectedPoints);
+        }
+
+        [Fact]
+        public async Task AdjustmentEngine_WeeklyMatchupMoreDifficultThanAverage_ReducesProjection()
+        {
+            var weekProjection = new WeekProjection { PlayerId = _playerId, Position = _position.ToString(), Name = "Player", ProjectedPoints = _projectedPoints, Season = _season.CurrentSeason, Week = _week };
+            List<WeekProjection> projections = [weekProjection];
+            _mockMatchupAnalysisService.Setup(ma => ma.PositionalMatchupRankings(_position)).ReturnsAsync([_m1, _m2, _m3]);
+            var teamGame = new Schedule { Week = _week, OpposingTeam = _tm1.Team, Season = _season.CurrentSeason, OpposingTeamId = _tm1.TeamId, Team = _team, TeamId = _teamId };
+            _mockPlayersService.Setup(ps => ps.GetTeamGames(_teamId)).ReturnsAsync([teamGame]);
+            _mockPlayersService.Setup(ps => ps.GetActiveInSeasonInjuries(_season.CurrentSeason)).ReturnsAsync([]);
+
+            var actual = await _sut.AdjustmentEngine(projections);
+            var observed = actual.FirstOrDefault();
+
+            Assert.NotNull(observed);
+            Assert.True(observed.ProjectedPoints < _projectedPoints && observed.Week == _week && observed.PlayerId == weekProjection.PlayerId);
+        }
+
+        [Fact]
+        public async Task AdjustmentEngine_WeeklyMatchupLessDifficultThanAverage_IncreasesProjection()
+        {
+            var weekProjection = new WeekProjection { PlayerId = _playerId, Position = _position.ToString(), Name = "Player", ProjectedPoints = _projectedPoints, Season = _season.CurrentSeason, Week = _week };
+            List<WeekProjection> projections = [weekProjection];
+            _mockMatchupAnalysisService.Setup(ma => ma.PositionalMatchupRankings(_position)).ReturnsAsync([_m1, _m2, _m3]);
+            var teamGame = new Schedule { Week = _week, OpposingTeam = _tm3.Team, Season = _season.CurrentSeason, OpposingTeamId = _tm3.TeamId, Team = _team, TeamId = _teamId };
+            _mockPlayersService.Setup(ps => ps.GetTeamGames(_teamId)).ReturnsAsync([teamGame]);
+            _mockPlayersService.Setup(ps => ps.GetActiveInSeasonInjuries(_season.CurrentSeason)).ReturnsAsync([]);
+
+            var actual = await _sut.AdjustmentEngine(projections);
+            var observed = actual.FirstOrDefault();
+
+            Assert.NotNull(observed);
+            Assert.True(observed.ProjectedPoints > _projectedPoints && observed.Week == _week && observed.PlayerId == weekProjection.PlayerId);
         }
     }
 }
