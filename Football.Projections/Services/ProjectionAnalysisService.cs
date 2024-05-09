@@ -26,7 +26,7 @@ namespace Football.Projections.Services
                 var fantasy = (await fantasyService.GetWeeklyFantasy(playerId)).ToDictionary(f => f.Week);
                 foreach (var projection in projections)
                 {
-                    if (fantasy[projection.Week] != null && projection.ProjectedPoints > 0)
+                    if (fantasy.TryGetValue(projection.Week, out var weeklyFantasy) && projection.ProjectedPoints > 0)
                     {
                         errors.Add(new WeeklyProjectionError
                         {
@@ -37,7 +37,7 @@ namespace Football.Projections.Services
                             Name = projection.Name,
                             ProjectedPoints = projection.ProjectedPoints,
                             FantasyPoints = fantasy[projection.Week].FantasyPoints,
-                            Error = Math.Abs(projection.ProjectedPoints - fantasy[projection.Week].FantasyPoints)
+                            Error = Math.Abs(projection.ProjectedPoints - weeklyFantasy.FantasyPoints)
                         });
                     }
                 }
@@ -71,7 +71,7 @@ namespace Football.Projections.Services
                 }
                 return weeklyProjectionErrors;
             }
-            else return Enumerable.Empty<WeeklyProjectionError>().ToList();  
+            return Enumerable.Empty<WeeklyProjectionError>().ToList();  
         }
 
         public async Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(Position position, int week)
@@ -136,7 +136,7 @@ namespace Football.Projections.Services
                     AdjAvgError = GetAdjustedAverageError(projections, weeklyFantasy)
                 };
             }
-            else return new();
+            return new();
         }
         public async Task<List<SeasonFlex>> SeasonFlexRankings()
         {

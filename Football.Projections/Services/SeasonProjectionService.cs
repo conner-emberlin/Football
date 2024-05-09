@@ -206,5 +206,35 @@ namespace Football.Projections.Services
             }
             return MultipleRegression.NormalEquations(matrixCalculator.RegressorMatrix(historicalRookies), matrixCalculator.DependentVector(rookieSeasons, Model.FantasyPoints));
         }
+
+        private async Task<double> GetAverageSeasonProjectionError(int playerId)
+        {
+            var totalDiff = 0.0;
+            var total = 0;
+            var seasons = await playersService.GetSeasons();
+            var seasonFantasy = await fantasyService.GetSeasonFantasy(playerId);
+            var sfCount = seasonFantasy.Count;
+
+            foreach (var sf in seasonFantasy)
+            {
+                if (sf.Games < _season.Games && sf.Games > 0)
+                {
+                    var avg = sf.FantasyPoints / sf.Games;
+                    sf.FantasyPoints = avg * _season.Games;
+                }
+            }
+
+            foreach (var season in seasons)
+            {
+                var seasonProjection = await playersService.GetSeasonProjection(season, playerId);
+                if (seasonProjection > 0)
+                {
+                    totalDiff += seasonProjection - seasonFantasy.First(s => s.Season == season).FantasyPoints;
+                    total += 1;
+                }
+            }
+
+            return total > 0 ? totalDiff/total : 0;
+        }
     }
 }

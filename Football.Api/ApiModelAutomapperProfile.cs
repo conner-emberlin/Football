@@ -14,8 +14,8 @@ namespace Football.Api
                     .ForMember(rpm => rpm.DeclareAge, o => o.Ignore())
                     .ForMember(rpm => rpm.RookieSeason, o => o.Ignore());
 
-            CreateMap<RookiePlayerModel, Rookie>();
-            CreateMap<Rookie, RookiePlayerModel>();
+            CreateMap<RookiePlayerModel, Rookie>()
+                    .ReverseMap();
         }
     }
 }
