@@ -6,6 +6,7 @@ using Football.Projections.Interfaces;
 using Serilog;
 using Microsoft.Extensions.Options;
 using Football.Enums;
+using Football.Players.Services;
 
 
 namespace Football.Projections.Services
@@ -38,11 +39,11 @@ namespace Football.Projections.Services
 
         private async Task<List<SeasonProjection>> InjuryAdjustment(List<SeasonProjection> seasonProjections)
         {
+            var playerInjuries = (await playerService.GetPlayerInjuries(_season.CurrentSeason)).ToDictionary(i => i.PlayerId, i => i.Games);
             foreach(var s in seasonProjections)
             {
-                var gamesInjured = await playerService.GetPlayerInjuries(s.PlayerId, _season.CurrentSeason);
-                if (gamesInjured > 0)
-                    s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * gamesInjured;
+                if (playerInjuries.TryGetValue(s.PlayerId, out var games))
+                    s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * games;
             }
             return seasonProjections;
         }
@@ -64,11 +65,11 @@ namespace Football.Projections.Services
 
         private async Task<List<SeasonProjection>> SuspensionAdjustment(List<SeasonProjection> seasonProjections)
         {
+            var playerSuspensions = (await playerService.GetPlayerSuspensions(_season.CurrentSeason)).ToDictionary(s => s.PlayerId, s => s.Length);
             foreach (var s in seasonProjections)
             {
-                var gamesSuspended = await playerService.GetPlayerSuspensions(s.PlayerId, _season.CurrentSeason);
-                if (gamesSuspended > 0)
-                    s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * gamesSuspended;
+                if (playerSuspensions.TryGetValue(s.PlayerId, out var length))
+                    s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * length;
             }
             return seasonProjections;
         }

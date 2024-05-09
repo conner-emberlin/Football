@@ -101,8 +101,9 @@ namespace Football.Tests
             var seasonProjection = new SeasonProjection { PlayerId = _playerId, Position = _position.ToString(), Name = "Player", ProjectedPoints = 170, Season = _season.CurrentSeason };
             List<SeasonProjection> projections = [seasonProjection];
 
-            _mockPlayersService.Setup(ps => ps.GetPlayerSuspensions(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(0);
-            _mockPlayersService.Setup(ps => ps.GetPlayerInjuries(_playerId, _season.CurrentSeason)).ReturnsAsync(5);
+            _mockPlayersService.Setup(ps => ps.GetPlayerSuspensions(_season.CurrentSeason)).ReturnsAsync([]);
+            InjuryConcerns injury = new() { PlayerId = _playerId, Season = _season.CurrentSeason, Games = 5 };
+            _mockPlayersService.Setup(ps => ps.GetPlayerInjuries(_season.CurrentSeason)).ReturnsAsync([injury]);
             var expectedPoints = seasonProjection.ProjectedPoints - (double)(seasonProjection.ProjectedPoints / _season.Games * 5);
 
             var actual = await _sut.AdjustmentEngine(projections);
@@ -117,9 +118,9 @@ namespace Football.Tests
         {
             var seasonProjection = new SeasonProjection { PlayerId = _playerId, Position = _position.ToString(), Name = "Player", ProjectedPoints = 170, Season = _season.CurrentSeason };
             List<SeasonProjection> projections = [seasonProjection];
-
-            _mockPlayersService.Setup(ps => ps.GetPlayerSuspensions(_playerId, _season.CurrentSeason)).ReturnsAsync(5);
-            _mockPlayersService.Setup(ps => ps.GetPlayerInjuries(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(0);
+            Suspensions suspension = new() { Season = _season.CurrentSeason, PlayerId = _playerId, Length = 5 };
+            _mockPlayersService.Setup(ps => ps.GetPlayerSuspensions(_season.CurrentSeason)).ReturnsAsync([suspension]);
+            _mockPlayersService.Setup(ps => ps.GetPlayerInjuries(_season.CurrentSeason)).ReturnsAsync([]);
             var expectedPoints = seasonProjection.ProjectedPoints - (double)(seasonProjection.ProjectedPoints / _season.Games * 5);
 
             var actual = await _sut.AdjustmentEngine(projections);

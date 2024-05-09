@@ -11,8 +11,8 @@ namespace Football.Players.Interfaces
         public Task<Player> GetPlayer(int playerId);
         public Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position);
         public Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position);
-        public Task<int> GetPlayerInjuries(int playerId, int season);
-        public Task<int> GetPlayerSuspensions(int playerId, int season);
+        public Task<List<InjuryConcerns>> GetPlayerInjuries(int season);
+        public Task<List<Suspensions>> GetPlayerSuspensions(int season);
         public Task<List<QuarterbackChange>> GetQuarterbackChanges(int season);
         public Task<double> GetEPA(int playerId, int season);
         public Task<double> GetSeasonProjection(int season, int playerId);

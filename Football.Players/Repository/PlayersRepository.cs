@@ -66,19 +66,17 @@ namespace Football.Players.Repository
                         AND [Position] = @position";
             return (await _dbConnection.QueryAsync<Rookie>(query, new { currentSeason, position })).ToList();
         }
-        public async Task<int> GetPlayerInjuries(int playerId, int season)
+        public async Task<List<InjuryConcerns>> GetPlayerInjuries(int season)
         {
-            var query = $@"SELECT [Games] FROM [dbo].InjuryConcerns
-                        WHERE [PlayerId] = @playerId
-                        AND [Season] = @season";
-            return (await _dbConnection.QueryAsync<int>(query, new { playerId, season })).FirstOrDefault();
+            var query = $@"SELECT * FROM [dbo].InjuryConcerns
+                        WHERE [Season] = @season";
+            return (await _dbConnection.QueryAsync<InjuryConcerns>(query, new { season })).ToList();
         }
-        public async Task<int> GetPlayerSuspensions(int playerId, int season)
+        public async Task<List<Suspensions>> GetPlayerSuspensions(int season)
         {
-            var query = $@"SELECT [Length] FROM [dbo].Suspensions
-                            WHERE [PlayerId] = @playerId
-                            AND [Season] = @season";
-            return (await _dbConnection.QueryAsync<int>(query, new { playerId, season })).FirstOrDefault();
+            var query = $@"SELECT * FROM [dbo].Suspensions
+                            WHERE [Season] = @season";                            
+            return (await _dbConnection.QueryAsync<Suspensions>(query, new { season })).ToList();
         }
         public async Task<List<QuarterbackChange>> GetQuarterbackChanges(int season)
         {

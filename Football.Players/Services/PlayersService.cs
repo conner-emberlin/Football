@@ -19,8 +19,8 @@ namespace Football.Players.Services
         public async Task<Player> GetPlayer(int playerId) => await playersRepository.GetPlayer(playerId);
         public async Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position) => await playersRepository.GetHistoricalRookies(currentSeason, position);
         public async Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position) => await playersRepository.GetCurrentRookies(currentSeason, position);
-        public async Task<int> GetPlayerInjuries(int playerId, int season) => await playersRepository.GetPlayerInjuries(playerId, season);
-        public async Task<int> GetPlayerSuspensions(int playerId, int season) => await playersRepository.GetPlayerSuspensions(playerId, season);
+        public async Task<List<InjuryConcerns>> GetPlayerInjuries(int season) => await playersRepository.GetPlayerInjuries(season);
+        public async Task<List<Suspensions>> GetPlayerSuspensions(int season) => await playersRepository.GetPlayerSuspensions(season);
         public async Task<List<QuarterbackChange>> GetQuarterbackChanges(int season) => await playersRepository.GetQuarterbackChanges(season);
         public async Task<double> GetEPA(int playerId, int season) => await playersRepository.GetEPA(playerId, season);
         public async Task<double> GetSeasonProjection(int season, int playerId) => await playersRepository.GetSeasonProjection(season, playerId);
