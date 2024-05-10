@@ -21,9 +21,9 @@ namespace Football.Api.Controllers
         private readonly Season _season = season.CurrentValue;
 
         [HttpGet("season/{position}")]
-        [ProducesResponseType(typeof(List<SeasonProjection>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<SeasonProjection>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<SeasonProjection>>> GetSeasonProjections(string position)
+        public async Task<ActionResult<IEnumerable<SeasonProjection>>> GetSeasonProjections(string position)
         {
             if(Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {

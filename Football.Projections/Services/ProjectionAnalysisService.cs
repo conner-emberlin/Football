@@ -1,18 +1,17 @@
-﻿using Football.Projections.Interfaces;
-using Football.Fantasy.Interfaces;
+﻿using Football.Enums;
 using Football.Models;
-using Football.Enums;
-using Microsoft.Extensions.Options;
-using Football.Projections.Models;
+using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
-using Serilog;
 using Football.Players.Interfaces;
+using Football.Projections.Interfaces;
+using Football.Projections.Models;
+using Microsoft.Extensions.Options;
 
 namespace Football.Projections.Services
 {
     public class ProjectionAnalysisService(IFantasyDataService fantasyService,
         IOptionsMonitor<Season> season, IProjectionService<SeasonProjection> seasonProjection,
-        IProjectionService<WeekProjection> weekProjection, ILogger logger, IOptionsMonitor<Starters> starters, IPlayersService playersService) : IProjectionAnalysisService
+        IProjectionService<WeekProjection> weekProjection, IOptionsMonitor<Starters> starters, IPlayersService playersService) : IProjectionAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
         private readonly Starters _starters = starters.CurrentValue;
@@ -138,13 +137,16 @@ namespace Football.Projections.Services
             }
             return new();
         }
-        public async Task<List<SeasonFlex>> SeasonFlexRankings()
+        public async Task<IEnumerable<SeasonFlex>> SeasonFlexRankings()
         {
             List<SeasonFlex> flexRankings = [];
             var rankings = (await seasonProjection.GetProjections(Position.QB))
                            .Union(await seasonProjection.GetProjections(Position.RB))
                            .Union(await seasonProjection.GetProjections(Position.WR))
-                           .Union(await seasonProjection.GetProjections(Position.TE)).ToList();
+                           .Union(await seasonProjection.GetProjections(Position.TE));
+
+            var replacementPointsDictionary = GetReplacementPointsDictionary(rankings);
+
             foreach (var rank in rankings)
             {
                 if (Enum.TryParse(rank.Position, out Position position))
@@ -155,7 +157,7 @@ namespace Football.Projections.Services
                         Name = rank.Name,
                         Position = rank.Position,
                         ProjectedPoints = rank.ProjectedPoints,
-                        Vorp = rank.ProjectedPoints - await GetReplacementPoints(position)
+                        Vorp = rank.ProjectedPoints - replacementPointsDictionary[position]
                     });
                 }
             }
@@ -215,13 +217,13 @@ namespace Football.Projections.Services
             return spa;
         }
 
-        public async Task<List<WeekProjection>> WeeklyFlexRankings()
+        public async Task<IEnumerable<WeekProjection>> WeeklyFlexRankings()
         {            
             var rbProjections = (await weekProjection.GetProjections(Position.RB)).ToList();
             var wrProjections = (await weekProjection.GetProjections(Position.WR)).ToList();
             var teProjections = (await weekProjection.GetProjections(Position.TE)).ToList();
             var rankings = rbProjections.Union(wrProjections).Union(teProjections);
-            return rankings.OrderByDescending(r => r.ProjectedPoints).ToList();
+            return rankings.OrderByDescending(r => r.ProjectedPoints);
         }
         private static double GetMeanSquaredError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
         {
@@ -336,11 +338,19 @@ namespace Football.Projections.Services
             }
             return count > 0 ? Math.Round(error / count, 2) : 0;
         }
-        private async Task<double> GetReplacementPoints(Position position)
+        private Dictionary<Position, double> GetReplacementPointsDictionary(IEnumerable<SeasonProjection> rankings)
         {
-            var projections = await seasonProjection.GetProjections(position);
-            var replacementIndex = (int)Math.Round((double)projections.Count() / 2);
-            return projections.ElementAt(replacementIndex).ProjectedPoints;
+            var rankingsByPosition = rankings.GroupBy(p => p.Position, p => p.ProjectedPoints, (key, p) => new {Position = key, Projections = p.OrderByDescending(p => p)});
+            Dictionary<Position, double> replacementPointsDictionary = [];
+            foreach (var rank in rankingsByPosition)
+            {
+                _ = Enum.TryParse(rank.Position, out Position position);
+                var replacementIndex = (int)Math.Floor((double)rank.Projections.Count() / 2);
+                replacementPointsDictionary.Add(position, rank.Projections.ElementAt(replacementIndex));
+            }
+            return replacementPointsDictionary;
         }
+
+
     }
 }
