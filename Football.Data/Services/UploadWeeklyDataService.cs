@@ -18,8 +18,10 @@ namespace Football.Data.Services
         {
             logger.Information("Uploading QB Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.QB.ToString(), season.ToString(), week.ToString());
-            var players = await WeeklyDataQB(scraperService.ParseFantasyProsQBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            var added = await uploadWeeklyDataRepository.UploadWeeklyQBData(players, await playerService.GetIgnoreList());
+            var ignoreList = await playerService.GetIgnoreList();
+            var players = (await WeeklyDataQB(scraperService.ParseFantasyProsQBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week))
+                            .Where(p => !ignoreList.Contains(p.PlayerId));
+            var added = await uploadWeeklyDataRepository.UploadWeeklyQBData(players);
             logger.Information("QB upload complete. {0} records added", added);
             return added;
         }
@@ -27,8 +29,10 @@ namespace Football.Data.Services
         {
             logger.Information("Uploadeding RB Data for week {0", week);
             var url = FantasyProsURLFormatter(Position.RB.ToString(), season.ToString(), week.ToString());
-            var players = await WeeklyDataRB(scraperService.ParseFantasyProsRBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            var added = await uploadWeeklyDataRepository.UploadWeeklyRBData(players, await playerService.GetIgnoreList());
+            var ignoreList = await playerService.GetIgnoreList();
+            var players = (await WeeklyDataRB(scraperService.ParseFantasyProsRBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week))
+                            .Where(p => !ignoreList.Contains(p.PlayerId));
+            var added = await uploadWeeklyDataRepository.UploadWeeklyRBData(players);
             logger.Information("RB upload complete. {0} records added", added);
             return added;
         }
@@ -36,8 +40,10 @@ namespace Football.Data.Services
         {
             logger.Information("Uploading WR Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.WR.ToString(), season.ToString(), week.ToString());
-            var players = await WeeklyDataWR(scraperService.ParseFantasyProsWRData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            var added = await uploadWeeklyDataRepository.UploadWeeklyWRData(players, await playerService.GetIgnoreList());
+            var ignoreList = await playerService.GetIgnoreList();
+            var players = (await WeeklyDataWR(scraperService.ParseFantasyProsWRData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week))
+                            .Where(p => !ignoreList.Contains(p.PlayerId));
+            var added = await uploadWeeklyDataRepository.UploadWeeklyWRData(players);
             logger.Information("WR upload complete. {0} records added", added);
             return added;
         }
@@ -45,8 +51,10 @@ namespace Football.Data.Services
         {
             logger.Information("Uploading TE Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.TE.ToString(), season.ToString(), week.ToString());
-            var players = await WeeklyDataTE(scraperService.ParseFantasyProsTEData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week);
-            var added = await uploadWeeklyDataRepository.UploadWeeklyTEData(players, await playerService.GetIgnoreList());
+            var ignoreList = await playerService.GetIgnoreList();
+            var players = (await WeeklyDataTE(scraperService.ParseFantasyProsTEData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week))
+                            .Where(p => !ignoreList.Contains(p.PlayerId));
+            var added = await uploadWeeklyDataRepository.UploadWeeklyTEData(players);
             logger.Information("TE upload complete. {0} records added", added);
             return added;
         }
@@ -74,8 +82,10 @@ namespace Football.Data.Services
         {
             logger.Information("Uploading RB Redzone data for week {0}", week);
             var url = RedZoneURL(Position.RB.ToString(), season, week, yardline);
-            var players = await WeeklyRedZoneRB(scraperService.ParseFantasyProsRedZoneRB(scraperService.ScrapeData(url, _scraping.RedZoneXPath)), season, week, yardline);
-            var added = await uploadWeeklyDataRepository.UploadWeeklyRedZoneRB(players, await playerService.GetIgnoreList());
+            var ignoreList = await playerService.GetIgnoreList();
+            var players = (await WeeklyRedZoneRB(scraperService.ParseFantasyProsRedZoneRB(scraperService.ScrapeData(url, _scraping.RedZoneXPath)), season, week, yardline))
+                            .Where(p => !ignoreList.Contains(p.PlayerId));
+            var added = await uploadWeeklyDataRepository.UploadWeeklyRedZoneRB(players);
             logger.Information("RB Redzone upload complete. {0} records added", added);
             return added;
         }
@@ -93,8 +103,9 @@ namespace Football.Data.Services
             logger.Information("Uploading week {0} Roster Percentages for position {1}", week, position);
             var url = FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
             var data = scraperService.ParseFantasyProsRosterPercent(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position);
-            var rosterPercentages = await WeeklyRosterPercent(data, season, week);
-            var added = await uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages, await playerService.GetIgnoreList());
+            var ignoreList = await playerService.GetIgnoreList();
+            var rosterPercentages = (await WeeklyRosterPercent(data, season, week)).Where(r => !ignoreList.Contains(r.PlayerId));
+            var added = await uploadWeeklyDataRepository.UploadWeeklyRosterPercentages(rosterPercentages);
             logger.Information("Roster Percentage upload complete. {0} records added", added);
             return added;
         }

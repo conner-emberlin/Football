@@ -5,10 +5,10 @@ namespace Football.Data.Interfaces
 {
     public interface IUploadSeasonDataRepository
     {
-        public Task<int> UploadSeasonQBData(List<SeasonDataQB> players, List<int> ignoreList);
-        public Task<int> UploadSeasonRBData(List<SeasonDataRB> players, List<int> ignoreList);
-        public Task<int> UploadSeasonWRData(List<SeasonDataWR> players, List<int> ignoreList);
-        public Task<int> UploadSeasonTEData(List<SeasonDataTE> players, List<int> ignoreList);
+        public Task<int> UploadSeasonQBData(IEnumerable<SeasonDataQB> players);
+        public Task<int> UploadSeasonRBData(IEnumerable<SeasonDataRB> players);
+        public Task<int> UploadSeasonWRData(IEnumerable<SeasonDataWR> players);
+        public Task<int> UploadSeasonTEData(IEnumerable<SeasonDataTE> players);
         public Task<int> UploadSeasonDSTData(List<SeasonDataDST> players);
         public Task<int> UploadCurrentTeams(List<PlayerTeam> teams);
         public Task<int> UploadSchedule(List<Schedule> schedules);

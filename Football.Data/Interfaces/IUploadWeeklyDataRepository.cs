@@ -4,16 +4,15 @@ namespace Football.Data.Interfaces
 {
     public interface IUploadWeeklyDataRepository
     {
-        public Task<int> UploadWeeklyQBData(List<WeeklyDataQB> players, List<int> ignoreList);
-        public Task<int> UploadWeeklyRBData(List<WeeklyDataRB> players, List<int> ignoreList);
-        public Task<int> UploadWeeklyWRData(List<WeeklyDataWR> players, List<int> ignoreList);
-        public Task<int> UploadWeeklyTEData(List<WeeklyDataTE> players, List<int> ignoreList);
+        public Task<int> UploadWeeklyQBData(IEnumerable<WeeklyDataQB> players);
+        public Task<int> UploadWeeklyRBData(IEnumerable<WeeklyDataRB> players);
+        public Task<int> UploadWeeklyWRData(IEnumerable<WeeklyDataWR> players);
+        public Task<int> UploadWeeklyTEData(IEnumerable<WeeklyDataTE> players);
         public Task<int> UploadWeeklyDSTData(List<WeeklyDataDST> players);
         public Task<int> UploadWeeklyKData(List<WeeklyDataK> players);
         public Task<int> UploadWeeklyGameResults(List<GameResult> results);
-        public Task<int> UploadWeeklyRosterPercentages(List<WeeklyRosterPercent> rosterPercentages, List<int> ignoreList);
+        public Task<int> UploadWeeklyRosterPercentages(IEnumerable<WeeklyRosterPercent> rosterPercentages);
         public Task<int> UploadWeeklySnapCounts(List<SnapCount> snapCounts);
-
-        public Task<int> UploadWeeklyRedZoneRB(List<WeeklyRedZoneRB> players, List<int> ignoreList);
+        public Task<int> UploadWeeklyRedZoneRB(IEnumerable<WeeklyRedZoneRB> players);
     }
 }

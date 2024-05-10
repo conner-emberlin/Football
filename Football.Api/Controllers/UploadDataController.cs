@@ -1,8 +1,7 @@
-﻿using Football.Data.Interfaces;
-using Football.Enums;
-using Football.Leagues.Interfaces;
-using Football.Leagues.Models;
+﻿using Football.Enums;
 using Football.Models;
+using Football.Data.Interfaces;
+using Football.Leagues.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -33,24 +32,7 @@ namespace Football.Api.Controllers
                     _ => BadRequest()
                 };
             }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
-        }
-        [HttpPost("roster-percent/{position}/{season}/{week}")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadWeeklyRosterPercentages(string position, int season, int week)
-        {
-            if (!string.IsNullOrWhiteSpace(position) && season > 0 && week > 0)
-            {
-                return Ok(await weeklyDataService.UploadWeeklyRosterPercentages(season, week, position));
-            }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
+            return BadRequest();
         }
 
         [HttpPost("{position}/{season}")]
@@ -70,10 +52,18 @@ namespace Football.Api.Controllers
                     _ => BadRequest(),
                 };
             }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
+            return BadRequest();
+        }
+
+        [HttpPost("roster-percent/{position}/{season}/{week}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UploadWeeklyRosterPercentages(string position, int season, int week)
+        {
+            if (!string.IsNullOrWhiteSpace(position) && season > 0 && week > 0)
+                return Ok(await weeklyDataService.UploadWeeklyRosterPercentages(season, week, position));
+
+            return BadRequest();
         }
 
         [HttpPost("headshots/{position}")]
@@ -90,7 +80,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadCurrentTeams(string position) => !string.IsNullOrEmpty(position) ?
-            Ok(await seasonDataService.UploadCurrentTeams(_season.CurrentSeason, position)) : BadRequest("Bad Request");
+            Ok(await seasonDataService.UploadCurrentTeams(_season.CurrentSeason, position)) : BadRequest();
 
         [HttpPost("schedule")]
         [ProducesResponseType(typeof(int), 200)]
