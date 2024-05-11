@@ -1,7 +1,7 @@
 ﻿using Moq;
 using Moq.AutoMock;
 using Xunit;
-using Serilog;
+using Football.Enums;
 using Football.Models;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
@@ -46,6 +46,23 @@ namespace Football.Tests
             _sut = new ProjectionAnalysisService(_mockFantasyDataService.Object, _mockSeason.Object, _mockSeasonProjectionService.Object, _mockWeekProjectionService.Object, _mockStarters.Object, _mockPlayersService.Object);
         }
 
+        [Fact]
+        public async Task SeasonFlexRankings_AreOrderedByVorp()
+        {
+            var qbProjection1 = new SeasonProjection { Name = "QB Name1", PlayerId = 1, Position = "QB", ProjectedPoints = 100, Season = _season.CurrentSeason };
+            var qbProjection2 = new SeasonProjection { Name = "QB Name2", PlayerId = 2, Position = "QB", ProjectedPoints = 110, Season = _season.CurrentSeason };
+            var teProjection1 = new SeasonProjection { Name = "TE Name1", PlayerId = 4, Position = "TE", ProjectedPoints = 100, Season = _season.CurrentSeason };
+            var teProjection2 = new SeasonProjection { Name = "TE Name2", PlayerId = 5, Position = "TE", ProjectedPoints = 50, Season = _season.CurrentSeason };
+
+            _mockSeasonProjectionService.Setup(s => s.GetProjections(Position.QB)).ReturnsAsync([qbProjection1, qbProjection2]);
+            _mockSeasonProjectionService.Setup(s => s.GetProjections(Position.WR)).ReturnsAsync([]);
+            _mockSeasonProjectionService.Setup(s => s.GetProjections(Position.RB)).ReturnsAsync([]);
+            _mockSeasonProjectionService.Setup(s => s.GetProjections(Position.TE)).ReturnsAsync([teProjection1, teProjection2]);
+
+            var actual = await _sut.SeasonFlexRankings();
+
+            Assert.True(actual.ElementAt(0).PlayerId == 4 && actual.ElementAt(1).PlayerId == 2);
+        }
 
     }
 }

@@ -30,10 +30,7 @@ namespace Football.Api.Controllers
                 return positionEnum == Position.FLEX ? Ok(await analysisService.SeasonFlexRankings())
                                       : Ok(await seasonProjectionService.GetProjections(positionEnum));
             }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
+            return BadRequest();
         }
         [HttpGet("season/player/{playerId}")]
         [ProducesResponseType(typeof(SeasonProjection), 200)]
@@ -51,10 +48,7 @@ namespace Football.Api.Controllers
                 var proj = (await seasonProjectionService.GetProjections(positionEnum)).ToList();
                 return Ok(await seasonProjectionService.PostProjections(proj));
             }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
+            return BadRequest();
         }
 
         [HttpGet("weekly/{position}")]
@@ -67,10 +61,7 @@ namespace Football.Api.Controllers
                 return positionEnum == Position.FLEX ? Ok(await analysisService.WeeklyFlexRankings()) 
                                                          : Ok(await weekProjectionService.GetProjections(positionEnum));
             }
-            else
-            {
-                return BadRequest();
-            }
+            return BadRequest();
         }
         [HttpPost("weekly/{position}")]
         [ProducesResponseType(typeof(int), 200)]
@@ -82,10 +73,7 @@ namespace Football.Api.Controllers
                 var proj = (await weekProjectionService.GetProjections(positionEnum)).ToList();
                 return Ok(await weekProjectionService.PostProjections(proj));
             }
-            else
-            {
-                return BadRequest("Bad Request");
-            }
+            return BadRequest();
         }
 
         [HttpGet("weekly-analysis/{position}")]
@@ -103,7 +91,7 @@ namespace Football.Api.Controllers
                 }
                 return Ok(projectionAnalyses);
             }
-            else return BadRequest("Bad Request");
+            return BadRequest();
         }
 
         [HttpGet("weekly-analysis/player/{playerId}")]
@@ -120,7 +108,7 @@ namespace Football.Api.Controllers
             {
                 return Ok(await analysisService.GetWeeklyProjectionError(positionEnum, week));
             }
-            else return BadRequest("Bad Request");
+            return BadRequest();
         }
 
         [HttpGet("weekly-error/{playerId}")]
@@ -163,16 +151,16 @@ namespace Football.Api.Controllers
         [HttpGet("season-projection-error/{position}")]
         [ProducesResponseType(typeof(List<SeasonProjectionError>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<IActionResult> GetSesasonProjectionError([FromRoute] string position, [FromQuery] int season) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetSeasonProjectionError(posEnum, season)) : BadRequest();
+        public async Task<IActionResult> GetSeasonProjectionError([FromRoute] string position, [FromQuery] int season) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetSeasonProjectionError(posEnum, season)) : BadRequest();
 
         [HttpGet("season-projection-analysis/{position}")]
         [ProducesResponseType(typeof(SeasonProjectionAnalysis), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<IActionResult> GetSesasonProjectionAnalysis([FromRoute] string position, [FromQuery] int season) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetSeasonProjectionAnalysis(posEnum, season)) : BadRequest();
+        public async Task<IActionResult> GetSeasonProjectionAnalysis([FromRoute] string position, [FromQuery] int season) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetSeasonProjectionAnalysis(posEnum, season)) : BadRequest();
 
         [HttpGet("season-projection-analysis/all/{position}")]
         [ProducesResponseType(typeof(List<SeasonProjectionAnalysis>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<IActionResult> GetAllSesasonProjectionAnalyses([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetAllSeasonProjectionAnalyses(posEnum)) : BadRequest();
+        public async Task<IActionResult> GetAllSeasonProjectionAnalyses([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetAllSeasonProjectionAnalyses(posEnum)) : BadRequest();
     }
 }

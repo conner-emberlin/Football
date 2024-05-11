@@ -219,9 +219,9 @@ namespace Football.Projections.Services
 
         public async Task<IEnumerable<WeekProjection>> WeeklyFlexRankings()
         {            
-            var rbProjections = (await weekProjection.GetProjections(Position.RB)).ToList();
-            var wrProjections = (await weekProjection.GetProjections(Position.WR)).ToList();
-            var teProjections = (await weekProjection.GetProjections(Position.TE)).ToList();
+            var rbProjections = await weekProjection.GetProjections(Position.RB);
+            var wrProjections = await weekProjection.GetProjections(Position.WR);
+            var teProjections = await weekProjection.GetProjections(Position.TE);
             var rankings = rbProjections.Union(wrProjections).Union(teProjections);
             return rankings.OrderByDescending(r => r.ProjectedPoints);
         }
