@@ -1,4 +1,5 @@
-﻿using Football.Enums;
+﻿using Football;
+using Football.Enums;
 using Football.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
@@ -11,7 +12,7 @@ namespace Football.Projections.Services
 {
     public class ProjectionAnalysisService(IFantasyDataService fantasyService,
         IOptionsMonitor<Season> season, IProjectionService<SeasonProjection> seasonProjection,
-        IProjectionService<WeekProjection> weekProjection, IOptionsMonitor<Starters> starters, IPlayersService playersService) : IProjectionAnalysisService
+        IProjectionService<WeekProjection> weekProjection, IOptionsMonitor<Starters> starters, IPlayersService playersService, ISettingsService settingsService) : IProjectionAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
         private readonly Starters _starters = starters.CurrentValue;
@@ -345,7 +346,9 @@ namespace Football.Projections.Services
             foreach (var rank in rankingsByPosition)
             {
                 _ = Enum.TryParse(rank.Position, out Position position);
-                var replacementIndex = (int)Math.Floor((double)rank.Projections.Count() / 2);
+                var replacementLevel = settingsService.GetReplacementLevel(position);
+                var projectionCount = rank.Projections.Count();
+                var replacementIndex = projectionCount < replacementLevel ? (int)Math.Floor((double)(projectionCount / 2)) : replacementLevel;
                 replacementPointsDictionary.Add(position, rank.Projections.ElementAt(replacementIndex));
             }
             return replacementPointsDictionary;

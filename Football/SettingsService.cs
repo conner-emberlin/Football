@@ -7,12 +7,13 @@ using Microsoft.Extensions.Caching.Memory;
 namespace Football
 {
     public class SettingsService(IOptionsMonitor<ProjectionLimits> projectionLimits, IOptionsMonitor<BoomBustSettings> boomBust, IOptionsMonitor<WaiverWireSettings> wireSettings,
-         IMemoryCache cache, IOptionsMonitor<StartOrSitSettings> startOrSitSettings) : ISettingsService
+         IMemoryCache cache, IOptionsMonitor<StartOrSitSettings> startOrSitSettings, IOptionsMonitor<ReplacementLevels> replacementLevels) : ISettingsService
     {
         private readonly ProjectionLimits _projectionLimits = projectionLimits.CurrentValue;
         private readonly BoomBustSettings _boomBust = boomBust.CurrentValue;
         private readonly WaiverWireSettings _wireSettings = wireSettings.CurrentValue;
         private readonly StartOrSitSettings _startOrSitSettings = startOrSitSettings.CurrentValue;
+        private readonly ReplacementLevels _replacementLevels = replacementLevels.CurrentValue;
         private readonly IMemoryCache _cache = cache;
 
         public int GetProjectionsCount(Position position) => position switch
@@ -70,6 +71,18 @@ namespace Football
                 Position.RB => _startOrSitSettings.RBCompareRange,
                 Position.WR => _startOrSitSettings.WRCompareRange,
                 Position.TE => _startOrSitSettings.TECompareRange,
+                _ => 0
+            };
+        }
+
+        public int GetReplacementLevel(Position position)
+        {
+            return position switch
+            {
+                Position.QB => _replacementLevels.ReplacementLevelQB,
+                Position.RB => _replacementLevels.ReplacementLevelRB,
+                Position.WR => _replacementLevels.ReplacementLevelWR,
+                Position.TE => _replacementLevels.ReplacementLevelTE,
                 _ => 0
             };
         }

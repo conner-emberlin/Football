@@ -1,6 +1,7 @@
 ﻿using Moq;
 using Moq.AutoMock;
 using Xunit;
+using Football;
 using Football.Enums;
 using Football.Models;
 using Football.Projections.Interfaces;
@@ -22,6 +23,7 @@ namespace Football.Tests
         private readonly Mock<IProjectionService<WeekProjection>> _mockWeekProjectionService;
         private readonly Mock<IFantasyDataService> _mockFantasyDataService;
         private readonly Mock<IPlayersService> _mockPlayersService;
+        private readonly Mock<ISettingsService> _mockSettingsService;
         private readonly Mock<IOptionsMonitor<Season>> _mockSeason;
         private readonly Mock<IOptionsMonitor<Starters>> _mockStarters;
 
@@ -37,13 +39,19 @@ namespace Football.Tests
             _mockWeekProjectionService = _mock.GetMock<IProjectionService<WeekProjection>>();
             _mockFantasyDataService = _mock.GetMock<IFantasyDataService>();
             _mockPlayersService = _mock.GetMock<IPlayersService>();
+            _mockSettingsService = _mock.GetMock<ISettingsService>();
             _mockSeason = _mock.GetMock<IOptionsMonitor<Season>>();
             _mockStarters = _mock.GetMock<IOptionsMonitor<Starters>>();
 
             _mockSeason.Setup(s => s.CurrentValue).Returns(_season);
             _mockStarters.Setup(s => s.CurrentValue).Returns(_starters);
 
-            _sut = new ProjectionAnalysisService(_mockFantasyDataService.Object, _mockSeason.Object, _mockSeasonProjectionService.Object, _mockWeekProjectionService.Object, _mockStarters.Object, _mockPlayersService.Object);
+            _mockSettingsService.Setup(s => s.GetReplacementLevel(Position.QB)).Returns(13);
+            _mockSettingsService.Setup(s => s.GetReplacementLevel(Position.WR)).Returns(25);
+            _mockSettingsService.Setup(s => s.GetReplacementLevel(Position.TE)).Returns(13);
+            _mockSettingsService.Setup(s => s.GetReplacementLevel(Position.RB)).Returns(25);
+
+            _sut = new ProjectionAnalysisService(_mockFantasyDataService.Object, _mockSeason.Object, _mockSeasonProjectionService.Object, _mockWeekProjectionService.Object, _mockStarters.Object, _mockPlayersService.Object, _mockSettingsService.Object);
         }
 
         [Fact]
@@ -62,7 +70,10 @@ namespace Football.Tests
             var actual = await _sut.SeasonFlexRankings();
 
             Assert.True(actual.ElementAt(0).PlayerId == 4 && actual.ElementAt(1).PlayerId == 2);
+            Assert.True(actual.ElementAt(2).Vorp == 0 && actual.ElementAt(3).Vorp == 0);
         }
+
+
 
     }
 }
