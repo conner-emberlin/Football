@@ -20,32 +20,36 @@ namespace Football.Data.Services
         {
             var url = FantasyProsURLFormatter(Position.QB.ToString(), season.ToString());
             var ignoreList = await playerService.GetIgnoreList();
+            var qbs = (await playerService.GetPlayersByPosition(Position.QB)).Select(p => p.PlayerId);
             var players = (await SeasonDataQB(scraperService.ParseFantasyProsQBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season))
-                           .Where(p => !ignoreList.Contains(p.PlayerId));
+                           .Where(p => !ignoreList.Contains(p.PlayerId) && qbs.Contains(p.PlayerId));
             return await uploadSeasonDataRepository.UploadSeasonQBData(players);
         }
         public async Task<int> UploadSeasonRBData(int season)
         {
             var url = FantasyProsURLFormatter(Position.RB.ToString(), season.ToString());
             var ignoreList = await playerService.GetIgnoreList();
+            var rbs = (await playerService.GetPlayersByPosition(Position.RB)).Select(p => p.PlayerId);
             var players = (await SeasonDataRB(scraperService.ParseFantasyProsRBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season))
-                            .Where(p => !ignoreList.Contains(p.PlayerId));
+                            .Where(p => !ignoreList.Contains(p.PlayerId) && rbs.Contains(p.PlayerId));
             return await uploadSeasonDataRepository.UploadSeasonRBData(players);
         }
         public async Task<int> UploadSeasonWRData(int season)
         {
             var url = FantasyProsURLFormatter(Position.WR.ToString(), season.ToString());
             var ignoreList = await playerService.GetIgnoreList();
+            var wrs = (await playerService.GetPlayersByPosition(Position.WR)).Select(p => p.PlayerId);
             var players = (await SeasonDataWR(scraperService.ParseFantasyProsWRData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season))
-                            .Where(p => !ignoreList.Contains(p.PlayerId));
+                            .Where(p => !ignoreList.Contains(p.PlayerId) && wrs.Contains(p.PlayerId));
             return await uploadSeasonDataRepository.UploadSeasonWRData(players);
         }
         public async Task<int> UploadSeasonTEData(int season)
         {
             var url = FantasyProsURLFormatter(Position.TE.ToString(), season.ToString());
             var ignoreList = await playerService.GetIgnoreList();
+            var tes = (await playerService.GetPlayersByPosition(Position.TE)).Select(p => p.PlayerId);
             var players = (await SeasonDataTE(scraperService.ParseFantasyProsTEData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season))
-                            .Where(p => !ignoreList.Contains(p.PlayerId));
+                            .Where(p => !ignoreList.Contains(p.PlayerId) && tes.Contains(p.PlayerId));
             return await uploadSeasonDataRepository.UploadSeasonTEData(players);
         }
         public async Task<int> UploadSeasonDSTData(int season)

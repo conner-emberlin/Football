@@ -12,8 +12,8 @@ namespace Football.Api.Controllers
     {
         [HttpPost("weekly-data/{season}/{week}")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<int>> UploadWeeklyData(int season, int week)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UploadWeeklyData(int season, int week)
         {
             if (season > 0 && week > 0)
             {
@@ -35,13 +35,13 @@ namespace Football.Api.Controllers
                 count += await weeklyDataService.UploadWeeklySnapCounts(season, week, Position.TE.ToString());
                 return Ok(count);
             }
-            else return BadRequest();
+            return BadRequest();
         }
 
         [HttpPost("weekly-fantasy/{season}/{week}")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<int>> UploadWeeklyFantasy(int season, int week)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UploadWeeklyFantasy(int season, int week)
         {
             if (season > 0 && week > 0)
             {
@@ -54,7 +54,7 @@ namespace Football.Api.Controllers
                 count += await fantasyService.PostWeeklyFantasy(season, week, Position.K);
                 return Ok(count);
             }
-            else return BadRequest();
+            return BadRequest();
         }
     }
 

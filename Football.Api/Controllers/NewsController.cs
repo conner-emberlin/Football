@@ -6,28 +6,19 @@ namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class NewsController : ControllerBase
+    public class NewsController(INewsService newsService) : ControllerBase
     {
-        private readonly INewsService _newsService;
-        public NewsController(INewsService newsService)
-        {
-            _newsService = newsService;
-        }
-
         [HttpGet("espn")]
-        [ProducesResponseType(typeof(EspnNews), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<EspnNews>> GetEspnNews() => Ok(await _newsService.GetEspnNews());
+        [ProducesResponseType(typeof(EspnNews), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetEspnNews() => Ok(await newsService.GetEspnNews());
 
         [HttpGet("weather/{zip}")]
-        [ProducesResponseType(typeof(WeatherAPIRoot), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<WeatherAPIRoot>> GetWeatherAPI(string zip) => Ok(await _newsService.GetWeatherAPI(zip));
+        [ProducesResponseType(typeof(WeatherAPIRoot), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetWeatherAPI(string zip) => Ok(await newsService.GetWeatherAPI(zip));
 
         [HttpGet("nfl-odds")]
-        [ProducesResponseType(typeof(List<NFLOddsRoot>), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<List<NFLOddsRoot>>> GetNFLOdds() => Ok(await _newsService.GetNFLOdds());
+        [ProducesResponseType(typeof(List<NFLOddsRoot>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetNFLOdds() => Ok(await newsService.GetNFLOdds());
 
 
     }

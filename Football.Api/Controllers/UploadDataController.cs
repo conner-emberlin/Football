@@ -15,9 +15,9 @@ namespace Football.Api.Controllers
         private readonly Season _season = season.CurrentValue;
 
         [HttpPost("{position}/{season}/{week}")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadWeeklyData(string position, int season, int week)
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UploadWeeklyData(string position, int season, int week)
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
@@ -36,9 +36,9 @@ namespace Football.Api.Controllers
         }
 
         [HttpPost("{position}/{season}")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadSeasonData(string position, int season)
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UploadSeasonData(string position, int season)
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
@@ -56,24 +56,21 @@ namespace Football.Api.Controllers
         }
 
         [HttpPost("roster-percent/{position}/{season}/{week}")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadWeeklyRosterPercentages(string position, int season, int week)
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UploadWeeklyRosterPercentages(string position, int season, int week)
         {
             if (!string.IsNullOrWhiteSpace(position) && season > 0 && week > 0)
                 return Ok(await weeklyDataService.UploadWeeklyRosterPercentages(season, week, position));
-
             return BadRequest();
         }
 
         [HttpPost("headshots/{position}")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> DownloadHeadShots(string position) => Ok(await scraperService.DownloadHeadShots(position));
 
         [HttpPost("logos")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> DownloadTeamLogos() => Ok(await scraperService.DownloadTeamLogos());
   
         [HttpPost("teams/{position}")]
@@ -83,19 +80,17 @@ namespace Football.Api.Controllers
             Ok(await seasonDataService.UploadCurrentTeams(_season.CurrentSeason, position)) : BadRequest();
 
         [HttpPost("schedule")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> UploadSchedule() => Ok(await seasonDataService.UploadSchedule(_season.CurrentSeason));
 
         [HttpPost("schedule-details")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> UploadScheduleDetails() => Ok(await seasonDataService.UploadScheduleDetails(_season.CurrentSeason));
 
         [HttpPost("game-results/{season}/{week}")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadWeeklyGameResults(int season, int week) => Ok(await weeklyDataService.UploadWeeklyGameResults(season, week));
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UploadWeeklyGameResults(int season, int week) => season > 0 && week > 0 ? Ok(await weeklyDataService.UploadWeeklyGameResults(season, week)) : BadRequest();
 
         [HttpPost("adp/{position}")]
         [ProducesResponseType(typeof(int), 200)]
@@ -103,8 +98,7 @@ namespace Football.Api.Controllers
         public async Task<ActionResult<int>> UploadADP(string position) => Ok(await seasonDataService.UploadADP(_season.CurrentSeason, position));
 
         [HttpPost("sleeper-map")]
-        [ProducesResponseType(typeof(int), 200)]
-        [ProducesResponseType(typeof(string), 400)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await leagueAnalysisService.UploadSleeperPlayerMap());
 
         [HttpPost("snaps/{position}/{season}/{week}")]
