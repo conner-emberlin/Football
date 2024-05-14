@@ -48,29 +48,19 @@ namespace Football.Projections.Services
         
         public async Task<IEnumerable<SeasonProjection>> GetProjections(Position position)
         {
-            if (GetProjectionsFromCache(position, out var cachedProj))
-                return cachedProj;
-            else if(GetProjectionsFromSQL(position, _season.CurrentSeason, out var projectionsSQL))
+            var projections = position switch
             {
-                cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), projectionsSQL);
-                return projectionsSQL;
-            }
-            else
-            {
-                var projections = position switch
-                {
-                    Position.QB => await CalculateProjections(await QBProjectionModel(), position),
-                    Position.RB => await CalculateProjections(await RBProjectionModel(), position),
-                    Position.WR => await CalculateProjections(await WRProjectionModel(), position),
-                    Position.TE => await CalculateProjections(await TEProjectionModel(), position),
-                    _ => throw new NotImplementedException()
-                };
-                projections = await adjustmentService.AdjustmentEngine(projections.ToList());
-                var withRookieProjections = (await RookieSeasonProjections(position)).Union(projections);
-                var formattedProjections = withRookieProjections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
-                cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), formattedProjections);
-                return formattedProjections;
-            }
+                Position.QB => await CalculateProjections(await QBProjectionModel(), position),
+                Position.RB => await CalculateProjections(await RBProjectionModel(), position),
+                Position.WR => await CalculateProjections(await WRProjectionModel(), position),
+                Position.TE => await CalculateProjections(await TEProjectionModel(), position),
+                _ => throw new NotImplementedException()
+            };
+            projections = await adjustmentService.AdjustmentEngine(projections.ToList());
+            var withRookieProjections = (await RookieSeasonProjections(position)).Union(projections);
+            var formattedProjections = withRookieProjections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
+            cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), formattedProjections);
+            return formattedProjections;
         }
         public async Task<IEnumerable<SeasonProjection>> CalculateProjections<T1>(List<T1> model, Position position)
         {

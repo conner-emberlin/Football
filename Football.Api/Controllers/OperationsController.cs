@@ -1,7 +1,6 @@
 ﻿using Football.Data.Interfaces;
 using Football.Enums;
 using Football.Fantasy.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Football.Api.Controllers

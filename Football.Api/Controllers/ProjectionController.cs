@@ -7,6 +7,8 @@ using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Football.Api.Models;
+using AutoMapper;
 
 
 namespace Football.Api.Controllers
@@ -16,19 +18,34 @@ namespace Football.Api.Controllers
     public class ProjectionController(IPlayersService playersService,
         IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season,
         IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService,
-        ILeagueAnalysisService leagueService) : ControllerBase
+        ILeagueAnalysisService leagueService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
         [HttpGet("season/{position}")]
-        [ProducesResponseType(typeof(IEnumerable<SeasonProjection>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<SeasonProjectionModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetSeasonProjections(string position)
         {
             if(Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
-                return positionEnum == Position.FLEX ? Ok(await analysisService.SeasonFlexRankings())
-                                      : Ok(await seasonProjectionService.GetProjections(positionEnum));
+                List<SeasonProjectionModel> model = [];
+
+                if (positionEnum == Position.FLEX)
+                    model = mapper.Map<List<SeasonProjectionModel>>(await analysisService.SeasonFlexRankings());
+
+                else if (seasonProjectionService.GetProjectionsFromCache(positionEnum, out var projectionsCache))
+                    model = mapper.Map<List<SeasonProjectionModel>>(projectionsCache);
+
+                else if (seasonProjectionService.GetProjectionsFromSQL(positionEnum, _season.CurrentSeason, out var projectionsSQL))
+                {
+                    model = mapper.Map<List<SeasonProjectionModel>>(projectionsSQL);
+                    model.ForEach(m => m.CanDelete = true);
+                }
+                else 
+                    model = mapper.Map<List<SeasonProjectionModel>>(await seasonProjectionService.GetProjections(positionEnum));
+
+                return Ok(model);
             }
             return BadRequest();
         }

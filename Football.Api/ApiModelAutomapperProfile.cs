@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Football.Api.Models;
 using Football.Players.Models;
+using Football.Projections.Models;
 namespace Football.Api
 {
     public class ApiModelAutomapperProfile : Profile
@@ -16,6 +17,12 @@ namespace Football.Api
 
             CreateMap<RookiePlayerModel, Rookie>()
                     .ReverseMap();
+
+            CreateMap<SeasonProjection, SeasonProjectionModel>(MemberList.Destination)
+                .ForMember(spm => spm.CanDelete, o => o.Ignore());
+            CreateMap<SeasonFlex, SeasonProjectionModel>(MemberList.Destination)
+                .ForMember(spm => spm.CanDelete, o => o.Ignore());
         }
+
     }
 }
