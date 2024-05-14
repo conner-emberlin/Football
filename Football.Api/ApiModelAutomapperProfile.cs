@@ -22,6 +22,9 @@ namespace Football.Api
                 .ForMember(spm => spm.CanDelete, o => o.Ignore());
             CreateMap<SeasonFlex, SeasonProjectionModel>(MemberList.Destination)
                 .ForMember(spm => spm.CanDelete, o => o.Ignore());
+
+            CreateMap<WeekProjection, WeekProjectionModel>(MemberList.Destination)
+                .ForMember(spm => spm.CanDelete, o => o.Ignore())
         }
 
     }

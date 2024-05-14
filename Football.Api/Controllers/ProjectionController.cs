@@ -68,14 +68,32 @@ namespace Football.Api.Controllers
         }
 
         [HttpGet("weekly/{position}")]
-        [ProducesResponseType(typeof(List<WeekProjection>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<WeekProjectionModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetWeeklyProjections(string position)
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
-                return positionEnum == Position.FLEX ? Ok(await analysisService.WeeklyFlexRankings()) 
-                                                         : Ok(await weekProjectionService.GetProjections(positionEnum));
+                List<WeekProjectionModel> model = [];
+                var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+                if (currentWeek > _season.Weeks) 
+                    return Ok(model);
+
+                if (positionEnum == Position.FLEX)
+                    model = mapper.Map<List<WeekProjectionModel>>(await analysisService.WeeklyFlexRankings());
+
+                else if (weekProjectionService.GetProjectionsFromCache(positionEnum, out var projectionsCache))
+                    model = mapper.Map<List<WeekProjectionModel>>(projectionsCache);
+
+                else if (weekProjectionService.GetProjectionsFromSQL(positionEnum, currentWeek, out var projectionsSQL))
+                {
+                    model = mapper.Map<List<WeekProjectionModel>>(projectionsSQL);
+                    model.ForEach(m => m.CanDelete = true);
+                }
+                else
+                    model = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum));
+               
+                return Ok(model);
             }
             return BadRequest();
         }

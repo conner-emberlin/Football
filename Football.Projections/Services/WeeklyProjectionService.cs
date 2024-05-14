@@ -34,7 +34,11 @@ namespace Football.Projections.Services
             return recordDeleted;
         } 
         public async Task<IEnumerable<WeekProjection>?> GetPlayerProjections(int playerId) => await projectionRepository.GetWeeklyProjection(playerId);
-        public async Task<int> PostProjections(List<WeekProjection> projections) => await projectionRepository.PostWeeklyProjections(projections);
+        public async Task<int> PostProjections(List<WeekProjection> projections) 
+        {
+            cache.Remove(projections.First().Position + Cache.WeeklyProjections.ToString());
+            return await projectionRepository.PostWeeklyProjections(projections); 
+        }
 
         public bool GetProjectionsFromSQL(Position position, int week, out IEnumerable<WeekProjection> projections)
         {
@@ -50,30 +54,20 @@ namespace Football.Projections.Services
         public async Task<IEnumerable<WeekProjection>> GetProjections(Position position)
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            if (GetProjectionsFromCache(position, out var cachedValues))
-                return cachedValues;
-            else if (GetProjectionsFromSQL(position, currentWeek, out var projectionsSQL))
+            var projections = position switch
             {
-                cache.Set(position.ToString() + Cache.WeeklyProjections.ToString(), projectionsSQL);
-                return projectionsSQL;
-            }
-            else
-            {
-                var projections = position switch
-                {
-                    Position.QB => await CalculateProjections(await QBProjectionModel(currentWeek), position),
-                    Position.RB => await CalculateProjections(await RBProjectionModel(currentWeek), position),
-                    Position.WR => await CalculateProjections(await WRProjectionModel(currentWeek), position),
-                    Position.TE => await CalculateProjections(await TEProjectionModel(currentWeek), position),
-                    Position.DST => await CalculateProjections(await DSTProjectionModel(currentWeek), position),
-                    Position.K => await CalculateProjections(await KProjectionModel(currentWeek), position),
-                    _ => throw new NotImplementedException()
-                };
-                projections = await adjustmentService.AdjustmentEngine(projections.ToList());
-                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
-                cache.Set(position.ToString() + Cache.WeeklyProjections.ToString(), formattedProjections);
-                return formattedProjections;
-            }
+                Position.QB => await CalculateProjections(await QBProjectionModel(currentWeek), position),
+                Position.RB => await CalculateProjections(await RBProjectionModel(currentWeek), position),
+                Position.WR => await CalculateProjections(await WRProjectionModel(currentWeek), position),
+                Position.TE => await CalculateProjections(await TEProjectionModel(currentWeek), position),
+                Position.DST => await CalculateProjections(await DSTProjectionModel(currentWeek), position),
+                Position.K => await CalculateProjections(await KProjectionModel(currentWeek), position),
+                _ => throw new NotImplementedException()
+            };
+            projections = await adjustmentService.AdjustmentEngine(projections.ToList());
+            var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
+            cache.Set(position.ToString() + Cache.WeeklyProjections.ToString(), formattedProjections);
+            return formattedProjections;
         }
         public async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, Position position)
         {
