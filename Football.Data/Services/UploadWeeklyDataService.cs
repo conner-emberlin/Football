@@ -87,9 +87,9 @@ namespace Football.Data.Services
             logger.Information("Uploading RB Redzone data for week {0}", week);
             var url = RedZoneURL(Position.RB.ToString(), season, week, yardline);
             var ignoreList = await playerService.GetIgnoreList();
-            var rbDictionary = (await playerService.GetPlayersByPosition(Position.RB)).ToDictionary(p => p.PlayerId);
+            var rbs = (await playerService.GetPlayersByPosition(Position.RB)).Select(p => p.PlayerId);
             var players = (await WeeklyRedZoneRB(scraperService.ParseFantasyProsRedZoneRB(scraperService.ScrapeData(url, _scraping.RedZoneXPath)), season, week, yardline))
-                            .Where(p => !ignoreList.Contains(p.PlayerId) && rbDictionary.ContainsKey(p.PlayerId));
+                            .Where(p => !ignoreList.Contains(p.PlayerId) && rbs.Contains(p.PlayerId));
             var added = await uploadWeeklyDataRepository.UploadWeeklyRedZoneRB(players);
             logger.Information("RB Redzone upload complete. {0} records added", added);
             return added;
@@ -151,20 +151,18 @@ namespace Football.Data.Services
             List<WeeklyDataQB> weeklyData = [];
             foreach(var p in players)
             {
-                var playerId = await playerService.GetPlayerId(p.Name);
-                if (playerId == 0)
+                var player = await playerService.GetPlayerByName(p.Name);
+                if (player == null)
                 {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.QB.ToString(), Active = 1 });
+                    player = await playerService.CreatePlayer(p.Name, 1, Position.QB.ToString());
                     logger.Information("New player created: {p}", p.Name);
-                    playerId = await playerService.GetPlayerId(p.Name);
                 }
-                var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.QB.ToString())
                 {
                     var wd= mapper.Map<WeeklyDataQB>(p);
                     wd.Season = season;
                     wd.Week = week;
-                    wd.PlayerId = playerId;
+                    wd.PlayerId = player.PlayerId;
                     weeklyData.Add(wd);
                 }
             }
@@ -176,20 +174,18 @@ namespace Football.Data.Services
             List<WeeklyDataRB> weeklyData = [];
             foreach (var p in players)
             {
-                var playerId = await playerService.GetPlayerId(p.Name);
-                if (playerId == 0)
+                var player = await playerService.GetPlayerByName(p.Name);
+                if (player == null)
                 {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.RB.ToString(), Active = 1 });
+                    player = await playerService.CreatePlayer(p.Name, 1, Position.RB.ToString());
                     logger.Information("New player created: {p}", p.Name);
-                    playerId = await playerService.GetPlayerId(p.Name);
                 }
-                var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.RB.ToString())
                 {
                     var wd = mapper.Map<WeeklyDataRB>(p);
                     wd.Season = season;
                     wd.Week = week;
-                    wd.PlayerId = playerId;
+                    wd.PlayerId = player.PlayerId;
                     weeklyData.Add(wd);
                 }
             }
@@ -202,12 +198,7 @@ namespace Football.Data.Services
             foreach (var p in players)
             {
                 var playerId = await playerService.GetPlayerId(p.Name);
-                if (playerId == 0)
-                {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.RB.ToString(), Active = 1 });
-                    logger.Information("New player created: {p}", p.Name);
-                    playerId = await playerService.GetPlayerId(p.Name);
-                }
+                if (playerId == 0) break;
                 var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.RB.ToString())
                 {
@@ -237,20 +228,18 @@ namespace Football.Data.Services
             List<WeeklyDataWR> weeklyData = [];
             foreach (var p in players)
             {
-                var playerId = await playerService.GetPlayerId(p.Name);
-                if (playerId == 0)
+                var player = await playerService.GetPlayerByName(p.Name);
+                if (player == null)
                 {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.WR.ToString(), Active = 1 });
+                    player = await playerService.CreatePlayer(p.Name, 1, Position.WR.ToString());
                     logger.Information("New player created: {p}", p.Name);
-                    playerId = await playerService.GetPlayerId(p.Name);
                 }
-                var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.WR.ToString())
                 {
                     var wd = mapper.Map<WeeklyDataWR>(p);
                     wd.Season = season;
                     wd.Week = week;
-                    wd.PlayerId = playerId;
+                    wd.PlayerId = player.PlayerId;
                     weeklyData.Add(wd);
                 }
             }
@@ -262,20 +251,18 @@ namespace Football.Data.Services
             List<WeeklyDataTE> weeklyData = [];
             foreach (var p in players)
             {
-                var playerId = await playerService.GetPlayerId(p.Name);
-                if (playerId == 0)
+                var player = await playerService.GetPlayerByName(p.Name);
+                if (player == null)
                 {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.TE.ToString(), Active = 1 });
+                    player = await playerService.CreatePlayer(p.Name, 1, Position.TE.ToString());
                     logger.Information("New player created: {p}", p.Name);
-                    playerId = await playerService.GetPlayerId(p.Name);
                 }
-                var player = await playerService.GetPlayer(playerId);
                 if (p.Games > 0 && player.Position == Position.TE.ToString())
                 {
                     var wd = mapper.Map<WeeklyDataTE>(p);
                     wd.Season = season;
                     wd.Week = week;
-                    wd.PlayerId = playerId;
+                    wd.PlayerId = player.PlayerId;
                     weeklyData.Add(wd);
                 }
             }
@@ -289,11 +276,7 @@ namespace Football.Data.Services
             {
                 var playerId = await playerService.GetPlayerId(p.Name);
                 if (playerId == 0)
-                {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.DST.ToString(), Active = 1 });
-                    logger.Information("New player created: {p}", p.Name);
-                    playerId = await playerService.GetPlayerId(p.Name);
-                }
+                    throw new Exception("Invalid DST");
                 if (p.Games > 0)
                 {
                     var wd = mapper.Map<WeeklyDataDST>(p);
@@ -311,19 +294,18 @@ namespace Football.Data.Services
             List<WeeklyDataK> weeklyData = [];
             foreach (var p in players)
             {
-                var playerId = await playerService.GetPlayerId(p.Name);
-                if (playerId == 0)
+                var player = await playerService.GetPlayerByName(p.Name);
+                if (player == null)
                 {
-                    await playerService.CreatePlayer(new Player { Name = p.Name, Position = Position.K.ToString(), Active = 1 });
+                    player = await playerService.CreatePlayer(p.Name, 1, Position.K.ToString());
                     logger.Information("New player created: {p}", p.Name);
-                    playerId = await playerService.GetPlayerId(p.Name);
                 }
-                if (p.Games > 0)
+                if (p.Games > 0 && player.Position == Position.K.ToString())
                 {
                     var wd = mapper.Map<WeeklyDataK>(p);
                     wd.Season = season;
                     wd.Week = week;
-                    wd.PlayerId = playerId;
+                    wd.PlayerId = player.PlayerId;
                     weeklyData.Add(wd);
                 }
             }

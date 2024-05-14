@@ -34,7 +34,7 @@ namespace Football.Api.Controllers
         }
         [HttpPost("add")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        public async Task<IActionResult> CreatePlayer([FromBody] Player player) => Ok(await playersService.CreatePlayer(player));
+        public async Task<IActionResult> CreatePlayer([FromBody] Player player) => Ok(await playersService.CreatePlayer(player.Name, player.Active, player.Position));
 
 
         [HttpGet("data/qb/{playerId}")]
@@ -153,7 +153,7 @@ namespace Football.Api.Controllers
                 var existingPlayerId = await playersService.GetPlayerId(model.Name);
                 if (existingPlayerId == 0)
                 {
-                    _= await playersService.CreatePlayer(mapper.Map<Player>(model));
+                    _= await playersService.CreatePlayer(model.Name, model.Active, model.Position);
                     var playerId = await playersService.GetPlayerId(model.Name);
                     if(playerId > 0)
                     {                       

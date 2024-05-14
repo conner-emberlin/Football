@@ -1,8 +1,6 @@
 using AutoMapper;
-using Football.Models;
 using Football.Data.Models;
 using Football.Players.Models;
-using Microsoft.Extensions.Options;
 
 namespace Football.Data
 {

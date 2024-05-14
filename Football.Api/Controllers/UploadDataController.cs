@@ -48,7 +48,6 @@ namespace Football.Api.Controllers
                     Position.RB => Ok(await seasonDataService.UploadSeasonRBData(season)),
                     Position.WR => Ok(await seasonDataService.UploadSeasonWRData(season)),
                     Position.TE => Ok(await seasonDataService.UploadSeasonTEData(season)),
-                    Position.DST => Ok(await seasonDataService.UploadSeasonDSTData(season)),
                     _ => BadRequest(),
                 };
             }

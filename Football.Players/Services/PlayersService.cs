@@ -14,9 +14,14 @@ namespace Football.Players.Services
         private readonly Season _season = season.CurrentValue;
 
         public async Task<int> GetPlayerId(string name) => await playersRepository.GetPlayerId(name);
-        public async Task<int> CreatePlayer(Player player) => await playersRepository.CreatePlayer(player);
+        public async Task<Player> CreatePlayer(string name, int active, string position)
+        {
+            var playerId = await playersRepository.CreatePlayer(name, active, position);
+            return new Player { PlayerId = playerId, Name = name, Active = active, Position = position };
+        }
         public async Task<List<Player>> GetPlayersByPosition(Position position) => await playersRepository.GetPlayersByPosition(position.ToString());        
         public async Task<Player> GetPlayer(int playerId) => await playersRepository.GetPlayer(playerId);
+        public async Task<Player?> GetPlayerByName(string name) => await playersRepository.GetPlayerByName(name);
         public async Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position) => await playersRepository.GetHistoricalRookies(currentSeason, position);
         public async Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position) => await playersRepository.GetCurrentRookies(currentSeason, position);
         public async Task<List<InjuryConcerns>> GetPlayerInjuries(int season) => await playersRepository.GetPlayerInjuries(season);
