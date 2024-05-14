@@ -52,18 +52,19 @@ namespace Football.Data.Services
         {
             var url = FantasyProsURLFormatter(position, season.ToString());
             var str = scraperService.ScrapeData(url, _scraping.FantasyProsXPath);
-            var parsedStr = scraperService.ParseFantasyProsPlayerTeam(str, position);
-            foreach (var pt in parsedStr)
+            var playerTeams = scraperService.ParseFantasyProsPlayerTeam(str, position);
+            foreach (var pt in playerTeams)
             {
                 logger.Information("Getting team for player {playerId}", pt.PlayerId);
                 pt.PlayerId = await playerService.GetPlayerId(pt.Name);
                 if(pt.PlayerId == 0)
                 {
                     logger.Information("Player {Name} does not exist in players table", pt.Name);
+                    playerTeams.Remove(pt);
                 }
                 pt.Season = season;
             }
-            return await uploadSeasonDataRepository.UploadCurrentTeams(parsedStr);
+            return await uploadSeasonDataRepository.UploadCurrentTeams(playerTeams);
         }
 
         public async Task<int> UploadSchedule(int season)
@@ -90,12 +91,7 @@ namespace Football.Data.Services
             List<SeasonDataQB> seasonData = [];
             foreach (var p in players)
             {
-                var player = await playerService.GetPlayerByName(p.Name);
-                if (player == null)
-                {
-                    player = await playerService.CreatePlayer(p.Name, 1, Position.WR.ToString());
-                    logger.Information("New player created: {p}", p.Name);
-                }
+                var player = await playerService.RetrievePlayer(p.Name, Position.QB);
                 if (p.Games > 0 && player.Position == Position.QB.ToString())
                 {
                     var sd = mapper.Map<SeasonDataQB>(p);
@@ -103,8 +99,6 @@ namespace Football.Data.Services
                     sd.PlayerId = player.PlayerId;
                     seasonData.Add(sd);
                 }
-                else
-                    logger.Information("{name} does not exist in the Players table", p.Name);
             }
             return seasonData;
         }
@@ -114,12 +108,7 @@ namespace Football.Data.Services
             List<SeasonDataRB> seasonData = [];
             foreach (var p in players)
             {
-                var player = await playerService.GetPlayerByName(p.Name);
-                if (player == null)
-                {
-                    player = await playerService.CreatePlayer(p.Name, 1, Position.WR.ToString());
-                    logger.Information("New player created: {p}", p.Name);
-                }
+                var player = await playerService.RetrievePlayer(p.Name, Position.RB);
                 if (p.Games > 0 && player.Position == Position.RB.ToString())
                 {
                     var sd = mapper.Map<SeasonDataRB>(p);
@@ -127,8 +116,6 @@ namespace Football.Data.Services
                     sd.PlayerId = player.PlayerId;
                     seasonData.Add(sd);
                 }
-                else
-                    logger.Information("{name} does not exist in the Players table", p.Name);
             }
             return seasonData;
         }
@@ -137,12 +124,7 @@ namespace Football.Data.Services
             List<SeasonDataWR> seasonData = [];
             foreach (var p in players)
             {
-                var player = await playerService.GetPlayerByName(p.Name);
-                if (player == null)
-                {
-                    player = await playerService.CreatePlayer(p.Name, 1, Position.WR.ToString());
-                    logger.Information("New player created: {p}", p.Name);
-                }
+                var player = await playerService.RetrievePlayer(p.Name, Position.WR);
                 if (p.Games > 0 && player.Position == Position.WR.ToString())
                 {
                     var sd = mapper.Map<SeasonDataWR>(p);
@@ -150,8 +132,6 @@ namespace Football.Data.Services
                     sd.PlayerId = player.PlayerId;
                     seasonData.Add(sd);
                 }
-                else
-                    logger.Information("{name} does not exist in the Players table", p.Name);
             }
             return seasonData;
         }
@@ -161,12 +141,7 @@ namespace Football.Data.Services
             List<SeasonDataTE> seasonData = [];
             foreach (var p in players)
             {
-                var player = await playerService.GetPlayerByName(p.Name);
-                if (player == null)
-                {
-                    player = await playerService.CreatePlayer(p.Name, 1, Position.WR.ToString());
-                    logger.Information("New player created: {p}", p.Name);
-                }
+                var player = await playerService.RetrievePlayer(p.Name, Position.TE);
                 if ( p.Games > 0 && player.Position == Position.TE.ToString())
                 {
                     var sd = mapper.Map<SeasonDataTE>(p);
@@ -174,8 +149,6 @@ namespace Football.Data.Services
                     sd.PlayerId = player.PlayerId;
                     seasonData.Add(sd);
                 }
-                else
-                    logger.Information("{name} does not exist in the Players table", p.Name);
             }
             return seasonData;
         }
@@ -237,6 +210,7 @@ namespace Football.Data.Services
             return scheduleDetails;
         }
         private string FantasyProsURLFormatter(string position, string year) => string.Format("{0}{1}.php?year={2}", _scraping.FantasyProsBaseURL, position.ToLower(), year);
+
     }
 }
 

@@ -5,11 +5,12 @@ using Football.Players.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using AutoMapper;
+using Serilog;
 
 namespace Football.Players.Services
 {
     public class PlayersService(IPlayersRepository playersRepository, IMemoryCache cache, IOptionsMonitor<Season> season, 
-        ISettingsService settingsService, IMapper mapper) : IPlayersService
+        ISettingsService settingsService, IMapper mapper, ILogger logger) : IPlayersService
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -22,6 +23,17 @@ namespace Football.Players.Services
         public async Task<List<Player>> GetPlayersByPosition(Position position) => await playersRepository.GetPlayersByPosition(position.ToString());        
         public async Task<Player> GetPlayer(int playerId) => await playersRepository.GetPlayer(playerId);
         public async Task<Player?> GetPlayerByName(string name) => await playersRepository.GetPlayerByName(name);
+
+        public async Task<Player> RetrievePlayer(string name, Position position)
+        {
+            var player = await GetPlayerByName(name);
+            if (player == null)
+            {
+                player = await CreatePlayer(name, 1, position.ToString());
+                logger.Information("New Player Added. Name: {0}, PlayerId: {1}", player.Name, player.PlayerId);                
+            }
+            return player;
+        }
         public async Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position) => await playersRepository.GetHistoricalRookies(currentSeason, position);
         public async Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position) => await playersRepository.GetCurrentRookies(currentSeason, position);
         public async Task<List<InjuryConcerns>> GetPlayerInjuries(int season) => await playersRepository.GetPlayerInjuries(season);

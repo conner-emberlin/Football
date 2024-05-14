@@ -9,6 +9,8 @@ using Football.Players.Models;
 using Football.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
+using Serilog;
+using Football.Enums;
 
 namespace Football.Tests
 {
@@ -24,11 +26,13 @@ namespace Football.Tests
         private readonly int _playerId = 1;
         private readonly string _team = "TM";
         private readonly int _teamId = 10;
+        private readonly Position _position = Position.QB;
 
         private readonly Mock<IPlayersRepository> _mockPlayersRepository;
         private readonly Mock<IOptionsMonitor<Season>> _mockSeason;
         private readonly Mock<IMemoryCache> _mockMemoryCache;
         private readonly Mock<ISettingsService> _mockSettingsService;
+        private readonly Mock<ILogger> _mockLogger;
 
         public PlayersServiceShould()
         {
@@ -42,6 +46,7 @@ namespace Football.Tests
             _mockSeason = _mock.GetMock<IOptionsMonitor<Season>>();
             _mockMemoryCache = _mock.GetMock<IMemoryCache>();
             _mockSettingsService = _mock.GetMock<ISettingsService>();
+            _mockLogger = _mock.GetMock<ILogger>();
 
             _mockSeason.Setup(s => s.CurrentValue).Returns(_season);
             _mockPlayersRepository.Setup(pr => pr.GetPlayer(_playerId)).ReturnsAsync(_playerDST);
@@ -49,7 +54,7 @@ namespace Football.Tests
             _mockPlayersRepository.Setup(ps => ps.GetTeamId(_playerId)).ReturnsAsync(_teamId);
             _mockPlayersRepository.Setup(ps => ps.GetTeamId(_teamMap.Team)).ReturnsAsync(_teamId);
 
-            _sut = new PlayersService(_mockPlayersRepository.Object, _mockMemoryCache.Object, _mockSeason.Object, _mockSettingsService.Object, _mapper);
+            _sut = new PlayersService(_mockPlayersRepository.Object, _mockMemoryCache.Object, _mockSeason.Object, _mockSettingsService.Object, _mapper, _mockLogger.Object);
         }
 
         [Fact]
@@ -89,6 +94,19 @@ namespace Football.Tests
 
             var actual = await _sut.GetPlayersByTeam(_team);
             Assert.Contains(actual, pt => pt.PlayerId == _playerId && pt.Team == _team);
+        }
+
+        [Fact]
+        public async Task RetrievePlayer_PlayerDoesNotExist_PlayerCreated()
+        {
+            var name = "Player Name";
+            _mockPlayersRepository.Setup(pr => pr.GetPlayerByName(name)).ReturnsAsync((Player?)null);
+            _mockPlayersRepository.Setup(pr => pr.CreatePlayer(name, 1, _position.ToString())).ReturnsAsync(_playerId);
+
+            var actual = await _sut.RetrievePlayer(name, _position);
+
+            Assert.True(actual.PlayerId == _playerId && actual.Position == _position.ToString() && actual.Name == name);
+
         }
     }
 }
