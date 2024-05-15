@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using AutoMapper;
 using Serilog;
+using AutoMapper.Configuration.Conventions;
 
 namespace Football.Players.Services
 {
@@ -82,6 +83,7 @@ namespace Football.Players.Services
             }
             else return await playersRepository.GetPlayerTeam(season, playerId);
         }
+        public async Task<IEnumerable<PlayerTeam>> GetPlayerTeams(int season, IEnumerable<int> playerIds) => await playersRepository.GetPlayerTeams(season, playerIds);
         public async Task<List<PlayerInjury>> GetPlayerInjuries()
         {
             List<PlayerInjury> playerInjuries = [];

@@ -45,6 +45,9 @@ namespace Football.Api.Controllers
                 else 
                     model = mapper.Map<List<SeasonProjectionModel>>(await seasonProjectionService.GetProjections(positionEnum));
 
+                var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
+                model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
+
                 return Ok(model);
             }
             return BadRequest();
@@ -92,7 +95,10 @@ namespace Football.Api.Controllers
                 }
                 else
                     model = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum));
-               
+
+                var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
+                model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
+
                 return Ok(model);
             }
             return BadRequest();

@@ -58,6 +58,7 @@ else if(players.Count > 0)
                     <th>Rank</th>
                     <th>Name</th>
                     <th>Position</th>
+                    <th>Team</th>
                     <th>Total Points</th>
                     <th>PPG</th>
                     @if (seasonOver && PositionEnum != "FLEX")
@@ -76,11 +77,13 @@ else if(players.Count > 0)
         </thead>
         <tbody>
         @foreach (var p in players)
-        {            
+        {  
+                    var logoPhotoPath = p.Team != null ? "https://localhost:7176/Logos/" + p.Team + ".png" : "https://localhost:7176/Logos/nfl.png";
             <tr>
             <td>@GetRank(p)</td>
             <td><a class = "page-links" href="Players/@p.PlayerId"> @p.Name</a></td>
             <td>@p.Position</td>
+            <td><img src="@logoPhotoPath" width="30" height="30"></td>
             <td>@Math.Round((double)p.ProjectedPoints,2)</td>
             <td>@Math.Round((double)p.ProjectedPoints/17,2)</td>
                         @if (seasonOver && PositionEnum != "FLEX")

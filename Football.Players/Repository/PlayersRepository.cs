@@ -120,6 +120,14 @@ namespace Football.Players.Repository
 
             return (await dbConnection.QueryAsync<PlayerTeam>(query, new { season, playerId })).FirstOrDefault();
         }
+
+        public async Task<IEnumerable<PlayerTeam>> GetPlayerTeams(int season, IEnumerable<int> playerIds)
+        {
+            var query = $@"SELECT * FROM [dbo].PlayerTeam
+                            WHERE [PlayerId] IN @playerIds
+                                AND [Season] = @season";
+            return await dbConnection.QueryAsync<PlayerTeam>(query, new { playerIds, season });
+        }
         public async Task<List<PlayerTeam>> GetPlayersByTeam(string team, int season)
         {
             var query = $@"SELECT [PlayerId], [Name], [Season], [Team]
