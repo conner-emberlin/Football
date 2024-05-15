@@ -97,14 +97,16 @@ namespace Football.Projections.Services
             if (matchupRanks.Count > 0)
             {
                 var avgMatchup = matchupRanks.ElementAt((int)Math.Floor((double)(matchupRanks.Count / 2)));
+                var teamDictionary = (await playerService.GetPlayerTeams(_season.CurrentSeason, weekProjections.Select(w => w.PlayerId))).ToDictionary(p => p.PlayerId);
+                var scheduleDictionary = (await playerService.GetWeeklySchedule(_season.CurrentSeason, weekProjections.First().Week)).ToDictionary(s => s.TeamId);
+
                 foreach (var w in weekProjections)
                 {
-                    var team = await playerService.GetPlayerTeam(_season.CurrentSeason, w.PlayerId);
-                    if (team != null)
+                    if (teamDictionary.TryGetValue(w.PlayerId, out var team))
                     {
-                        var teamId = await playerService.GetTeamId(team.Team);
-                        var matchup = (await playerService.GetTeamGames(teamId)).FirstOrDefault(m => m.Week == w.Week);
-                        if (matchup != null && matchup.OpposingTeam != "BYE")
+                        var matchup = scheduleDictionary[team.TeamId];
+                        if (matchup.OpposingTeam == "BYE") w.ProjectedPoints = 0;
+                        else 
                         {
                             var opponentRank = matchupRanks.FirstOrDefault(mr => mr.Team.TeamId == matchup.OpposingTeamId);
                             if (opponentRank != null)
@@ -114,11 +116,8 @@ namespace Football.Projections.Services
                                 w.ProjectedPoints = w.Position != Position.DST.ToString() ? w.ProjectedPoints * (tamperedRatio + 1) / 2 : tamperedRatio * w.ProjectedPoints;
                             }
                         }
-                        else
-                            w.ProjectedPoints = 0;
                     }
-                    else
-                        w.ProjectedPoints = 0;
+                    else w.ProjectedPoints = 0;
                 }
             }
             return weekProjections;

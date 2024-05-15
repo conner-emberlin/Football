@@ -43,5 +43,6 @@ namespace Football.Players.Interfaces
         public Task<List<int>> GetSeasons();
         public Task<bool> CreateRookie(Rookie rookie);
         public Task<List<Rookie>> GetAllRookies();
+        public Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week);
     }
 }

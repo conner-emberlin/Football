@@ -6,7 +6,6 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using AutoMapper;
 using Serilog;
-using AutoMapper.Configuration.Conventions;
 
 namespace Football.Players.Services
 {
@@ -72,13 +71,15 @@ namespace Football.Players.Services
             var player = await GetPlayer(playerId);
             if (player.Position == Position.DST.ToString())
             {
-                var team = await GetTeam(await GetTeamId(playerId));
+                var teamId = await GetTeamId(playerId);
+                var team = await GetTeam(teamId);
                 return new PlayerTeam
                 {
                     PlayerId = playerId,
                     Name = team.TeamDescription,
                     Season = season,
-                    Team = team.Team
+                    Team = team.Team,
+                    TeamId = teamId
                 };
             }
             else return await playersRepository.GetPlayerTeam(season, playerId);
@@ -110,13 +111,15 @@ namespace Football.Players.Services
         public async Task<List<PlayerTeam>> GetPlayersByTeam(string team) 
         { 
             var playerTeams = await playersRepository.GetPlayersByTeam(team, _season.CurrentSeason);
-            var teamMap = await GetTeam(await GetTeamId(team));
+            var teamId = await GetTeamId(team);
+            var teamMap = await GetTeam(teamId);
             playerTeams.Add(new PlayerTeam
             {
                 PlayerId = teamMap.PlayerId,
                 Name = teamMap.TeamDescription,
                 Season = _season.CurrentSeason,
-                Team = team
+                Team = team,
+                TeamId = teamId
             });
             var formerPlayers = (await GetInSeasonTeamChanges()).Where(t => t.PreviousTeam == team);
             if (formerPlayers.Any())
@@ -129,7 +132,8 @@ namespace Football.Players.Services
                         PlayerId = player.PlayerId,
                         Name = player.Name,
                         Season = _season.CurrentSeason,
-                        Team = team
+                        Team = team, 
+                        TeamId = teamMap.TeamId
                     });
                 }
             }
@@ -146,5 +150,7 @@ namespace Football.Players.Services
             return await playersRepository.UpdateCurrentTeam(teamChange.PlayerId, teamChange.NewTeam, _season.CurrentSeason) ?
                    await playersRepository.PostTeamChange(teamChange) : 0;
         }
+
+        public async Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week) => await playersRepository.GetWeeklySchedule(season, week);
     }
 }

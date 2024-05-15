@@ -43,8 +43,8 @@ namespace Football.Data.Repository
 
         public async Task<int> UploadCurrentTeams(List<PlayerTeam> teams)
         {
-            var query = $@"INSERT INTO [dbo].PlayerTeam (Season, PlayerId, Name, Team)
-                        VALUES (@Season, @PlayerId, @Name, @Team)";
+            var query = $@"INSERT INTO [dbo].PlayerTeam (Season, PlayerId, Name, Team, TeamId)
+                        VALUES (@Season, @PlayerId, @Name, @Team, @TeamId)";
             return await dbConnection.ExecuteAsync(query, teams);
         }
         public async Task<int> UploadSchedule(List<Schedule> schedules)

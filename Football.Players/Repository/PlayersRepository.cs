@@ -113,7 +113,7 @@ namespace Football.Players.Repository
         }
         public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId)
         {
-            var query = $@"SELECT [PlayerId], [Name], [Season], [Team]
+            var query = $@"SELECT *
                         FROM [dbo].PlayerTeam
                         WHERE [Season] = @season
                             AND [PlayerId] = @playerId";
@@ -301,6 +301,14 @@ namespace Football.Players.Repository
         {
             var query = $@"SELECT * FROM [dbo].Rookie";
             return (await dbConnection.QueryAsync<Rookie>(query)).ToList();
+        }
+
+        public async Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week)
+        {
+            var query = $@"SELECT * FROM [dbo].Schedule
+                            WHERE [Season] = @season
+                                AND [Week] = @week";
+            return await dbConnection.QueryAsync<Schedule>(query, new { season, week });
         }
     }
 }

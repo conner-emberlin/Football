@@ -63,6 +63,7 @@ namespace Football.Data.Services
                     playerTeams.Remove(pt);
                 }
                 pt.Season = season;
+                pt.TeamId = await playerService.GetTeamId(pt.Team);
             }
             return await uploadSeasonDataRepository.UploadCurrentTeams(playerTeams);
         }
