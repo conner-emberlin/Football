@@ -77,29 +77,31 @@ namespace Football.Api.Controllers
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
-                List<WeekProjectionModel> model = [];
+                List<WeekProjectionModel> models = [];
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
                 if (currentWeek > _season.Weeks) 
-                    return Ok(model);
+                    return Ok(models);
 
                 if (positionEnum == Position.FLEX)
-                    model = mapper.Map<List<WeekProjectionModel>>(await analysisService.WeeklyFlexRankings());
+                    models = mapper.Map<List<WeekProjectionModel>>(await analysisService.WeeklyFlexRankings());
 
                 else if (weekProjectionService.GetProjectionsFromCache(positionEnum, out var projectionsCache))
-                    model = mapper.Map<List<WeekProjectionModel>>(projectionsCache);
+                    models = mapper.Map<List<WeekProjectionModel>>(projectionsCache);
 
                 else if (weekProjectionService.GetProjectionsFromSQL(positionEnum, currentWeek, out var projectionsSQL))
                 {
-                    model = mapper.Map<List<WeekProjectionModel>>(projectionsSQL);
-                    model.ForEach(m => m.CanDelete = true);
+                    models = mapper.Map<List<WeekProjectionModel>>(projectionsSQL);
+                    models.ForEach(m => m.CanDelete = true);
                 }
                 else
-                    model = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum));
+                    models = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum));
 
-                var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
-                model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
+                var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId);
+                var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, models.First().Week)).ToDictionary(s => s.TeamId);
+                models.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team.Team : string.Empty);                
+                models.ForEach(m => m.Opponent = teamDictionary.TryGetValue(m.PlayerId, out var team) ? scheduleDictionary[team.TeamId].OpposingTeam : string.Empty);
 
-                return Ok(model);
+                return Ok(models);
             }
             return BadRequest();
         }

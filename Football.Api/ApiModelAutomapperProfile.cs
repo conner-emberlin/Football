@@ -14,10 +14,8 @@ namespace Football.Api
                     .ForMember(rpm => rpm.TeamDrafted, o => o.Ignore())
                     .ForMember(rpm => rpm.DeclareAge, o => o.Ignore())
                     .ForMember(rpm => rpm.RookieSeason, o => o.Ignore());
-
             CreateMap<RookiePlayerModel, Rookie>()
                     .ReverseMap();
-
             CreateMap<SeasonProjection, SeasonProjectionModel>(MemberList.Destination)
                 .ForMember(spm => spm.CanDelete, o => o.Ignore())
                 .ForMember(spm => spm.Team, o => o.Ignore());
@@ -26,7 +24,8 @@ namespace Football.Api
                 .ForMember(spm => spm.Team, o => o.Ignore());
             CreateMap<WeekProjection, WeekProjectionModel>(MemberList.Destination)
                 .ForMember(spm => spm.CanDelete, o => o.Ignore())
-                .ForMember(spm => spm.Team, o => o.Ignore());
+                .ForMember(spm => spm.Team, o => o.Ignore())
+                .ForMember(spm => spm.Opponent, o => o.Ignore());
         }
 
     }
