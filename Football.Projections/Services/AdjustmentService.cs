@@ -6,8 +6,6 @@ using Football.Projections.Interfaces;
 using Serilog;
 using Microsoft.Extensions.Options;
 using Football.Enums;
-using Football.Players.Services;
-
 
 namespace Football.Projections.Services
 {
@@ -57,8 +55,7 @@ namespace Football.Projections.Services
                                                                 (ai, wp) => new { InSeasonInjury = ai, WeekProjection = wp });
             foreach (var wp in weeklyProjections)
             {
-                if (injuredPlayerProjections.Any(ip => ip.WeekProjection.PlayerId == wp.PlayerId))
-                    wp.ProjectedPoints = 0;
+                if (injuredPlayerProjections.Any(ip => ip.WeekProjection.PlayerId == wp.PlayerId)) wp.ProjectedPoints = 0;
             }
             return weeklyProjections;
         }
@@ -68,8 +65,7 @@ namespace Football.Projections.Services
             var playerSuspensions = (await playerService.GetPlayerSuspensions(_season.CurrentSeason)).ToDictionary(s => s.PlayerId, s => s.Length);
             foreach (var s in seasonProjections)
             {
-                if (playerSuspensions.TryGetValue(s.PlayerId, out var length))
-                    s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * length;
+                if (playerSuspensions.TryGetValue(s.PlayerId, out var length)) s.ProjectedPoints -= (s.ProjectedPoints / _season.Games) * length;
             }
             return seasonProjections;
         }

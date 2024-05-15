@@ -60,7 +60,7 @@ namespace Football.Tests
             _m1 = new() { Team = _tm1, GamesPlayed = 10, AvgPointsAllowed = 10, PointsAllowed = 100, Position = _position.ToString() };
             _m2 = new() { Team = _tm2, GamesPlayed = 10, AvgPointsAllowed = 20, PointsAllowed = 200, Position = _position.ToString() };
             _m3 = new() { Team = _tm3, GamesPlayed = 10, AvgPointsAllowed = 30, PointsAllowed = 300, Position = _position.ToString() };
-            _playerTeam = new() { Name = "Player", PlayerId = _playerId, Season = _season.CurrentSeason, Team = _team };
+            _playerTeam = new() { Name = "Player", PlayerId = _playerId, Season = _season.CurrentSeason, Team = _team, TeamId = _teamId };
 
             _mockPlayersService = _mock.GetMock<IPlayersService>();
             _mockMatchupAnalysisService = _mock.GetMock<IMatchupAnalysisService>();
@@ -73,7 +73,7 @@ namespace Football.Tests
             _mockTunings.Setup(mt => mt.CurrentValue).Returns(_tunings);
             _mockWeeklyTunings.Setup(mw => mw.CurrentValue).Returns(_weeklyTunings);
 
-            _mockPlayersService.Setup(ps => ps.GetPlayerTeam(_season.CurrentSeason, _playerId)).ReturnsAsync(_playerTeam);
+            _mockPlayersService.Setup(ps => ps.GetPlayerTeams(_season.CurrentSeason, It.IsAny<IEnumerable<int>>())).ReturnsAsync([_playerTeam]);
             _mockPlayersService.Setup(ps => ps.GetTeamId(_team)).ReturnsAsync(_teamId);
 
             _sut = new AdjustmentService(_mockPlayersService.Object, _mockMatchupAnalysisService.Object, _mockLogger.Object, _mockSeason.Object, _mockTunings.Object, _mockWeeklyTunings.Object);
@@ -138,7 +138,7 @@ namespace Football.Tests
             var matchupRanking = new MatchupRanking { Team = _teamMap, GamesPlayed = 10, AvgPointsAllowed = 20, PointsAllowed = 200, Position = _position.ToString() };
             _mockMatchupAnalysisService.Setup(ma => ma.PositionalMatchupRankings(_position)).ReturnsAsync([matchupRanking]);
             var teamGame = new Schedule { Week = 1, OpposingTeam = "BYE", Season = _season.CurrentSeason, OpposingTeamId = 30, Team = _team, TeamId = _teamId };
-            _mockPlayersService.Setup(ps => ps.GetTeamGames(_teamId)).ReturnsAsync([teamGame]);
+            _mockPlayersService.Setup(ps => ps.GetWeeklySchedule(_season.CurrentSeason, 1)).ReturnsAsync([teamGame]);
             _mockPlayersService.Setup(ps => ps.GetActiveInSeasonInjuries(_season.CurrentSeason)).ReturnsAsync([]);
 
             var actual = await _sut.AdjustmentEngine(projections);
@@ -155,7 +155,7 @@ namespace Football.Tests
             List<WeekProjection> projections = [weekProjection];
             _mockMatchupAnalysisService.Setup(ma => ma.PositionalMatchupRankings(_position)).ReturnsAsync([_m1, _m2, _m3]);
             var teamGame = new Schedule { Week = _week, OpposingTeam = _tm1.Team, Season = _season.CurrentSeason, OpposingTeamId = _tm1.TeamId, Team = _team, TeamId = _teamId };
-            _mockPlayersService.Setup(ps => ps.GetTeamGames(_teamId)).ReturnsAsync([teamGame]);
+            _mockPlayersService.Setup(ps => ps.GetWeeklySchedule(_season.CurrentSeason, _week)).ReturnsAsync([teamGame]);
             _mockPlayersService.Setup(ps => ps.GetActiveInSeasonInjuries(_season.CurrentSeason)).ReturnsAsync([]);
 
             var actual = await _sut.AdjustmentEngine(projections);
@@ -172,7 +172,7 @@ namespace Football.Tests
             List<WeekProjection> projections = [weekProjection];
             _mockMatchupAnalysisService.Setup(ma => ma.PositionalMatchupRankings(_position)).ReturnsAsync([_m1, _m2, _m3]);
             var teamGame = new Schedule { Week = _week, OpposingTeam = _tm3.Team, Season = _season.CurrentSeason, OpposingTeamId = _tm3.TeamId, Team = _team, TeamId = _teamId };
-            _mockPlayersService.Setup(ps => ps.GetTeamGames(_teamId)).ReturnsAsync([teamGame]);
+            _mockPlayersService.Setup(ps => ps.GetWeeklySchedule(_season.CurrentSeason, _week)).ReturnsAsync([teamGame]);
             _mockPlayersService.Setup(ps => ps.GetActiveInSeasonInjuries(_season.CurrentSeason)).ReturnsAsync([]);
 
             var actual = await _sut.AdjustmentEngine(projections);
