@@ -21,7 +21,7 @@
 }
 </div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
-<button class="button-22" role="button" @onclick="CalculateProjections"> 
+<button class="button-22" role="button" @onclick="GetProjections"> 
     Submit
     </button>
 
@@ -156,9 +156,9 @@ else if(players.Count > 0)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
             count  = await JsonSerializer.DeserializeAsync<int>(responseStream, options);
-
         }
     }
+
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
@@ -166,7 +166,7 @@ else if(players.Count > 0)
         players.Clear();
     }
 
-    public async Task CalculateProjections()
+    public async Task GetProjections()
     {
         loading = true;
         shouldRender = true;
@@ -198,16 +198,10 @@ else if(players.Count > 0)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
             players = await JsonSerializer.DeserializeAsync<List<SeasonProjectionModel>>(responseStream, options);
-            if (PositionEnum != "FLEX")
-            {
-                analysis = await GetSeasonProjectionAnalyses(PositionEnum);
-            }
+            if (PositionEnum != "FLEX") analysis = await GetSeasonProjectionAnalyses(PositionEnum);
             badRequestError = false;
         }
-        else
-        {
-            badRequestError = true;
-        }
+        else badRequestError = true;
         loading = false;
         shouldRender = true;
     }
@@ -223,7 +217,7 @@ else if(players.Count > 0)
             using var responseStream = await response.Content.ReadAsStreamAsync();
             return await JsonSerializer.DeserializeAsync<List<SeasonProjectionError>>(responseStream, options);
         }
-        else return null;
+        return null;
     }
 
     public async Task DeleteProjection(int playerId, int season)
@@ -237,18 +231,13 @@ else if(players.Count > 0)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
             recordDeleted = await JsonSerializer.DeserializeAsync<bool>(responseStream, options);
-            await CalculateProjections();
+            await GetProjections();
         }
-        else
-        {
-            badRequestError = true;
-        }
+        else badRequestError = true;
         shouldRender = true;
     }
-    private SeasonProjectionError? GetSeasonProjectionAnalysis(int playerId)
-    {
-        return analysis.FirstOrDefault(a => a.Player.PlayerId == playerId);
-    }
+    private SeasonProjectionError? GetSeasonProjectionAnalysis(int playerId) => analysis.FirstOrDefault(a => a.Player.PlayerId == playerId);
+
     private int GetRank(SeasonProjectionModel projection) => players.IndexOf(projection) + 1;
 }
 

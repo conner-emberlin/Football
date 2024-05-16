@@ -1,6 +1,5 @@
 ﻿@page "/Teams/{id?}"
 <PageTitle>Teams</PageTitle>
-
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @using System.Globalization;
@@ -74,7 +73,7 @@ else if (badRequestError)
                         var awayTeam = GetTeamName(s.AwayTeamId);
 
                         var match = homeTeam + " vs " + awayTeam;
-                        var date = s.Day + " " + ConvertDate(s.Date) + " " + s.Time;
+                        var date = s.Day + " " + form.ConvertDate(s.Date) + " " + s.Time;
 
                         <tr>
                             <td>@match</td>
@@ -255,7 +254,7 @@ else if (badRequestError)
     public bool badRequestError { get; set; } = false;
     public bool youTried { get; set; } = false;
 
-    public List<TeamMap> teams = new();
+    public List<TeamMap>? teams = new();
     public List<TeamMap>? filteredTeams { get; set; }
     public bool teamSelected { get; set; } = false;
     public string selectedTeam { get; set; } = "";
@@ -269,13 +268,13 @@ else if (badRequestError)
     public bool showSchedule { get; set; } = false;
     public List<ScheduleDetails>? scheduleDetails = new();
 
-    public List<FantasyPerformance> allPerformances = new();
-    public FantasyPerformance qbPerformance = new();
-    public List<FantasyPerformance> rbPerformance = new();
-    public List<FantasyPerformance> wrPerformance = new();
-    public FantasyPerformance tePerformance = new();
-    public FantasyPerformance dstPerformance = new();
-    public FantasyPerformance kPerformance = new();
+    public List<FantasyPerformance>? allPerformances = new();
+    public FantasyPerformance? qbPerformance = new();
+    public List<FantasyPerformance>? rbPerformance = new();
+    public List<FantasyPerformance>? wrPerformance = new();
+    public FantasyPerformance? tePerformance = new();
+    public FantasyPerformance? dstPerformance = new();
+    public FantasyPerformance? kPerformance = new();
 
     public Formatter form = new();
 
@@ -306,14 +305,8 @@ else if (badRequestError)
     private void HandleInput(ChangeEventArgs e)
     {
         var filter = e.Value?.ToString();
-        if (filter?.Length > 1)
-        {
-            filteredTeams = teams.Where(t => t.TeamDescription.ToLower().Contains(filter.ToLower())).ToList();
-        }
-        else
-        {
-            filteredTeams = null;
-        }
+        if (filter?.Length > 1) filteredTeams = teams.Where(t => t.TeamDescription.ToLower().Contains(filter.ToLower())).ToList();
+        else filteredTeams = null;
     }
 
     private async void SelectTeam(int tid)
@@ -347,10 +340,7 @@ else if (badRequestError)
             teams = await JsonSerializer.DeserializeAsync<List<TeamMap>>(responseStream, options);
             badRequestError = false;
         }
-        else
-        {
-            badRequestError = true;
-        }
+        else badRequestError = true;
     }
 
     private async Task GetGameResults()
@@ -419,12 +409,6 @@ else if (badRequestError)
     private string ScheduleHeader() => scheduleDetails != null ? "Week " + scheduleDetails.First().Week + " Schedule" : "Schedule";
 
     private string GetTeamName(int teamId) => teams != null ? teams.First(t => t.TeamId == teamId).TeamDescription : string.Empty;
-
-    private string ConvertDate(string date)
-    {
-        DateTime dt = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-        return dt.ToString("MM/dd");
-    }
 
     private string GetTeamFantasyLink(int teamId, int opponentId, int week)
     {

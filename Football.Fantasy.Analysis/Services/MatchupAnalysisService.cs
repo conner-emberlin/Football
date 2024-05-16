@@ -23,19 +23,19 @@ namespace Football.Fantasy.Analysis.Services
             else
             {
                 List<MatchupRanking> rankings = [];
+                var playersByPosition = (await playersService.GetPlayersByPosition(position)).ToDictionary(p => p.PlayerId);
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
                 foreach (var team in await playersService.GetAllTeams())
                 {
                     double fpTotal = 0;
                     var games = await playersService.GetTeamGames(team.TeamId);
-                    var filteredGames = games.Where(g => g.Week < currentWeek && g.OpposingTeamId > 0).ToList();
+                    var filteredGames = games.Where(g => g.Week < currentWeek && g.OpposingTeamId > 0);
                     foreach (var game in filteredGames)
                     {
                         var opposingPlayers = await playersService.GetPlayersByTeam(game.OpposingTeam);
                         foreach (var op in opposingPlayers)
                         {
-                            var player = await playersService.GetPlayer(op.PlayerId);
-                            if (player.Position == position.ToString())
+                            if (playersByPosition.TryGetValue(op.PlayerId, out var player))
                             {
                                 var weeklyFantasy = (await fantasyDataService.GetWeeklyFantasy(player.PlayerId, game.OpposingTeam)).Where(w => w.Week == game.Week).FirstOrDefault();
                                 if (weeklyFantasy != null)
@@ -46,10 +46,10 @@ namespace Football.Fantasy.Analysis.Services
                     rankings.Add(new MatchupRanking
                     {
                         Team = team,
-                        GamesPlayed = filteredGames.Count,
+                        GamesPlayed = filteredGames.Count(),
                         Position = position.ToString(),
                         PointsAllowed = Math.Round(fpTotal, 2),
-                        AvgPointsAllowed = filteredGames.Count > 1 ? Math.Round(fpTotal / filteredGames.Count, 2) : 0
+                        AvgPointsAllowed = filteredGames.Count() > 1 ? Math.Round(fpTotal / filteredGames.Count(), 2) : 0
                     });
                 }
                 var matchupRanks = rankings.OrderBy(r => r.AvgPointsAllowed).ToList();

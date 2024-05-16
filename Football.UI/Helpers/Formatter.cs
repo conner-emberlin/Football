@@ -1,4 +1,6 @@
-﻿namespace Football.UI.Helpers
+﻿using System.Globalization;
+
+namespace Football.UI.Helpers
 {
     public class Formatter
     {
@@ -16,5 +18,11 @@
             };
         }
         public int Rank<T>(List<T> list, T item) => list.IndexOf(item) + 1;
+
+        public string ConvertDate(string date)
+        {
+            DateTime dt = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            return dt.ToString("MM/dd");
+        }
     }
 }
