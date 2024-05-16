@@ -2,7 +2,7 @@
 <PageTitle>Fantasy Analysis</PageTitle>
 @using System.Text.Json
 @using System.Text.Json.Serialization
-@using Football.Fantasy.Analysis.Models;
+@using Football.Api.Models;
 @using Football.Enums;
 @using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
@@ -35,7 +35,7 @@
     <p>Unexpected Error. Please try again.</p>
 }
 
-@if (FantasyPerformances.Any())
+@if (FantasyAnalyses.Any())
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
@@ -67,39 +67,34 @@
                         <span class="sort-link" onclick="@(() => SetTable("StdDev"))">StdDev</span>
                         <span class="oi @(tableSort.GetSortStyle("StdDev"))"></span>
                     </th>
-                    <th>Boom%</th>
-                    <th>Bust%</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("BoomPercentage"))">Boom%</span>
+                        <span class="oi @(tableSort.GetSortStyle("BoomPercentage"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("BustPercentage"))">Bust%</span>
+                        <span class="oi @(tableSort.GetSortStyle("BustPercentage"))"></span>
+                    </th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 1; i <= FantasyPerformances.Count; i++)
+                @for (int i = 1; i <= FantasyAnalyses.Count; i++)
                 {
-                    var playerId = FantasyPerformances.ElementAt(i - 1).PlayerId;
-                    var boomBust = BoomBusts.FirstOrDefault(b => b.Player.PlayerId == playerId);
-
                     <tr>
                         <td>
-                            <a class="page-links" href="Players/@FantasyPerformances.ElementAt(i-1).PlayerId"> @FantasyPerformances.ElementAt(i-1).Name</a>                            
+                            <a class="page-links" href="Players/@FantasyAnalyses.ElementAt(i-1).PlayerId"> @FantasyAnalyses.ElementAt(i-1).Name</a>                            
                         </td>
-                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).AvgFantasy,2)</td>
-                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).TotalFantasy,2)</td>                       
-                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MinFantasy,2)</td>
-                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).MaxFantasy,2)</td>
-                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).Variance,2)</td>
-                        <td>@Math.Round(FantasyPerformances.ElementAt(i-1).StdDev,2)</td>   
-
-                        @if(boomBust is not null)
-                        {
-                            <td>@boomBust.BoomPercentage</td>
-                            <td>@boomBust.BustPercentage</td>
-                        }
-                        else{
-                            <td>-</td>
-                            <td>-</td>
-                        }
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i-1).AvgFantasy,2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).TotalFantasy, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).MinFantasy, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).MaxFantasy, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).Variance, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).StdDev, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).BoomPercentage, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).BustPercentage, 2)</td>
                         <td>
-                            <a href="error-graph/@FantasyPerformances.ElementAt(i-1).PlayerId"> <i class="oi oi-graph" /></a>
+                            <a href="error-graph/@FantasyAnalyses.ElementAt(i-1).PlayerId"> <i class="oi oi-graph" /></a>
                         </td>
                     </tr>
                 }
@@ -113,8 +108,7 @@
     private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
     public string Position { get; set; } = "Quarterback";
     public Position positionEnum { get; set; }
-    public List<FantasyPerformance> FantasyPerformances = new();
-    public List<BoomBust> BoomBusts = new();
+    public List<FantasyAnalysisModel>? FantasyAnalyses = new();
 
     public bool loading { get; set; } = false;
     public bool badRequestError { get; set; } = false;
@@ -126,7 +120,7 @@
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
-        FantasyPerformances.Clear();
+        FantasyAnalyses?.Clear();
         tableSort = new();
         positionEnum = Position switch
         {
@@ -143,18 +137,17 @@
     public async Task Get()
     {
         loading = true;
-        FantasyPerformances.Clear();
+        FantasyAnalyses?.Clear();
         shouldRender = true;
 
-        await GetFantasyPerformances();
-        await GetBoomBusts();
+        await GetFantasyAnalyses();
 
         loading = false;
         shouldRender = true;
     }
-    public async Task GetFantasyPerformances()
+    public async Task GetFantasyAnalyses()
     {      
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/fantasy-performance/" + positionEnum.ToString());
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/fantasy-analysis/" + positionEnum.ToString());
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -162,37 +155,13 @@
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            FantasyPerformances = await JsonSerializer.DeserializeAsync<List<FantasyPerformance>>(responseStream, options);
-            FantasyPerformances = FantasyPerformances.Where(f => f.AvgFantasy >= 5).ToList();
+            FantasyAnalyses = await JsonSerializer.DeserializeAsync<List<FantasyAnalysisModel>>(responseStream, options);
+            FantasyAnalyses = FantasyAnalyses.Where(f => f.AvgFantasy >= 5).ToList();
             badRequestError = false;
         }
-        else
-        {
-            badRequestError = true;
-        }
+        else badRequestError = true;
     }
 
-    public async Task GetBoomBusts()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/boom-busts/" + positionEnum.ToString());
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            BoomBusts = await JsonSerializer.DeserializeAsync<List<BoomBust>>(responseStream, options);
-            badRequestError = false;
-        }
-        else
-        {
-            badRequestError = true;
-        }
-    }
+    public void SetTable(string columnName) => FantasyAnalyses = tableSort.SortTable<FantasyAnalysisModel>(FantasyAnalyses, columnName);
 
-    public void SetTable(string columnName)
-    {       
-        FantasyPerformances = tableSort.SortTable<FantasyPerformance>(FantasyPerformances, columnName);
-    }
 }

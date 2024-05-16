@@ -18,7 +18,7 @@ namespace Football.Api.Controllers
     [ApiController]
     public class FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMarketShareService marketShareService,
         IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService,
-        IPlayersService playersService, IFantasyAnalysisService boomBustService, ILeagueAnalysisService leagueService, ISnapCountService snapCountService, IMapper mapper) : ControllerBase
+        IPlayersService playersService, IFantasyAnalysisService fantasyAnalysisService, ILeagueAnalysisService leagueService, ISnapCountService snapCountService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -61,7 +61,7 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetCurrentFantasyTotals() => Ok(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason));
 
         [HttpGet("matchup-rankings/{position}")]
-        [ProducesResponseType(typeof(List<MatchupRanking>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<MatchupRankingModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetMatchupRankings(string position)
         {
@@ -73,6 +73,25 @@ namespace Football.Api.Controllers
                 model.ForEach(m => m.TeamDescription = teamDictionary[m.TeamId]);
                 return Ok(model);
             }  
+            return BadRequest();
+        }
+
+        [HttpGet("fantasy-analysis/{pos}")]
+        [ProducesResponseType(typeof(List<FantasyAnalysisModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetFantasyAnalysis([FromRoute] string pos)
+        {
+            if (Enum.TryParse(pos.Trim().ToUpper(), out Position position))
+            {
+                var models = mapper.Map<List<FantasyAnalysisModel>>(await fantasyAnalysisService.GetFantasyPerformances(position));
+                var boomBustDictionary = (await fantasyAnalysisService.GetBoomBusts(position)).ToDictionary(b => b.Player.PlayerId);
+                foreach (var m in models)
+                {
+                    m.BoomPercentage = boomBustDictionary[m.PlayerId].BoomPercentage;
+                    m.BustPercentage = boomBustDictionary[m.PlayerId].BustPercentage;
+                }
+                return Ok(models);
+            }
             return BadRequest();
         }
 
@@ -115,26 +134,15 @@ namespace Football.Api.Controllers
             return Ok(await waiverWireService.GetWaiverWireCandidates(_season.CurrentSeason, currentWeek));
         }
 
-        [HttpGet("boom-busts/{position}")]
-        [ProducesResponseType(typeof(List<BoomBust>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetBoomBusts([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await boomBustService.GetBoomBusts(posEnum)) : BadRequest();
-
         [HttpGet("weekly-boom-busts/{playerId}")]
         [ProducesResponseType(typeof(List<BoomBustByWeek>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetBoomBustByWeek([FromRoute] int playerId) => playerId > 0 ? Ok(await boomBustService.GetBoomBustsByWeek(playerId)) : BadRequest();
-
-
-        [HttpGet("fantasy-performance/{position}")]
-        [ProducesResponseType(typeof(List<FantasyPerformance>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetFantasyPerformances([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await boomBustService.GetFantasyPerformances(posEnum)) : BadRequest();
+        public async Task<IActionResult> GetBoomBustByWeek([FromRoute] int playerId) => playerId > 0 ? Ok(await fantasyAnalysisService.GetBoomBustsByWeek(playerId)) : BadRequest();
 
         [HttpGet("shares/{position}")]
         [ProducesResponseType(typeof(List<FantasyPerformance>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetFantasyPercentages([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await boomBustService.GetFantasyPercentages(posEnum)) : BadRequest();
+        public async Task<IActionResult> GetFantasyPercentages([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await fantasyAnalysisService.GetFantasyPercentages(posEnum)) : BadRequest();
 
         [HttpGet("trending-players")]
         [ProducesResponseType(typeof(List<TrendingPlayer>), StatusCodes.Status200OK)]

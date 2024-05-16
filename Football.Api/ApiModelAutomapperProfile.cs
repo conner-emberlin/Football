@@ -29,6 +29,9 @@ namespace Football.Api
                 .ForMember(spm => spm.Opponent, o => o.Ignore());
             CreateMap<MatchupRanking, MatchupRankingModel>(MemberList.Destination)
                 .ForMember(mr => mr.TeamDescription, o => o.Ignore());
+            CreateMap<FantasyPerformance, FantasyAnalysisModel>(MemberList.Destination)
+                .ForMember(f => f.BoomPercentage, o => o.Ignore())
+                .ForMember(f => f.BustPercentage, o => o.Ignore());
         }
 
     }
