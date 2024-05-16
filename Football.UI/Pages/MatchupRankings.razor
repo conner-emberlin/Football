@@ -2,10 +2,7 @@
 <PageTitle>Matchup Rankings</PageTitle>
 @using System.Text.Json
 @using System.Text.Json.Serialization
-@using Football.Projections.Models;
-@using Football.Players.Models;
-@using Football.Fantasy.Models;
-@using Football.Fantasy.Analysis.Models;
+@using Football.Api.Models;
 @using Football.Enums;
 @using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
@@ -62,12 +59,12 @@
                 @for (int i = 1; i <= Rankings.Count; i++)
                 {
                     <tr>
-                        <td><a class="page-links" href="Teams/@Rankings.ElementAt(i-1).Team.TeamId"> @Rankings.ElementAt(i-1).Team.TeamDescription</a></td>
+                        <td><a class="page-links" href="Teams/@Rankings.ElementAt(i-1).TeamId"> @Rankings.ElementAt(i-1).TeamDescription</a></td>
                         <td>@Rankings.ElementAt(i-1).GamesPlayed</td>
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).PointsAllowed,2)</td>
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).AvgPointsAllowed,2)</td>
                         <td>
-                            <a href="top-opponents/@Rankings.ElementAt(i-1).Team.TeamId/@Rankings.ElementAt(i-1).Position"> <i class="oi oi-magnifying-glass" /></a>
+                            <a href="top-opponents/@Rankings.ElementAt(i-1).TeamId/@Rankings.ElementAt(i-1).Position"> <i class="oi oi-magnifying-glass" /></a>
                         </td>
                     </tr>
                 }
@@ -83,7 +80,7 @@
     private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
     public string Position { get; set; } = "Quarterback";
     public Position positionEnum { get; set; }
-    public List<MatchupRanking> Rankings = new();
+    public List<MatchupRankingModel>? Rankings = new();
 
     public bool loading { get; set; } = false;
     public bool badRequestError { get; set; } = false;
@@ -95,7 +92,7 @@
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
-        Rankings.Clear();
+        if (Rankings != null) Rankings.Clear();
         tableSort = new();
         positionEnum = Position switch
         {
@@ -111,7 +108,7 @@
     public async Task GetMatchupRankings()
     {
         loading = true;
-        Rankings.Clear();
+        if (Rankings != null) Rankings.Clear();
         shouldRender = true;
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/matchup-rankings/" + positionEnum.ToString());
         request.Headers.Add("Accept", "application/json");
@@ -121,19 +118,17 @@
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            Rankings = await JsonSerializer.DeserializeAsync<List<MatchupRanking>>(responseStream, options);
+            Rankings = await JsonSerializer.DeserializeAsync<List<MatchupRankingModel>>(responseStream, options);
             badRequestError = false;
         }
-        else
-        {
-            badRequestError = true;
-        }
+        else badRequestError = true;
+
         loading = false;
         shouldRender = true;
     }
 
     private void SetTable(string columnName)
     {
-        Rankings = tableSort.SortTable<MatchupRanking>(Rankings, columnName);
+        Rankings = tableSort.SortTable<MatchupRankingModel>(Rankings, columnName);
     }
 }

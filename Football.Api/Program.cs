@@ -31,6 +31,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 using System.Data;
 using System.Data.SqlClient;
+using Football.Fantasy.Analysis.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +73,7 @@ builder.Services.AddScoped<IAdjustmentService, AdjustmentService>();
 builder.Services.AddScoped<IProjectionRepository, ProjectionRepository>();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<IMatchupAnalysisService, MatchupAnalysisService>();
+builder.Services.AddScoped<IMatchupAnalysisRepository, MatchupAnalysisRepository>();
 builder.Services.AddScoped<IMarketShareService, MarketShareService>();
 builder.Services.AddScoped<IStartOrSitService, StartOrSitService>();
 builder.Services.AddScoped<IProjectionAnalysisService, ProjectionAnalysisService>();

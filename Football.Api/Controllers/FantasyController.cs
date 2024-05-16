@@ -4,11 +4,13 @@ using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Football.Api.Models;
 using Football.Players.Interfaces;
 using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Analysis.Models;
 using Football.Leagues.Interfaces;
 using Football.Leagues.Models;
+using AutoMapper;
 
 namespace Football.Api.Controllers
 {
@@ -16,7 +18,7 @@ namespace Football.Api.Controllers
     [ApiController]
     public class FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMarketShareService marketShareService,
         IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService,
-        IPlayersService playersService, IFantasyAnalysisService boomBustService, ILeagueAnalysisService leagueService, ISnapCountService snapCountService) : ControllerBase
+        IPlayersService playersService, IFantasyAnalysisService boomBustService, ILeagueAnalysisService leagueService, ISnapCountService snapCountService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -61,7 +63,17 @@ namespace Football.Api.Controllers
         [HttpGet("matchup-rankings/{position}")]
         [ProducesResponseType(typeof(List<MatchupRanking>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetMatchupRankings(string position) => Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum) ? Ok(await matchupAnalysisService.PositionalMatchupRankings(positionEnum)) : BadRequest();
+        public async Task<IActionResult> GetMatchupRankings(string position)
+        {
+            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
+            {
+                var model = mapper.Map<List<MatchupRankingModel>>(await matchupAnalysisService.PositionalMatchupRankings(positionEnum));
+                var teamDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
+                model.ForEach(m => m.TeamDescription = teamDictionary[m.TeamId]);
+                return Ok(model);
+            }  
+            return BadRequest();
+        }
 
         [HttpGet("top-opponents/{teamId}/{position}")]
         [ProducesResponseType(typeof(List<WeeklyFantasy>), 200)]

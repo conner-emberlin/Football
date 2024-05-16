@@ -1,5 +1,6 @@
 ﻿using Football.Data.Interfaces;
 using Football.Enums;
+using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,7 +8,7 @@ namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OperationsController(IUploadWeeklyDataService weeklyDataService, IFantasyDataService fantasyService) : ControllerBase
+    public class OperationsController(IUploadWeeklyDataService weeklyDataService, IFantasyDataService fantasyService, IMatchupAnalysisService matchupAnalysisService) : ControllerBase
     {
         [HttpPost("weekly-data/{season}/{week}")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
@@ -51,6 +52,13 @@ namespace Football.Api.Controllers
                 count += await fantasyService.PostWeeklyFantasy(season, week, Position.TE);
                 count += await fantasyService.PostWeeklyFantasy(season, week, Position.DST);
                 count += await fantasyService.PostWeeklyFantasy(season, week, Position.K);
+
+                count += await matchupAnalysisService.PostMatchupRankings(Position.QB);
+                count += await matchupAnalysisService.PostMatchupRankings(Position.RB);
+                count += await matchupAnalysisService.PostMatchupRankings(Position.WR);
+                count += await matchupAnalysisService.PostMatchupRankings(Position.TE);
+                count += await matchupAnalysisService.PostMatchupRankings(Position.DST);
+                count += await matchupAnalysisService.PostMatchupRankings(Position.K);
                 return Ok(count);
             }
             return BadRequest();

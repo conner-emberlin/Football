@@ -104,7 +104,7 @@ namespace Football.Projections.Services
                         if (matchup.OpposingTeam == "BYE") w.ProjectedPoints = 0;
                         else 
                         {
-                            var opponentRank = matchupRanks.FirstOrDefault(mr => mr.Team.TeamId == matchup.OpposingTeamId);
+                            var opponentRank = matchupRanks.FirstOrDefault(mr => mr.TeamId == matchup.OpposingTeamId);
                             if (opponentRank != null)
                             {
                                 var ratio = opponentRank.AvgPointsAllowed / avgMatchup.AvgPointsAllowed;

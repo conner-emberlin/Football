@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Football.Api.Models;
+using Football.Fantasy.Analysis.Models;
 using Football.Players.Models;
 using Football.Projections.Models;
 namespace Football.Api
@@ -26,6 +27,8 @@ namespace Football.Api
                 .ForMember(spm => spm.CanDelete, o => o.Ignore())
                 .ForMember(spm => spm.Team, o => o.Ignore())
                 .ForMember(spm => spm.Opponent, o => o.Ignore());
+            CreateMap<MatchupRanking, MatchupRankingModel>(MemberList.Destination)
+                .ForMember(mr => mr.TeamDescription, o => o.Ignore());
         }
 
     }

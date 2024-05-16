@@ -6,13 +6,12 @@ using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Football.Enums;
-using Football.Players.Models;
 using Football.Fantasy.Models;
 
 namespace Football.Fantasy.Analysis.Services
 {
     public class MatchupAnalysisService(IPlayersService playersService, IFantasyDataService fantasyDataService,
-        IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settings) : IMatchupAnalysisService
+        IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settings, IMatchupAnalysisRepository matchupAnalysisRepository) : IMatchupAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -25,7 +24,8 @@ namespace Football.Fantasy.Analysis.Services
                 List<MatchupRanking> rankings = [];
                 var playersByPosition = (await playersService.GetPlayersByPosition(position)).ToDictionary(p => p.PlayerId);
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-                foreach (var team in await playersService.GetAllTeams())
+                var allTeams = await playersService.GetAllTeams();
+                foreach (var team in allTeams)
                 {
                     double fpTotal = 0;
                     var games = await playersService.GetTeamGames(team.TeamId);
@@ -38,14 +38,15 @@ namespace Football.Fantasy.Analysis.Services
                             if (playersByPosition.TryGetValue(op.PlayerId, out var player))
                             {
                                 var weeklyFantasy = (await fantasyDataService.GetWeeklyFantasy(player.PlayerId, game.OpposingTeam)).Where(w => w.Week == game.Week).FirstOrDefault();
-                                if (weeklyFantasy != null)
-                                    fpTotal += weeklyFantasy.FantasyPoints;
+                                if (weeklyFantasy != null) fpTotal += weeklyFantasy.FantasyPoints;
                             }
                         }
                     }
                     rankings.Add(new MatchupRanking
                     {
-                        Team = team,
+                        TeamId = team.TeamId,
+                        Week = currentWeek,
+                        Season = _season.CurrentSeason,
                         GamesPlayed = filteredGames.Count(),
                         Position = position.ToString(),
                         PointsAllowed = Math.Round(fpTotal, 2),
@@ -69,7 +70,7 @@ namespace Football.Fantasy.Analysis.Services
                 var player = await playersService.GetPlayer(playerId);
                 _ = Enum.TryParse(player.Position, out Position position);
                 var matchupRankings = await PositionalMatchupRankings(position);
-                var matchupRanking = matchupRankings.FindIndex(m => m.Team.TeamId == opponentId) + 1;
+                var matchupRanking = matchupRankings.FindIndex(m => m.TeamId == opponentId) + 1;
                 return matchupRanking;
             }
             else return 0;
@@ -91,5 +92,6 @@ namespace Football.Fantasy.Analysis.Services
             }
             return opponentFantasy;
         }
+        public async Task<int> PostMatchupRankings(Position position) => await matchupAnalysisRepository.PostMatchupRankings(await PositionalMatchupRankings(position));
     }
 }
