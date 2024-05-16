@@ -89,7 +89,7 @@ namespace Football.Projections.Services
         private async Task<List<WeekProjection>> MatchupAdjustment(List<WeekProjection> weekProjections)
         {
             _= Enum.TryParse(weekProjections.First().Position, out Position position);
-            var matchupRanks = await mathupAnalysisService.PositionalMatchupRankings(position);
+            var matchupRanks = await mathupAnalysisService.GetPositionalMatchupRankingsFromSQL(position, weekProjections.First().Season, weekProjections.First().Week);
             if (matchupRanks.Count > 0)
             {
                 var avgMatchup = matchupRanks.ElementAt((int)Math.Floor((double)(matchupRanks.Count / 2)));

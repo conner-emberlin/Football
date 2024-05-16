@@ -398,10 +398,10 @@ namespace Football.Data.Services
                             Winner = split[4],
                             HomeIndicator = split[5],
                             Loser = split[6],
-                            WinnerPoints = int.TryParse(split[8], out var wp) ? wp : 0,
-                            LoserPoints = int.TryParse(split[9], out var lp) ? lp : 0,
-                            WinnerYards = int.TryParse(split[10], out var wy) ? wy : 0,
-                            LoserYards = int.TryParse(split[12], out var ly) ? ly : 0
+                            WinnerPoints = split.Count > 10 ? int.TryParse(split[8], out var wp) ? wp : 0 : 0,
+                            LoserPoints = split.Count > 10 ? int.TryParse(split[9], out var lp) ? lp : 0 : 0,
+                            WinnerYards = split.Count > 10 ? int.TryParse(split[10], out var wy) ? wy : 0 : 0,
+                            LoserYards = split.Count > 10 ? int.TryParse(split[12], out var ly) ? ly : 0 : 0
                         });
                     }
                 }

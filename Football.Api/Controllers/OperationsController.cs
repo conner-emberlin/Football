@@ -52,18 +52,28 @@ namespace Football.Api.Controllers
                 count += await fantasyService.PostWeeklyFantasy(season, week, Position.TE);
                 count += await fantasyService.PostWeeklyFantasy(season, week, Position.DST);
                 count += await fantasyService.PostWeeklyFantasy(season, week, Position.K);
-
-                count += await matchupAnalysisService.PostMatchupRankings(Position.QB);
-                count += await matchupAnalysisService.PostMatchupRankings(Position.RB);
-                count += await matchupAnalysisService.PostMatchupRankings(Position.WR);
-                count += await matchupAnalysisService.PostMatchupRankings(Position.TE);
-                count += await matchupAnalysisService.PostMatchupRankings(Position.DST);
-                count += await matchupAnalysisService.PostMatchupRankings(Position.K);
                 return Ok(count);
             }
             return BadRequest();
         }
+
+        [HttpPost("matchup-rankings/{week}")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UploadMatchupRankings(int week)
+        {
+            var count = 0;
+            count += await matchupAnalysisService.PostMatchupRankings(Position.QB, week);
+            count += await matchupAnalysisService.PostMatchupRankings(Position.RB, week);
+            count += await matchupAnalysisService.PostMatchupRankings(Position.WR, week);
+            count += await matchupAnalysisService.PostMatchupRankings(Position.TE, week);
+            count += await matchupAnalysisService.PostMatchupRankings(Position.DST, week);
+            count += await matchupAnalysisService.PostMatchupRankings(Position.K, week);
+            return Ok(count);
+        }
     }
+
+
 
 
 

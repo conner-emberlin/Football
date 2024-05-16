@@ -81,7 +81,7 @@ namespace Football.Tests
             var weekProjection = new WeekProjection { PlayerId = _playerId, Position = _position.ToString(), Name = "Player", ProjectedPoints = 100, Season = _season.CurrentSeason, Week = 1 };
             List<WeekProjection> projections = [weekProjection];
             var injury = new InSeasonInjury { Season = _season.CurrentSeason, InjuryStartWeek = 1, InjuryEndWeek = 0, PlayerId = _playerId };
-            _mockMatchupAnalysisService.Setup(ms => ms.PositionalMatchupRankings(_position)).ReturnsAsync([]);
+            _mockMatchupAnalysisService.Setup(ms => ms.GetPositionalMatchupRankingsFromSQL(_position, It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync([]);
             _mockPlayersService.Setup(ps => ps.GetActiveInSeasonInjuries(_season.CurrentSeason)).ReturnsAsync([injury]);
 
             var actual = await _sut.AdjustmentEngine(projections);
@@ -132,7 +132,7 @@ namespace Football.Tests
             var weekProjection = new WeekProjection { PlayerId = _playerId, Position = _position.ToString(), Name = "Player", ProjectedPoints = 100, Season = _season.CurrentSeason, Week = 1 };
             List<WeekProjection> projections = [weekProjection];
             var matchupRanking = new MatchupRanking { TeamId = _teamId, GamesPlayed = 10, AvgPointsAllowed = 20, PointsAllowed = 200, Position = _position.ToString() };
-            _mockMatchupAnalysisService.Setup(ma => ma.PositionalMatchupRankings(_position)).ReturnsAsync([matchupRanking]);
+            _mockMatchupAnalysisService.Setup(ma => ma.GetPositionalMatchupRankingsFromSQL(_position, _season.CurrentSeason, 1)).ReturnsAsync([matchupRanking]);
             var teamGame = new Schedule { Week = 1, OpposingTeam = "BYE", Season = _season.CurrentSeason, OpposingTeamId = 30, Team = _team, TeamId = _teamId };
             _mockPlayersService.Setup(ps => ps.GetWeeklySchedule(_season.CurrentSeason, 1)).ReturnsAsync([teamGame]);
             _mockPlayersService.Setup(ps => ps.GetActiveInSeasonInjuries(_season.CurrentSeason)).ReturnsAsync([]);
@@ -149,7 +149,7 @@ namespace Football.Tests
         {
             var weekProjection = new WeekProjection { PlayerId = _playerId, Position = _position.ToString(), Name = "Player", ProjectedPoints = _projectedPoints, Season = _season.CurrentSeason, Week = _week };
             List<WeekProjection> projections = [weekProjection];
-            _mockMatchupAnalysisService.Setup(ma => ma.PositionalMatchupRankings(_position)).ReturnsAsync([_m1, _m2, _m3]);
+            _mockMatchupAnalysisService.Setup(ma => ma.GetPositionalMatchupRankingsFromSQL(_position, _season.CurrentSeason, _week)).ReturnsAsync([_m1, _m2, _m3]);
             var teamGame = new Schedule { Week = _week, OpposingTeam = "OPP", Season = _season.CurrentSeason, OpposingTeamId = _tm1, Team = _team, TeamId = _teamId };
             _mockPlayersService.Setup(ps => ps.GetWeeklySchedule(_season.CurrentSeason, _week)).ReturnsAsync([teamGame]);
             _mockPlayersService.Setup(ps => ps.GetActiveInSeasonInjuries(_season.CurrentSeason)).ReturnsAsync([]);
@@ -166,7 +166,7 @@ namespace Football.Tests
         {
             var weekProjection = new WeekProjection { PlayerId = _playerId, Position = _position.ToString(), Name = "Player", ProjectedPoints = _projectedPoints, Season = _season.CurrentSeason, Week = _week };
             List<WeekProjection> projections = [weekProjection];
-            _mockMatchupAnalysisService.Setup(ma => ma.PositionalMatchupRankings(_position)).ReturnsAsync([_m1, _m2, _m3]);
+            _mockMatchupAnalysisService.Setup(ma => ma.GetPositionalMatchupRankingsFromSQL(_position, _season.CurrentSeason, _week)).ReturnsAsync([_m1, _m2, _m3]);
             var teamGame = new Schedule { Week = _week, OpposingTeam = "OPP3", Season = _season.CurrentSeason, OpposingTeamId = _tm3, Team = _team, TeamId = _teamId };
             _mockPlayersService.Setup(ps => ps.GetWeeklySchedule(_season.CurrentSeason, _week)).ReturnsAsync([teamGame]);
             _mockPlayersService.Setup(ps => ps.GetActiveInSeasonInjuries(_season.CurrentSeason)).ReturnsAsync([]);
