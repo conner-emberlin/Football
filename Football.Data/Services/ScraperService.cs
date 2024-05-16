@@ -393,9 +393,9 @@ namespace Football.Data.Services
                         {
                             Week = int.Parse(split[0]),
                             Day = split[1],
-                            Date = split[2],
-                            Time = split[3],
-                            Winner = split[4],
+                            Date = FormatDate(split[2]),
+                            Time = split[8],
+                            Winner = split[3],
                             HomeIndicator = split[5],
                             Loser = split[6],
                             WinnerPoints = split.Count > 10 ? int.TryParse(split[8], out var wp) ? wp : 0 : 0,
@@ -498,6 +498,22 @@ namespace Football.Data.Services
                 "K" => 15,
                 _ => 0
             };
+        }
+
+        private string FormatDate(string date)
+        {
+            var month = "";            
+            if (date.ToLower().Contains("august")) month = "08";
+            else if (date.ToLower().Contains("september")) month = "09";
+            else if (date.ToLower().Contains("october")) month = "10";
+            else if (date.ToLower().Contains("november")) month = "11";
+            else if (date.ToLower().Contains("december")) month = "12";
+            else if (date.ToLower().Contains("january")) month = "01";
+
+            var day = Regex.Match(date, @"\d+").Value;
+            if (day.Length == 1) day = "0" + day;
+
+            return string.Format("{0}-{1}-{2}", _season.CurrentSeason, month, day);
         }
     }
 }

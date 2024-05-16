@@ -76,13 +76,10 @@ namespace Football.Data.Services
         }
         public async Task<int> UploadScheduleDetails(int season)
         {
-            var count = 0;
+            List<ScheduleDetails> schedule = [];
             for (int i = 1; i <= _season.Games + 1; i++)
-            {
-                var details = await ScheduleDetails(await scraperService.ScrapeGameScores(i), season);
-                count += await uploadSeasonDataRepository.UploadScheduleDetails(details);
-            }
-            return count;
+                schedule.AddRange(await ScheduleDetails(await scraperService.ScrapeGameScores(i), season));
+            return await uploadSeasonDataRepository.UploadScheduleDetails(schedule); ;
         }
 
         public async Task<int> UploadADP(int season, string position) => await uploadSeasonDataRepository.UploadADP(await SeasonADP(await scraperService.ScrapeADP(position), season));
