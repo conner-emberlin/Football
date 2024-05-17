@@ -1,21 +1,28 @@
-﻿using Football.Models;
+﻿using Football.Enums;
+using Football.Models;
 using Football.Fantasy.Interfaces;
-using Football.Fantasy.Analysis.Models;
-using Football.Fantasy.Analysis.Interfaces;
-using Football.Players.Interfaces;
-using Microsoft.Extensions.Options;
-using Football.Enums;
 using Football.Fantasy.Models;
+using Football.Fantasy.Analysis.Interfaces;
+using Football.Fantasy.Analysis.Models;
+using Football.Players.Interfaces;
+using Serilog;
+using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Analysis.Services
 {
     public class MatchupAnalysisService(IPlayersService playersService, IFantasyDataService fantasyDataService,
-        IOptionsMonitor<Season> season, IMatchupAnalysisRepository matchupAnalysisRepository) : IMatchupAnalysisService
+        IOptionsMonitor<Season> season, IMatchupAnalysisRepository matchupAnalysisRepository, ILogger logger) : IMatchupAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
 
         public async Task<List<MatchupRanking>> GetPositionalMatchupRankingsFromSQL(Position position, int season, int week) => await matchupAnalysisRepository.GetPositionalMatchupRankingsFromSQL(position.ToString(), season, week);
-        public async Task<int> PostMatchupRankings(Position position, int week = 0) => await matchupAnalysisRepository.PostMatchupRankings(await CalculatePositionalMatchupRankings(position, week));
+        public async Task<int> PostMatchupRankings(Position position, int week = 0)
+        {
+            logger.Information("Uploading matchup rankings for {0}", position.ToString());
+            var count = await matchupAnalysisRepository.PostMatchupRankings(await CalculatePositionalMatchupRankings(position, week));
+            logger.Information("{0} records uploaded", count);
+            return count;
+        }
 
         public async Task<int> GetMatchupRanking(int playerId)
         {
@@ -37,7 +44,7 @@ namespace Football.Fantasy.Analysis.Services
         {
             List<WeeklyFantasy> opponentFantasy = [];
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            var schedule = (await playersService.GetTeamGames(teamId)).Where(g => g.Week < currentWeek && g.OpposingTeam != "BYE");
+            var schedule = (await playersService.GetTeamGames(teamId)).Where(g => g.Week < currentWeek && g.OpposingTeamId > 0);
             foreach (var s in schedule)
             {
                 var oppFantasy = (await fantasyDataService.GetWeeklyTeamFantasy(s.OpposingTeam, s.Week))
@@ -67,7 +74,7 @@ namespace Football.Fantasy.Analysis.Services
                     {
                         if (playersByPosition.TryGetValue(op.PlayerId, out var player))
                         {
-                            var weeklyFantasy = (await fantasyDataService.GetWeeklyFantasy(player.PlayerId, game.OpposingTeam)).Where(w => w.Week == game.Week).FirstOrDefault();
+                            var weeklyFantasy = (await fantasyDataService.GetWeeklyFantasy(player.PlayerId, game.OpposingTeam)).FirstOrDefault(w => w.Week == game.Week);
                             if (weeklyFantasy != null) fpTotal += weeklyFantasy.FantasyPoints;
                         }
                     }

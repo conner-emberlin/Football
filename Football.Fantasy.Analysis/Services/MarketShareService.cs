@@ -20,7 +20,8 @@ namespace Football.Fantasy.Analysis.Services
         public async Task<TargetShare> GetTargetShare(int playerId)
         {
             var team = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
-            return team != null ? (await GetTargetShares()).First(t => t.Team.Team == team.Team) : new TargetShare();           
+            if (team != null) return await GetTargetShare(await playersService.GetTeam(team.TeamId));
+            return new();    
         }
         public async Task<List<TargetShare>> GetTargetShares()
         {
@@ -30,59 +31,7 @@ namespace Football.Fantasy.Analysis.Services
             {
                 var teams = await playersService.GetAllTeams();
                 List<TargetShare> shares = [];
-                foreach (var team in teams)
-                {
-                    var allPlayers = await playersService.GetPlayersByTeam(team.Team);
-                    List<Player> players = [];
-
-                    var totalAttempts = 0.0;
-                    var totalCompletions = 0.0;
-                    var RBTargets = 0.0;
-                    var RBComps = 0.0;
-                    var WRTargets = 0.0;
-                    var WRComps = 0.0;
-                    var TETargets = 0.0;
-                    var TEComps = 0.0;
-
-                    foreach (var p in allPlayers)
-                    {
-                        _ = Enum.TryParse((await playersService.GetPlayer(p.PlayerId)).Position, out Position position);
-                        if (position == Position.QB)
-                        {
-                            var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, p.PlayerId, team.Team);
-                            totalAttempts += stats.Sum(s => s.Attempts);
-                            totalCompletions += stats.Sum(s => s.Completions);
-                        }
-                        else if (position == Position.RB)
-                        {
-                            var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId, team.Team);
-                            RBTargets += stats.Sum(s => s.Targets);
-                            RBComps += stats.Sum(s => s.Receptions);
-                        }
-                        else if (position == Position.WR)
-                        {
-                            var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId, team.Team);
-                            WRTargets += stats.Sum(s => s.Targets);
-                            WRComps += stats.Sum(s => s.Receptions);
-                        }
-                        else if (position == Position.TE)
-                        {
-                            var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId, team.Team);
-                            TETargets += stats.Sum(s => s.Targets);
-                            TEComps += stats.Sum(s => s.Receptions);
-                        }
-                    }
-                    shares.Add(new TargetShare
-                    {
-                        Team = team,
-                        RBTargetShare = totalAttempts > 0 ? Math.Round(RBTargets / totalAttempts, 3) : 0,
-                        RBCompShare = totalCompletions > 0 ? Math.Round(RBComps / totalCompletions, 3) : 0,
-                        WRTargetShare = totalAttempts > 0 ? Math.Round(WRTargets / totalAttempts, 3) : 0,
-                        WRCompShare = totalCompletions > 0 ? Math.Round(WRComps / totalCompletions, 3) : 0,
-                        TETargetShare = totalAttempts > 0 ? Math.Round(TETargets / totalAttempts, 3) : 0,
-                        TECompShare = totalCompletions > 0 ? Math.Round(TEComps / totalCompletions, 3) : 0
-                    });
-                }
+                foreach (var team in teams) shares.Add(await GetTargetShare(team));
                 var orderedShares = shares.OrderBy(s => s.Team.TeamDescription).ToList();
                 cache.Set(Cache.TargetShares.ToString(), orderedShares);
                 return orderedShares;
@@ -271,5 +220,61 @@ namespace Football.Fantasy.Analysis.Services
                 TotalRecTd = Math.Round(totalRecTd, 2)
             };
         }
+
+        private async Task<TargetShare> GetTargetShare(TeamMap teamMap)
+        {
+            var allPlayers = await playersService.GetPlayersByTeam(teamMap.Team);
+            List<Player> players = [];
+
+            var totalAttempts = 0.0;
+            var totalCompletions = 0.0;
+            var RBTargets = 0.0;
+            var RBComps = 0.0;
+            var WRTargets = 0.0;
+            var WRComps = 0.0;
+            var TETargets = 0.0;
+            var TEComps = 0.0;
+
+            foreach (var p in allPlayers)
+            {
+                _ = Enum.TryParse((await playersService.GetPlayer(p.PlayerId)).Position, out Position position);
+                if (position == Position.QB)
+                {
+                    var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, p.PlayerId, teamMap.Team);
+                    totalAttempts += stats.Sum(s => s.Attempts);
+                    totalCompletions += stats.Sum(s => s.Completions);
+                }
+                else if (position == Position.RB)
+                {
+                    var stats = await statisticsService.GetWeeklyData<WeeklyDataRB>(position, p.PlayerId, teamMap.Team);
+                    RBTargets += stats.Sum(s => s.Targets);
+                    RBComps += stats.Sum(s => s.Receptions);
+                }
+                else if (position == Position.WR)
+                {
+                    var stats = await statisticsService.GetWeeklyData<WeeklyDataWR>(position, p.PlayerId, teamMap.Team);
+                    WRTargets += stats.Sum(s => s.Targets);
+                    WRComps += stats.Sum(s => s.Receptions);
+                }
+                else if (position == Position.TE)
+                {
+                    var stats = await statisticsService.GetWeeklyData<WeeklyDataTE>(position, p.PlayerId, teamMap.Team);
+                    TETargets += stats.Sum(s => s.Targets);
+                    TEComps += stats.Sum(s => s.Receptions);
+                }
+            }
+            return new TargetShare
+            {
+                Team = teamMap,
+                RBTargetShare = totalAttempts > 0 ? Math.Round(RBTargets / totalAttempts, 3) : 0,
+                RBCompShare = totalCompletions > 0 ? Math.Round(RBComps / totalCompletions, 3) : 0,
+                WRTargetShare = totalAttempts > 0 ? Math.Round(WRTargets / totalAttempts, 3) : 0,
+                WRCompShare = totalCompletions > 0 ? Math.Round(WRComps / totalCompletions, 3) : 0,
+                TETargetShare = totalAttempts > 0 ? Math.Round(TETargets / totalAttempts, 3) : 0,
+                TECompShare = totalCompletions > 0 ? Math.Round(TEComps / totalCompletions, 3) : 0
+            };
+        }
+
+
     }
 }

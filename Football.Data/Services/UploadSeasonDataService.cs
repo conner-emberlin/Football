@@ -78,7 +78,7 @@ namespace Football.Data.Services
         {
             List<ScheduleDetails> schedule = [];
             for (int i = 1; i <= _season.Games + 1; i++)
-                schedule.AddRange(await ScheduleDetails(await scraperService.ScrapeGameScores(i), season));
+                schedule.AddRange(await ScheduleDetails(await scraperService.ScrapeGameScores(i, false), season));
             return await uploadSeasonDataRepository.UploadScheduleDetails(schedule); ;
         }
 

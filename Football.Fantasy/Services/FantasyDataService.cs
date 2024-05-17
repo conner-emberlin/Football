@@ -141,8 +141,7 @@ namespace Football.Fantasy.Services
             foreach (var player in players)
             {
                 var weeklyFantasy = (await GetWeeklyFantasy(player.PlayerId, team)).FirstOrDefault(f => f.Week == week);
-                if(weeklyFantasy != null)
-                    teamFantasy.Add(weeklyFantasy);
+                if(weeklyFantasy != null) teamFantasy.Add(weeklyFantasy);
             }
             return teamFantasy;
         }
@@ -154,10 +153,7 @@ namespace Football.Fantasy.Services
             for (int i = 1; i < currentWeek; i++)
             {
                 foreach (var s in await GetWeeklyFantasy(_season.CurrentSeason, i))
-                {
-                    if (s.Position == position.ToString())
-                        weeklyFantasy.Add(s);
-                }
+                    if (s.Position == position.ToString()) weeklyFantasy.Add(s);
             }
             return weeklyFantasy;
         }
@@ -169,11 +165,7 @@ namespace Football.Fantasy.Services
             {
                 var currentWeek = await playersService.GetCurrentWeek(season);
                 List<WeeklyFantasy> weeklyFantasy = [];
-                for (int i = 1; i < currentWeek; i++)
-                {
-                    foreach (var s in await GetWeeklyFantasy(season, i))
-                        weeklyFantasy.Add(s);
-                }
+                for (int i = 1; i < currentWeek; i++) weeklyFantasy.AddRange(await GetWeeklyFantasy(season, i));
                 var leaders = weeklyFantasy.GroupBy(w => w.PlayerId)
                                     .Select(gw => new SeasonFantasy
                                     {

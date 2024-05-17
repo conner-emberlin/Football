@@ -17,7 +17,7 @@ namespace Football.Data.Interfaces
         public List<PlayerTeam> ParseFantasyProsPlayerTeam(string[] strings, string position);
         public Task<List<Schedule>> ParseFantasyProsSeasonSchedule(string[] strings);
         public List<FantasyProsRosterPercent> ParseFantasyProsRosterPercent(string[] strings, string position);
-        public Task<List<ProFootballReferenceGameScores>> ScrapeGameScores(int week);
+        public Task<List<ProFootballReferenceGameScores>> ScrapeGameScores(int week, bool gameScores = true);
         public Task<List<FantasyProsADP>> ScrapeADP(string position);
         public Task<List<FantasyProsSnapCount>> ScrapeSnapCounts(string position, int week);
         public List<FantasyProsStringParseRB> ParseFantasyProsRedZoneRB(string[] strings);

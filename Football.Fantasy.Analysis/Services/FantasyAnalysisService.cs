@@ -52,8 +52,7 @@ namespace Football.Fantasy.Analysis.Services
                 {
                     var player = await playersService.GetPlayer(p.PlayerId);
                     var fp = await GetFantasyPerformance(player);
-                    if (fp != null)
-                       teamFantasyPerformances.Add(fp);
+                    if (fp != null) teamFantasyPerformances.Add(fp);
                 }
             }
             return teamFantasyPerformances;

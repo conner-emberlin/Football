@@ -347,7 +347,7 @@ namespace Football.Data.Services
             }
             return schedules;
         }
-        public async Task<List<ProFootballReferenceGameScores>> ScrapeGameScores(int week)
+        public async Task<List<ProFootballReferenceGameScores>> ScrapeGameScores(int week, bool gameScores = true)
         {
             var t = await Task.Run(() =>
             {
@@ -398,10 +398,10 @@ namespace Football.Data.Services
                             Winner = split[3],
                             HomeIndicator = split[5],
                             Loser = split[6],
-                            WinnerPoints = split.Count > 10 ? int.TryParse(split[8], out var wp) ? wp : 0 : 0,
-                            LoserPoints = split.Count > 10 ? int.TryParse(split[9], out var lp) ? lp : 0 : 0,
-                            WinnerYards = split.Count > 10 ? int.TryParse(split[10], out var wy) ? wy : 0 : 0,
-                            LoserYards = split.Count > 10 ? int.TryParse(split[12], out var ly) ? ly : 0 : 0
+                            WinnerPoints = gameScores ? int.TryParse(split[8], out var wp) ? wp : 0 : 0,
+                            LoserPoints =  gameScores  ? int.TryParse(split[9], out var lp) ? lp : 0 : 0,
+                            WinnerYards =  gameScores  ? int.TryParse(split[10], out var wy) ? wy : 0 : 0,
+                            LoserYards = gameScores ? int.TryParse(split[12], out var ly) ? ly : 0 : 0
                         });
                     }
                 }
@@ -503,12 +503,12 @@ namespace Football.Data.Services
         private string FormatDate(string date)
         {
             var month = "";            
-            if (date.ToLower().Contains("august")) month = "08";
-            else if (date.ToLower().Contains("september")) month = "09";
-            else if (date.ToLower().Contains("october")) month = "10";
-            else if (date.ToLower().Contains("november")) month = "11";
-            else if (date.ToLower().Contains("december")) month = "12";
-            else if (date.ToLower().Contains("january")) month = "01";
+            if (date.Contains("august", StringComparison.CurrentCultureIgnoreCase)) month = "08";
+            else if (date.Contains("september", StringComparison.CurrentCultureIgnoreCase)) month = "09";
+            else if (date.Contains("october", StringComparison.CurrentCultureIgnoreCase)) month = "10";
+            else if (date.Contains("november", StringComparison.CurrentCultureIgnoreCase)) month = "11";
+            else if (date.Contains("december", StringComparison.CurrentCultureIgnoreCase)) month = "12";
+            else if (date.Contains("january", StringComparison.CurrentCultureIgnoreCase)) month = "01";
 
             var day = Regex.Match(date, @"\d+").Value;
             if (day.Length == 1) day = "0" + day;

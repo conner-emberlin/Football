@@ -7,7 +7,6 @@
         AllPlayers,
         SeasonTotals,
         TeamTotals,
-        MatchupRankings,
         TargetShares,
         StartOrSit,
         TrendingPlayers,
