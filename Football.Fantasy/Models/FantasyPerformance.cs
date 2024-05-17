@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
-namespace Football.Fantasy.Analysis.Models
+namespace Football.Fantasy.Models
 {
     public class FantasyPerformance
     {

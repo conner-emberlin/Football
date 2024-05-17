@@ -1,4 +1,4 @@
-﻿namespace Football.Fantasy.Analysis.Models
+﻿namespace Football.Fantasy.Models
 {
     public class FantasyPercentage
     {

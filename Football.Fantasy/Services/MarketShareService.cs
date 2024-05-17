@@ -2,16 +2,14 @@
 using Football.Models;
 using Football.Data.Models;
 using Football.Fantasy.Interfaces;
-using Football.Fantasy.Analysis.Models;
-using Football.Fantasy.Analysis.Interfaces;
+using Football.Fantasy.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Football.Statistics.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Football.Fantasy.Models;
 
-namespace Football.Fantasy.Analysis.Services
+namespace Football.Fantasy.Services
 {
     public class MarketShareService(IPlayersService playersService, IStatisticsService statisticsService, IFantasyDataService fantasyService,
         IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settingsService) : IMarketShareService

@@ -5,7 +5,6 @@
 @using Football.Projections.Models;
 @using Football.Players.Models;
 @using Football.Fantasy.Models;
-@using Football.Fantasy.Analysis.Models;
 @using Football.Enums;
 @using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
@@ -74,7 +73,7 @@
 }
 
 @code {
-    public List<Football.Fantasy.Analysis.Models.TargetShare> targetShare = new();
+    public List<Football.Fantasy.Models.TargetShare> targetShare = new();
 
     public bool loading { get; set; } = false;
     public bool badRequestError { get; set; } = false;
@@ -101,7 +100,7 @@
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            targetShare = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Analysis.Models.TargetShare>>(responseStream, options);
+            targetShare = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Models.TargetShare>>(responseStream, options);
             badRequestError = false;
         }
         else
@@ -114,6 +113,6 @@
 
     private void SetTable(string columnName)
     {
-        targetShare = tableSort.SortTable<Football.Fantasy.Analysis.Models.TargetShare>(targetShare, columnName);
+        targetShare = tableSort.SortTable<Football.Fantasy.Models.TargetShare>(targetShare, columnName);
     }
 }

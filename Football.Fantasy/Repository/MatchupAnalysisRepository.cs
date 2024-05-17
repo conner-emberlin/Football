@@ -1,10 +1,10 @@
-﻿using Football.Fantasy.Analysis.Models;
-using Football.Fantasy.Analysis.Interfaces;
+﻿using Football.Fantasy.Models;
+using Football.Fantasy.Interfaces;
 using Dapper;
 using System.Data;
 using Football.Enums;
 
-namespace Football.Fantasy.Analysis.Repository
+namespace Football.Fantasy.Repository
 {
     public class MatchupAnalysisRepository(IDbConnection dbConnection) : IMatchupAnalysisRepository
     {

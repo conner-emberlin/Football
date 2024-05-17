@@ -1,4 +1,4 @@
-﻿using Football.Fantasy.Analysis.Interfaces;
+﻿using Football.Fantasy.Interfaces;
 using Football.Models;
 using Football.Players.Interfaces;
 using Football.Projections.Models;

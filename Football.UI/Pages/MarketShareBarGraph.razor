@@ -2,7 +2,7 @@
 <PageTitle>Market Shares</PageTitle>
 @using System.Text.Json
 @using System.Text.Json.Serialization
-@using Football.Fantasy.Analysis.Models;
+@using Football.Fantasy.Models;
 @using ApexCharts;
 @inject IHttpClientFactory ClientFactory
 
@@ -51,8 +51,8 @@ else if ((youTried && badRequestError) || (youTried && playerShare == null))
 
     public string name { get; set; } = "";
 
-    public List<Football.Fantasy.Analysis.Models.MarketShare>? allShares = new();
-    public Football.Fantasy.Analysis.Models.MarketShare? playerShare = new();
+    public List<Football.Fantasy.Models.MarketShare>? allShares = new();
+    public Football.Fantasy.Models.MarketShare? playerShare = new();
     public List<Share> shares = new();
 
     public bool loading { get; set; } = false;
@@ -77,7 +77,7 @@ else if ((youTried && badRequestError) || (youTried && playerShare == null))
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            allShares = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Analysis.Models.MarketShare>>(responseStream, options);
+            allShares = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Models.MarketShare>>(responseStream, options);
             playerShare = allShares.FirstOrDefault(f => f.Player.PlayerId == int.Parse(id));
 
             if (playerShare != null)

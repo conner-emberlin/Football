@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Football.Api.Models;
 using Football.Players.Interfaces;
-using Football.Fantasy.Analysis.Interfaces;
-using Football.Fantasy.Analysis.Models;
 using Football.Leagues.Interfaces;
 using Football.Leagues.Models;
 using AutoMapper;

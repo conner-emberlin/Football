@@ -1,6 +1,5 @@
 ﻿using Football.Data.Interfaces;
 using Football.Enums;
-using Football.Fantasy.Analysis.Interfaces;
 using Football.Fantasy.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

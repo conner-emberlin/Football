@@ -1,7 +1,7 @@
 ﻿using Football.Enums;
-using Football.Fantasy.Analysis.Models;
+using Football.Fantasy.Models;
 
-namespace Football.Fantasy.Analysis.Interfaces
+namespace Football.Fantasy.Interfaces
 {
     public interface IMarketShareService
     {

@@ -1,7 +1,6 @@
-﻿using Football.Fantasy.Models;
-using Football.Players.Models;
+﻿using Football.Players.Models;
 
-namespace Football.Fantasy.Analysis.Models
+namespace Football.Fantasy.Models
 {
     public class StartOrSit
     {

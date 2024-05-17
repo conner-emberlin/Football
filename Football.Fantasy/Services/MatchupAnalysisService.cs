@@ -2,13 +2,11 @@
 using Football.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
-using Football.Fantasy.Analysis.Interfaces;
-using Football.Fantasy.Analysis.Models;
 using Football.Players.Interfaces;
 using Serilog;
 using Microsoft.Extensions.Options;
 
-namespace Football.Fantasy.Analysis.Services
+namespace Football.Fantasy.Services
 {
     public class MatchupAnalysisService(IPlayersService playersService, IFantasyDataService fantasyDataService,
         IOptionsMonitor<Season> season, IMatchupAnalysisRepository matchupAnalysisRepository, ILogger logger) : IMatchupAnalysisService

@@ -28,7 +28,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Football.Api\Football.Api.csproj" />
     <ProjectReference Include="..\Football.Data\Football.Data.csproj" />
-    <ProjectReference Include="..\Football.Fantasy.Analysis\Football.Fantasy.Analysis.csproj" />
     <ProjectReference Include="..\Football.Fantasy\Football.Fantasy.csproj" />
     <ProjectReference Include="..\Football.Leagues\Football.Leagues.csproj" />
     <ProjectReference Include="..\Football.News\Football.News.csproj" />

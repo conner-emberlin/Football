@@ -2,7 +2,7 @@
 <PageTitle>Fantasy Distribution</PageTitle>
 @using System.Text.Json
 @using System.Text.Json.Serialization
-@using Football.Fantasy.Analysis.Models;
+@using Football.Fantasy.Models;
 @using ApexCharts;
 @inject IHttpClientFactory ClientFactory
 
@@ -50,8 +50,8 @@ else if((youTried && badRequestError) || (youTried && playerPercentage == null))
 
     public string name { get; set; } = "";
 
-    public List<Football.Fantasy.Analysis.Models.FantasyPercentage>? fantasyPercentages = new();
-    public Football.Fantasy.Analysis.Models.FantasyPercentage? playerPercentage = new();
+    public List<Football.Fantasy.Models.FantasyPercentage>? fantasyPercentages = new();
+    public Football.Fantasy.Models.FantasyPercentage? playerPercentage = new();
     public List<Distribution> distributions = new();
 
     public bool loading { get; set; } = false;
@@ -76,7 +76,7 @@ else if((youTried && badRequestError) || (youTried && playerPercentage == null))
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            fantasyPercentages = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Analysis.Models.FantasyPercentage>>(responseStream, options);
+            fantasyPercentages = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Models.FantasyPercentage>>(responseStream, options);
             playerPercentage = fantasyPercentages.FirstOrDefault(f => f.PlayerId == int.Parse(id));
 
             if (playerPercentage != null)

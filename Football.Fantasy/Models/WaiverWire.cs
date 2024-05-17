@@ -1,6 +1,6 @@
 ﻿using Football.Players.Models;
 
-namespace Football.Fantasy.Analysis.Models
+namespace Football.Fantasy.Models
 {
     public class WaiverWireCandidate
     {

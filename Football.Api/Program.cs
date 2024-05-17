@@ -8,8 +8,6 @@ using Football.Data.Services;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Repository;
 using Football.Fantasy.Services;
-using Football.Fantasy.Analysis.Interfaces;
-using Football.Fantasy.Analysis.Services;
 using Football.Leagues.Interfaces;
 using Football.Leagues.Services;
 using Football.Leagues.Models;
@@ -31,7 +29,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 using System.Data;
 using System.Data.SqlClient;
-using Football.Fantasy.Analysis.Repository;
+
 
 var builder = WebApplication.CreateBuilder(args);
 

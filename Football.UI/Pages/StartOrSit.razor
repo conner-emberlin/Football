@@ -7,7 +7,6 @@
 @using Football.Projections.Models;
 @using Football.Players.Models;
 @using Football.Fantasy.Models;
-@using Football.Fantasy.Analysis.Models;
 @using Football.Enums;
 @using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
@@ -199,7 +198,7 @@ else if (badRequestError){
     public bool loading { get; set; } = false;
     private bool shouldRender;
 
-    public List<Football.Fantasy.Analysis.Models.StartOrSit>? StartOrSits { get; set; } = new();
+    public List<Football.Fantasy.Models.StartOrSit>? StartOrSits { get; set; } = new();
 
     protected override bool ShouldRender() => shouldRender;
 
@@ -232,7 +231,7 @@ else if (badRequestError){
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = response.Content.ReadAsStream();
-            StartOrSits = JsonSerializer.Deserialize<List<Football.Fantasy.Analysis.Models.StartOrSit>>(responseStream, options);
+            StartOrSits = JsonSerializer.Deserialize<List<Football.Fantasy.Models.StartOrSit>>(responseStream, options);
         }
         else
         {
@@ -295,7 +294,7 @@ else if (badRequestError){
               : 3 <= diff && diff < 10 ? "color:orange"
               : "color:red";
     }
-    private string AtIndicator(Football.Fantasy.Analysis.Models.StartOrSit sos)
+    private string AtIndicator(Football.Fantasy.Models.StartOrSit sos)
     {
         var det = sos.ScheduleDetails;
         var playerTeamId = sos.TeamMap!.TeamId;
@@ -306,7 +305,7 @@ else if (badRequestError){
         else return string.Empty;
     }
    
-    private string GetOpponent(Football.Fantasy.Analysis.Models.StartOrSit sos)
+    private string GetOpponent(Football.Fantasy.Models.StartOrSit sos)
     {
         var det = sos.ScheduleDetails;
         var playerTeamId = sos.TeamMap!.TeamId;

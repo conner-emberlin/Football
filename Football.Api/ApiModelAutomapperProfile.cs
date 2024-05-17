@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Football.Api.Models;
-using Football.Fantasy.Analysis.Models;
+using Football.Fantasy.Models;
 using Football.Players.Models;
 using Football.Projections.Models;
 namespace Football.Api

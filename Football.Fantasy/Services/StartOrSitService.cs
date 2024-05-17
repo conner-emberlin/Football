@@ -3,14 +3,13 @@ using Football.Enums;
 using Football.News.Interfaces;
 using Football.News.Models;
 using Football.Players.Interfaces;
-using Football.Fantasy.Analysis.Interfaces;
 using Microsoft.Extensions.Options;
-using Football.Fantasy.Analysis.Models;
 using Football.Players.Models;
 using Football.Fantasy.Interfaces;
+using Football.Fantasy.Models;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Football.Fantasy.Analysis.Services
+namespace Football.Fantasy.Services
 {
     public class StartOrSitService(INewsService newsService, IPlayersService playersService, IMatchupAnalysisService matchupAnalysisService,
         IFantasyDataService fantasyDataService, ISettingsService settingsService, IMemoryCache cache,
