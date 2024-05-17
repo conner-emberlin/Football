@@ -31,11 +31,14 @@ namespace Football.Fantasy.Analysis.Services
             if (team != null && currentWeek < _season.Weeks)
             {           
                 var opponentId = (await playersService.GetTeamGames(team.TeamId)).First(g => g.Week == currentWeek).OpposingTeamId;
-                var player = await playersService.GetPlayer(playerId);
-                _ = Enum.TryParse(player.Position, out Position position);
-                var matchupRankings = await GetPositionalMatchupRankingsFromSQL(position, _season.CurrentSeason, currentWeek);
-                var matchupRanking = matchupRankings.FindIndex(m => m.TeamId == opponentId) + 1;
-                return matchupRanking;
+                if (opponentId > 0)
+                {
+                    var player = await playersService.GetPlayer(playerId);
+                    _ = Enum.TryParse(player.Position, out Position position);
+                    var matchupRankings = await GetPositionalMatchupRankingsFromSQL(position, _season.CurrentSeason, currentWeek);
+                    var matchupRanking = matchupRankings.FindIndex(m => m.TeamId == opponentId) + 1;
+                    return matchupRanking;
+                }
             }
             return 0;
         }

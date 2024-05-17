@@ -114,14 +114,6 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(TargetShare), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetTargetShares() =>  Ok(await marketShareService.GetTargetShares());
 
-        [HttpGet("weather/{playerId}")]
-        [ProducesResponseType(typeof(Weather), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetWeather(int playerId) => Ok(await startOrSitService.GetWeather(playerId));
-
-        [HttpGet("lines/{playerId}")]
-        [ProducesResponseType(typeof(MatchLines), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetMatchLines(int playerId) => Ok(await startOrSitService.GetMatchLines(playerId));
-
         [HttpPost("start-or-sit")]
         [ProducesResponseType(typeof(List<StartOrSit>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetStartOrSit([FromBody] List<int> playerIds) => Ok(await startOrSitService.GetStartOrSits(playerIds));
