@@ -188,5 +188,13 @@ namespace Football.Api.Controllers
             }
             return Ok(models.OrderByDescending(m => m.RookieSeason).ThenBy(m => m.Position).ThenBy(m => m.Name).ToList());
         }
+
+        [HttpGet("trending-players")]
+        [ProducesResponseType(typeof(List<TrendingPlayer>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetTrendingPlayers() => Ok(await playersService.GetTrendingPlayers());
+
+        [HttpPost("sleeper-map")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await playersService.UploadSleeperPlayerMap());
     }
 }

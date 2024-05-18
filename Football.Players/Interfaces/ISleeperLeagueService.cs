@@ -1,6 +1,6 @@
-﻿using Football.Leagues.Models;
+﻿using Football.Players.Models;
 
-namespace Football.Leagues.Interfaces
+namespace Football.Players.Interfaces
 {
     public interface ISleeperLeagueService
     {

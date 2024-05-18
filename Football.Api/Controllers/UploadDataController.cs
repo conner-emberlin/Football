@@ -1,7 +1,6 @@
 ﻿using Football.Enums;
 using Football.Models;
 using Football.Data.Interfaces;
-using Football.Leagues.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -10,7 +9,7 @@ namespace Football.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class UploadDataController(IUploadWeeklyDataService weeklyDataService, IUploadSeasonDataService seasonDataService,
-        IScraperService scraperService, IOptionsMonitor<Season> season, ILeagueAnalysisService leagueAnalysisService) : ControllerBase
+        IScraperService scraperService, IOptionsMonitor<Season> season) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -96,9 +95,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadADP(string position) => Ok(await seasonDataService.UploadADP(_season.CurrentSeason, position));
 
-        [HttpPost("sleeper-map")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await leagueAnalysisService.UploadSleeperPlayerMap());
+
 
         [HttpPost("snaps/{position}/{season}/{week}")]
         [ProducesResponseType(typeof(int), 200)]

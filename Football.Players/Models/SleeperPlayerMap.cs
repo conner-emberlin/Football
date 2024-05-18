@@ -1,4 +1,4 @@
-﻿namespace Football.Leagues.Models
+﻿namespace Football.Players.Models
 {
     public class SleeperPlayerMap
     {

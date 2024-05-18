@@ -44,5 +44,8 @@ namespace Football.Players.Interfaces
         public Task<bool> CreateRookie(Rookie rookie);
         public Task<List<Rookie>> GetAllRookies();
         public Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week);
+        public Task<int> UploadSleeperPlayerMap(List<SleeperPlayerMap> playerMap);
+        public Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId);
+        public Task<List<SleeperPlayerMap>> GetSleeperPlayerMaps();
     }
 }

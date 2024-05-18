@@ -7,7 +7,6 @@
 @using Football.Fantasy.Models;
 @using Football.Statistics.Models;
 @using Football.Players.Models;
-@using Football.Leagues.Models;
 @using Football.UI.Helpers;
 
 @inject IHttpClientFactory ClientFactory
@@ -1197,7 +1196,7 @@ else if (!loading && !playerSelected)
 
     private async Task GetTrendingPlayers()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/trending-players");
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/player/trending-players");
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);

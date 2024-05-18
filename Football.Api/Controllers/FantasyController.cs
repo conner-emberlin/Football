@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Football.Api.Models;
 using Football.Players.Interfaces;
-using Football.Leagues.Interfaces;
-using Football.Leagues.Models;
 using AutoMapper;
 
 namespace Football.Api.Controllers
@@ -16,7 +14,7 @@ namespace Football.Api.Controllers
     [ApiController]
     public class FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMarketShareService marketShareService,
         IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService,
-        IPlayersService playersService, IFantasyAnalysisService fantasyAnalysisService, ILeagueAnalysisService leagueService, ISnapCountService snapCountService, IMapper mapper) : ControllerBase
+        IPlayersService playersService, IFantasyAnalysisService fantasyAnalysisService, ISnapCountService snapCountService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -133,10 +131,6 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<FantasyPerformance>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetFantasyPercentages([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await fantasyAnalysisService.GetFantasyPercentages(posEnum)) : BadRequest();
-
-        [HttpGet("trending-players")]
-        [ProducesResponseType(typeof(List<TrendingPlayer>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetTrendingPlayers() => Ok(await leagueService.GetTrendingPlayers());
 
         [HttpGet("snap-analysis/{position}")]
         [ProducesResponseType(typeof(List<SnapCountAnalysis>), StatusCodes.Status200OK)]

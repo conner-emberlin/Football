@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Football.Leagues.Models
+namespace Football.Players.Models
 {
     public class SleeperLeague
     {

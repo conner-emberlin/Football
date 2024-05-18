@@ -9,8 +9,8 @@ using Serilog;
 
 namespace Football.Players.Services
 {
-    public class PlayersService(IPlayersRepository playersRepository, IMemoryCache cache, IOptionsMonitor<Season> season, 
-        ISettingsService settingsService, IMapper mapper, ILogger logger) : IPlayersService
+    public class PlayersService(IPlayersRepository playersRepository, IMemoryCache cache, IOptionsMonitor<Season> season,
+        ISettingsService settingsService, IMapper mapper, ILogger logger, ISleeperLeagueService sleeperLeagueService) : IPlayersService
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -20,7 +20,7 @@ namespace Football.Players.Services
             var playerId = await playersRepository.CreatePlayer(name, active, position);
             return new Player { PlayerId = playerId, Name = name, Active = active, Position = position };
         }
-        public async Task<List<Player>> GetPlayersByPosition(Position position) => await playersRepository.GetPlayersByPosition(position.ToString());        
+        public async Task<List<Player>> GetPlayersByPosition(Position position) => await playersRepository.GetPlayersByPosition(position.ToString());
         public async Task<Player> GetPlayer(int playerId) => await playersRepository.GetPlayer(playerId);
         public async Task<Player?> GetPlayerByName(string name) => await playersRepository.GetPlayerByName(name);
 
@@ -30,7 +30,7 @@ namespace Football.Players.Services
             if (player == null)
             {
                 player = await CreatePlayer(name, 1, position.ToString());
-                logger.Information("New Player Added. Name: {0}, PlayerId: {1}", player.Name, player.PlayerId);                
+                logger.Information("New Player Added. Name: {0}, PlayerId: {1}", player.Name, player.PlayerId);
             }
             return player;
         }
@@ -41,7 +41,7 @@ namespace Football.Players.Services
         public async Task<List<QuarterbackChange>> GetQuarterbackChanges(int season) => await playersRepository.GetQuarterbackChanges(season);
         public async Task<double> GetEPA(int playerId, int season) => await playersRepository.GetEPA(playerId, season);
         public async Task<double> GetSeasonProjection(int season, int playerId) => await playersRepository.GetSeasonProjection(season, playerId);
-        public async Task<double> GetWeeklyProjection(int season, int week, int playerId) => await playersRepository.GetWeeklyProjection(season, week, playerId);        
+        public async Task<double> GetWeeklyProjection(int season, int week, int playerId) => await playersRepository.GetWeeklyProjection(season, week, playerId);
         public async Task<TeamMap> GetTeam(int teamId) => await playersRepository.GetTeam(teamId);
         public async Task<int> GetTeamId(string teamName) => await playersRepository.GetTeamId(teamName);
         public async Task<int> GetTeamId(int playerId) => await playersRepository.GetTeamId(playerId);
@@ -60,12 +60,12 @@ namespace Football.Players.Services
         public async Task<List<int>> GetSeasons() => await playersRepository.GetSeasons();
         public async Task<bool> CreateRookie(Rookie rookie) => await playersRepository.CreateRookie(rookie);
         public async Task<List<Rookie>> GetAllRookies() => await playersRepository.GetAllRookies();
-        public async Task<int> InactivatePlayers(List<int> playerIds) 
+        public async Task<int> InactivatePlayers(List<int> playerIds)
         {
             var updated = await playersRepository.InactivatePlayers(playerIds);
             if (updated > 0) cache.Remove(Cache.AllPlayers.ToString());
             return updated;
-        } 
+        }
         public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId)
         {
             var player = await GetPlayer(playerId);
@@ -108,8 +108,8 @@ namespace Football.Players.Services
                 return players;
             }
         }
-        public async Task<List<PlayerTeam>> GetPlayersByTeam(string team) 
-        { 
+        public async Task<List<PlayerTeam>> GetPlayersByTeam(string team)
+        {
             var playerTeams = await playersRepository.GetPlayersByTeam(team, _season.CurrentSeason);
             var teamId = await GetTeamId(team);
             var teamMap = await GetTeam(teamId);
@@ -132,13 +132,13 @@ namespace Football.Players.Services
                         PlayerId = player.PlayerId,
                         Name = player.Name,
                         Season = _season.CurrentSeason,
-                        Team = team, 
+                        Team = team,
                         TeamId = teamMap.TeamId
                     });
                 }
             }
             return playerTeams;
-        } 
+        }
         public async Task<List<Schedule>> GetUpcomingGames(int playerId)
         {
             var team = await GetPlayerTeam(_season.CurrentSeason, playerId);
@@ -152,5 +152,75 @@ namespace Football.Players.Services
         }
 
         public async Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week) => await playersRepository.GetWeeklySchedule(season, week);
+
+        public async Task<List<TrendingPlayer>> GetTrendingPlayers()
+        {
+            if (settingsService.GetFromCache<TrendingPlayer>(Cache.TrendingPlayers, out var cachedTrending))
+                return cachedTrending;
+            else
+            {
+                var sleeperTrendingPlayers = await sleeperLeagueService.GetSleeperTrendingPlayers();
+                List<TrendingPlayer> trendingPlayers = [];
+
+                if (sleeperTrendingPlayers != null)
+                {
+                    foreach (var sleeperPlayer in sleeperTrendingPlayers)
+                    {
+                        if (int.TryParse(sleeperPlayer.SleeperPlayerId, out var sleeperId))
+                        {
+                            var sleeperMap = await GetSleeperPlayerMap(sleeperId);
+                            if (sleeperMap != null)
+                            {
+                                trendingPlayers.Add(new TrendingPlayer
+                                {
+                                    Player = await GetPlayer(sleeperMap.PlayerId),
+                                    PlayerTeam = await GetPlayerTeam(_season.CurrentSeason, sleeperMap.PlayerId),
+                                    Adds = sleeperPlayer.Adds
+                                });
+                            }
+
+                        }
+                    }
+                }
+                cache.Set(Cache.TrendingPlayers.ToString(), trendingPlayers);
+                return trendingPlayers;
+            }
+        }
+
+        public async Task<int> UploadSleeperPlayerMap()
+        {
+            var sleeperPlayers = await sleeperLeagueService.GetSleeperPlayers();
+            var existingMaps = await playersRepository.GetSleeperPlayerMaps();
+            var playerMap = (await GetSleeperPlayerMap(sleeperPlayers)).Where(s => !existingMaps.Any(e => e.PlayerId == s.PlayerId)).ToList();
+            return await playersRepository.UploadSleeperPlayerMap(playerMap);
+        }
+
+        private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMap(List<SleeperPlayer> sleeperPlayers)
+        {
+            List<SleeperPlayerMap> playerMap = [];
+            if (sleeperPlayers.Count > 0)
+            {
+                foreach (var sp in sleeperPlayers)
+                {
+                    if (!string.IsNullOrWhiteSpace(sp.PlayerName))
+                    {
+                        var playerId = await GetPlayerId(sp.PlayerName);
+                        if (playerId > 0)
+                        {
+                            playerMap.Add(new SleeperPlayerMap
+                            {
+                                SleeperPlayerId = sp.SleeperPlayerId,
+                                PlayerId = playerId
+                            });
+                        }
+                    }
+                }
+                return playerMap;
+            }
+            throw new NullReferenceException();
+        }
+
+        public async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => await playersRepository.GetSleeperPlayerMap(sleeperId);
+        private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMaps() => await playersRepository.GetSleeperPlayerMaps();
     }
 }

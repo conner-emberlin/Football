@@ -310,5 +310,22 @@ namespace Football.Players.Repository
                                 AND [Week] = @week";
             return await dbConnection.QueryAsync<Schedule>(query, new { season, week });
         }
+
+        public async Task<int> UploadSleeperPlayerMap(List<SleeperPlayerMap> playerMap)
+        {
+            var query = $@"INSERT INTO [dbo].SleeperPlayerMap (SleeperPlayerId, PlayerId) VALUES (@SleeperPlayerId, @PlayerId)";
+            return await dbConnection.ExecuteAsync(query, playerMap);
+        }
+        public async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId)
+        {
+            var query = $@"SELECT * FROM [dbo].SleeperPlayerMap WHERE SleeperPlayerId = @sleeperId";
+            return (await dbConnection.QueryAsync<SleeperPlayerMap>(query, new { sleeperId })).FirstOrDefault();
+        }
+
+        public async Task<List<SleeperPlayerMap>> GetSleeperPlayerMaps()
+        {
+            var query = $@"SELECT * FROM [dbo].SleeperPlayerMap";
+            return (await dbConnection.QueryAsync<SleeperPlayerMap>(query)).ToList();
+        }
     }
 }

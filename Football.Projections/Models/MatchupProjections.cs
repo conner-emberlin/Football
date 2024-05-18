@@ -1,6 +1,5 @@
-﻿using Football.Projections.Models;
-
-namespace Football.Leagues.Models
+﻿
+namespace Football.Projections.Models
 {
     public class MatchupProjections
     {

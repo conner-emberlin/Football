@@ -1,7 +1,5 @@
 ﻿using Football.Enums;
 using Football.Models;
-using Football.Leagues.Models;
-using Football.Leagues.Interfaces;
 using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
@@ -17,8 +15,7 @@ namespace Football.Api.Controllers
     [ApiController]
     public class ProjectionController(IPlayersService playersService,
         IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season,
-        IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService,
-        ILeagueAnalysisService leagueService, IMapper mapper) : ControllerBase
+        IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -154,7 +151,7 @@ namespace Football.Api.Controllers
         [HttpGet("sleeper-projections/{username}")]
         [ProducesResponseType(typeof(List<WeekProjection>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetSleeperLeagueProjections([FromRoute] string username) => Ok(await leagueService.GetSleeperLeagueProjections(username));
+        public async Task<IActionResult> GetSleeperLeagueProjections([FromRoute] string username) => Ok(await analysisService.GetSleeperLeagueProjections(username));
 
         [HttpGet("sleeper-projections/{username}/matchup")]
         [ProducesResponseType(typeof(List<MatchupProjections>), StatusCodes.Status200OK)]
@@ -162,7 +159,7 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetMatchupProjections([FromRoute] string username)
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            return Ok(await leagueService.GetMatchupProjections(username, currentWeek));
+            return Ok(await analysisService.GetMatchupProjections(username, currentWeek));
         }
 
         [HttpDelete("weekly/{playerId}/{season}/{week}")]

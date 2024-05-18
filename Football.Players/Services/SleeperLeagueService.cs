@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Football.Leagues.Models;
-using Football.Leagues.Interfaces;
+using Football.Players.Interfaces;
+using Football.Players.Models;
 
-namespace Football.Leagues.Services
+namespace Football.Players.Services
 {
     public class SleeperLeagueService(IHttpClientFactory clientFactory, IOptionsMonitor<SleeperSettings> settings, IOptionsMonitor<Season> season, JsonOptions options) : ISleeperLeagueService
     {
@@ -23,7 +23,7 @@ namespace Football.Leagues.Services
                 using var responseStream = await response.Content.ReadAsStreamAsync();
                 return await JsonSerializer.DeserializeAsync<SleeperUser>(responseStream, options.Options);
             }
-            else return new SleeperUser();
+            return new SleeperUser();
         }
 
         public async Task<List<SleeperLeague>?> GetSleeperLeagues(string userId)

@@ -148,6 +148,11 @@ namespace Football.Models
         public double TECompareRange { get; set; }
     }
 
+    public class SleeperSettings
+    {
+        public string SleeperBaseURL { get; set; } = "";
+    }
+
     public class JsonOptions
     {
         public JsonSerializerOptions Options { get; }

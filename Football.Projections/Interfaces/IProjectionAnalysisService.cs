@@ -15,6 +15,8 @@ namespace Football.Projections.Interfaces
         public Task<List<SeasonProjectionError>> GetSeasonProjectionError(Position position, int season = 0);
         public Task<SeasonProjectionAnalysis> GetSeasonProjectionAnalysis(Position position, int season = 0);
         public Task<List<SeasonProjectionAnalysis>> GetAllSeasonProjectionAnalyses(Position position);
+        public Task<List<WeekProjection>> GetSleeperLeagueProjections(string username);
+        public Task<List<MatchupProjections>> GetMatchupProjections(string username, int week);
 
     }
 }
