@@ -60,6 +60,7 @@ namespace Football.Players.Services
         public async Task<List<int>> GetSeasons() => await playersRepository.GetSeasons();
         public async Task<bool> CreateRookie(Rookie rookie) => await playersRepository.CreateRookie(rookie);
         public async Task<List<Rookie>> GetAllRookies() => await playersRepository.GetAllRookies();
+        public async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => await playersRepository.GetSleeperPlayerMap(sleeperId);
         public async Task<int> InactivatePlayers(List<int> playerIds)
         {
             var updated = await playersRepository.InactivatePlayers(playerIds);
@@ -215,12 +216,9 @@ namespace Football.Players.Services
                         }
                     }
                 }
-                return playerMap;
             }
-            throw new NullReferenceException();
+            return playerMap;
         }
-
-        public async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => await playersRepository.GetSleeperPlayerMap(sleeperId);
-        private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMaps() => await playersRepository.GetSleeperPlayerMaps();
+        
     }
 }

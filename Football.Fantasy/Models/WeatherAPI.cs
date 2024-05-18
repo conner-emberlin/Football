@@ -1,4 +1,4 @@
-﻿namespace Football.News.Models
+﻿namespace Football.Fantasy.Models
 {
     public class WeatherAPI
     {

@@ -8,9 +8,6 @@ using Football.Data.Services;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Repository;
 using Football.Fantasy.Services;
-using Football.News.Interfaces;
-using Football.News.Models;
-using Football.News.Services;
 using Football.Players.Interfaces;
 using Football.Players.Repository;
 using Football.Players.Services;
@@ -48,7 +45,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
 
-builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IScraperService, ScraperService>();
 builder.Services.AddScoped<IUploadWeeklyDataService, UploadWeeklyDataService>();
 builder.Services.AddScoped<IUploadWeeklyDataRepository, UploadWeeklyDataRepository>();
@@ -92,10 +88,7 @@ builder.Services.Configure<Starters>(builder.Configuration.GetSection("Starters"
 builder.Services.Configure<Tunings>(builder.Configuration.GetSection("Tunings"));
 builder.Services.Configure<WeeklyTunings>(builder.Configuration.GetSection("WeeklyTunings"));
 builder.Services.Configure<WeeklyScraping>(builder.Configuration.GetSection("Scraping"));
-builder.Services.Configure<ESPN>(builder.Configuration.GetSection("ESPN"));
 builder.Services.Configure<MockDraftSettings>(builder.Configuration.GetSection("MockDraftSettings"));
-builder.Services.Configure<WeatherAPI>(builder.Configuration.GetSection("WeatherAPI"));
-builder.Services.Configure<NFLOddsAPI>(builder.Configuration.GetSection("NFLOddsAPI"));
 builder.Services.Configure<WaiverWireSettings>(builder.Configuration.GetSection("WaiverWireSettings"));
 builder.Services.Configure<BoomBustSettings>(builder.Configuration.GetSection("BoomBustSettings"));
 builder.Services.Configure<SleeperSettings>(builder.Configuration.GetSection("SleeperSettings"));
