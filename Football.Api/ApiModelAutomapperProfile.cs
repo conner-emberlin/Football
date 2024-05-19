@@ -32,6 +32,67 @@ namespace Football.Api
             CreateMap<FantasyPerformance, FantasyAnalysisModel>(MemberList.Destination)
                 .ForMember(f => f.BoomPercentage, o => o.Ignore())
                 .ForMember(f => f.BustPercentage, o => o.Ignore());
+
+            CreateMap<WeeklyDataQB, WeeklyDataModel>()
+                .ForMember(w => w.Interceptions, o => o.MapFrom(w => w.Int))
+                .ForMember(w => w.PassingYards, o => o.MapFrom(w => w.Yards))
+                .ForMember(w => w.PassingTouchdowns, o => o.MapFrom(w => w.TD))
+                .ForMember(w => w.RushingTouchdowns, o => o.MapFrom(w => w.RushingTD));
+            CreateMap<WeeklyDataRB, WeeklyDataModel>()
+                .ForMember(w => w.RushingAttempts, o => o.MapFrom(w => w.RushingAtt))
+                .ForMember(w => w.RushingYards, o => o.MapFrom(w => w.RushingYds))
+                .ForMember(w => w.RushingTouchdowns, o => o.MapFrom(w => w.RushingTD))
+                .ForMember(w => w.ReceivingYards, o => o.MapFrom(w => w.Yards))
+                .ForMember(w => w.ReceivingTouchdowns, o => o.MapFrom(w => w.ReceivingTD));
+            CreateMap<WeeklyDataWR, WeeklyDataModel>()
+                .ForMember(w => w.ReceivingYards, o => o.MapFrom(w => w.Yards))
+                .ForMember(w => w.ReceivingTouchdowns, o => o.MapFrom(w => w.TD))
+                .ForMember(w => w.RushingAttempts, o => o.MapFrom(w => w.RushingAtt))
+                .ForMember(w => w.RushingTouchdowns, o => o.MapFrom(w => w.RushingTD))
+                .ForMember(W => W.RushingYards, o => o.MapFrom(w => w.RushingYds));
+            CreateMap<WeeklyDataTE, WeeklyDataModel>()
+                .ForMember(w => w.ReceivingYards, o => o.MapFrom(w => w.Yards))
+                .ForMember(w => w.ReceivingTouchdowns, o => o.MapFrom(w => w.TD))
+                .ForMember(w => w.RushingAttempts, o => o.MapFrom(w => w.RushingAtt))
+                .ForMember(w => w.RushingTouchdowns, o => o.MapFrom(w => w.RushingTD))
+                .ForMember(W => W.RushingYards, o => o.MapFrom(w => w.RushingYds));
+            CreateMap<WeeklyDataDST, WeeklyDataModel>()
+                .ForMember(w => w.DefensiveSacks, o => o.MapFrom(w => w.Sacks))
+                .ForMember(w => w.DefensiveSafties, o => o.MapFrom(w => w.Safties))
+                .ForMember(w => w.DefensiveInterceptions, o => o.MapFrom(w => w.Ints))
+                .ForMember(w => w.DefensiveTouchdowns, o => o.MapFrom(w => w.DefensiveTD))
+                .ForMember(w => w.SpecialTeamsTouchdowns, o => o.MapFrom(w => w.SpecialTD));
+            CreateMap<WeeklyDataK, WeeklyDataModel>();
+
+            CreateMap<SeasonDataQB, SeasonDataModel>()
+                .ForMember(w => w.Interceptions, o => o.MapFrom(w => w.Int))
+                .ForMember(w => w.PassingYards, o => o.MapFrom(w => w.Yards))
+                .ForMember(w => w.PassingTouchdowns, o => o.MapFrom(w => w.TD))
+                .ForMember(w => w.RushingTouchdowns, o => o.MapFrom(w => w.RushingTD));
+            CreateMap<SeasonDataRB, SeasonDataModel>()
+                .ForMember(w => w.RushingAttempts, o => o.MapFrom(w => w.RushingAtt))
+                .ForMember(w => w.RushingYards, o => o.MapFrom(w => w.RushingYds))
+                .ForMember(w => w.RushingTouchdowns, o => o.MapFrom(w => w.RushingTD))
+                .ForMember(w => w.ReceivingYards, o => o.MapFrom(w => w.Yards))
+                .ForMember(w => w.ReceivingTouchdowns, o => o.MapFrom(w => w.ReceivingTD));
+            CreateMap<SeasonDataWR, SeasonDataModel>()
+                .ForMember(w => w.ReceivingYards, o => o.MapFrom(w => w.Yards))
+                .ForMember(w => w.ReceivingTouchdowns, o => o.MapFrom(w => w.TD))
+                .ForMember(w => w.RushingAttempts, o => o.MapFrom(w => w.RushingAtt))
+                .ForMember(w => w.RushingTouchdowns, o => o.MapFrom(w => w.RushingTD))
+                .ForMember(W => W.RushingYards, o => o.MapFrom(w => w.RushingYds));
+            CreateMap<SeasonDataTE, SeasonDataModel>()
+                .ForMember(w => w.ReceivingYards, o => o.MapFrom(w => w.Yards))
+                .ForMember(w => w.ReceivingTouchdowns, o => o.MapFrom(w => w.TD))
+                .ForMember(w => w.RushingAttempts, o => o.MapFrom(w => w.RushingAtt))
+                .ForMember(w => w.RushingTouchdowns, o => o.MapFrom(w => w.RushingTD))
+                .ForMember(W => W.RushingYards, o => o.MapFrom(w => w.RushingYds));
+            CreateMap<SeasonDataDST, SeasonDataModel>()
+                .ForMember(w => w.DefensiveSacks, o => o.MapFrom(w => w.Sacks))
+                .ForMember(w => w.DefensiveSafties, o => o.MapFrom(w => w.Safties))
+                .ForMember(w => w.DefensiveInterceptions, o => o.MapFrom(w => w.Ints))
+                .ForMember(w => w.DefensiveTouchdowns, o => o.MapFrom(w => w.DefensiveTD))
+                .ForMember(w => w.SpecialTeamsTouchdowns, o => o.MapFrom(w => w.SpecialTD));
         }
 
     }
