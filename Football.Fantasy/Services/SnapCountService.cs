@@ -1,8 +1,6 @@
-﻿using Football.Data.Models;
-using Football.Enums;
+﻿using Football.Enums;
 using Football.Players.Models;
 using Football.Players.Interfaces;
-using Football.Statistics.Interfaces;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 

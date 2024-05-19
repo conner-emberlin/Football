@@ -1,5 +1,5 @@
 ﻿using Football.Fantasy.Models;
-using Football.Data.Models;
+using Football.Players.Models;
 
 namespace Football.Fantasy.Interfaces
 {

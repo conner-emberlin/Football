@@ -1,5 +1,5 @@
 ﻿using Football.Projections.Interfaces;
-using Football.Data.Models;
+using Football.Players.Models;
 using Football.Models;
 using Microsoft.Extensions.Options;
 using Serilog;

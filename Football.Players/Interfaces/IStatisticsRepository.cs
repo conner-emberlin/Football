@@ -1,7 +1,7 @@
-﻿using Football.Data.Models;
+﻿using Football.Players.Models;
 using Football.Enums;
 
-namespace Football.Statistics.Interfaces
+namespace Football.Players.Interfaces
 {
     public interface IStatisticsRepository
     {

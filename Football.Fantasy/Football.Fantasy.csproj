@@ -13,7 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Football.Data\Football.Data.csproj" />
     <ProjectReference Include="..\Football.Players\Football.Players.csproj" />
-    <ProjectReference Include="..\Football.Statistics\Football.Statistics.csproj" />
   </ItemGroup>
 
 </Project>

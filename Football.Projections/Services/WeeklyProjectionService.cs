@@ -1,12 +1,11 @@
-﻿using Football.Data.Models;
-using Football.Enums;
+﻿using Football.Enums;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.Models;
 using Football.Players.Interfaces;
+using Football.Players.Models;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
-using Football.Statistics.Interfaces;
 using MathNet.Numerics.LinearRegression;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;

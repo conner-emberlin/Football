@@ -1,10 +1,10 @@
-﻿using Football.Data.Models;
-using Football.Statistics.Interfaces;
+﻿using Football.Players.Interfaces;
+using Football.Players.Models;
 using System.Data;
 using Dapper;
 using Football.Enums;
 
-namespace Football.Statistics.Repository
+namespace Football.Players.Repository
 {
     public class StatisticsRepository(IDbConnection dbConnection) : IStatisticsRepository
     {

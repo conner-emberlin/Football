@@ -2,11 +2,9 @@
 using Moq.AutoMock;
 using AutoMapper;
 using Xunit;
-using Football.Statistics.Services;
-using Football.Statistics.Interfaces;
 using Football.Players.Interfaces;
+using Football.Players.Services;
 using Football.Players.Models;
-using Football.Data.Models;
 using Football.Enums;
 
 

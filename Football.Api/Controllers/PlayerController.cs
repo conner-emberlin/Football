@@ -2,12 +2,9 @@
 using Football.Models;
 using Football.Enums;
 using Football.Api.Models;
-using Football.Data.Models;
-using Football.Statistics.Interfaces;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
-using Football.Statistics.Models;
 using AutoMapper;
 
 namespace Football.Api.Controllers

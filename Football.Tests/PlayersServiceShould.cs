@@ -29,6 +29,7 @@ namespace Football.Tests
         private readonly Position _position = Position.QB;
 
         private readonly Mock<IPlayersRepository> _mockPlayersRepository;
+        private readonly Mock<ISleeperLeagueService> _mockSleeperLeagueService;
         private readonly Mock<IOptionsMonitor<Season>> _mockSeason;
         private readonly Mock<IMemoryCache> _mockMemoryCache;
         private readonly Mock<ISettingsService> _mockSettingsService;
@@ -47,6 +48,7 @@ namespace Football.Tests
             _mockMemoryCache = _mock.GetMock<IMemoryCache>();
             _mockSettingsService = _mock.GetMock<ISettingsService>();
             _mockLogger = _mock.GetMock<ILogger>();
+            _mockSleeperLeagueService = _mock.GetMock<ISleeperLeagueService>();
 
             _mockSeason.Setup(s => s.CurrentValue).Returns(_season);
             _mockPlayersRepository.Setup(pr => pr.GetPlayer(_playerId)).ReturnsAsync(_playerDST);
@@ -54,7 +56,7 @@ namespace Football.Tests
             _mockPlayersRepository.Setup(ps => ps.GetTeamId(_playerId)).ReturnsAsync(_teamId);
             _mockPlayersRepository.Setup(ps => ps.GetTeamId(_teamMap.Team)).ReturnsAsync(_teamId);
 
-            _sut = new PlayersService(_mockPlayersRepository.Object, _mockMemoryCache.Object, _mockSeason.Object, _mockSettingsService.Object, _mapper, _mockLogger.Object);
+            _sut = new PlayersService(_mockPlayersRepository.Object, _mockMemoryCache.Object, _mockSeason.Object, _mockSettingsService.Object, _mapper, _mockLogger.Object, _mockSleeperLeagueService.Object);
         }
 
         [Fact]

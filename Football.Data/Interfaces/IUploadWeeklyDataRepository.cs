@@ -1,4 +1,4 @@
-﻿using Football.Data.Models;
+﻿using Football.Players.Models;
 
 namespace Football.Data.Interfaces
 {

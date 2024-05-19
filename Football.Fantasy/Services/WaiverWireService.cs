@@ -2,7 +2,6 @@
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.Players.Interfaces;
-using Football.Statistics.Interfaces;
 using Football.Enums;
 using Microsoft.Extensions.Options;
 

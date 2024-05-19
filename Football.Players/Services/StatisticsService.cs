@@ -1,10 +1,8 @@
-﻿using Football.Data.Models;
-using Football.Enums;
+﻿using Football.Enums;
 using Football.Players.Interfaces;
-using Football.Statistics.Interfaces;
-using Football.Statistics.Models;
+using Football.Players.Models;
 
-namespace Football.Statistics.Services
+namespace Football.Players.Services
 {
     public class StatisticsService(IStatisticsRepository statisticsRepository, IPlayersService playersService, ISettingsService settingsService) : IStatisticsService
     {

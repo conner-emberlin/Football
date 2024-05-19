@@ -3,14 +3,14 @@ using Moq.AutoMock;
 using Xunit;
 using Serilog;
 using Football.Players.Interfaces;
-using Football.Fantasy.Analysis.Interfaces;
+using Football.Fantasy.Interfaces;
 using Football.Models;
 using Microsoft.Extensions.Options;
 using Football.Projections.Models;
 using Football.Players.Models;
 using Football.Enums;
 using Football.Projections.Services;
-using Football.Fantasy.Analysis.Models;
+using Football.Fantasy.Models;
 
 namespace Football.Tests
 {

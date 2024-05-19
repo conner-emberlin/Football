@@ -1,6 +1,5 @@
-﻿using Football.Players.Models;
-
-namespace Football.Statistics.Models
+﻿
+namespace Football.Players.Models
 {
     public class AdvancedQBStatistics
     {

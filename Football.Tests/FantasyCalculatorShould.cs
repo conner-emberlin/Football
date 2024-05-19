@@ -6,7 +6,7 @@ using Football.Models;
 using Football.Fantasy;
 using Football.Fantasy.Services;
 using Microsoft.Extensions.Options;
-using Football.Data.Models;
+using Football.Players.Models;
 
 
 namespace Football.Tests

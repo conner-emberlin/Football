@@ -1,14 +1,11 @@
 ﻿using Football.Players.Interfaces;
-using Football.Statistics.Interfaces;
 using Football.Enums;
-using Football.Data.Models;
 using Football.Models;
 using Microsoft.Extensions.Options;
-using Football.Statistics.Models;
 using Football.Players.Models;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Football.Statistics.Services
+namespace Football.Players.Services
 {
     public class AdvancedStatisticsService(IStatisticsService statisticsService, IPlayersService playersService, 
         IOptionsMonitor<FiveThirtyEightValueSettings> value, IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settingsService) : IAdvancedStatisticsService

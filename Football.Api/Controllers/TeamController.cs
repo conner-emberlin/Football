@@ -1,11 +1,8 @@
 ﻿using Football.Players.Interfaces;
-using Football.Statistics.Models;
-using Football.Statistics.Interfaces;
 using Football.Models;
 using Football.Players.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Football.Data.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 

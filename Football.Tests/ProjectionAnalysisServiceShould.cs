@@ -26,6 +26,7 @@ namespace Football.Tests
         private readonly Mock<ISettingsService> _mockSettingsService;
         private readonly Mock<IOptionsMonitor<Season>> _mockSeason;
         private readonly Mock<IOptionsMonitor<Starters>> _mockStarters;
+        private readonly Mock<ISleeperLeagueService> _mockSleeperLeagueService;
 
         private readonly ProjectionAnalysisService _sut;
 
@@ -42,6 +43,7 @@ namespace Football.Tests
             _mockSettingsService = _mock.GetMock<ISettingsService>();
             _mockSeason = _mock.GetMock<IOptionsMonitor<Season>>();
             _mockStarters = _mock.GetMock<IOptionsMonitor<Starters>>();
+            _mockSleeperLeagueService = _mock.GetMock<ISleeperLeagueService>();
 
             _mockSeason.Setup(s => s.CurrentValue).Returns(_season);
             _mockStarters.Setup(s => s.CurrentValue).Returns(_starters);
@@ -51,7 +53,7 @@ namespace Football.Tests
             _mockSettingsService.Setup(s => s.GetReplacementLevel(Position.TE)).Returns(13);
             _mockSettingsService.Setup(s => s.GetReplacementLevel(Position.RB)).Returns(25);
 
-            _sut = new ProjectionAnalysisService(_mockFantasyDataService.Object, _mockSeason.Object, _mockSeasonProjectionService.Object, _mockWeekProjectionService.Object, _mockStarters.Object, _mockPlayersService.Object, _mockSettingsService.Object);
+            _sut = new ProjectionAnalysisService(_mockFantasyDataService.Object, _mockSeason.Object, _mockSeasonProjectionService.Object, _mockWeekProjectionService.Object, _mockStarters.Object, _mockPlayersService.Object, _mockSettingsService.Object, _mockSleeperLeagueService.Object);
         }
 
         [Fact]

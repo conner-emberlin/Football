@@ -1,5 +1,4 @@
 ﻿using Football.Data.Interfaces;
-using Football.Data.Models;
 using Football.Players.Models;
 using System.Data;
 using Dapper;

@@ -1,6 +1,6 @@
-﻿using Football.Statistics.Models;
+﻿using Football.Players.Models;
 
-namespace Football.Statistics.Interfaces
+namespace Football.Players.Interfaces
 {
     public interface IAdvancedStatisticsService
     {

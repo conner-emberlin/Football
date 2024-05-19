@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Football.Data.Models;
+using Football.Players.Models;
 using Football.Projections.Models;
 
 namespace Football.Projections

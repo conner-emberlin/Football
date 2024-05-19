@@ -1,5 +1,4 @@
-﻿using Football.Data.Models;
-using Football.Fantasy.Models;
+﻿using Football.Fantasy.Models;
 
 namespace Football.Fantasy.Interfaces
 {
