@@ -6,6 +6,7 @@
         public int Season { get; set; }
         public string Name { get; set; } = "";
         public string Position { get; set; } = "";
+        public int Games { get; set; }
 
         public double Completions { get; set; }
         public double Attempts { get; set; }
@@ -20,6 +21,7 @@
         public double Fumbles { get; set; }
 
         public double Receptions { get; set; }
+        public double Long { get; set; }
         public double Targets { get; set; }
         public double ReceivingYards { get; set; }
         public double ReceivingTouchdowns { get; set; }

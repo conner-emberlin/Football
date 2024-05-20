@@ -21,6 +21,7 @@
         public double Fumbles { get; set; }
 
         public double Receptions { get; set; }
+        public double Long { get; set; }
         public double Targets { get; set; }
         public double ReceivingYards { get; set; }
         public double ReceivingTouchdowns { get; set; }
