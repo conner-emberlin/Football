@@ -45,6 +45,15 @@ namespace Football.Fantasy
                     .ForMember(sf => sf.Position, o => o.MapFrom(sf => Enums.Position.K.ToString()))
                     .ForMember(sf => sf.Games, o => o.MapFrom(sf => 1))
                     .ForMember(sf => sf.FantasyPoints, o => o.Ignore());
+
+            CreateMap<Hour, Weather>()
+                    .ForMember(w => w.GameTime, o => o.MapFrom(h => h.time))
+                    .ForMember(w => w.Temperature, o => o.MapFrom(h => string.Format("{0}°F", h.temp_f)))
+                    .ForMember(w => w.Condition, o => o.MapFrom(h => h.condition.text))
+                    .ForMember(w => w.ConditionURL, o => o.MapFrom(h => string.Format("https:{0}", h.condition.icon)))
+                    .ForMember(w => w.Wind, o => o.MapFrom(h => string.Format("{0} mph winds", h.wind_mph)))
+                    .ForMember(w => w.RainChance, o => o.MapFrom(h => string.Format("{0}% chance of rain", h.chance_of_rain)))
+                    .ForMember(w => w.SnowChance, o => o.MapFrom(h => string.Format("{0}% chance of snow", h.chance_of_snow)));
         }
     }
 }

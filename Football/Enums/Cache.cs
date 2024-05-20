@@ -10,6 +10,9 @@
         TargetShares,
         StartOrSit,
         TrendingPlayers,
-        RemainingSOS
+        RemainingSOS,
+        NFLOdds,
+        WeatherZip,
+        PlayerComparisons
     }
 }

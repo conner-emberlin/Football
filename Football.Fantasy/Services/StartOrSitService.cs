@@ -7,12 +7,13 @@ using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
+using AutoMapper;
 
 namespace Football.Fantasy.Services
 {
     public class StartOrSitService(IPlayersService playersService, IMatchupAnalysisService matchupAnalysisService,
         IFantasyDataService fantasyDataService, ISettingsService settingsService, IMemoryCache cache,
-        IOptionsMonitor<Season> season, IOptionsMonitor<NFLOddsAPI> oddsAPI, IOptionsMonitor<WeatherAPI> weatherAPI, JsonOptions options, IHttpClientFactory clientFactory) : IStartOrSitService
+        IOptionsMonitor<Season> season, IOptionsMonitor<NFLOddsAPI> oddsAPI, IOptionsMonitor<WeatherAPI> weatherAPI, JsonOptions options, IHttpClientFactory clientFactory, IMapper mapper) : IStartOrSitService
     {
         private readonly Season _season = season.CurrentValue;
         private readonly NFLOddsAPI _oddsAPI = oddsAPI.CurrentValue;
@@ -72,6 +73,7 @@ namespace Football.Fantasy.Services
                         GameTime = FormatTime(scheduleDetail.Time, scheduleDetail.Date),
                         Temperature = "Indoor"
                     };
+                if (cache.TryGetValue(Cache.WeatherZip.ToString() + homeLocation.Zip, out Weather? zipWeather) && zipWeather != null) return zipWeather;
                 var forecast = await GetWeatherAPI(homeLocation.Zip);
                 if (forecast != null)
                 {
@@ -80,7 +82,12 @@ namespace Football.Fantasy.Services
                     {
                         var time = FormatTime(scheduleDetail.Time, scheduleDetail.Date);
                         var forecastHour = forecastDay.hour.First(h => h.time == time);
-                        return forecastHour != null ? Weather(forecastHour) : new ();
+                        if (forecastHour != null)
+                        {
+                            var weather = mapper.Map<Weather>(forecastHour);
+                            cache.Set(Cache.WeatherZip.ToString() + homeLocation.Zip, weather);
+                            return weather;
+                        }
                     }
                 }
             }
@@ -89,6 +96,8 @@ namespace Football.Fantasy.Services
 
         private async Task<List<PlayerComparison>> GetPlayerComparisons(Player player, int currentWeek, ScheduleDetails schedule, int teamId, double playerProjection)
         {
+            if (cache.TryGetValue(Cache.PlayerComparisons.ToString() + player.PlayerId.ToString(), out List<PlayerComparison>? comps) && comps != null) return comps;
+
             List<PlayerComparison> comparisons = [];
             if (schedule == null || playerProjection == 0) return comparisons;
 
@@ -117,6 +126,7 @@ namespace Football.Fantasy.Services
                     }
                 }
             }
+            cache.Set(Cache.PlayerComparisons.ToString() + player.PlayerId.ToString(), comparisons);
             return comparisons;
         }
         private async Task<MatchLines> GetMatchLines(TeamMap teamMap)
@@ -160,17 +170,6 @@ namespace Football.Fantasy.Services
             return matchLines;
         }
 
-        private static Weather Weather(Hour hour) =>
-            new() {
-                GameTime = hour.time,
-                Temperature = string.Format("{0}°F", hour.temp_f),
-                Condition = hour.condition.text,
-                ConditionURL = string.Format("https:{0}", hour.condition.icon),
-                Wind = string.Format("{0} mph winds", hour.wind_mph),
-                RainChance = string.Format("{0}% chance of rain", hour.chance_of_rain),
-                SnowChance = string.Format("{0}% chance of snow", hour.chance_of_snow)
-                };
-
         private static string FormatTime(string time, string date)
         {
             var ind = time.IndexOf(':');
@@ -201,6 +200,8 @@ namespace Football.Fantasy.Services
 
         private async Task<List<NFLOddsRoot>?> GetNFLOdds()
         {
+            if (cache.TryGetValue(Cache.NFLOdds.ToString(), out List<NFLOddsRoot>? nflOdds)) return nflOdds;
+
             var url = string.Format("{0}&apiKey={1}", _oddsAPI.NFLOddsAPIURL, _oddsAPI.NFLOddsAPIKey);
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Accept", "application/json");
@@ -209,7 +210,10 @@ namespace Football.Fantasy.Services
             if (response.IsSuccessStatusCode)
             {
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                return await JsonSerializer.DeserializeAsync<List<NFLOddsRoot>>(responseStream, options.Options);
+                var odds = await JsonSerializer.DeserializeAsync<List<NFLOddsRoot>>(responseStream, options.Options);
+                if (odds != null) cache.Set(Cache.NFLOdds.ToString(), odds);
+
+                return odds;
             }
             return Enumerable.Empty<NFLOddsRoot>().ToList();
         }
