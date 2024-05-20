@@ -1,6 +1,5 @@
 ﻿@page "/Players/{id?}"
 <PageTitle>Players</PageTitle>
-
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @using Football.Fantasy.Models;
@@ -103,7 +102,7 @@ else if (!loading && !playerSelected)
     <div>
        <b>@playerName</b> 
     </div>
-    @if(!string.IsNullOrEmpty(team.Team))
+    @if(!string.IsNullOrEmpty(team?.Team))
     {
         <div><b>@team.Team</b> <b>&#x2022;</b>  <b style="color:@form.PositionColor(@playerPosition)">@playerPosition</b> </div>
     }
@@ -793,7 +792,7 @@ else if (!loading && !playerSelected)
     private bool youTried = false;
 
     private bool playerSelected = false;
-    public List<Player> players { get; set; } = new();
+    public List<Player>? players { get; set; } = new();
 
     public List<Player>? filteredPlayers { get; set; }
     public string selectedPlayer { get; set; } = "";
@@ -804,20 +803,20 @@ else if (!loading && !playerSelected)
 
     List<SeasonDataModel> seasonData { get; set; } = new();
     List<WeeklyDataModel> weeklyData { get; set; } = new();
-    List<FantasyPPG> seasonFantasy {get; set;} = new();  
-    List<WeeklyFantasy> weeklyFantasy { get; set; } = new();
+    List<FantasyPPG>? seasonFantasy {get; set;} = new();  
+    List<WeeklyFantasy>? weeklyFantasy { get; set; } = new();
     SeasonFantasy? runningTotal { get; set; } = new();
 
 
     public int rank { get; set; }
     public int positionRank { get; set; }
 
-    public PlayerTeam team = new();
+    public PlayerTeam? team = new();
 
     public List<Schedule> schedule { get; set; } = new();
 
     public bool showTrending { get; set; } = false;
-    public List<TrendingPlayer> trendingPlayers { get; set; } = new();
+    public List<TrendingPlayer>? trendingPlayers { get; set; } = new();
 
     public bool loading { get; set; }
 
@@ -898,6 +897,7 @@ else if (!loading && !playerSelected)
         selectedPlayer = playerName;
         filteredPlayers = null;
         loading = false;
+
         StateHasChanged();
 
     }
@@ -914,10 +914,6 @@ else if (!loading && !playerSelected)
             using var responseStream = await response.Content.ReadAsStreamAsync();
             seasonData = (await JsonSerializer.DeserializeAsync<List<SeasonDataModel>>(responseStream, options)).OrderByDescending(s => s.Season).ToList();
         }
-        else
-        {
-            badRequestError = true;
-        }
     }
     private async Task GetWeeklyData()
     {
@@ -929,10 +925,6 @@ else if (!loading && !playerSelected)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
             weeklyData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataModel>>(responseStream, options)).OrderBy(d => d.Week).ToList();
-        }
-        else
-        {
-            badRequestError = true;
         }
     }
 
@@ -979,10 +971,6 @@ else if (!loading && !playerSelected)
                 }
             }
         }
-        else
-        {
-            badRequestError = true;
-        }
     }
 
     private async Task GetPlayerTeam()
@@ -1008,10 +996,6 @@ else if (!loading && !playerSelected)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
             schedule = (await JsonSerializer.DeserializeAsync<List<Schedule>>(responseStream, options)).Take(5).ToList();
-        }
-        else
-        {
-            badRequestError = true;
         }
     }
 

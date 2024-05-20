@@ -52,6 +52,8 @@ namespace Football.Projections.Services
         public async Task<IEnumerable<WeekProjection>> GetProjections(Position position)
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            if (currentWeek == 1) return await GetWeekOneProjections(position);
+
             var projections = position switch
             {
                 Position.QB => await CalculateProjections(await QBProjectionModel(currentWeek), position),
@@ -151,6 +153,7 @@ namespace Football.Projections.Services
         private async Task<List<QBModelWeek>> QBProjectionModel(int currentWeek)
         {
             var players = await playersService.GetPlayersByPosition(Position.QB);
+            var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
             List<QBModelWeek> qbModel = [];
             foreach (var player in players)
             {
@@ -162,7 +165,7 @@ namespace Football.Projections.Services
                     model.SnapsPerGame = (statCalculator.CalculateWeeklyAverage(snaps, currentWeek)).Snaps;
                     model.PasserRating = await advancedStats.PasserRating(player.PlayerId);
                     model.FiveThirtyEightValue = await advancedStats.FiveThirtyEightQBValue(player.PlayerId);
-                    model.ProjectedPoints = await playersService.GetSeasonProjection(_season.CurrentSeason, player.PlayerId);
+                    model.ProjectedPoints = seasonProjectionDictionary.TryGetValue(player.PlayerId, out var projection) ? projection : 0;
                     qbModel.Add(model);
                 }                   
             }
@@ -171,6 +174,7 @@ namespace Football.Projections.Services
         private async Task<List<RBModelWeek>> RBProjectionModel(int currentWeek)
         {
             var players = await playersService.GetPlayersByPosition(Position.RB);
+            var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
             List<RBModelWeek> rbModel = [];
             foreach (var player in players)
             {
@@ -181,7 +185,7 @@ namespace Football.Projections.Services
                     var model = mapper.Map<RBModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek));
                     model.SnapsPerGame = (statCalculator.CalculateWeeklyAverage(snaps, currentWeek)).Snaps;
                     model.RBTargetShare = (await shareService.GetTargetShare(player.PlayerId)).RBTargetShare;
-                    model.ProjectedPoints = await playersService.GetSeasonProjection(_season.CurrentSeason, player.PlayerId);
+                    model.ProjectedPoints = seasonProjectionDictionary.TryGetValue(player.PlayerId, out var projection) ? projection : 0;
                     rbModel.Add(model);
                 }
             }
@@ -190,6 +194,7 @@ namespace Football.Projections.Services
         private async Task<List<WRModelWeek>> WRProjectionModel(int currentWeek)
         {
             var players = await playersService.GetPlayersByPosition(Position.WR);
+            var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
             List<WRModelWeek> wrModel = [];
             foreach (var player in players)
             {
@@ -199,7 +204,7 @@ namespace Football.Projections.Services
                 {
                     var model = mapper.Map<WRModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek));
                     model.SnapsPerGame = (statCalculator.CalculateWeeklyAverage(snaps, currentWeek)).Snaps;
-                    model.ProjectedPoints = await playersService.GetSeasonProjection(_season.CurrentSeason, player.PlayerId);
+                    model.ProjectedPoints = seasonProjectionDictionary.TryGetValue(player.PlayerId, out var projection) ? projection : 0;
                     wrModel.Add(model);
                 }
             }
@@ -208,6 +213,7 @@ namespace Football.Projections.Services
         private async Task<List<TEModelWeek>> TEProjectionModel(int currentWeek)
         {
             var players = await playersService.GetPlayersByPosition(Position.TE);
+            var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
             List<TEModelWeek> teModel = [];
             foreach (var player in players)
             {
@@ -217,7 +223,7 @@ namespace Football.Projections.Services
                 {
                     var model = mapper.Map<TEModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek));
                     model.SnapsPerGame = (statCalculator.CalculateWeeklyAverage(snaps, currentWeek)).Snaps;
-                    model.ProjectedPoints = await playersService.GetSeasonProjection(_season.CurrentSeason, player.PlayerId);
+                    model.ProjectedPoints = seasonProjectionDictionary.TryGetValue(player.PlayerId, out var projection) ? projection : 0;
                     teModel.Add(model);
                 }
             }
@@ -248,18 +254,39 @@ namespace Football.Projections.Services
             foreach(var player in players)
             {
                 var stats = await statisticsService.GetWeeklyData<WeeklyDataK>(Position.K, player.PlayerId);
-                if (stats.Count > 0)
-                    kModel.Add(mapper.Map<KModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
-                
+                if (stats.Count > 0) kModel.Add(mapper.Map<KModelWeek>(statCalculator.CalculateWeeklyAverage(stats, currentWeek)));
             }
             return kModel;
         }
         private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) 
         {
-            return seasonProjection > 0 ?
-            (_weeklyTunings.ProjectionWeight / week) * seasonProjection + (1 - (_weeklyTunings.ProjectionWeight / week)) * weeklyProjection
-            : weeklyProjection;
+            if (seasonProjection > 0)
+                return (_weeklyTunings.ProjectionWeight / week) * seasonProjection + (1 - (_weeklyTunings.ProjectionWeight / week)) * weeklyProjection;
+
+            return weeklyProjection;
         } 
+
+        private async Task<List<WeekProjection>> GetWeekOneProjections(Position position)
+        {
+            List<WeekProjection> weekOneProjections = [];
+            var players = await playersService.GetPlayersByPosition(position);
+            var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
+            foreach ( var player in players)
+            {
+                if (seasonProjectionDictionary.TryGetValue(player.PlayerId, out var seasonProjection))
+                {
+                    weekOneProjections.Add(new WeekProjection
+                    {
+                        PlayerId = player.PlayerId,
+                        Name = player.Name,
+                        Season = _season.CurrentSeason,
+                        Week = 1,
+                        ProjectedPoints = seasonProjection / _season.Games
+                    });
+                }
+            }
+            return weekOneProjections;
+        }
 
     }    
 }

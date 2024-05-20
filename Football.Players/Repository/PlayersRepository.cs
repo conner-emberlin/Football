@@ -102,6 +102,15 @@ namespace Football.Players.Repository
             return (await dbConnection.QueryAsync<double>(query, new { season, playerId })).FirstOrDefault(); 
         }
 
+        public async Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season)
+        {
+            var query = $@"SELECT [PlayerId], [ProjectedPoints]
+                        FROM [dbo].SeasonProjections
+                        WHERE [PlayerId] IN @playerIds
+                            AND [Season] = @season";
+            return (await dbConnection.QueryAsync<(int PlayerId, double ProjectedPoints)>(query, new { playerIds, season })).ToDictionary(p => p.PlayerId, p => p.ProjectedPoints);
+        }
+
         public async Task<double> GetWeeklyProjection(int season, int week, int playerId)
         {
             var query = $@"SELECT [ProjectedPoints]

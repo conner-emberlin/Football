@@ -29,10 +29,10 @@ namespace Football.Api.Controllers
 
             return Ok(filteredPlayers.OrderBy(p => p.Name));
         }
+
         [HttpPost("add")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreatePlayer([FromBody] Player player) => Ok(await playersService.CreatePlayer(player.Name, player.Active, player.Position));
-
 
         [HttpGet("weekly-data/{playerId}")]
         [ProducesResponseType(typeof(List<WeeklyDataModel>), StatusCodes.Status200OK)]
@@ -117,10 +117,6 @@ namespace Football.Api.Controllers
         [HttpPost("team-change/in-season")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         public async Task<IActionResult> PostInSeasonTeamChange([FromBody] InSeasonTeamChange teamChange) => Ok(await playersService.PostInSeasonTeamChange(teamChange));
-
-        [HttpPost("travel-distance/{playerId}")]
-        [ProducesResponseType(typeof(double), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetTravelDistance([FromRoute] int playerId) => Ok(await distanceService.GetTravelDistance(playerId));
 
         [HttpGet("advanced-stats/qb")]
         [ProducesResponseType(typeof(List<AdvancedQBStatistics>), StatusCodes.Status200OK)]
