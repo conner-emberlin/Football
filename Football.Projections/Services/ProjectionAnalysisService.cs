@@ -172,11 +172,11 @@ namespace Football.Projections.Services
         {
             var players = await playersService.GetPlayersByPosition(position);
             var season = priorSeason > 0 ? priorSeason : _season.CurrentSeason;
+            var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), season);
             List<SeasonProjectionError> analyses = [];
             foreach (var player in players)
             {
-                var seasonProjection = await playersService.GetSeasonProjection(season, player.PlayerId);
-                if (seasonProjection > 0)
+                if (seasonProjectionDictionary.TryGetValue(player.PlayerId, out var seasonProjection))
                 {
                     var weeklyFantasy = (await fantasyService.GetWeeklyFantasy(player.PlayerId)).Where(w => w.Season == season);
                     analyses.Add(new SeasonProjectionError

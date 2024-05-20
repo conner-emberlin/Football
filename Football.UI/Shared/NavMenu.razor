@@ -34,8 +34,7 @@
                 <span class="oi oi-eye" aria-hidden="true"></span> Season Projections
             </NavLink>
         </div>
-        @if (seasonActive)
-        {
+
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="weeklyprojections">
                     <span class="oi oi-calendar" aria-hidden="true"></span> Weekly Projections
@@ -97,31 +96,16 @@
                 <span class="oi oi-plus" aria-hidden="true"></span> Waiver Wire
             </NavLink>
         </div>
-        }
+
     </nav>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
-    private bool seasonActive = false;
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/current-week");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            seasonActive = await JsonSerializer.DeserializeAsync<int>(responseStream, options) > 1;
-        }
     }
 }

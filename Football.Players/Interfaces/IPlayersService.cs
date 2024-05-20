@@ -23,7 +23,6 @@ namespace Football.Players.Interfaces
         public Task<int> PostInSeasonTeamChange(InSeasonTeamChange teamChange);
         public Task<List<QuarterbackChange>> GetQuarterbackChanges(int season);
         public Task<double> GetEPA(int playerId, int season);
-        public Task<double> GetSeasonProjection(int season, int playerId);
         public Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season);
         public Task<double> GetWeeklyProjection(int season, int week, int playerId);
 
