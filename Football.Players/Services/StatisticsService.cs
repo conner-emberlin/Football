@@ -1,13 +1,16 @@
 ﻿using Football.Enums;
+using Football.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
+using Microsoft.Extensions.Options;
 
 namespace Football.Players.Services
 {
-    public class StatisticsService(IStatisticsRepository statisticsRepository, IPlayersService playersService, ISettingsService settingsService) : IStatisticsService
+    public class StatisticsService(IStatisticsRepository statisticsRepository, IPlayersService playersService, ISettingsService settingsService, IOptionsMonitor<Season> season) : IStatisticsService
     {
+        private readonly Season _season = season.CurrentValue;
         public async Task<List<T>> GetSeasonData<T>(Position position, int queryParam, bool isPlayer) => await statisticsRepository.GetSeasonData<T>(position, queryParam, isPlayer);
-        public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId) => await statisticsRepository.GetWeeklyData<T>(position, playerId);
+        public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId) => await statisticsRepository.GetWeeklyDataByPlayer<T>(position, playerId, _season.CurrentSeason);
         public async Task<List<T>> GetWeeklyData<T>(Position position, int season, int week) => await statisticsRepository.GetWeeklyData<T>(position, season, week);
         public async Task<List<T>> GetWeeklyData<T>(Position position) => await statisticsRepository.GetWeeklyData<T>(position);
         public async Task<List<GameResult>> GetGameResults(int season) => await statisticsRepository.GetGameResults(season);
@@ -33,7 +36,7 @@ namespace Football.Players.Services
 
         public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId, string team)
         {
-            var weeklyData = await statisticsRepository.GetWeeklyData<T>(position, playerId);
+            var weeklyData = await statisticsRepository.GetWeeklyDataByPlayer<T>(position, playerId, _season.CurrentSeason);
             var teamChanges = await playersService.GetInSeasonTeamChanges();
             if (teamChanges.Any(t => t.PlayerId == playerId))
             {

@@ -136,7 +136,7 @@ namespace Football.Fantasy.Services
             if (teamOdds != null)
             {
                 var bookmaker = teamOdds.bookmakers.FirstOrDefault(b => b.key == _oddsAPI.DefaultBookmaker);
-                return bookmaker != null ? MatchLines(bookmaker, teamMap) : new ();
+                if (bookmaker != null) return MatchLines(bookmaker, teamMap);
             }
             return new ();
         }
@@ -198,9 +198,9 @@ namespace Football.Fantasy.Services
             return new();
         }
 
-        private async Task<List<NFLOddsRoot>?> GetNFLOdds()
+        private async Task<List<NFLOddsRoot>> GetNFLOdds()
         {
-            if (cache.TryGetValue(Cache.NFLOdds.ToString(), out List<NFLOddsRoot>? nflOdds)) return nflOdds;
+            if (cache.TryGetValue(Cache.NFLOdds.ToString(), out List<NFLOddsRoot>? nflOdds) && nflOdds != null) return nflOdds;
 
             var url = string.Format("{0}&apiKey={1}", _oddsAPI.NFLOddsAPIURL, _oddsAPI.NFLOddsAPIKey);
             var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -211,9 +211,11 @@ namespace Football.Fantasy.Services
             {
                 using var responseStream = await response.Content.ReadAsStreamAsync();
                 var odds = await JsonSerializer.DeserializeAsync<List<NFLOddsRoot>>(responseStream, options.Options);
-                if (odds != null) cache.Set(Cache.NFLOdds.ToString(), odds);
-
-                return odds;
+                if (odds != null) 
+                {
+                    cache.Set(Cache.NFLOdds.ToString(), odds);
+                    return odds;
+                }
             }
             return Enumerable.Empty<NFLOddsRoot>().ToList();
         }

@@ -14,10 +14,10 @@ namespace Football.Players.Repository
             if (week > 0) query += " AND [Week] = @week";
             return (await dbConnection.QueryAsync<T>(query, new { season, week })).ToList();
         }
-        public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId)
+        public async Task<List<T>> GetWeeklyDataByPlayer<T>(Position position, int playerId, int season)
         {
-            var query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}] WHERE [PlayerId] = @playerId";
-            return (await dbConnection.QueryAsync<T>(query, new { playerId })).ToList();
+            var query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}] WHERE [PlayerId] = @playerId AND [Season] = @season";
+            return (await dbConnection.QueryAsync<T>(query, new { playerId, season })).ToList();
         }
 
         public async Task<List<T>> GetWeeklyData<T>(Position position)
