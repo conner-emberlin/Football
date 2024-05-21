@@ -62,7 +62,7 @@ namespace Football.Fantasy.Services
                     }
                     break;
 
-                default: throw new NotImplementedException();
+                default: break;
             }
             return await fantasyData.PostSeasonFantasy(seasonFantasy);
         }
@@ -107,7 +107,7 @@ namespace Football.Fantasy.Services
                             weeklyFantasy.Add(calculator.CalculateFantasy(data, opponentStat, gameResult, teamId));
                     }
                     break;
-                default: throw new NotImplementedException();
+                default: break;
             }
             var added = await fantasyData.PostWeeklyFantasy(weeklyFantasy);
             logger.Information("{0} fantasy upload complete. {1} records added", position.ToString(), added);

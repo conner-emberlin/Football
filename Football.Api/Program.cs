@@ -18,6 +18,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 using System.Data;
 using System.Data.SqlClient;
+using Football.Fantasy.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -91,6 +92,7 @@ builder.Services.Configure<SleeperSettings>(builder.Configuration.GetSection("Sl
 builder.Services.Configure<GeoDistance>(builder.Configuration.GetSection("GeoDistance"));
 builder.Services.Configure<FiveThirtyEightValueSettings>(builder.Configuration.GetSection("FiveThirtyEightValueSettings"));
 builder.Services.Configure<StartOrSitSettings>(builder.Configuration.GetSection("StartOrSitSettings"));
+builder.Services.Configure<NFLOddsAPI>(builder.Configuration.GetSection("NFLOddsAPI"));
 
 builder.Services.AddAutoMapper(
     typeof(ApiModelAutomapperProfile), 

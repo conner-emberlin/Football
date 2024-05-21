@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using Football.Players.Models;
+﻿using Football.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
-using Football.Models;
+using Football.Players.Models;
+using AutoMapper;
 using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Services

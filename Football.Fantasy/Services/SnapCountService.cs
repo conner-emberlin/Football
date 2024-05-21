@@ -1,10 +1,8 @@
 ﻿using Football.Enums;
-using Football.Players.Models;
-using Football.Players.Interfaces;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
-
-
+using Football.Players.Models;
+using Football.Players.Interfaces;
 
 namespace Football.Fantasy.Services
 {
@@ -17,8 +15,7 @@ namespace Football.Fantasy.Services
             foreach (var player in players)
             {
                 var sca = await GetSnapCountAnalysis(player, season);
-                if ( sca != null )
-                    snapCountAnalyses.Add(sca);
+                if ( sca != null ) snapCountAnalyses.Add(sca);
             }
             return snapCountAnalyses;
         }
