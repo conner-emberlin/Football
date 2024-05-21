@@ -257,8 +257,8 @@ else if (!loading && !playerSelected)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
-                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
                             </tr>
                         }
 
@@ -383,8 +383,8 @@ else if (!loading && !playerSelected)
                                 <td>@stat.ReceivingYards</td>
                                 <td>@stat.ReceivingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
-                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
                             </tr>
                         }
                     </tbody>
@@ -515,8 +515,8 @@ else if (!loading && !playerSelected)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
-                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
                             </tr>
                         }
                     </tbody>
@@ -647,8 +647,8 @@ else if (!loading && !playerSelected)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints</td>
-                                <td>@seasonFantasy.Where(s => s.Season == stat.Season).First().FPPG</td>
+                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
                             </tr>
                         }
                     </tbody>
@@ -803,7 +803,7 @@ else if (!loading && !playerSelected)
 
     List<SeasonDataModel> seasonData { get; set; } = new();
     List<WeeklyDataModel> weeklyData { get; set; } = new();
-    List<FantasyPPG>? seasonFantasy {get; set;} = new();  
+    List<SeasonFantasyModel>? seasonFantasy {get; set;} = new();  
     List<WeeklyFantasy>? weeklyFantasy { get; set; } = new();
     SeasonFantasy? runningTotal { get; set; } = new();
 
@@ -930,26 +930,14 @@ else if (!loading && !playerSelected)
 
     private async Task GetFantasySeasonData()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/data/season/" + playerId.ToString());
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/season-fantasy/" + playerId.ToString());
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            seasonFantasy = await JsonSerializer.DeserializeAsync<List<FantasyPPG>>(responseStream, options);
-            if (seasonFantasy.Any())
-            {
-                foreach (var s in seasonFantasy)
-                {
-                    s.FantasyPoints = Math.Round(s.FantasyPoints, 2);
-                    s.FPPG = Math.Round(s.FantasyPoints / s.Games, 2);
-                }
-            }
-        }
-        else
-        {
-            badRequestError = true;
+            seasonFantasy = await JsonSerializer.DeserializeAsync<List<SeasonFantasyModel>>(responseStream, options);
         }
     }
 
@@ -1030,12 +1018,6 @@ else if (!loading && !playerSelected)
 
 
     #endregion
-
-    public class FantasyPPG : SeasonFantasy
-    {
-        public double FPPG { get; set; }
-    }
-
 
 }
 

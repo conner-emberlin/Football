@@ -105,6 +105,8 @@ namespace Football.Api
                 .ForMember(w => w.DefensiveInterceptions, o => o.MapFrom(w => w.Ints))
                 .ForMember(w => w.DefensiveTouchdowns, o => o.MapFrom(w => w.DefensiveTD))
                 .ForMember(w => w.SpecialTeamsTouchdowns, o => o.MapFrom(w => w.SpecialTD));
+            CreateMap<SeasonFantasy, SeasonFantasyModel>()
+                .ForMember(s => s.FantasyPointsPerGame, o => o.MapFrom(s => s.Games > 0 ? s.FantasyPoints / s.Games : 0));
 
         }
 

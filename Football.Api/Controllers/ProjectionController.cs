@@ -124,7 +124,7 @@ namespace Football.Api.Controllers
             {
                 List<WeeklyProjectionAnalysis> projectionAnalyses = [];
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-                for (int i = 2; i < currentWeek; i++)
+                for (int i = 1; i < currentWeek; i++)
                 {
                     projectionAnalyses.Add(await analysisService.GetWeeklyProjectionAnalysis(positionEnum, i));
                 }
