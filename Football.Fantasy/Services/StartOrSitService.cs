@@ -1,13 +1,14 @@
-﻿using Football.Models;
-using Football.Enums;
+﻿using Football.Enums;
+using Football.Models;
 using Football.Players.Interfaces;
-using Microsoft.Extensions.Options;
 using Football.Players.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
-using Microsoft.Extensions.Caching.Memory;
-using System.Text.Json;
 using AutoMapper;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
+
 
 namespace Football.Fantasy.Services
 {
@@ -101,28 +102,29 @@ namespace Football.Fantasy.Services
             List<PlayerComparison> comparisons = [];
             if (schedule == null || playerProjection == 0) return comparisons;
 
+            _ = Enum.TryParse(player.Position, out Position position);
+            var playerComparison = settingsService.GetPlayerComparison(position);
+
             var opponentId = schedule.HomeTeamId == teamId ? schedule.AwayTeamId : schedule.HomeTeamId;
             var opponentSchedule = (await playersService.GetTeamGames(opponentId)).Where(s => s.Week < currentWeek && s.OpposingTeamId > 0);
             foreach (var match in opponentSchedule)
             {
-                foreach (var op in await playersService.GetPlayersByTeam(match.OpposingTeam))
+                var opposingTeamPlayers = await playersService.GetPlayersByTeamIdAndPosition(match.OpposingTeamId, position);
+
+                foreach (var op in opposingTeamPlayers)
                 {
-                    var otherPlayer = await playersService.GetPlayer(op.PlayerId);
-                    if (Enum.TryParse(otherPlayer.Position, out Position otherPlayerPosition) && otherPlayer.Position == player.Position)
+                    var otherProjectedPoints = await playersService.GetWeeklyProjection(_season.CurrentSeason, match.Week, op.PlayerId);
+                    if (Math.Abs(playerProjection - otherProjectedPoints) <= playerComparison)
                     {
-                        var otherProjectedPoints = await playersService.GetWeeklyProjection(_season.CurrentSeason, match.Week, otherPlayer.PlayerId);
-                        if (Math.Abs(playerProjection - otherProjectedPoints) <= settingsService.GetPlayerComparison(otherPlayerPosition))
+                        var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(op.PlayerId);
+                        comparisons.Add(new PlayerComparison
                         {
-                            var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(otherPlayer.PlayerId);
-                            comparisons.Add(new PlayerComparison
-                            {
-                                Player = otherPlayer,
-                                Team = match.OpposingTeam,
-                                Schedule = match,
-                                WeeklyFantasy = weeklyFantasy.FirstOrDefault(w => w.Week == match.Week),
-                                ProjectedPoints = otherProjectedPoints
-                            });
-                        }
+                            Player = await playersService.GetPlayer(op.PlayerId),
+                            Team = match.OpposingTeam,
+                            Schedule = match,
+                            WeeklyFantasy = weeklyFantasy.FirstOrDefault(w => w.Week == match.Week),
+                            ProjectedPoints = otherProjectedPoints
+                        });
                     }
                 }
             }
@@ -152,14 +154,9 @@ namespace Football.Fantasy.Services
                     {
                         case Enums.Market.spreads: 
                             foreach (var outcome in market.outcomes)
-                            {
-                                if (outcome.name == teamMap.TeamDescription)
-                                    matchLines.Line = outcome.point;
-                            }                                                      
+                                if (outcome.name == teamMap.TeamDescription) matchLines.Line = outcome.point;
                         break;
-                        case Enums.Market.totals: 
-                            if (market.outcomes.Count > 0)
-                                matchLines.OverUnder = market.outcomes.First().point;
+                        case Enums.Market.totals: if (market.outcomes.Count > 0) matchLines.OverUnder = market.outcomes.First().point;                            
                         break;
                         default: break;
                     }

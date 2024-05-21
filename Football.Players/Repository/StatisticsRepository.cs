@@ -20,11 +20,6 @@ namespace Football.Players.Repository
             return (await dbConnection.QueryAsync<T>(query, new { playerId, season })).ToList();
         }
 
-        public async Task<List<T>> GetWeeklyData<T>(Position position)
-        {
-            var query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}]";
-            return (await dbConnection.QueryAsync<T>(query)).ToList();
-        }
         public async Task<List<T>> GetSeasonData<T>(Position position, int queryParam, bool isPlayer)
         {
             var query = $@"SELECT * FROM [dbo].[{GetSeasonTable(position)}] WHERE {GetSeasonQueryWhere(isPlayer)}";
@@ -44,9 +39,9 @@ namespace Football.Players.Repository
                                 AND [Week] = @week";
             return (await dbConnection.QueryAsync<WeeklyRosterPercent>(query, new { season, week })).ToList();
         }
-        public async Task<List<SnapCount>> GetSnapCounts(int playerId)
+        public async Task<List<SnapCount>> GetSnapCounts(int playerId, int season)
         {
-            var query = $@"SELECT * FROM [dbo].SnapCount WHERE [PlayerId] = @playerId";
+            var query = $@"SELECT * FROM [dbo].SnapCount WHERE [PlayerId] = @playerId AND [Season] = @season";
             return (await dbConnection.QueryAsync<SnapCount>(query, new {playerId})).ToList();
         }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());

@@ -30,8 +30,7 @@ namespace Football.Fantasy.Services
         public async Task<List<WaiverWireCandidate>> GetWaiverWireCandidates(int season, int week)
         {
             List<WaiverWireCandidate> candidates = [];
-            if (week > _season.Weeks) 
-                return candidates;
+            if (week > _season.Weeks) return candidates;
 
             var rosterPercentages = (await _statisticsService.GetWeeklyRosterPercentages(season, week - 1)).Where(r => r.RosterPercent < _settings.RostershipMax).ToList();
             foreach (var rp in rosterPercentages)
