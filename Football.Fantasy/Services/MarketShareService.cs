@@ -36,6 +36,8 @@ namespace Football.Fantasy.Services
         }
         public async Task<List<MarketShare>> GetMarketShare(Position position)
         {
+            if (cache.TryGetValue(Cache.MarketShare.ToString() + position.ToString(), out List<MarketShare>? marketShares) && marketShares != null) return marketShares;
+
             List<MarketShare> shares = [];
             var players = await playersService.GetPlayersByPosition(position);
             var teamTotals = (await GetTeamTotals()).ToDictionary(t => t.Team.TeamId);
@@ -45,7 +47,9 @@ namespace Football.Fantasy.Services
                 if (team != null) 
                     shares.Add(await GetMarketShare(position, player, team, teamTotals[team.TeamId], await fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team)));                                    
             }
-            return [.. shares.Where(s => s.TotalFantasy > 0).OrderByDescending(s => s.FantasyShare)];
+            var mShares = shares.Where(s => s.TotalFantasy > 0).OrderByDescending(s => s.FantasyShare);
+            cache.Set(Cache.MarketShare.ToString() + position.ToString(), mShares);
+            return [.. mShares];
         }
         public async Task<List<TeamTotals>> GetTeamTotals()
         {

@@ -38,9 +38,12 @@
 
 else if(players.Count > 0)
 {
+    @if (!players.First().CanDelete)
+    {
     <button class="button-22" role = "button" @onclick="UploadProjections">
         Upload
     </button>
+    }
     @if(count > 0)
     {
         <p>@count records added </p>

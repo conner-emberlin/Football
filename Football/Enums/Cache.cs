@@ -13,6 +13,7 @@
         RemainingSOS,
         NFLOdds,
         WeatherZip,
-        PlayerComparisons
+        PlayerComparisons,
+        MarketShare
     }
 }
