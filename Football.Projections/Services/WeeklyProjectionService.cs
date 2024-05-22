@@ -287,7 +287,7 @@ namespace Football.Projections.Services
                     });
                 }
             }
-            return weekOneProjections;
+            return await adjustmentService.AdjustmentEngine(weekOneProjections);
         }
 
     }    

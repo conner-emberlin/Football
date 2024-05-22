@@ -294,9 +294,8 @@ namespace Football.Data.Services
             List<PlayerTeam> playerTeams = [];
             for (int i = 0; i < strings.Length - len; i += len)
             {
-                var temp = strings[i];
-                var team = teams.First(t => temp.Contains(t.Team));
-                var playerName = temp.Remove(temp.LastIndexOf(team.Team));
+                var team = teams.First(t => strings[i].Contains(t.Team));
+                var playerName = strings[i].Remove(strings[i].LastIndexOf(team.Team));
                 playerTeams.Add(new PlayerTeam
                 {
                     Name = FormatName(playerName),
