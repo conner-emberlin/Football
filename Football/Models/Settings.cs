@@ -166,6 +166,13 @@ namespace Football.Models
         public string SnapCountXPath { get; set; } = "";
     }
 
+    public class WeatherAPI
+    {
+        public string WeatherAPIKey { get; set; } = "";
+        public string WeatherAPIURL { get; set; } = "";
+        public string ForecastDays { get; set; } = "";
+    }
+
     public class JsonOptions
     {
         public JsonSerializerOptions Options { get; }

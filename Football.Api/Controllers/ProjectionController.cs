@@ -94,7 +94,7 @@ namespace Football.Api.Controllers
                     models = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum));
 
                 var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId);
-                var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, models.First().Week)).ToDictionary(s => s.TeamId);
+                var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, currentWeek)).ToDictionary(s => s.TeamId);
                 models.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team.Team : string.Empty);                
                 models.ForEach(m => m.Opponent = teamDictionary.TryGetValue(m.PlayerId, out var team) ? scheduleDictionary[team.TeamId].OpposingTeam : string.Empty);
 

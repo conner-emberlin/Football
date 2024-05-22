@@ -1,11 +1,5 @@
 ﻿namespace Football.Fantasy.Models
 {
-    public class WeatherAPI
-    {
-        public string WeatherAPIKey { get; set; } = "";
-        public string WeatherAPIURL { get; set; } = "";
-        public string ForecastDays { get; set; } = "";
-    }
 
     // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
     public class Astro

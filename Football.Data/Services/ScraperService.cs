@@ -287,19 +287,21 @@ namespace Football.Data.Services
             }
             return count;
         }
-        public List<PlayerTeam> ParseFantasyProsPlayerTeam(string[] strings, string position)
+        public async Task<List<PlayerTeam>> ParseFantasyProsPlayerTeam(string[] strings, string position)
         {
-            var len = GetFantasyProsTableLength(position);
+            var len = GetPlayerTeamTableLength(position);
+            var teams = await playersService.GetAllTeams();
             List<PlayerTeam> playerTeams = [];
             for (int i = 0; i < strings.Length - len; i += len)
             {
-                int start = strings[i].IndexOf('(') + 1;
-                int end = strings[i].IndexOf(')', start);
-
+                var temp = strings[i];
+                var team = teams.First(t => temp.Contains(t.Team));
+                var playerName = temp.Remove(temp.LastIndexOf(team.Team));
                 playerTeams.Add(new PlayerTeam
                 {
-                    Name = FormatName(strings[i]),
-                    Team = strings[i][start..end]
+                    Name = FormatName(playerName),
+                    Team = team.Team,
+                    TeamId = team.TeamId
                 });
             }
             return playerTeams;
@@ -500,6 +502,18 @@ namespace Football.Data.Services
             };
         }
 
+        private static int GetPlayerTeamTableLength(string position)
+        {
+            return position.ToUpper() switch
+            {
+                "QB" => 11,
+                "RB" => 9,
+                "WR" => 9,
+                "TE" => 6,
+                "K" => 5,
+                _ => 0
+            };
+        }
         private string FormatDate(string date)
         {
             var month = "";            

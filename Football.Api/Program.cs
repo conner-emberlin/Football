@@ -93,6 +93,7 @@ builder.Services.Configure<GeoDistance>(builder.Configuration.GetSection("GeoDis
 builder.Services.Configure<FiveThirtyEightValueSettings>(builder.Configuration.GetSection("FiveThirtyEightValueSettings"));
 builder.Services.Configure<StartOrSitSettings>(builder.Configuration.GetSection("StartOrSitSettings"));
 builder.Services.Configure<NFLOddsAPI>(builder.Configuration.GetSection("NFLOddsAPI"));
+builder.Services.Configure<WeatherAPI>(builder.Configuration.GetSection("WeatherAPI"));
 
 builder.Services.AddAutoMapper(
     typeof(ApiModelAutomapperProfile), 

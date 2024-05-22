@@ -50,22 +50,26 @@ namespace Football.Data.Services
         }
         public async Task<int> UploadCurrentTeams(int season, string position)
         {
-            var url = FantasyProsURLFormatter(position, season.ToString());
+            var url = string.Format("https://www.fantasypros.com/nfl/projections/{0}.php?week=draft", position);
             var str = scraperService.ScrapeData(url, _scraping.FantasyProsXPath);
-            var playerTeams = scraperService.ParseFantasyProsPlayerTeam(str, position);
+            var playerTeams = await scraperService.ParseFantasyProsPlayerTeam(str, position);
+            List<PlayerTeam> currentTeams = [];
             foreach (var pt in playerTeams)
             {
-                logger.Information("Getting team for player {playerId}", pt.PlayerId);
-                pt.PlayerId = await playerService.GetPlayerId(pt.Name);
-                if(pt.PlayerId == 0)
+                var playerId = await playerService.GetPlayerId(pt.Name);
+                if (playerId > 0)
                 {
-                    logger.Information("Player {Name} does not exist in players table", pt.Name);
-                    playerTeams.Remove(pt);
+                    currentTeams.Add(new PlayerTeam
+                    {
+                        PlayerId = playerId,
+                        Name = pt.Name,
+                        Season = season,
+                        Team = pt.Team,
+                        TeamId = pt.TeamId
+                    });
                 }
-                pt.Season = season;
-                pt.TeamId = await playerService.GetTeamId(pt.Team);
             }
-            return await uploadSeasonDataRepository.UploadCurrentTeams(playerTeams);
+            return await uploadSeasonDataRepository.UploadCurrentTeams(currentTeams);
         }
 
         public async Task<int> UploadSchedule(int season)

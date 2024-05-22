@@ -269,7 +269,9 @@ namespace Football.Projections.Services
         private async Task<List<WeekProjection>> GetWeekOneProjections(Position position)
         {
             List<WeekProjection> weekOneProjections = [];
-            var players = await playersService.GetPlayersByPosition(position);
+            if (position == Position.K || position == Position.DST) return weekOneProjections;
+
+            var players = (await playersService.GetPlayersByPosition(position)).Where(p => p.Active == 1);
             var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
             foreach ( var player in players)
             {

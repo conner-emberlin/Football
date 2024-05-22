@@ -89,7 +89,6 @@ namespace Football.Fantasy.Services
             return total;
         }
 
-        #region private methods
 
         private async Task<TargetShare> GetTargetShare(TeamMap teamMap)
         {
@@ -279,7 +278,6 @@ namespace Football.Fantasy.Services
             total.TotalRecTd += stats.Sum(s => s.TD);
             return total;
         }
-        #endregion
 
     }
 }
