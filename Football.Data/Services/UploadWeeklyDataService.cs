@@ -152,7 +152,7 @@ namespace Football.Data.Services
             List<WeeklyDataQB> weeklyData = [];
             foreach(var p in players)
             {
-                var player = await playerService.RetrievePlayer(p.Name, Position.QB);
+                var player = await playerService.RetrievePlayer(p.Name, Position.QB, true);
                 if (p.Games > 0 && player.Position == Position.QB.ToString())
                 {
                     var wd= mapper.Map<WeeklyDataQB>(p);
@@ -170,7 +170,7 @@ namespace Football.Data.Services
             List<WeeklyDataRB> weeklyData = [];
             foreach (var p in players)
             {
-                var player = await playerService.RetrievePlayer(p.Name, Position.RB);
+                var player = await playerService.RetrievePlayer(p.Name, Position.RB, true);
                 if (p.Games > 0 && player.Position == Position.RB.ToString())
                 {
                     var wd = mapper.Map<WeeklyDataRB>(p);
@@ -219,7 +219,7 @@ namespace Football.Data.Services
             List<WeeklyDataWR> weeklyData = [];
             foreach (var p in players)
             {
-                var player = await playerService.RetrievePlayer(p.Name, Position.WR);
+                var player = await playerService.RetrievePlayer(p.Name, Position.WR, true);
                 if (p.Games > 0 && player.Position == Position.WR.ToString())
                 {
                     var wd = mapper.Map<WeeklyDataWR>(p);
@@ -237,7 +237,7 @@ namespace Football.Data.Services
             List<WeeklyDataTE> weeklyData = [];
             foreach (var p in players)
             {
-                var player = await playerService.RetrievePlayer(p.Name, Position.TE);
+                var player = await playerService.RetrievePlayer(p.Name, Position.TE, true);
                 if (p.Games > 0 && player.Position == Position.TE.ToString())
                 {
                     var wd = mapper.Map<WeeklyDataTE>(p);
@@ -275,7 +275,7 @@ namespace Football.Data.Services
             List<WeeklyDataK> weeklyData = [];
             foreach (var p in players)
             {
-                var player = await playerService.RetrievePlayer(p.Name, Position.K);
+                var player = await playerService.RetrievePlayer(p.Name, Position.K, true);
                 if (p.Games > 0 && player.Position == Position.K.ToString())
                 {
                     var wd = mapper.Map<WeeklyDataK>(p);

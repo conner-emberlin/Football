@@ -42,6 +42,7 @@ namespace Football.Players.Interfaces
         public Task<bool> UpdateCurrentTeam(int playerId, string newTeam, int season);
         public Task<int> PostTeamChange(InSeasonTeamChange teamChange);
         public Task<int> InactivatePlayers(List<int> playerIds);
+        public Task<int> ActivatePlayer(int playerId);
         public Task<List<int>> GetSeasons();
         public Task<bool> CreateRookie(Rookie rookie);
         public Task<List<Rookie>> GetAllRookies();

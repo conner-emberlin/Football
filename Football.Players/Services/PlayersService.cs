@@ -24,13 +24,22 @@ namespace Football.Players.Services
         public async Task<Player> GetPlayer(int playerId) => await playersRepository.GetPlayer(playerId);
         public async Task<Player?> GetPlayerByName(string name) => await playersRepository.GetPlayerByName(name);
 
-        public async Task<Player> RetrievePlayer(string name, Position position)
+        public async Task<Player> RetrievePlayer(string name, Position position, bool activatePlayer = false)
         {
             var player = await GetPlayerByName(name);
             if (player == null)
             {
                 player = await CreatePlayer(name, 1, position.ToString());
                 logger.Information("New Player Added. Name: {0}, PlayerId: {1}", player.Name, player.PlayerId);
+            }
+            else if(player.Active == 0 && activatePlayer)
+            {
+                var updated = await ActivatePlayer(player.PlayerId);
+                if (updated > 0)
+                {
+                    logger.Information("Player activated. Name: {0}, PlayerId {1}", player.Name, player.PlayerId);
+                    player.Active = 1;
+                }
             }
             return player;
         }
@@ -69,6 +78,8 @@ namespace Football.Players.Services
             if (updated > 0) cache.Remove(Cache.AllPlayers.ToString());
             return updated;
         }
+
+        public async Task<int> ActivatePlayer(int playerId) => await playersRepository.ActivatePlayer(playerId);
         public async Task<PlayerTeam?> GetPlayerTeam(int season, int playerId)
         {
             var player = await GetPlayer(playerId);

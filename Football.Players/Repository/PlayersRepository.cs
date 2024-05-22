@@ -303,6 +303,12 @@ namespace Football.Players.Repository
             return await dbConnection.ExecuteAsync(query, new { playerIds });
         }
 
+        public async Task<int> ActivatePlayer(int playerId)
+        {
+            var query = $@"UPDATE [dbo].Players SET [Active] = 1 WHERE [PlayerId] = @playerId";
+            return await dbConnection.ExecuteAsync(query, new { playerId });
+        }
+
         public async Task<List<int>> GetSeasons()
         {
             var query = $@"SELECT DISTINCT [Season]

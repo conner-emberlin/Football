@@ -108,7 +108,19 @@ namespace Football.Tests
             var actual = await _sut.RetrievePlayer(name, _position);
 
             Assert.True(actual.PlayerId == _playerId && actual.Position == _position.ToString() && actual.Name == name);
+        }
 
+        [Fact]
+        public async Task RetrievePlayer_PlayerExistsAndInactive_ActivatesPlayerWhenTrue()
+        {
+            var name = "Player Name";
+            var player = new Player { Name = name, Active = 0, Position = _position.ToString(), PlayerId = _playerId };
+            _mockPlayersRepository.Setup(pr => pr.GetPlayerByName(name)).ReturnsAsync(player);
+            _mockPlayersRepository.Setup(pr => pr.ActivatePlayer(_playerId)).ReturnsAsync(1);
+
+            var actual = await _sut.RetrievePlayer(name, _position, true);
+
+            Assert.Equal(1, actual.Active);
         }
     }
 }
