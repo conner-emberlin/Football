@@ -10,7 +10,7 @@ namespace Football.Fantasy.Services
     {
         public async Task<List<SnapCountAnalysis>> GetSnapCountAnalysis(Position position, int season)
         {
-            var players = await playersService.GetPlayersByPosition(position);
+            var players = await playersService.GetPlayersByPosition(position, true);
             List<SnapCountAnalysis> snapCountAnalyses = [];
             foreach (var player in players)
             {

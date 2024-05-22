@@ -7,7 +7,7 @@ namespace Football.Players.Interfaces
     {
         public Task<List<Player>> GetAllPlayers();
         public Task<int> GetPlayerId(string name);             
-        public Task<List<Player>> GetPlayersByPosition(Position position);
+        public Task<List<Player>> GetPlayersByPosition(Position position, bool activeOnly = false);
         public Task<Player> GetPlayer(int playerId);
         public Task<Player?> GetPlayerByName(string name);
         public Task<Player> CreatePlayer(string name, int active, string position);

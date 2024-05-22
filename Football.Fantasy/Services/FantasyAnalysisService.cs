@@ -18,7 +18,7 @@ namespace Football.Fantasy.Services
         public async Task<List<BoomBust>> GetBoomBusts(Position position)
         {
             var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(position);
-            var playersByPosition = await playersService.GetPlayersByPosition(position);
+            var playersByPosition = await playersService.GetPlayersByPosition(position, true);
             return weeklyFantasy.Join(playersByPosition, wf => wf.PlayerId, p => p.PlayerId, 
                                        (wf, p) => new { WeeklyFantasy = wf, Player = p })
                                                        .GroupBy(wfp => wfp.Player, 
@@ -57,7 +57,7 @@ namespace Football.Fantasy.Services
         public async Task<List<FantasyPerformance>> GetFantasyPerformances(Position position)
         {
             List<FantasyPerformance> fantasyPerformances = [];
-            var players = await playersService.GetPlayersByPosition(position);
+            var players = await playersService.GetPlayersByPosition(position, true);
             foreach (var player in players)
             {
                 var fantasyPerformance = await GetFantasyPerformance(player);
@@ -110,7 +110,7 @@ namespace Football.Fantasy.Services
 
         public async Task<List<FantasyPercentage>> GetFantasyPercentages(Position position)
         {
-            var players = await playersService.GetPlayersByPosition(position);
+            var players = await playersService.GetPlayersByPosition(position, true);
             List<FantasyPercentage> fantasyPercentages = [];
             if (position == Position.QB)
             {

@@ -39,7 +39,7 @@ namespace Football.Fantasy.Services
             if (cache.TryGetValue(Cache.MarketShare.ToString() + position.ToString(), out List<MarketShare>? marketShares) && marketShares != null) return marketShares;
 
             List<MarketShare> shares = [];
-            var players = await playersService.GetPlayersByPosition(position);
+            var players = await playersService.GetPlayersByPosition(position, true);
             var teamTotals = (await GetTeamTotals()).ToDictionary(t => t.Team.TeamId);
             foreach (var player in players)
             {

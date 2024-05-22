@@ -29,11 +29,14 @@ namespace Football.Players.Repository
                         ";
             return (await dbConnection.QueryAsync<Player>(query)).ToList();
         }
-        public async Task<List<Player>> GetPlayersByPosition(string position)
+        public async Task<List<Player>> GetPlayersByPosition(string position, bool activeOnly)
         {
             var query = $@"SELECT [PlayerId], [Name], [Position], [Active]
                             FROM [dbo].Players
                             WHERE [Position] = @position";
+
+            if (activeOnly) query += $@" AND [Active] = 1";
+
             return (await dbConnection.QueryAsync<Player>(query, new { position })).ToList();
         }
 

@@ -78,30 +78,27 @@ namespace Football.Projections.Services
             var dependentVector = matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
             var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
             var results = regressorMatrix * coefficients;
-            var players = (await playersService.GetPlayersByPosition(position)).ToDictionary(p => p.PlayerId);
+            var players = (await playersService.GetPlayersByPosition(position, true)).ToDictionary(p => p.PlayerId);
 
             for (int i = 0; i < results.Count; i++)
             {
                 var playerId = (int)settingsService.GetValueFromModel(model[i], Model.PlayerId);
                 var player = players[playerId];               
                 if (player != null && player.Position != Position.DST.ToString() && player.Position != Position.K.ToString())
-                {                    
-                    if (player.Active == 1)
-                    {
-                        var projectedPoints = settingsService.GetValueFromModel(model[i], Model.ProjectedPoints);
-                        var projection = WeightedWeeklyProjection(projectedPoints / _season.Games, results[i], currentWeek - 1);
-                        var avgError = await GetAverageProjectionError(playerId);
+                {
+                    var projectedPoints = settingsService.GetValueFromModel(model[i], Model.ProjectedPoints);
+                    var projection = WeightedWeeklyProjection(projectedPoints / _season.Games, results[i], currentWeek - 1);
+                    var avgError = await GetAverageProjectionError(playerId);
 
-                        projections.Add(new WeekProjection
-                        {
-                            PlayerId = playerId,
-                            Season = _season.CurrentSeason,
-                            Week = currentWeek,
-                            Name = player.Name,
-                            Position = player.Position,
-                            ProjectedPoints =  (2 * projection - avgError)/2
-                        }); ;
-                    }
+                    projections.Add(new WeekProjection
+                    {
+                        PlayerId = playerId,
+                        Season = _season.CurrentSeason,
+                        Week = currentWeek,
+                        Name = player.Name,
+                        Position = player.Position,
+                        ProjectedPoints = (2 * projection - avgError) / 2
+                    }); 
                 }
                 else if(player != null && (player.Position == Position.DST.ToString() || player.Position == Position.K.ToString()))
                 {
@@ -152,7 +149,7 @@ namespace Football.Projections.Services
         }
         private async Task<List<QBModelWeek>> QBProjectionModel(int currentWeek)
         {
-            var players = await playersService.GetPlayersByPosition(Position.QB);
+            var players = await playersService.GetPlayersByPosition(Position.QB, true);
             var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
             List<QBModelWeek> qbModel = [];
             foreach (var player in players)
@@ -173,7 +170,7 @@ namespace Football.Projections.Services
         }
         private async Task<List<RBModelWeek>> RBProjectionModel(int currentWeek)
         {
-            var players = await playersService.GetPlayersByPosition(Position.RB);
+            var players = await playersService.GetPlayersByPosition(Position.RB, true);
             var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
             List<RBModelWeek> rbModel = [];
             foreach (var player in players)
@@ -193,7 +190,7 @@ namespace Football.Projections.Services
         }
         private async Task<List<WRModelWeek>> WRProjectionModel(int currentWeek)
         {
-            var players = await playersService.GetPlayersByPosition(Position.WR);
+            var players = await playersService.GetPlayersByPosition(Position.WR, true);
             var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
             List<WRModelWeek> wrModel = [];
             foreach (var player in players)
@@ -212,7 +209,7 @@ namespace Football.Projections.Services
         }
         private async Task<List<TEModelWeek>> TEProjectionModel(int currentWeek)
         {
-            var players = await playersService.GetPlayersByPosition(Position.TE);
+            var players = await playersService.GetPlayersByPosition(Position.TE, true);
             var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
             List<TEModelWeek> teModel = [];
             foreach (var player in players)
@@ -232,7 +229,7 @@ namespace Football.Projections.Services
 
         private async Task<List<DSTModelWeek>> DSTProjectionModel(int currentWeek)
         {
-            var players = await playersService.GetPlayersByPosition(Position.DST);
+            var players = await playersService.GetPlayersByPosition(Position.DST, true);
             List<DSTModelWeek> dstModel = [];
             foreach(var player in players)
             {
@@ -249,7 +246,7 @@ namespace Football.Projections.Services
 
         private async Task<List<KModelWeek>> KProjectionModel(int currentWeek)
         {
-            var players = await playersService.GetPlayersByPosition(Position.K);
+            var players = await playersService.GetPlayersByPosition(Position.K, true);
             List<KModelWeek> kModel = [];
             foreach(var player in players)
             {
@@ -271,7 +268,7 @@ namespace Football.Projections.Services
             List<WeekProjection> weekOneProjections = [];
             if (position == Position.K || position == Position.DST) return weekOneProjections;
 
-            var players = (await playersService.GetPlayersByPosition(position)).Where(p => p.Active == 1);
+            var players = await playersService.GetPlayersByPosition(position, true);
             var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
             foreach ( var player in players)
             {

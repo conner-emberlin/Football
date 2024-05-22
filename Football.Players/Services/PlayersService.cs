@@ -20,7 +20,7 @@ namespace Football.Players.Services
             var playerId = await playersRepository.CreatePlayer(name, active, position);
             return new Player { PlayerId = playerId, Name = name, Active = active, Position = position };
         }
-        public async Task<List<Player>> GetPlayersByPosition(Position position) => await playersRepository.GetPlayersByPosition(position.ToString());
+        public async Task<List<Player>> GetPlayersByPosition(Position position, bool activeOnly = false) => await playersRepository.GetPlayersByPosition(position.ToString(), activeOnly);
         public async Task<Player> GetPlayer(int playerId) => await playersRepository.GetPlayer(playerId);
         public async Task<Player?> GetPlayerByName(string name) => await playersRepository.GetPlayerByName(name);
 
