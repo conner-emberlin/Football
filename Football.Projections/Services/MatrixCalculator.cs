@@ -21,7 +21,7 @@ namespace Football.Projections.Services
                 vec[i] = Convert.ToDouble(prop.GetValue(dependents[i]));
             return vec;
         }
-        private Vector<double> TransformModel<T>(T modelItem)
+        public Vector<double> TransformModel<T>(T modelItem)
         {
             var properties = settings.GetPropertiesFromModel<T>();
             var vec = Vector<double>.Build.Dense(properties.Count + 1);

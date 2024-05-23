@@ -7,5 +7,6 @@ namespace Football.Projections.Interfaces
     {
         public Matrix<double> RegressorMatrix<T>(List<T> model);
         public Vector<double> DependentVector<T>(List<T> dependents, Model value);
+        public Vector<double> TransformModel<T>(T modelItem);
     }
 }

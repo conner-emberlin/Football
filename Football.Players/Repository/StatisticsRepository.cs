@@ -27,6 +27,13 @@ namespace Football.Players.Repository
             return (await dbConnection.QueryAsync<T>(query)).ToList();
         }
 
+        public async Task<List<T>> GetAllSeasonDataByPosition<T>(Position position)
+        {
+            var query = $@"SELECT * FROM [dbo].[{GetSeasonTable(position)}]
+                            ORDER BY [PlayerId], [Season]";
+            return (await dbConnection.QueryAsync<T>(query)).ToList();
+        }
+
         public async Task<List<T>> GetSeasonData<T>(Position position, int queryParam, bool isPlayer)
         {
             var query = $@"SELECT * FROM [dbo].[{GetSeasonTable(position)}] WHERE {GetSeasonQueryWhere(isPlayer)}";
