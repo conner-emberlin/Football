@@ -50,6 +50,7 @@ namespace Football.Projections.Services
         
         public async Task<IEnumerable<SeasonProjection>> GetProjections(Position position)
         {
+
             var projections = position switch
             {
                 Position.QB => await CalculateProjections(await QBProjectionModel(), position),
@@ -68,97 +69,52 @@ namespace Football.Projections.Services
         {
             List<SeasonProjection> projections = [];
             var regressorMatrix = matrixCalculator.RegressorMatrix(model);            
-            var fantasyModel = await FantasyProjectionModel(model);
+            var fantasyModel = await FantasyProjectionModel(position);
             var dependentVector = matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
             var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
-            var results = regressorMatrix * coefficients;
-            var players = (await playersService.GetPlayersByPosition(position)).ToDictionary(p => p.PlayerId);
-            for (int i = 0; i < results.Count; i++)
+
+            var players = await playersService.GetPlayersByPosition(position, true);
+
+            foreach (var player in players)
             {
-                var playerId = (int)settingsService.GetValueFromModel(model[i], Model.PlayerId);
-                if (playerId > 0)
+                var weightedVector = await GetWeightedAverageVector(player);
+                var projectedPoints = weightedVector * coefficients;
+
+                if (projectedPoints > 0)
                 {
-                    var player = players[playerId];
-                    if (player.Active == 1)
+                    projections.Add(new SeasonProjection
                     {
-                        projections.Add(new SeasonProjection
-                        {
-                            PlayerId = playerId,
-                            Season = _season.CurrentSeason,
-                            Name = player.Name,
-                            Position = player.Position,
-                            ProjectedPoints = results[i]
-                        });
-                    }
+                        PlayerId = player.PlayerId,
+                        Season = _season.CurrentSeason,
+                        Name = player.Name,
+                        Position = player.Position,
+                        ProjectedPoints = projectedPoints
+                    });
                 }
-            }
+            }           
             return projections;
         }
-        private async Task<List<SeasonFantasy>> FantasyProjectionModel<T>(List<T> statsModel)
+        private async Task<List<SeasonFantasy>> FantasyProjectionModel(Position position) => await fantasyService.GetAllSeasonFantasyByPosition(position);
+
+        private async Task<List<QBModelSeason>> QBProjectionModel() => mapper.Map<List<QBModelSeason>>(await statisticsService.GetAllSeasonDataByPosition<SeasonDataQB>(Position.QB));
+
+        private async Task<List<RBModelSeason>> RBProjectionModel() => mapper.Map<List<RBModelSeason>>(await statisticsService.GetAllSeasonDataByPosition<SeasonDataRB>(Position.RB));
+
+        private async Task<List<WRModelSeason>> WRProjectionModel() => mapper.Map<List<WRModelSeason>>(await statisticsService.GetAllSeasonDataByPosition<SeasonDataWR>(Position.WR));
+
+        private async Task<List<TEModelSeason>> TEProjectionModel() => mapper.Map<List<TEModelSeason>>(await statisticsService.GetAllSeasonDataByPosition<SeasonDataTE>(Position.TE));
+        private async Task<Vector<double>?> GetWeightedAverageVector(Player player)
         {
-            List<SeasonFantasy> seasonFantasy = [];
-            foreach (var stat in statsModel)
+            _ = Enum.TryParse(player.Position, out Position position);
+
+            return position switch
             {
-                var playerId = (int)settingsService.GetValueFromModel(stat, Model.PlayerId);
-                if (playerId > 0)
-                {
-                    var seasonFantasyResults = await fantasyService.GetSeasonFantasy(playerId);
-                    if (seasonFantasyResults.Count > 0)
-                    {
-                        var seasonAverage = statCalculator.CalculateStatProjection(seasonFantasyResults);
-                        seasonFantasy.Add(seasonAverage);
-                    }
-                }
-            }
-            return seasonFantasy;
-        }
-        private async Task<List<QBModelSeason>> QBProjectionModel()
-        {
-            var players = await playersService.GetPlayersByPosition(Position.QB);
-            List<QBModelSeason> qbModel = [];
-            foreach (var player in players)
-            {
-                var stats = (await statisticsService.GetSeasonData<SeasonDataQB>(Position.QB, player.PlayerId, true));
-                if (stats.Count > 0)
-                    qbModel.Add(mapper.Map<QBModelSeason>(statCalculator.CalculateStatProjection(stats)));
-            }
-            return qbModel;
-        }
-        private async Task<List<RBModelSeason>> RBProjectionModel()
-        {
-            var players = await playersService.GetPlayersByPosition(Position.RB);
-            List<RBModelSeason> rbModel = [];
-            foreach (var player in players)
-            {
-                var stats = (await statisticsService.GetSeasonData<SeasonDataRB>(Position.RB, player.PlayerId, true));
-                if (stats.Count > 0)
-                    rbModel.Add(mapper.Map<RBModelSeason>(statCalculator.CalculateStatProjection(stats)));
-            }
-            return rbModel;
-        }
-        private async Task<List<WRModelSeason>> WRProjectionModel()
-        {
-            var players = await playersService.GetPlayersByPosition(Position.WR);
-            List<WRModelSeason> wrModel = [];
-            foreach (var player in players)
-            {
-                var stats = (await statisticsService.GetSeasonData<SeasonDataWR>(Position.WR, player.PlayerId, true));
-                if (stats.Count > 0)
-                    wrModel.Add(mapper.Map<WRModelSeason>(statCalculator.CalculateStatProjection(stats)));
-            }
-            return wrModel;
-        }
-        private async Task<List<TEModelSeason>> TEProjectionModel()
-        {
-            var players = await playersService.GetPlayersByPosition(Position.TE);
-            List<TEModelSeason> teModel = [];
-            foreach (var player in players)
-            {
-                var stats = (await statisticsService.GetSeasonData<SeasonDataTE>(Position.TE, player.PlayerId, true));
-                if (stats.Count > 0)
-                    teModel.Add(mapper.Map<TEModelSeason>(statCalculator.CalculateStatProjection(stats)));
-            }
-            return teModel;
+                Position.QB => matrixCalculator.TransformModel(mapper.Map<QBModelSeason>(statCalculator.CalculateStatProjection(await statisticsService.GetSeasonData<SeasonDataQB>(position, player.PlayerId, true)))),
+                Position.RB => matrixCalculator.TransformModel(mapper.Map<RBModelSeason>(statCalculator.CalculateStatProjection(await statisticsService.GetSeasonData<SeasonDataRB>(position, player.PlayerId, true)))),
+                Position.WR => matrixCalculator.TransformModel(mapper.Map<WRModelSeason>(statCalculator.CalculateStatProjection(await statisticsService.GetSeasonData<SeasonDataWR>(position, player.PlayerId, true)))),
+                Position.TE => matrixCalculator.TransformModel(mapper.Map<TEModelSeason>(statCalculator.CalculateStatProjection(await statisticsService.GetSeasonData<SeasonDataTE>(position, player.PlayerId, true)))),
+                _ => Vector<double>.Build.Dense(0)
+            }; 
         }
 
         private async Task<List<SeasonProjection>> RookieSeasonProjections(Position position)
