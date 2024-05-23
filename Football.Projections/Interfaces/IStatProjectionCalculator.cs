@@ -10,13 +10,13 @@ namespace Football.Projections.Interfaces
         public SeasonDataWR CalculateStatProjection(List<SeasonDataWR> seasons);
         public SeasonDataTE CalculateStatProjection(List<SeasonDataTE> seasons);
         public SeasonFantasy CalculateStatProjection(List<SeasonFantasy> seasons);
-        public WeeklyDataQB CalculateWeeklyAverage(List<WeeklyDataQB> weeks, int currentWeek);
-        public WeeklyDataRB CalculateWeeklyAverage(List<WeeklyDataRB> weeks, int currentWeek);
-        public WeeklyDataWR CalculateWeeklyAverage(List<WeeklyDataWR> weeks, int currentWeek);
-        public WeeklyDataTE CalculateWeeklyAverage(List<WeeklyDataTE> weeks, int currentWeek);
-        public WeeklyDataDST CalculateWeeklyAverage(List<WeeklyDataDST> weeks, int currentWeek);
-        public WeeklyDataK CalculateWeeklyAverage(List<WeeklyDataK> weeks, int currentWeek);
-        public WeeklyFantasy CalculateWeeklyAverage(List<WeeklyFantasy> weeks, int currentWeek);
-        public SnapCount CalculateWeeklyAverage(List<SnapCount> snaps, int currentWeek);
+        public WeeklyFantasy WeightedWeeklyAverage(List<WeeklyFantasy> weeks, int currentWeek);
+        public WeeklyDataQB WeightedWeeklyAverage(List<WeeklyDataQB> weeks, int currentWeek);
+        public WeeklyDataRB WeightedWeeklyAverage(List<WeeklyDataRB> weeks, int currentWeek);
+        public WeeklyDataWR WeightedWeeklyAverage(List<WeeklyDataWR> weeks, int currentWeek);
+        public WeeklyDataTE WeightedWeeklyAverage(List<WeeklyDataTE> weeks, int currentWeek);
+        public WeeklyDataDST WeightedWeeklyAverage(List<WeeklyDataDST> weeks, int currentWeek);
+        public WeeklyDataK WeightedWeeklyAverage(List<WeeklyDataK> weeks, int currentWeek);
+        public SnapCount WeightedWeeklyAverage(List<SnapCount> weeks, int currentWeek);
     }
 }
