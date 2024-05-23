@@ -14,6 +14,7 @@ namespace Football.Players.Interfaces
         public Task<List<TeamRecord>> GetTeamRecords(int season);
         public Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week);
         public Task<List<SnapCount>> GetSnapCounts(int playerId);
+        public Task<double> GetSnapsByGame(int playerId, int season, int week);
 
     }
 }

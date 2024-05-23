@@ -51,6 +51,12 @@ namespace Football.Players.Repository
             var query = $@"SELECT * FROM [dbo].SnapCount WHERE [PlayerId] = @playerId AND [Season] = @season";
             return (await dbConnection.QueryAsync<SnapCount>(query, new {playerId, season})).ToList();
         }
+
+        public async Task<double> GetSnapsByGame(int playerId, int season, int week)
+        {
+            var query = $@"SELECT [Snaps] FROM [dbo].SnapCount WHERE [PlayerId] = @playerId AND [Season] = @season AND [Week] = @week";
+            return (await dbConnection.QueryAsync<double>(query, new { playerId, season, week })).FirstOrDefault();
+        }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(Position position) => string.Format("Season{0}Data", position.ToString());
         private static string GetSeasonQueryWhere(bool isPlayer) => isPlayer ? "[PlayerId] = @queryParam" : "[Season] = @queryParam";
