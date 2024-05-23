@@ -2,6 +2,7 @@
 using Football.Fantasy.Models;
 using System.Data;
 using Dapper;
+using Football.Enums;
 
 namespace Football.Fantasy.Repository
 {
@@ -41,6 +42,13 @@ namespace Football.Fantasy.Repository
                         WHERE [Season] = @season";
             if (week > 0) query += " AND [Week] = @week";
             return (await dbConnection.QueryAsync<WeeklyFantasy>(query, new { season, week })).ToList();
+        }
+
+        public async Task<List<WeeklyFantasy>> GetAllWeeklyFantasyByPosition(string position)
+        {
+            var query = $@"SELECT * FROM [dbo].WeeklyFantasy WHERE [Position] = @position
+                            ORDER BY [PlayerId], [Season], [Week]";
+            return (await dbConnection.QueryAsync<WeeklyFantasy>(query, new { position })).ToList();
         }
     }
 }

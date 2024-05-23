@@ -13,6 +13,7 @@ namespace Football.Fantasy.Interfaces
         public Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId, string team);
         public Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week);
         public Task<List<WeeklyFantasy>> GetWeeklyFantasy(Position position);
+        public Task<List<WeeklyFantasy>> GetAllWeeklyFantasyByPosition(Position position);
         public Task<List<WeeklyFantasy>> GetWeeklyTeamFantasy(string team, int week);
         public Task<List<SeasonFantasy>> GetCurrentFantasyTotals(int season);
     }
