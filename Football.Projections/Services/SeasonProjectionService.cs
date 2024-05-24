@@ -65,7 +65,7 @@ namespace Football.Projections.Services
             cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), formattedProjections);
             return formattedProjections;
         }
-        public async Task<IEnumerable<SeasonProjection>> CalculateProjections<T1>(List<T1> model, Position position)
+        private async Task<IEnumerable<SeasonProjection>> CalculateProjections<T1>(List<T1> model, Position position)
         {
             List<SeasonProjection> projections = [];
             var regressorMatrix = matrixCalculator.RegressorMatrix(model);            
