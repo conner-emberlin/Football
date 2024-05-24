@@ -276,6 +276,8 @@ namespace Football.Projections.Services
 
         public WeeklyDataQB WeightedWeeklyAverage(List<WeeklyDataQB> weeks, int currentWeek)
         {
+            if (weeks.Count == 0) return new WeeklyDataQB();
+
             if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
 
             var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
@@ -306,6 +308,8 @@ namespace Football.Projections.Services
 
         public WeeklyDataRB WeightedWeeklyAverage(List<WeeklyDataRB> weeks, int currentWeek)
         {
+            if (weeks.Count == 0) return new WeeklyDataRB();
+
             if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
 
             var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
@@ -334,6 +338,8 @@ namespace Football.Projections.Services
 
         public WeeklyDataWR WeightedWeeklyAverage(List<WeeklyDataWR> weeks, int currentWeek)
         {
+            if (weeks.Count == 0) return new WeeklyDataWR();
+
             if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
 
             var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
@@ -362,6 +368,8 @@ namespace Football.Projections.Services
 
         public WeeklyDataTE WeightedWeeklyAverage(List<WeeklyDataTE> weeks, int currentWeek)
         {
+            if (weeks.Count == 0) return new WeeklyDataTE();
+
             if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
 
             var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
@@ -390,6 +398,8 @@ namespace Football.Projections.Services
 
         public WeeklyDataDST WeightedWeeklyAverage(List<WeeklyDataDST> weeks, int currentWeek)
         {
+            if (weeks.Count == 0) return new WeeklyDataDST();
+
             if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
 
             var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
@@ -417,6 +427,8 @@ namespace Football.Projections.Services
 
         public WeeklyDataK WeightedWeeklyAverage(List<WeeklyDataK> weeks, int currentWeek)
         {
+            if (weeks.Count == 0) return new WeeklyDataK();
+
             if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
 
             var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
@@ -446,6 +458,8 @@ namespace Football.Projections.Services
 
         public SnapCount WeightedWeeklyAverage(List<SnapCount> weeks, int currentWeek)
         {
+            if (weeks.Count == 0) return new SnapCount();
+
             if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
 
             var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);

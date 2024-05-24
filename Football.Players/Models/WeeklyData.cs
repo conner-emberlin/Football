@@ -146,4 +146,34 @@
         public int Yardline { get; set; }
     }
 
+    public class AllWeeklyDataQB: WeeklyDataQB
+    {
+        public double Snaps { get; set; }
+    }
+
+    public class AllWeeklyDataRB : WeeklyDataRB
+    {
+        public double Snaps { get; set;}
+    }
+
+    public class AllWeeklyDataWR : WeeklyDataWR
+    {
+        public double Snaps { get; set; }    
+    }
+
+    public class AllWeeklyDataTE : WeeklyDataTE
+    {
+        public double Snaps { get; set; }
+    } 
+
+    public class AllWeeklyDataK : WeeklyDataK
+    {
+
+    }
+
+    public class AllWeeklyDataDST : WeeklyDataDST
+    {
+
+    }
+
 }

@@ -22,8 +22,24 @@ namespace Football.Players.Repository
 
         public async Task<List<T>> GetAllWeeklyDataByPosition<T>(Position position)
         {
-            var query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}]
-                            ORDER BY [PlayerId], [Season], [Week]";
+            var query = "";
+
+            if (position == Position.DST || position == Position.K)
+            {
+                query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}] w";
+
+            }
+            else
+            {
+                query = $@" SELECT w.*, COALESCE(s.Snaps, 0) AS Snaps
+                            FROM [dbo].[{GetWeeklyTable(position)}] w
+                            LEFT OUTER JOIN SnapCount s
+                            ON w.PlayerId = s.PlayerId
+                            AND w.Season = s.Season
+                            AND w.Week = s.Week
+                            ORDER BY w.[PlayerId], w.[Season], w.[Week]";
+            }   
+
             return (await dbConnection.QueryAsync<T>(query)).ToList();
         }
 
