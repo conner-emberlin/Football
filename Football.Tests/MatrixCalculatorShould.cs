@@ -24,9 +24,9 @@ namespace Football.Tests
         [Fact]
         public void RegressorMatrix_HasCorrectDimensionsAndNonZeroEntries()
         {
-            WRModelWeek q1 = new() { PlayerId = 1, ProjectedPoints = 100, ReceptionsPerGame = 10, Season = 2023, SnapsPerGame = 50, TargetsPerGame = 15, TouchdownsPerGame = 1, Week = 5, YardsPerGame = 100, YardsPerReception = 10 };
-            WRModelWeek q2 = new() { PlayerId = 2, ProjectedPoints = 200, ReceptionsPerGame = 5, Season = 2023, SnapsPerGame = 35, TargetsPerGame = 10, TouchdownsPerGame = 0.5, Week = 5, YardsPerGame = 150, YardsPerReception = 12 };
-            WRModelWeek q3 = new() { PlayerId = 3, ProjectedPoints = 300, ReceptionsPerGame = 11, Season = 2023, SnapsPerGame = 50, TargetsPerGame = 15, TouchdownsPerGame = 1, Week = 5, YardsPerGame = 100, YardsPerReception = 10 };
+            WRModelWeek q1 = new() { PlayerId = 1,  ReceptionsPerGame = 10, Season = 2023, SnapsPerGame = 50, TargetsPerGame = 15, TouchdownsPerGame = 1, Week = 5, YardsPerGame = 100, YardsPerReception = 10 };
+            WRModelWeek q2 = new() { PlayerId = 2,  ReceptionsPerGame = 5, Season = 2023, SnapsPerGame = 35, TargetsPerGame = 10, TouchdownsPerGame = 0.5, Week = 5, YardsPerGame = 150, YardsPerReception = 12 };
+            WRModelWeek q3 = new() { PlayerId = 3,  ReceptionsPerGame = 11, Season = 2023, SnapsPerGame = 50, TargetsPerGame = 15, TouchdownsPerGame = 1, Week = 5, YardsPerGame = 100, YardsPerReception = 10 };
             List<WRModelWeek> model = [q1, q2, q3];
             var wrProperties = (typeof(WRModelWeek).GetProperties())
                                     .Where(p => !p.ToString()!.Contains(Model.PlayerId.ToString())

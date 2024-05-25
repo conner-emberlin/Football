@@ -72,6 +72,7 @@ namespace Football.Models
         public double SecondYearQBLeap { get; set; }
         public double NewQBFloor { get; set; }
         public double NewQBCeiling { get; set; }
+        public int SeasonDataTrimmingGames { get; set; }
     }
 
     public class WeeklyTunings
@@ -80,6 +81,8 @@ namespace Football.Models
         public double ProjectionWeight { get; set; }
         public double TamperedMin { get; set; }
         public double TamperedMax { get; set; }
+        public double MinWeekWeighted { get; set; }
+        public int RecentWeeks { get; set; }
     }
 
     public class MockDraftSettings

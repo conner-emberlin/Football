@@ -88,6 +88,8 @@ namespace Football.Projections.Services
 
         private async Task<List<WeekProjection>> MatchupAdjustment(List<WeekProjection> weekProjections)
         {
+            if (weekProjections.Count == 0) return weekProjections;
+
             _= Enum.TryParse(weekProjections.First().Position, out Position position);
             var matchupSeason = weekProjections.First().Week == 1 ? _season.CurrentSeason - 1 : _season.CurrentSeason;
             var matchupWeek = weekProjections.First().Week == 1 ? _season.Weeks + 1 : weekProjections.First().Week;

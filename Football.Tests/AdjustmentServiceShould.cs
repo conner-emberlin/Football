@@ -129,12 +129,12 @@ namespace Football.Tests
         [Fact]
         public async Task AdjustmentEngine_WeeklyByeWeek_ReturnsZeroProjection()
         {
-            var weekProjection = new WeekProjection { PlayerId = _playerId, Position = _position.ToString(), Name = "Player", ProjectedPoints = 100, Season = _season.CurrentSeason, Week = 1 };
+            var weekProjection = new WeekProjection { PlayerId = _playerId, Position = _position.ToString(), Name = "Player", ProjectedPoints = 100, Season = _season.CurrentSeason, Week = 2 };
             List<WeekProjection> projections = [weekProjection];
             var matchupRanking = new MatchupRanking { TeamId = _teamId, GamesPlayed = 10, AvgPointsAllowed = 20, PointsAllowed = 200, Position = _position.ToString() };
-            _mockMatchupAnalysisService.Setup(ma => ma.GetPositionalMatchupRankingsFromSQL(_position, _season.CurrentSeason, 1)).ReturnsAsync([matchupRanking]);
-            var teamGame = new Schedule { Week = 1, OpposingTeam = "BYE", Season = _season.CurrentSeason, OpposingTeamId = 30, Team = _team, TeamId = _teamId };
-            _mockPlayersService.Setup(ps => ps.GetWeeklySchedule(_season.CurrentSeason, 1)).ReturnsAsync([teamGame]);
+            _mockMatchupAnalysisService.Setup(ma => ma.GetPositionalMatchupRankingsFromSQL(_position, _season.CurrentSeason,2)).ReturnsAsync([matchupRanking]);
+            var teamGame = new Schedule { Week = 2, OpposingTeam = "BYE", Season = _season.CurrentSeason, OpposingTeamId = 30, Team = _team, TeamId = _teamId };
+            _mockPlayersService.Setup(ps => ps.GetWeeklySchedule(_season.CurrentSeason, 2)).ReturnsAsync([teamGame]);
             _mockPlayersService.Setup(ps => ps.GetActiveInSeasonInjuries(_season.CurrentSeason)).ReturnsAsync([]);
 
             var actual = await _sut.AdjustmentEngine(projections);

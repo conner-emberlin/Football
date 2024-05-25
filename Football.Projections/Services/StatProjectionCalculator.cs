@@ -252,9 +252,11 @@ namespace Football.Projections.Services
        
         public WeeklyFantasy WeightedWeeklyAverage(List<WeeklyFantasy> weeks, int currentWeek)
         {
-            if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count == 0) return new WeeklyFantasy();
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
+            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
+
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
             var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyFantasy weightedAverage = new()
@@ -278,9 +280,9 @@ namespace Football.Projections.Services
         {
             if (weeks.Count == 0) return new WeeklyDataQB();
 
-            if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
             var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataQB weightedAverage = new()
@@ -310,9 +312,9 @@ namespace Football.Projections.Services
         {
             if (weeks.Count == 0) return new WeeklyDataRB();
 
-            if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
             var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataRB weightedAverage = new()
@@ -340,9 +342,9 @@ namespace Football.Projections.Services
         {
             if (weeks.Count == 0) return new WeeklyDataWR();
 
-            if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
             var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataWR weightedAverage = new()
@@ -370,9 +372,9 @@ namespace Football.Projections.Services
         {
             if (weeks.Count == 0) return new WeeklyDataTE();
 
-            if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
             var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataTE weightedAverage = new()
@@ -400,9 +402,9 @@ namespace Football.Projections.Services
         {
             if (weeks.Count == 0) return new WeeklyDataDST();
 
-            if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
             var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataDST weightedAverage = new()
@@ -429,9 +431,9 @@ namespace Football.Projections.Services
         {
             if (weeks.Count == 0) return new WeeklyDataK();
 
-            if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
             var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataK weightedAverage = new()
@@ -460,9 +462,9 @@ namespace Football.Projections.Services
         {
             if (weeks.Count == 0) return new SnapCount();
 
-            if (weeks.Count < 5) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(3);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
             var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
             SnapCount weightedAverage = new()
