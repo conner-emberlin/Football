@@ -133,7 +133,7 @@ namespace Football.Fantasy.Services
         }
         private async Task<MatchLines> GetMatchLines(TeamMap teamMap)
         {
-            var odds = await GetNFLOdds();
+            var odds = cache.TryGetValue(Cache.NFLOdds.ToString(), out List<NFLOddsRoot>? nflOdds) && nflOdds != null ? nflOdds : await GetNFLOdds();
             var teamOdds = odds.FirstOrDefault(o => o.home_team == teamMap.TeamDescription || o.away_team == teamMap.TeamDescription);
             if (teamOdds != null)
             {
@@ -197,8 +197,6 @@ namespace Football.Fantasy.Services
 
         private async Task<List<NFLOddsRoot>> GetNFLOdds()
         {
-            if (cache.TryGetValue(Cache.NFLOdds.ToString(), out List<NFLOddsRoot>? nflOdds) && nflOdds != null) return nflOdds;
-
             var url = string.Format("{0}&apiKey={1}", _oddsAPI.NFLOddsAPIURL, _oddsAPI.NFLOddsAPIKey);
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Accept", "application/json");

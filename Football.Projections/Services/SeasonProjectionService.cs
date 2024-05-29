@@ -60,7 +60,7 @@ namespace Football.Projections.Services
                 Position.TE => await CalculateProjections(await TEProjectionModel(), position),
                 _ => throw new NotImplementedException()
             };
-            projections = await adjustmentService.AdjustmentEngine(projections.ToList());
+            projections = await adjustmentService.AdjustmentEngine(projections);
             var withRookieProjections = (await RookieSeasonProjections(position)).Union(projections);
             var formattedProjections = withRookieProjections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
             cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), formattedProjections);
@@ -74,7 +74,7 @@ namespace Football.Projections.Services
             var dependentVector = matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
             var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
 
-            var players = await playersService.GetPlayersByPosition(position, true);
+            var players = await playersService.GetPlayersByPosition(position, activeOnly: true);
 
             foreach (var player in players)
             {

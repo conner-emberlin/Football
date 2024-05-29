@@ -155,7 +155,8 @@ namespace Football.Players.Repository
                             WHERE pt.TeamId = @teamId
                                 AND EXISTS(SELECT 1 FROM [dbo].Player p
                                             WHERE p.PlayerId = pt.PlayerId
-                                                AND p.Position = @position";
+                                                AND p.Position = @position
+                                                AND p.Active = 1";
             return await dbConnection.QueryAsync<PlayerTeam>(query, new { teamId, position });
         }
         public async Task<int> GetTeamId(string teamName)

@@ -14,12 +14,6 @@ namespace Football.Fantasy.Services
     {
         private readonly Season _season = season.CurrentValue;
 
-        public async Task<TargetShare> GetTargetShare(int playerId)
-        {
-            var team = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
-            if (team != null) return await GetTargetShare(await playersService.GetTeam(team.TeamId));
-            return new();    
-        }
         public async Task<List<TargetShare>> GetTargetShares()
         {
             if (settingsService.GetFromCache<TargetShare>(Cache.TargetShares, out var cachedShares))
@@ -89,11 +83,9 @@ namespace Football.Fantasy.Services
             return total;
         }
 
-
         private async Task<TargetShare> GetTargetShare(TeamMap teamMap)
         {
             var allPlayers = await playersService.GetPlayersByTeam(teamMap.Team);
-            List<Player> players = [];
 
             var totalAttempts = 0.0;
             var totalCompletions = 0.0;

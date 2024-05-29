@@ -16,7 +16,7 @@ namespace Football.Projections.Services
         private readonly Tunings _tunings = tunings.CurrentValue;
         private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
 
-        public async Task<List<SeasonProjection>> AdjustmentEngine(List<SeasonProjection> seasonProjections)
+        public async Task<IEnumerable<SeasonProjection>> AdjustmentEngine(IEnumerable<SeasonProjection> seasonProjections)
         {
             logger.Information("Calculating adjustments");
             seasonProjections = await InjuryAdjustment(seasonProjections);
@@ -35,7 +35,7 @@ namespace Football.Projections.Services
             return weekProjections;
         }
 
-        private async Task<List<SeasonProjection>> InjuryAdjustment(List<SeasonProjection> seasonProjections)
+        private async Task<IEnumerable<SeasonProjection>> InjuryAdjustment(IEnumerable<SeasonProjection> seasonProjections)
         {
             var playerInjuries = (await playerService.GetPlayerInjuries(_season.CurrentSeason)).ToDictionary(i => i.PlayerId, i => i.Games);
             foreach(var s in seasonProjections)
@@ -60,7 +60,7 @@ namespace Football.Projections.Services
             return weeklyProjections;
         }
 
-        private async Task<List<SeasonProjection>> SuspensionAdjustment(List<SeasonProjection> seasonProjections)
+        private async Task<IEnumerable<SeasonProjection>> SuspensionAdjustment(IEnumerable<SeasonProjection> seasonProjections)
         {
             var playerSuspensions = (await playerService.GetPlayerSuspensions(_season.CurrentSeason)).ToDictionary(s => s.PlayerId, s => s.Length);
             foreach (var s in seasonProjections)
@@ -69,14 +69,13 @@ namespace Football.Projections.Services
             }
             return seasonProjections;
         }
-        private async Task<List<SeasonProjection>> QuarterbackChangeAdjustment(List<SeasonProjection> seasonProjections)
+        private async Task<IEnumerable<SeasonProjection>> QuarterbackChangeAdjustment(IEnumerable<SeasonProjection> seasonProjections)
         {
-            var qbChanges = await playerService.GetQuarterbackChanges(_season.CurrentSeason);
+            var qbChanges = (await playerService.GetQuarterbackChanges(_season.CurrentSeason)).ToDictionary(q => q.PlayerId);
             foreach(var s in seasonProjections)
             {
-                if (qbChanges.Any(q => q.PlayerId == s.PlayerId))
+                if (qbChanges.TryGetValue(s.PlayerId, out var changeRecord))
                 {                   
-                    var changeRecord = qbChanges.First(q => q.PlayerId == s.PlayerId);
                     logger.Information("QB Change found for player {p}: {n}. The New QB is {q}.", s.PlayerId, s.Name, changeRecord.CurrentQB);
                     var previousEPA = await playerService.GetEPA(changeRecord.PreviousQB, _season.CurrentSeason - 1);
                     var currentEPA = await playerService.GetEPA(changeRecord.CurrentQB, _season.CurrentSeason - 1);
@@ -123,8 +122,14 @@ namespace Football.Projections.Services
             }
             return weekProjections;
         }
-        private double EPARatio(double previousEPA, double currentEPA) => previousEPA == 0 ? 1
-                   : previousEPA > currentEPA ? Math.Max(_tunings.NewQBFloor, currentEPA / previousEPA)
-                   : Math.Min(_tunings.NewQBCeiling, currentEPA / previousEPA);               
+        private double EPARatio(double previousEPA, double currentEPA)
+        {
+            if (previousEPA == 0) previousEPA = _tunings.AverageQBEPA;
+            
+            if (currentEPA == 0) currentEPA = _tunings.AverageQBEPA;
+
+            return previousEPA > currentEPA ? Math.Max(_tunings.NewQBFloor, currentEPA / previousEPA)
+                                            : Math.Min(_tunings.NewQBCeiling, currentEPA / previousEPA);
+        }           
     }
 }

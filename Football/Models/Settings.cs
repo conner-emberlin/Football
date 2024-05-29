@@ -73,6 +73,7 @@ namespace Football.Models
         public double NewQBFloor { get; set; }
         public double NewQBCeiling { get; set; }
         public int SeasonDataTrimmingGames { get; set; }
+        public double AverageQBEPA { get; set; }
     }
 
     public class WeeklyTunings
