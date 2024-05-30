@@ -57,7 +57,7 @@ namespace Football.Players.Repository
         }
         public async Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position)
         {
-            var query = $@"SELECT [PlayerId], [TeamDrafted], [Position], [RookieSeason], [DraftPosition], [DeclareAge]
+            var query = $@"SELECT *
                         FROM [dbo].Rookie
                         WHERE [RookieSeason] < @currentSeason
                         AND [Position] = @position";
@@ -65,7 +65,7 @@ namespace Football.Players.Repository
         }
         public async Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position)
         {
-            var query = $@"SELECT [PlayerId], [TeamDrafted], [Position], [RookieSeason], [DraftPosition], [DeclareAge]
+            var query = $@"SELECT *
                         FROM [dbo].Rookie
                         WHERE [RookieSeason] = @currentSeason
                         AND [Position] = @position";
@@ -316,8 +316,8 @@ namespace Football.Players.Repository
 
         public async Task<bool> CreateRookie(Rookie rookie)
         {
-            var query = $@"INSERT INTO [dbo].Rookie (PlayerId, TeamDrafted, Position, RookieSeason, DraftPosition, DeclareAge)
-                            VALUES (@PlayerId, @TeamDrafted, @Position, @RookieSeason, @DraftPosition, @DeclareAge)";
+            var query = $@"INSERT INTO [dbo].Rookie (PlayerId, TeamDrafted, Position, RookieSeason, DraftPosition, DeclareAge, TeamId)
+                            VALUES (@PlayerId, @TeamDrafted, @Position, @RookieSeason, @DraftPosition, @DeclareAge, @TeamId)";
             return await dbConnection.ExecuteAsync(query, rookie) > 0;
         }
 

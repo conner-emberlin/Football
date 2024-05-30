@@ -132,12 +132,18 @@ namespace Football.Api.Controllers
 
         [HttpPost("add-rookie")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CreateRookie([FromBody] RookiePlayerModel model)
         {
-            if (model.Name != string.Empty && model.Position != string.Empty && Enum.TryParse(model.Position, out Position _))
+            if (model.Name != string.Empty && Enum.TryParse(model.Position, out Position _))
             {                
                 var rookie = mapper.Map<Rookie>(model);
+
+                var teamId = await playersService.GetTeamId(rookie.TeamDrafted);
+                if (teamId == 0) return NotFound();
+                rookie.TeamId = teamId;
+
                 var existingPlayerId = await playersService.GetPlayerId(model.Name);
                 if (existingPlayerId == 0)
                 {

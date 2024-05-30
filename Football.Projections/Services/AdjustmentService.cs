@@ -142,7 +142,7 @@ namespace Football.Projections.Services
                 if (newPassCatchers.Any())
                 {
                     var previousQBsData = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(newPassCatchers.First().TeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First();
-                    var rookieQB = currentRookies.FirstOrDefault(r => r.TeamDrafted == newPassCatchers.First().Team)?.PlayerId;
+                    var rookieQB = currentRookies.FirstOrDefault(r => r.TeamId == newPassCatchers.First().TeamId)?.PlayerId;
                     quarterbackChanges.AddRange(newPassCatchers.Select(n => new QuarterbackChange
                     {
                         PlayerId = n.PlayerId,
