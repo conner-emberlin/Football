@@ -109,7 +109,7 @@ namespace Football.Fantasy.Services
             var opponentSchedule = (await playersService.GetTeamGames(opponentId)).Where(s => s.Week < currentWeek && s.OpposingTeamId > 0);
             foreach (var match in opponentSchedule)
             {
-                var opposingTeamPlayers = await playersService.GetPlayersByTeamIdAndPosition(match.OpposingTeamId, position);
+                var opposingTeamPlayers = await playersService.GetPlayersByTeamIdAndPosition(match.OpposingTeamId, position, _season.CurrentSeason);
 
                 foreach (var op in opposingTeamPlayers)
                 {

@@ -76,9 +76,9 @@ namespace Football.Projections.Services
             {
                 if (qbChanges.TryGetValue(s.PlayerId, out var changeRecord))
                 {
-                    var qbProjections = await playerService.GetSeasonProjections([changeRecord.PreviousQB, changeRecord.CurrentQB], _season.CurrentSeason);
-                    var previousQbProjection = qbProjections.TryGetValue(changeRecord.PreviousQB, out var projectPrev) ? projectPrev : _tunings.AverageQBProjection;
-                    var currentQbProjection = qbProjections.TryGetValue(changeRecord.CurrentQB, out var currentPrev) ? currentPrev : _tunings.AverageQBProjection;
+                    var qbProjections = await playerService.GetSeasonProjections([changeRecord.PreviousQBId, changeRecord.CurrentQBId], _season.CurrentSeason);
+                    var previousQbProjection = qbProjections.TryGetValue(changeRecord.PreviousQBId, out var projectPrev) ? projectPrev : _tunings.AverageQBProjection;
+                    var currentQbProjection = qbProjections.TryGetValue(changeRecord.CurrentQBId, out var currentPrev) ? currentPrev : _tunings.AverageQBProjection;
                     s.ProjectedPoints *= QBProjectionRatio(previousQbProjection, currentQbProjection);
                 }
             }
@@ -130,31 +130,30 @@ namespace Football.Projections.Services
                                             : Math.Min(_tunings.NewQBCeiling, currentProjection / previousProjection);
         }
 
-        public async Task<List<QuarterbackChange>> GetQuarterbackChanges()
+        public async Task<IEnumerable<QuarterbackChange>> GetQuarterbackChanges()
         {
             List<QuarterbackChange> quarterbackChanges = [];
             var qbTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.QB);
+            var currentRookies = await playerService.GetCurrentRookies(_season.CurrentSeason, Position.QB.ToString());
 
             foreach (var change in qbTeamChanges)
             {
-                var newPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.WR))
-                                        .Union(await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.TE));
-
+                var newPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.TE, _season.CurrentSeason));
                 if (newPassCatchers.Any())
                 {
-                    var previousQBsData = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(newPassCatchers.First().TeamId, Position.QB, _season.CurrentSeason - 1))
-                                            .OrderByDescending(s => s.Games)
-                                            .First();
-                    //need to check for rookie qbs here
-
+                    var previousQBsData = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(newPassCatchers.First().TeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First();
+                    var rookieQB = currentRookies.FirstOrDefault(r => r.TeamDrafted == newPassCatchers.First().Team)?.PlayerId;
                     quarterbackChanges.AddRange(newPassCatchers.Select(n => new QuarterbackChange
                     {
                         PlayerId = n.PlayerId,
+                        Name = n.Name,
                         Season = _season.CurrentSeason,
-                        PreviousQB = previousQBsData.PlayerId,
-                        CurrentQB = change.PlayerId
+                        PreviousQBId = previousQBsData.PlayerId,
+                        CurrentQBId = rookieQB ?? change.PlayerId
                     }));
-                }                
+                }
+                var previousPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.TE, _season.CurrentSeason))
+                                           .Where(p => !quarterbackChanges.Select(q => q.PlayerId).Contains(p.PlayerId));
             }
             return quarterbackChanges;
         }

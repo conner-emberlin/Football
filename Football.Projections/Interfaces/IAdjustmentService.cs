@@ -8,6 +8,6 @@ namespace Football.Projections.Interfaces
         public Task<IEnumerable<SeasonProjection>> AdjustmentEngine(IEnumerable<SeasonProjection> seasonProjections);
         public Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections);
 
-        public Task<List<QuarterbackChange>> GetQuarterbackChanges();
+        public Task<IEnumerable<QuarterbackChange>> GetQuarterbackChanges();
     }
 }

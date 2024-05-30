@@ -136,12 +136,13 @@ namespace Football.Players.Repository
             return (await dbConnection.QueryAsync<PlayerTeam>(query, new { team , season})).ToList();
         }
 
-        public async Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, string position, bool activeOnly = false)
+        public async Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, string position, int season, bool activeOnly = false)
         {
             var newQuery = "";
 
             var query = $@"SELECT * FROM [dbo].[PlayerTeam] pt 
                             WHERE pt.TeamId = @teamId
+                                AND pt.Season = @season
                                 AND EXISTS (SELECT 1 FROM [dbo].Players p
                                             WHERE p.PlayerId = pt.PlayerId
                                                 AND p.Position = @position";
@@ -152,7 +153,7 @@ namespace Football.Players.Repository
             }
             else newQuery = query + ")";
 
-            return await dbConnection.QueryAsync<PlayerTeam>(newQuery, new { teamId, position });
+            return await dbConnection.QueryAsync<PlayerTeam>(newQuery, new { teamId, position, season });
         }
         public async Task<int> GetTeamId(string teamName)
         {
