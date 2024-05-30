@@ -90,19 +90,6 @@ namespace Football.Players.Repository
                         WHERE [Season] = @season";
             return (await dbConnection.QueryAsync<QuarterbackChange>(query, new {season})).ToList();
         }
-        public async Task<double> GetEPA(int playerId, int season)
-        {
-            var query = $@"SELECT [EPA] FROM [dbo].[EPA] WHERE [PlayerId] = @playerId AND [Season] = @season";
-            return (await dbConnection.QueryAsync<double>(query, new {playerId, season})).FirstOrDefault();
-        }
-        public async Task<double> GetSeasonProjection(int season, int playerId)
-        {
-            var query = $@"SELECT [ProjectedPoints]
-                        FROM [dbo].SeasonProjections
-                        WHERE [PlayerId] = @playerId
-                            AND [Season] = @season";
-            return (await dbConnection.QueryAsync<double>(query, new { season, playerId })).FirstOrDefault(); 
-        }
 
         public async Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season)
         {

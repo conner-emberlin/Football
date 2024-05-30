@@ -1,15 +1,15 @@
-﻿using Football.Fantasy.Interfaces;
+﻿using Football.Enums;
 using Football.Models;
+using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
 using Football.Projections.Models;
 using Football.Projections.Interfaces;
-using Serilog;
 using Microsoft.Extensions.Options;
-using Football.Enums;
+
 
 namespace Football.Projections.Services
 {
-    public class AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, ILogger logger, IOptionsMonitor<Season> season,
+    public class AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, IOptionsMonitor<Season> season,
         IOptionsMonitor<Tunings> tunings, IOptionsMonitor<WeeklyTunings> weeklyTunings) : IAdjustmentService
     {
         private readonly Season _season = season.CurrentValue;
@@ -18,18 +18,16 @@ namespace Football.Projections.Services
 
         public async Task<IEnumerable<SeasonProjection>> AdjustmentEngine(IEnumerable<SeasonProjection> seasonProjections)
         {
-            logger.Information("Calculating adjustments");
             seasonProjections = await InjuryAdjustment(seasonProjections);
             seasonProjections = await SuspensionAdjustment(seasonProjections);
 
             var position = seasonProjections.First().Position;
-            if (position == Position.WR.ToString())
+            if (position == Position.WR.ToString() || position == Position.TE.ToString())
                 seasonProjections = await QuarterbackChangeAdjustment(seasonProjections);
             return seasonProjections;
         }
         public async Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections)
         {
-            logger.Information("Calculating adjustments");
             weekProjections = await MatchupAdjustment(weekProjections);
             weekProjections = await InjuryAdustment(weekProjections);
             return weekProjections;
@@ -75,11 +73,11 @@ namespace Football.Projections.Services
             foreach(var s in seasonProjections)
             {
                 if (qbChanges.TryGetValue(s.PlayerId, out var changeRecord))
-                {                   
-                    logger.Information("QB Change found for player {p}: {n}. The New QB is {q}.", s.PlayerId, s.Name, changeRecord.CurrentQB);
-                    var previousEPA = await playerService.GetEPA(changeRecord.PreviousQB, _season.CurrentSeason - 1);
-                    var currentEPA = await playerService.GetEPA(changeRecord.CurrentQB, _season.CurrentSeason - 1);
-                    s.ProjectedPoints *= EPARatio(previousEPA, currentEPA);
+                {
+                    var qbProjections = await playerService.GetSeasonProjections([changeRecord.PreviousQB, changeRecord.CurrentQB], _season.CurrentSeason);
+                    var previousQbProjection = qbProjections.TryGetValue(changeRecord.PreviousQB, out var projectPrev) ? projectPrev : _tunings.AverageQBProjection;
+                    var currentQbProjection = qbProjections.TryGetValue(changeRecord.CurrentQB, out var currentPrev) ? currentPrev : _tunings.AverageQBProjection;
+                    s.ProjectedPoints *= QBProjectionRatio(previousQbProjection, currentQbProjection);
                 }
             }
             return seasonProjections;
@@ -105,7 +103,7 @@ namespace Football.Projections.Services
                     if (teamDictionary.TryGetValue(w.PlayerId, out var team))
                     {
                         var matchup = scheduleDictionary[team.TeamId];
-                        if (matchup.OpposingTeam == "BYE") w.ProjectedPoints = 0;
+                        if (matchup.OpposingTeamId == 0) w.ProjectedPoints = 0;
                         else 
                         {
                             var opponentRank = matchupRanks.FirstOrDefault(mr => mr.TeamId == matchup.OpposingTeamId);
@@ -122,14 +120,12 @@ namespace Football.Projections.Services
             }
             return weekProjections;
         }
-        private double EPARatio(double previousEPA, double currentEPA)
+        private double QBProjectionRatio(double previousProjection, double currentProjection)
         {
-            if (previousEPA == 0) previousEPA = _tunings.AverageQBEPA;
-            
-            if (currentEPA == 0) currentEPA = _tunings.AverageQBEPA;
+            if (previousProjection == currentProjection) return 1;
 
-            return previousEPA > currentEPA ? Math.Max(_tunings.NewQBFloor, currentEPA / previousEPA)
-                                            : Math.Min(_tunings.NewQBCeiling, currentEPA / previousEPA);
+            return previousProjection > currentProjection ? Math.Max(_tunings.NewQBFloor, currentProjection / previousProjection)
+                                            : Math.Min(_tunings.NewQBCeiling, currentProjection / previousProjection);
         }           
     }
 }
