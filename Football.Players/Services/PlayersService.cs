@@ -210,6 +210,29 @@ namespace Football.Players.Services
             return await playersRepository.UploadSleeperPlayerMap(playerMap);
         }
 
+        public async Task<IEnumerable<TeamChange>> GetTeamChanges(int season, Position position)
+        {
+            var currentSeason = _season.CurrentSeason;
+            var previousSeason = currentSeason - 1;
+
+            var players = await GetPlayersByPosition(position, activeOnly: true);
+
+            var previousTeams = await GetPlayerTeams(previousSeason, players.Select(p => p.PlayerId));
+            var currentTeams = await GetPlayerTeams(currentSeason, players.Select(p => p.PlayerId));
+
+            var diffs = previousTeams.Join(currentTeams, p => p.PlayerId, c => c.PlayerId, (p, c) => new { p.PlayerId, PreviousTeamId = p.TeamId, CurrentTeamId = c.TeamId })
+                                     .Where(d => d.PreviousTeamId != d.CurrentTeamId && d.PreviousTeamId > 0 && d.CurrentTeamId > 0);
+
+            return diffs.Select(d => new TeamChange
+            {
+                PlayerId = d.PlayerId,
+                Position = position,
+                Season = season,
+                PreviousTeamId = d.PreviousTeamId,
+                CurrentTeamId = d.CurrentTeamId
+            });                                        
+        }
+
         private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMap(List<SleeperPlayer> sleeperPlayers)
         {
             List<SleeperPlayerMap> playerMap = [];
