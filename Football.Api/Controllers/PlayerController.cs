@@ -184,5 +184,6 @@ namespace Football.Api.Controllers
         [HttpPost("sleeper-map")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await playersService.UploadSleeperPlayerMap());
+
     }
 }

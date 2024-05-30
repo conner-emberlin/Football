@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using AutoMapper;
 using Serilog;
+using System.Runtime.InteropServices;
 
 namespace Football.Players.Services
 {
@@ -122,7 +123,7 @@ namespace Football.Players.Services
             }
         }
 
-        public async Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, Position position) => await playersRepository.GetPlayersByTeamIdAndPosition(teamId, position.ToString());
+        public async Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, Position position, bool activeOnly = false) => await playersRepository.GetPlayersByTeamIdAndPosition(teamId, position.ToString(), activeOnly);
         public async Task<List<PlayerTeam>> GetPlayersByTeam(string team)
         {
             var playerTeams = await playersRepository.GetPlayersByTeam(team, _season.CurrentSeason);

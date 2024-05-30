@@ -1,4 +1,5 @@
-﻿using Football.Projections.Models;
+﻿using Football.Players.Models;
+using Football.Projections.Models;
 
 namespace Football.Projections.Interfaces
 {
@@ -6,5 +7,7 @@ namespace Football.Projections.Interfaces
     {
         public Task<IEnumerable<SeasonProjection>> AdjustmentEngine(IEnumerable<SeasonProjection> seasonProjections);
         public Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections);
+
+        public Task<List<QuarterbackChange>> GetQuarterbackChanges();
     }
 }

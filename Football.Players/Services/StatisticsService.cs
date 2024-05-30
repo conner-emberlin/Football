@@ -18,6 +18,7 @@ namespace Football.Players.Services
         public async Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week) => await statisticsRepository.GetWeeklyRosterPercentages(season, week);
         public async Task<List<SnapCount>> GetSnapCounts(int playerId) => await statisticsRepository.GetSnapCounts(playerId, _season.CurrentSeason);
         public async Task<double> GetSnapsByGame(int playerId, int season, int week) => await statisticsRepository.GetSnapsByGame(playerId, season, week);
+        public async Task<List<T>> GetSeasonDataByTeamIdAndPosition<T>(int teamId, Position position, int season) => await statisticsRepository.GetSeasonDataByTeamIdAndPosition<T>(teamId, position, season);
 
         public async Task<List<TeamRecord>> GetTeamRecords(int season)
         {

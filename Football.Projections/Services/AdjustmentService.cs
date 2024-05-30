@@ -5,11 +5,13 @@ using Football.Players.Interfaces;
 using Football.Projections.Models;
 using Football.Projections.Interfaces;
 using Microsoft.Extensions.Options;
+using Football.Players.Models;
+using Football.Players.Services;
 
 
 namespace Football.Projections.Services
 {
-    public class AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, IOptionsMonitor<Season> season,
+    public class AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, IStatisticsService statisticsService, IOptionsMonitor<Season> season,
         IOptionsMonitor<Tunings> tunings, IOptionsMonitor<WeeklyTunings> weeklyTunings) : IAdjustmentService
     {
         private readonly Season _season = season.CurrentValue;
@@ -126,6 +128,35 @@ namespace Football.Projections.Services
 
             return previousProjection > currentProjection ? Math.Max(_tunings.NewQBFloor, currentProjection / previousProjection)
                                             : Math.Min(_tunings.NewQBCeiling, currentProjection / previousProjection);
-        }           
+        }
+
+        public async Task<List<QuarterbackChange>> GetQuarterbackChanges()
+        {
+            List<QuarterbackChange> quarterbackChanges = [];
+            var qbTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.QB);
+
+            foreach (var change in qbTeamChanges)
+            {
+                var newPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.WR))
+                                        .Union(await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.TE));
+
+                if (newPassCatchers.Any())
+                {
+                    var previousQBsData = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(newPassCatchers.First().TeamId, Position.QB, _season.CurrentSeason - 1))
+                                            .OrderByDescending(s => s.Games)
+                                            .First();
+                    //need to check for rookie qbs here
+
+                    quarterbackChanges.AddRange(newPassCatchers.Select(n => new QuarterbackChange
+                    {
+                        PlayerId = n.PlayerId,
+                        Season = _season.CurrentSeason,
+                        PreviousQB = previousQBsData.PlayerId,
+                        CurrentQB = change.PlayerId
+                    }));
+                }                
+            }
+            return quarterbackChanges;
+        }
     }
 }
