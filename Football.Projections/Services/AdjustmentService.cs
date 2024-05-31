@@ -8,7 +8,6 @@ using Microsoft.Extensions.Options;
 using Football.Players.Models;
 using Football.Players.Services;
 
-
 namespace Football.Projections.Services
 {
     public class AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, IStatisticsService statisticsService, IOptionsMonitor<Season> season,
@@ -135,74 +134,88 @@ namespace Football.Projections.Services
             List<QuarterbackChange> quarterbackChanges = [];
             var qbTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.QB);
             var currentRookies = await playerService.GetCurrentRookies(_season.CurrentSeason, Position.QB.ToString());
-
             foreach (var change in qbTeamChanges)
             {
-                //change record for pass catchers on qb's new team
-                var newPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.TE, _season.CurrentSeason));
-                if (newPassCatchers.Any())
-                {
-                    var previousQB = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(newPassCatchers.First().TeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First();
-                    var rookieQB = (currentRookies.FirstOrDefault(r => r.TeamId == newPassCatchers.First().TeamId))?.PlayerId;
-                    quarterbackChanges.AddRange(newPassCatchers.Select(n => new QuarterbackChange
-                    {
-                        PlayerId = n.PlayerId,
-                        Name = n.Name,
-                        Season = _season.CurrentSeason,
-                        PreviousQBId = previousQB.PlayerId,
-                        CurrentQBId = rookieQB ?? change.PlayerId
-                    }));
-                }
-                //change record for pass catcheres on qb's previous team
-                var previousPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.TE, _season.CurrentSeason));                                         
-                if (previousPassCatchers.Any())
-                {
-                    var previousTeamQBs = (await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.QB, _season.CurrentSeason)).Select(p => p.PlayerId);
-                    var previousTeamQBProjections = (await playerService.GetSeasonProjections(previousTeamQBs, _season.CurrentSeason)).OrderByDescending(q => q.Value).FirstOrDefault();
-
-                    if (previousTeamQBProjections.Value > 0)
-                    {
-                        quarterbackChanges.AddRange(previousPassCatchers.Select(p => new QuarterbackChange
-                        {
-                            PlayerId = p.PlayerId,
-                            Name = p.Name,
-                            Season = _season.CurrentSeason,
-                            PreviousQBId = change.PlayerId,
-                            CurrentQBId = previousTeamQBProjections.Key
-                        }));
-                    }
-                }
+                quarterbackChanges.AddRange(await GetChangeRecordsForCurrentTeam(change, currentRookies));
+                quarterbackChanges.AddRange(await GetChangeRecordsForPreviousTeam(change));
             }
-            //change record for players with new rookie qb whose previous qb did not change teams
-            foreach (var rq in currentRookies)
-            {
-                if (!quarterbackChanges.Any(q => q.CurrentQBId == rq.PlayerId))
-                {
-                    var passCatchersForRookie = (await playerService.GetPlayersByTeamIdAndPosition(rq.TeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(rq.TeamId, Position.TE, _season.CurrentSeason));
-                    var previousQB = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(rq.TeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First();
-                    quarterbackChanges.AddRange(passCatchersForRookie.Select(p => new QuarterbackChange
-                    {
-                        PlayerId = p.PlayerId,
-                        Name = p.Name,
-                        Season = _season.CurrentSeason,
-                        PreviousQBId = previousQB.PlayerId,
-                        CurrentQBId =  rq.PlayerId
-                    }));
-                }
-            }
-
+            var rookieQbs = currentRookies.Where(c => !quarterbackChanges.Any(q => q.CurrentQBId == c.PlayerId));
+            quarterbackChanges.AddRange(await GetChangeRecordsForRookieQBs(rookieQbs));
             var distinctQuarterbackChanges = quarterbackChanges.DistinctBy(qc => qc.PlayerId);
-
-            //if pass catcher with quarterback change also changed teams, adjust previous team to qb on previous team rather than the previous qb of new team
             var passCatcherTeamChanges = (await playerService.GetTeamChanges(_season.CurrentSeason, Position.WR)).Union(await playerService.GetTeamChanges(_season.CurrentSeason, Position.TE)).ToDictionary(t => t.PlayerId);
             foreach (var qc in distinctQuarterbackChanges)
             {
                 if (passCatcherTeamChanges.TryGetValue(qc.PlayerId, out var teamChange))
                 {
-                    qc.PreviousQBId = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(teamChange.PreviousTeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First().PlayerId;
+                    qc.PreviousQBId = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(teamChange.PreviousTeamId, Position.QB, _season.CurrentSeason - 1))
+                                      .OrderByDescending(s => s.Games).First().PlayerId;
                 }
             }
             return distinctQuarterbackChanges;
+        }
+
+        private async Task<IEnumerable<QuarterbackChange>> GetChangeRecordsForCurrentTeam(TeamChange change, List<Rookie> currentRookies)
+        {
+            var newPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.TE, _season.CurrentSeason));
+            if (newPassCatchers.Any())
+            {
+                var previousQB = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(newPassCatchers.First().TeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First();
+                var rookieQB = (currentRookies.FirstOrDefault(r => r.TeamId == newPassCatchers.First().TeamId))?.PlayerId;
+                return newPassCatchers.Select(n => new QuarterbackChange
+                {
+                    PlayerId = n.PlayerId,
+                    Name = n.Name,
+                    Season = _season.CurrentSeason,
+                    PreviousQBId = previousQB.PlayerId,
+                    CurrentQBId = rookieQB ?? change.PlayerId
+                });
+            }
+            return Enumerable.Empty<QuarterbackChange>();
+        }
+
+        private async Task<IEnumerable<QuarterbackChange>> GetChangeRecordsForPreviousTeam(TeamChange change)
+        {
+            var previousPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.TE, _season.CurrentSeason));
+            if (previousPassCatchers.Any())
+            {
+                var previousTeamQBs = (await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.QB, _season.CurrentSeason)).Select(p => p.PlayerId);
+                var previousTeamQBProjections = (await playerService.GetSeasonProjections(previousTeamQBs, _season.CurrentSeason)).OrderByDescending(q => q.Value).FirstOrDefault();
+
+                if (previousTeamQBProjections.Value > 0)
+                {
+                    return previousPassCatchers.Select(p => new QuarterbackChange
+                    {
+                        PlayerId = p.PlayerId,
+                        Name = p.Name,
+                        Season = _season.CurrentSeason,
+                        PreviousQBId = change.PlayerId,
+                        CurrentQBId = previousTeamQBProjections.Key
+                    });
+                }
+            }
+            return Enumerable.Empty<QuarterbackChange>();
+        }
+
+        private async Task<IEnumerable<QuarterbackChange>> GetChangeRecordsForRookieQBs(IEnumerable<Rookie>? rookieQbs)
+        {
+            if (rookieQbs == null) return Enumerable.Empty<QuarterbackChange>();
+
+            List<QuarterbackChange> changeRecords = [];
+
+            foreach (var rq in rookieQbs)
+            {
+                var passCatchersForRookie = (await playerService.GetPlayersByTeamIdAndPosition(rq.TeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(rq.TeamId, Position.TE, _season.CurrentSeason));
+                var previousQB = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(rq.TeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First();
+                changeRecords.AddRange(passCatchersForRookie.Select(p => new QuarterbackChange
+                {
+                    PlayerId = p.PlayerId,
+                    Name = p.Name,
+                    Season = _season.CurrentSeason,
+                    PreviousQBId = previousQB.PlayerId,
+                    CurrentQBId = rq.PlayerId
+                }));
+            }
+            return changeRecords;
         }
     }
 }
