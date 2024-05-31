@@ -71,7 +71,7 @@ namespace Football.Projections.Services
         }
         private async Task<IEnumerable<SeasonProjection>> QuarterbackChangeAdjustment(IEnumerable<SeasonProjection> seasonProjections)
         {
-            var qbChanges = (await playerService.GetQuarterbackChanges(_season.CurrentSeason)).ToDictionary(q => q.PlayerId);
+            var qbChanges = (await GetQuarterbackChanges()).ToDictionary(q => q.PlayerId);
             foreach(var s in seasonProjections)
             {
                 if (qbChanges.TryGetValue(s.PlayerId, out var changeRecord))
@@ -141,21 +141,54 @@ namespace Football.Projections.Services
                 var newPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.TE, _season.CurrentSeason));
                 if (newPassCatchers.Any())
                 {
-                    var previousQBsData = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(newPassCatchers.First().TeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First();
-                    var rookieQB = currentRookies.FirstOrDefault(r => r.TeamId == newPassCatchers.First().TeamId)?.PlayerId;
+                    var previousQB = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(newPassCatchers.First().TeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First();
+                    var rookieQB = (currentRookies.FirstOrDefault(r => r.TeamId == newPassCatchers.First().TeamId))?.PlayerId;
                     quarterbackChanges.AddRange(newPassCatchers.Select(n => new QuarterbackChange
                     {
                         PlayerId = n.PlayerId,
                         Name = n.Name,
                         Season = _season.CurrentSeason,
-                        PreviousQBId = previousQBsData.PlayerId,
+                        PreviousQBId = previousQB.PlayerId,
                         CurrentQBId = rookieQB ?? change.PlayerId
                     }));
                 }
-                var previousPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.TE, _season.CurrentSeason))
-                                           .Where(p => !quarterbackChanges.Select(q => q.PlayerId).Contains(p.PlayerId));
+                var previousPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.TE, _season.CurrentSeason));                                         
+                if (previousPassCatchers.Any())
+                {
+                    var previousTeamQBs = (await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.QB, _season.CurrentSeason)).Select(p => p.PlayerId);
+                    var previousTeamQBProjections = (await playerService.GetSeasonProjections(previousTeamQBs, _season.CurrentSeason)).OrderByDescending(q => q.Value).FirstOrDefault();
+
+                    if (previousTeamQBProjections.Value > 0)
+                    {
+                        quarterbackChanges.AddRange(previousPassCatchers.Select(p => new QuarterbackChange
+                        {
+                            PlayerId = p.PlayerId,
+                            Name = p.Name,
+                            Season = _season.CurrentSeason,
+                            PreviousQBId = change.PlayerId,
+                            CurrentQBId = previousTeamQBProjections.Key
+                        }));
+                    }
+                }
             }
-            return quarterbackChanges;
+            foreach (var rq in currentRookies)
+            {
+                if (!quarterbackChanges.Any(q => q.CurrentQBId == rq.PlayerId))
+                {
+                    var passCatchersForRookie = (await playerService.GetPlayersByTeamIdAndPosition(rq.TeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(rq.TeamId, Position.TE, _season.CurrentSeason));
+                    var previousQB = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(rq.TeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First();
+                    quarterbackChanges.AddRange(passCatchersForRookie.Select(p => new QuarterbackChange
+                    {
+                        PlayerId = p.PlayerId,
+                        Name = p.Name,
+                        Season = _season.CurrentSeason,
+                        PreviousQBId = previousQB.PlayerId,
+                        CurrentQBId =  rq.PlayerId
+                    }));
+                }
+            }
+            //need to check if any of the qb changes also changed teams and adjust the previous qb
+            return quarterbackChanges.DistinctBy(qc => qc.PlayerId);
         }
     }
 }
