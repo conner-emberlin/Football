@@ -138,6 +138,7 @@ namespace Football.Projections.Services
 
             foreach (var change in qbTeamChanges)
             {
+                //change record for pass catchers on qb's new team
                 var newPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.TE, _season.CurrentSeason));
                 if (newPassCatchers.Any())
                 {
@@ -152,6 +153,7 @@ namespace Football.Projections.Services
                         CurrentQBId = rookieQB ?? change.PlayerId
                     }));
                 }
+                //change record for pass catcheres on qb's previous team
                 var previousPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.PreviousTeamId, Position.TE, _season.CurrentSeason));                                         
                 if (previousPassCatchers.Any())
                 {
@@ -171,6 +173,7 @@ namespace Football.Projections.Services
                     }
                 }
             }
+            //change record for players with new rookie qb whose previous qb did not change teams
             foreach (var rq in currentRookies)
             {
                 if (!quarterbackChanges.Any(q => q.CurrentQBId == rq.PlayerId))
@@ -187,8 +190,19 @@ namespace Football.Projections.Services
                     }));
                 }
             }
-            //need to check if any of the qb changes also changed teams and adjust the previous qb
-            return quarterbackChanges.DistinctBy(qc => qc.PlayerId);
+
+            var distinctQuarterbackChanges = quarterbackChanges.DistinctBy(qc => qc.PlayerId);
+
+            //if pass catcher with quarterback change also changed teams, adjust previous team to qb on previous team rather than the previous qb of new team
+            var passCatcherTeamChanges = (await playerService.GetTeamChanges(_season.CurrentSeason, Position.WR)).Union(await playerService.GetTeamChanges(_season.CurrentSeason, Position.TE)).ToDictionary(t => t.PlayerId);
+            foreach (var qc in distinctQuarterbackChanges)
+            {
+                if (passCatcherTeamChanges.TryGetValue(qc.PlayerId, out var teamChange))
+                {
+                    qc.PreviousQBId = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(teamChange.PreviousTeamId, Position.QB, _season.CurrentSeason - 1)).OrderByDescending(s => s.Games).First().PlayerId;
+                }
+            }
+            return distinctQuarterbackChanges;
         }
     }
 }
