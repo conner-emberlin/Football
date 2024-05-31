@@ -97,7 +97,8 @@ namespace Football.Players.Repository
                         FROM [dbo].SeasonProjections
                         WHERE [PlayerId] IN @playerIds
                             AND [Season] = @season";
-            return (await dbConnection.QueryAsync<(int PlayerId, double ProjectedPoints)>(query, new { playerIds, season })).ToDictionary(p => p.PlayerId, p => p.ProjectedPoints);
+            var t = (await dbConnection.QueryAsync<(int PlayerId, double ProjectedPoints)>(query, new { playerIds, season })).ToDictionary(p => p.PlayerId, p => p.ProjectedPoints);
+            return t;
         }
 
         public async Task<double> GetWeeklyProjection(int season, int week, int playerId)

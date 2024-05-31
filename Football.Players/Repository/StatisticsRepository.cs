@@ -3,6 +3,7 @@ using Football.Players.Models;
 using System.Data;
 using Dapper;
 using Football.Enums;
+using Football.Models;
 
 namespace Football.Players.Repository
 {
@@ -46,7 +47,7 @@ namespace Football.Players.Repository
         public async Task<List<T>> GetAllSeasonDataByPosition<T>(Position position, int minGames)
         {
             var query = $@"SELECT * FROM [dbo].[{GetSeasonTable(position)}]
-                            WHERE [Games] > @minGames
+                            WHERE [Games] >= @minGames
                             ORDER BY [PlayerId], [Season]";
             return (await dbConnection.QueryAsync<T>(query, new {minGames})).ToList();
         }
@@ -90,6 +91,28 @@ namespace Football.Players.Repository
                                         AND pt.Season = s.Season)";
             return (await dbConnection.QueryAsync<T>(query, new { teamId, season })).ToList();
 
+        }
+
+        public async Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection)
+        {
+            var query = $@"SELECT sqd.PlayerId, 
+                                  sqd.Games AS PreviousSeasonGames, 
+                                  pt.TeamId AS PreviousSeasonTeamId, 
+                                  sp.ProjectedPoints AS CurrentSeasonProjection
+                            FROM SeasonQBData sqd
+                            JOIN SeasonProjections sp
+                                ON sqd.PlayerID = sp.PlayerId
+                            JOIN PlayerTeam pt
+                                ON sqd.PlayerID = pt.PlayerId
+                            WHERE sqd.Season = @previousSeason
+                                    AND sp.Season = @currentSeason
+                                    AND sqd.Games < @maxGames
+                                    AND sp.ProjectedPoints > @avgProjection
+                                    AND pt.Season = @previousSeason
+                                    AND NOT EXISTS(SELECT 1 FROM Rookie r 
+                                                    WHERE r.PlayerId = sqd.PlayerID 
+                                                        AND r.RookieSeason = @previousSeason)";
+            return await dbConnection.QueryAsync<StarterMissedGames>(query, new { previousSeason, currentSeason, maxGames, avgProjection });
         }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(Position position) => string.Format("Season{0}Data", position.ToString());

@@ -16,7 +16,7 @@ namespace Football.Api.Controllers
     [ApiController]
     public class ProjectionController(IPlayersService playersService,
         IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season,
-        IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, IAdjustmentService adj, IMapper mapper) : ControllerBase
+        IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -196,8 +196,5 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAllSeasonProjectionAnalyses([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetAllSeasonProjectionAnalyses(posEnum)) : BadRequest();
 
-        [HttpGet("qb-changes")]
-        [ProducesResponseType(typeof(IEnumerable<QuarterbackChange>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetQuarterbackChanges() => Ok(await adj.GetQuarterbackChanges());
     }
 }

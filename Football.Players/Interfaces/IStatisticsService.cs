@@ -17,6 +17,7 @@ namespace Football.Players.Interfaces
         public Task<List<SnapCount>> GetSnapCounts(int playerId);
         public Task<double> GetSnapsByGame(int playerId, int season, int week);
         public Task<List<T>> GetSeasonDataByTeamIdAndPosition<T>(int teamId, Position position, int season);
+        public Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection);
 
     }
 }

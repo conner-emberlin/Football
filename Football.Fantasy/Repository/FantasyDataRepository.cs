@@ -54,7 +54,7 @@ namespace Football.Fantasy.Repository
         public async Task<List<SeasonFantasy>> GetAllSeasonFantasyByPosition(string position, int minGames)
         {
             var query = $@"SELECT * FROM [dbo].SeasonFantasyData 
-                            WHERE [Position] = @position AND [Games] > @minGames
+                            WHERE [Position] = @position AND [Games] >= @minGames
                             ORDER BY [PlayerId], [Season]";
             return (await dbConnection.QueryAsync<SeasonFantasy>(query, new { position, minGames })).ToList();
         }

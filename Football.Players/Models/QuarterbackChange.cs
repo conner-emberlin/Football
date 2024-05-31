@@ -3,7 +3,6 @@
     public class QuarterbackChange
     {
         public int PlayerId { get; set; }
-        public string Name { get; set; } = "";
         public int Season { get; set; }
         public int PreviousQBId { get; set; }
         public int CurrentQBId { get; set; }

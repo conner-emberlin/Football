@@ -59,6 +59,8 @@ namespace Football.Players.Services
             else return weeklyData;
         }
 
-        
+        public async Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection) => await statisticsRepository.GetCurrentStartersThatMissedGamesLastSeason(currentSeason, previousSeason, maxGames, avgProjection);
+
+
     }
 }

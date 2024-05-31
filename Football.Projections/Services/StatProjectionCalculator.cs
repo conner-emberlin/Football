@@ -17,6 +17,8 @@ namespace Football.Projections.Services
         {
             if (seasons.Count == 0) return new SeasonDataQB();
 
+            if (seasons.Count > 3) seasons = seasons.Where(s => s.Season != seasons.Min(s => s.Season)).ToList();
+
             var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearQBLeap;
             var recentSeason = seasons.Max(s => s.Season);
             var previousSeasons = seasons.Count - 1;
@@ -138,6 +140,8 @@ namespace Football.Projections.Services
         public SeasonDataWR CalculateStatProjection(List<SeasonDataWR> seasons)
         {
             if (seasons.Count == 0) return new SeasonDataWR();
+
+            if (seasons.Count > 3) seasons = seasons.Where(s => s.Season != seasons.Min(s => s.Season)).ToList();
 
             var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearWRLeap;
             var recentSeason = seasons.Max(s => s.Season);
