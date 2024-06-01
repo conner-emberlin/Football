@@ -89,4 +89,22 @@
         public double OverallADP { get; set; }
     }
 
+    public class AllSeasonDataQB: SeasonDataQB
+    {
+        public double YearsExperience { get; set; }
+    }
+
+    public class AllSeasonDataRB: SeasonDataRB
+    {
+        public double YearsExperience { get; set; }
+    }
+    public class AllSeasonDataWR: SeasonDataWR
+    {
+        public double YearsExperience { get; set; }
+    }
+    public class AllSeasonDataTE : SeasonDataTE
+    {
+        public double YearsExperience { get; set; }
+    } 
+
 }

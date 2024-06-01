@@ -93,7 +93,7 @@ namespace Football.Data.Services
             List<SeasonDataQB> seasonData = [];
             foreach (var p in players)
             {
-                var player = await playerService.RetrievePlayer(p.Name, Position.QB);
+                var player = await playerService.RetrievePlayer(p.Name, Position.QB, false);
                 if (p.Games > 0 && player.Position == Position.QB.ToString())
                 {
                     var sd = mapper.Map<SeasonDataQB>(p);
@@ -110,7 +110,7 @@ namespace Football.Data.Services
             List<SeasonDataRB> seasonData = [];
             foreach (var p in players)
             {
-                var player = await playerService.RetrievePlayer(p.Name, Position.RB);
+                var player = await playerService.RetrievePlayer(p.Name, Position.RB, false);
                 if (p.Games > 0 && player.Position == Position.RB.ToString())
                 {
                     var sd = mapper.Map<SeasonDataRB>(p);
@@ -126,7 +126,7 @@ namespace Football.Data.Services
             List<SeasonDataWR> seasonData = [];
             foreach (var p in players)
             {
-                var player = await playerService.RetrievePlayer(p.Name, Position.WR);
+                var player = await playerService.RetrievePlayer(p.Name, Position.WR, false);
                 if (p.Games > 0 && player.Position == Position.WR.ToString())
                 {
                     var sd = mapper.Map<SeasonDataWR>(p);
@@ -143,7 +143,7 @@ namespace Football.Data.Services
             List<SeasonDataTE> seasonData = [];
             foreach (var p in players)
             {
-                var player = await playerService.RetrievePlayer(p.Name, Position.TE);
+                var player = await playerService.RetrievePlayer(p.Name, Position.TE, false);
                 if ( p.Games > 0 && player.Position == Position.TE.ToString())
                 {
                     var sd = mapper.Map<SeasonDataTE>(p);

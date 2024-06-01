@@ -44,12 +44,12 @@ namespace Football.Players.Repository
             return (await dbConnection.QueryAsync<T>(query)).ToList();
         }
 
-        public async Task<List<T>> GetAllSeasonDataByPosition<T>(Position position, int minGames)
+        public async Task<List<T>> GetAllSeasonDataByPosition<T>(Position position)
         {
-            var query = $@"SELECT * FROM [dbo].[{GetSeasonTable(position)}]
-                            WHERE [Games] >= @minGames
+            var query = $@"SELECT s.*, RANK() OVER (PARTITION BY s.PlayerId ORDER BY s.Season) AS YearsExperience 
+                            FROM [dbo].[{GetSeasonTable(position)}] s
                             ORDER BY [PlayerId], [Season]";
-            return (await dbConnection.QueryAsync<T>(query, new {minGames})).ToList();
+            return (await dbConnection.QueryAsync<T>(query)).ToList();
         }
 
         public async Task<List<T>> GetSeasonData<T>(Position position, int queryParam, bool isPlayer)
@@ -113,6 +113,12 @@ namespace Football.Players.Repository
                                                     WHERE r.PlayerId = sqd.PlayerID 
                                                         AND r.RookieSeason = @previousSeason)";
             return await dbConnection.QueryAsync<StarterMissedGames>(query, new { previousSeason, currentSeason, maxGames, avgProjection });
+        }
+
+        public async Task<double> GetYearsExperience(int playerId, Position position)
+        {
+            var query = $@"SELECT COUNT(*) FROM [dbo].[{GetSeasonTable(position)}] WHERE [PlayerId] = @playerId";
+            return (await dbConnection.QueryAsync<double>(query, new { playerId })).First();
         }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(Position position) => string.Format("Season{0}Data", position.ToString());

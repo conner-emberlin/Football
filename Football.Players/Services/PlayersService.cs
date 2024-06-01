@@ -29,7 +29,8 @@ namespace Football.Players.Services
             var player = await GetPlayerByName(name);
             if (player == null)
             {
-                player = await CreatePlayer(name, 1, position.ToString());
+                var active = activatePlayer ? 1 : 0;
+                player = await CreatePlayer(name, active, position.ToString());
                 logger.Information("New Player Added. Name: {0}, PlayerId: {1}", player.Name, player.PlayerId);
             }
             else if(player.Active == 0 && activatePlayer)
