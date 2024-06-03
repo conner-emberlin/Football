@@ -117,7 +117,7 @@ namespace Football.Players.Repository
 
         public async Task<double> GetYearsExperience(int playerId, Position position)
         {
-            var query = $@"SELECT COUNT(*) FROM [dbo].[{GetSeasonTable(position)}] WHERE [PlayerId] = @playerId";
+            var query = $@"SELECT COUNT(*) + 1 FROM [dbo].[{GetSeasonTable(position)}] WHERE [PlayerId] = @playerId";
             return (await dbConnection.QueryAsync<double>(query, new { playerId })).First();
         }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());

@@ -6,6 +6,7 @@ using Football.Projections.Models;
 using Football.Projections.Interfaces;
 using Microsoft.Extensions.Options;
 using Football.Players.Models;
+using MathNet.Numerics;
 
 namespace Football.Projections.Services
 {
@@ -22,13 +23,21 @@ namespace Football.Projections.Services
             seasonProjections = await SuspensionAdjustment(seasonProjections);
 
             var position = seasonProjections.First().Position;
+
             if (position == Position.WR.ToString() || position == Position.TE.ToString())
             {
-                var qbChanges = (await GetQuarterbackChanges()).ToDictionary(q => q.PlayerId);
+                var wrTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.WR);
+
+                var qbChanges = (await GetQuarterbackChanges(wrTeamChanges)).ToDictionary(q => q.PlayerId);
+                
                 seasonProjections = await QuarterbackChangeAdjustment(seasonProjections, qbChanges);
                 seasonProjections = await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges);
-            }
-                
+
+                if (position == Position.WR.ToString())
+                {
+                    seasonProjections = await SharedReceivingDutiesAdjustment(seasonProjections, wrTeamChanges);
+                }
+            }                
             return seasonProjections;
         }
         public async Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections)
@@ -106,6 +115,23 @@ namespace Football.Projections.Services
 
         }
 
+        private async Task<IEnumerable<SeasonProjection>> SharedReceivingDutiesAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> wrTeamChanges)
+        {
+            var seasonProjectionDictionary = seasonProjections.ToDictionary(s => s.PlayerId);
+            var playerTeams = (await playerService.GetPlayerTeams(_season.CurrentSeason, seasonProjections.Select(p => p.PlayerId))).ToDictionary(p => p.PlayerId);
+            foreach (var sp in seasonProjections)
+            {
+                if (playerTeams.TryGetValue(sp.PlayerId, out var team))
+                {
+                    var newWRs = wrTeamChanges.Where(w => w.CurrentTeamId == team.TeamId).Select(p => p.PlayerId);
+                    if (newWRs.Any(w => seasonProjectionDictionary.TryGetValue(w, out var proj) && proj.ProjectedPoints > _tunings.NewWRMinPoints))
+                        sp.ProjectedPoints *= _tunings.NewWRAdjustmentFactor;
+                }
+                
+            }
+            return seasonProjections;
+        }
+
         private async Task<List<WeekProjection>> MatchupAdjustment(List<WeekProjection> weekProjections)
         {
             if (weekProjections.Count == 0) return weekProjections;
@@ -152,7 +178,7 @@ namespace Football.Projections.Services
                                             : Math.Min(_tunings.NewQBCeiling, currentProjection / previousProjection);
         }
 
-        private async Task<IEnumerable<QuarterbackChange>> GetQuarterbackChanges()
+        private async Task<IEnumerable<QuarterbackChange>> GetQuarterbackChanges(IEnumerable<TeamChange> wrTeamChanges)
         {
            List<QuarterbackChange> quarterbackChanges = [];
             var qbTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.QB);
@@ -166,7 +192,7 @@ namespace Football.Projections.Services
             quarterbackChanges.AddRange(await GetChangeRecordsForRookieQBs(rookieQbs));
             var distinctQuarterbackChanges = quarterbackChanges.DistinctBy(qc => qc.PlayerId).ToList();
 
-            var passCatcherTeamChanges = (await playerService.GetTeamChanges(_season.CurrentSeason, Position.WR)).Union(await playerService.GetTeamChanges(_season.CurrentSeason, Position.TE)).ToDictionary(t => t.PlayerId);
+            var passCatcherTeamChanges = (wrTeamChanges).Union(await playerService.GetTeamChanges(_season.CurrentSeason, Position.TE)).ToDictionary(t => t.PlayerId);
             foreach (var qc in distinctQuarterbackChanges)
             {
                 if (passCatcherTeamChanges.TryGetValue(qc.PlayerId, out var teamChange))
@@ -193,7 +219,6 @@ namespace Football.Projections.Services
             }
             return distinctQuarterbackChanges;
         }
-
         private async Task<IEnumerable<QuarterbackChange>> GetChangeRecordsForCurrentTeam(TeamChange change, List<Rookie> currentRookies)
         {
             var newPassCatchers = (await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.WR, _season.CurrentSeason)).Union(await playerService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.TE, _season.CurrentSeason));
