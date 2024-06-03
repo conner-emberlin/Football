@@ -90,7 +90,7 @@ namespace Football.Projections.Services
                     var qbProjections = await playerService.GetSeasonProjections([changeRecord.PreviousQBId, changeRecord.CurrentQBId], _season.CurrentSeason);
                     var previousQbProjection = qbProjections.TryGetValue(changeRecord.PreviousQBId, out var projectPrev) ? projectPrev : _tunings.AverageQBProjection;
                     var currentQbProjection = qbProjections.TryGetValue(changeRecord.CurrentQBId, out var currentPrev) ? currentPrev : _tunings.AverageQBProjection;
-                    s.ProjectedPoints *= QBProjectionRatio(previousQbProjection, currentQbProjection);
+                    s.ProjectedPoints *= QBProjectionRatio(previousQbProjection, currentQbProjection, changeRecord.CurrentQBIsRookie);
                 }
             }
             return seasonProjections;
@@ -170,9 +170,11 @@ namespace Football.Projections.Services
             return weekProjections;
         }
 
-        private double QBProjectionRatio(double previousProjection, double currentProjection)
+        private double QBProjectionRatio(double previousProjection, double currentProjection, bool qbIsRookie)
         {
             if (previousProjection == currentProjection) return 1;
+
+            if (qbIsRookie && currentProjection / previousProjection > 1) return 1;
 
             return previousProjection > currentProjection ? Math.Max(_tunings.NewQBFloor, currentProjection / previousProjection)
                                             : Math.Min(_tunings.NewQBCeiling, currentProjection / previousProjection);
@@ -214,7 +216,8 @@ namespace Football.Projections.Services
                     PlayerId = pc.Key,
                     Season = _season.CurrentSeason,
                     PreviousQBId = previousQB,
-                    CurrentQBId = newQB
+                    CurrentQBId = newQB,
+                    CurrentQBIsRookie = currentRookies.Any(c => c.PlayerId == newQB)
                 });
             }
             return distinctQuarterbackChanges;
@@ -231,7 +234,8 @@ namespace Football.Projections.Services
                     PlayerId = n.PlayerId,
                     Season = _season.CurrentSeason,
                     PreviousQBId = previousQB.PlayerId,
-                    CurrentQBId = rookieQB ?? change.PlayerId
+                    CurrentQBId = rookieQB ?? change.PlayerId,
+                    CurrentQBIsRookie = rookieQB != null
                 });
             }
             return Enumerable.Empty<QuarterbackChange>();
@@ -274,7 +278,8 @@ namespace Football.Projections.Services
                     PlayerId = p.PlayerId,
                     Season = _season.CurrentSeason,
                     PreviousQBId = previousQB.PlayerId,
-                    CurrentQBId = rq.PlayerId
+                    CurrentQBId = rq.PlayerId,
+                    CurrentQBIsRookie = true
                 }));
             }
             return changeRecords;

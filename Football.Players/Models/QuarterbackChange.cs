@@ -6,5 +6,6 @@
         public int Season { get; set; }
         public int PreviousQBId { get; set; }
         public int CurrentQBId { get; set; }
+        public bool CurrentQBIsRookie { get; set; }
     }
 }
