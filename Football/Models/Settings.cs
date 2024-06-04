@@ -79,6 +79,8 @@ namespace Football.Models
         public double RushingQBThreshold { get; set; }
         public double ReceivingRBThreshold { get; set; }
         public double BackupQBAdjustmentMax { get; set; }
+        public double VetQBNewTeamYears { get; set; }
+        public double VetQBNewTeamFactor { get; set; }
     }
 
     public class WeeklyTunings
