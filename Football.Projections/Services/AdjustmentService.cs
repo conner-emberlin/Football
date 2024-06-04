@@ -304,5 +304,12 @@ namespace Football.Projections.Services
             var fantasyPercentage = await fantasyAnalysisService.GetQBSeasonFantasyPercentageByPlayerId(previousSeason, playerId);
             return fantasyPercentage.RushTDShare + fantasyPercentage.RushYDShare > _tunings.RushingQBThreshold;
         }
+
+        private async Task<bool> IsReceivingRB(int playerId)
+        {
+            var previousSeason = _season.CurrentSeason - 1;
+            var fantasyPercentage = await fantasyAnalysisService.GetRBSeasonFantasyPercentageByPlayerId(previousSeason, playerId);
+            return fantasyPercentage.RecShare + fantasyPercentage.RecYDShare + fantasyPercentage.RushTDShare > _tunings.RushingQBThreshold;
+        }
     }
 }
