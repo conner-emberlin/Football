@@ -20,7 +20,7 @@ namespace Football.Players.Services
         public async Task<double> GetSnapsByGame(int playerId, int season, int week) => await statisticsRepository.GetSnapsByGame(playerId, season, week);
         public async Task<List<T>> GetSeasonDataByTeamIdAndPosition<T>(int teamId, Position position, int season) => await statisticsRepository.GetSeasonDataByTeamIdAndPosition<T>(teamId, position, season);
         public async Task<double> GetYearsExperience(int playerId, Position position) => await statisticsRepository.GetYearsExperience(playerId, position);
-
+        public async Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection) => await statisticsRepository.GetCurrentStartersThatMissedGamesLastSeason(currentSeason, previousSeason, maxGames, avgProjection);
         public async Task<List<TeamRecord>> GetTeamRecords(int season)
         {
             var gameResults = await GetGameResults(season);
@@ -60,7 +60,7 @@ namespace Football.Players.Services
             else return weeklyData;
         }
 
-        public async Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection) => await statisticsRepository.GetCurrentStartersThatMissedGamesLastSeason(currentSeason, previousSeason, maxGames, avgProjection);
+
 
 
     }

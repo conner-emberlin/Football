@@ -15,11 +15,19 @@ namespace Football.Projections.Services
 
         public SeasonDataQB CalculateStatProjection(List<SeasonDataQB> seasons)
         {
+            var secondYearLeap = true;
+
             if (seasons.Count == 0) return new SeasonDataQB();
 
-            if (seasons.Count > 3) seasons = seasons.Where(s => s.Season != seasons.Min(s => s.Season)).ToList();
+            if (seasons.Count > 1)
+            {
+                var recentSeasonData = seasons.OrderByDescending(s => s.Season).First();
+                var backupSeasons = seasons.Where(s => s.Attempts > 0 && s.Attempts / s.Games <= 0.5 * recentSeasonData.Attempts / recentSeasonData.Games).Select(s => s.Season);
+                secondYearLeap = !backupSeasons.Any();
+                seasons = seasons.Where(s => !backupSeasons.Contains(s.Season)).ToList();
+            }
 
-            var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearQBLeap;
+            var recentWeight = seasons.Count > 1 ? _tunings.Weight : secondYearLeap ? _tunings.SecondYearQBLeap : 1;
             var recentSeason = seasons.Max(s => s.Season);
             var previousSeasons = seasons.Count - 1;
             var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -198,9 +206,19 @@ namespace Football.Projections.Services
         }
         public SeasonDataTE CalculateStatProjection(List<SeasonDataTE> seasons)
         {
+            var secondYearLeap = true;
+
             if (seasons.Count == 0) return new SeasonDataTE();
 
-            var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearWRLeap;
+            if (seasons.Count > 1)
+            {
+                var recentSeasonData = seasons.OrderByDescending(s => s.Season).First();
+                var backupSeasons = seasons.Where(s => s.Targets > 0 && s.Targets / s.Games <= 0.5 * recentSeasonData.Targets / recentSeasonData.Games).Select(s => s.Season);
+                secondYearLeap = !backupSeasons.Any();
+                seasons = seasons.Where(s => !backupSeasons.Contains(s.Season)).ToList();
+            }
+            
+            var recentWeight = seasons.Count > 1 ? _tunings.Weight : secondYearLeap ? _tunings.SecondYearWRLeap : 1;
             var recentSeason = seasons.Max(s => s.Season);
             var previousSeasons = seasons.Count - 1;
             var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;

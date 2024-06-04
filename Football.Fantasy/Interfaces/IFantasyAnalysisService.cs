@@ -12,6 +12,8 @@ namespace Football.Fantasy.Interfaces
         public Task<FantasyPerformance?> GetFantasyPerformance(Player player);
         public Task<List<BoomBustByWeek>> GetBoomBustsByWeek(int playerId);
         public Task<List<FantasyPercentage>> GetFantasyPercentages(Position position);
-        
+        public Task<FantasyPercentage> GetQBSeasonFantasyPercentageByPlayerId(int season, int playerId);
+
+
     }
 }

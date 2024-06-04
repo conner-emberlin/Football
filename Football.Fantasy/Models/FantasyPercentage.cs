@@ -3,6 +3,7 @@
     public class FantasyPercentage
     {
         public int PlayerId { get;  set; }
+        public int Season { get; set; }
         public string Name { get; set; } = "";
         public string Position { get; set; } ="";
         public double PassYDShare { get; set; }

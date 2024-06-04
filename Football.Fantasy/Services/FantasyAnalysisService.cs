@@ -208,6 +208,26 @@ namespace Football.Fantasy.Services
             return CleanPercentageAmounts(fantasyPercentages);
         }
 
+        public async Task<FantasyPercentage> GetQBSeasonFantasyPercentageByPlayerId(int season, int playerId)
+        {
+            var seasonData = (await statsService.GetSeasonData<SeasonDataQB>(Position.QB, playerId, true)).FirstOrDefault(s => s.Season == season);
+            if (seasonData != null) 
+            {
+                var seasonFantasy = (await fantasyDataService.GetSeasonFantasy(playerId)).First(s => s.Season == season);
+                var totalFantasy = seasonFantasy.FantasyPoints + seasonData.Int * _scoring.PointsPerInterception + seasonData.Fumbles * _scoring.PointsPerFumble;
+                return new FantasyPercentage
+                {
+                    PlayerId =  playerId,
+                    Season = season,
+                    Position = Position.QB.ToString(),
+                    PassYDShare = Math.Round(seasonData.Yards * _scoring.PointsPerPassingYard / totalFantasy, 4),
+                    PassTDShare = Math.Round(seasonData.TD * _scoring.PointsPerPassingTouchdown / totalFantasy, 4),
+                    RushYDShare = Math.Round(seasonData.RushingYards * _scoring.PointsPerYard / totalFantasy, 4),
+                    RushTDShare = Math.Round(seasonData.RushingTD * _scoring.PointsPerTouchdown / totalFantasy, 4)
+                };
+            }
+            return new();
+        }
 
 
         private static List<FantasyPercentage> CleanPercentageAmounts(List<FantasyPercentage> fantasyPercentages)
