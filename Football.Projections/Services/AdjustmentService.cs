@@ -18,31 +18,35 @@ namespace Football.Projections.Services
 
         public async Task<IEnumerable<SeasonProjection>> AdjustmentEngine(IEnumerable<SeasonProjection> seasonProjections)
         {
+            _ = Enum.TryParse(seasonProjections.First().Position, out Position position);
+            var qbTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.QB);
+            var wrTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.WR);
+            var teTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.TE);
+            var qbChanges = (await GetQuarterbackChanges(wrTeamChanges, teTeamChanges, qbTeamChanges)).ToDictionary(q => q.PlayerId);
+
             seasonProjections = await InjuryAdjustment(seasonProjections);
             seasonProjections = await SuspensionAdjustment(seasonProjections);
 
-            var position = seasonProjections.First().Position;
-            var qbTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.QB);
-
-            if (position == Position.WR.ToString() || position == Position.TE.ToString())
+            switch (position)
             {
-                var wrTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.WR);
-                var teTeamChanges = await playerService.GetTeamChanges(_season.CurrentSeason, Position.TE);               
-                var qbChanges = (await GetQuarterbackChanges(wrTeamChanges, teTeamChanges, qbTeamChanges)).ToDictionary(q => q.PlayerId);
-                
-                seasonProjections = await QuarterbackChangeAdjustment(seasonProjections, qbChanges);
-                seasonProjections = await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges);
+                case Position.QB:
+                    seasonProjections = await VeteranQBOnNewTeamAdjustment(seasonProjections, qbTeamChanges);
+                    break;
 
-                if (position == Position.WR.ToString())
-                {
+                case Position.RB:
+                    break;
+
+                case Position.WR:
+                    seasonProjections = await QuarterbackChangeAdjustment(seasonProjections, qbChanges);
+                    seasonProjections = await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges);
                     seasonProjections = await SharedReceivingDutiesAdjustment(seasonProjections, wrTeamChanges);
-                }
-            }
-            
-            if (position == Position.QB.ToString())
-            {
-                seasonProjections = await VeteranQBOnNewTeamAdjustment(seasonProjections, qbTeamChanges);
-            }
+                    break;
+
+                case Position.TE:
+                    seasonProjections = await QuarterbackChangeAdjustment(seasonProjections, qbChanges);
+                    seasonProjections = await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges);
+                    break;
+            }          
             return seasonProjections;
         }
         public async Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections)
