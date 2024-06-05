@@ -12,6 +12,8 @@
         public double RushingTouchdownsPerGame { get; set; }
         public double SacksPerGame { get; set; }
         public double YearsExperience { get; set; }
+        public double InterceptionsPerGame { get; set; }
+        public double FumblesPerGame { get; set; }
     }
     public class RBModelSeason
     {
@@ -25,6 +27,7 @@
         public double ReceivingYardsPerGame { get; set; }
         public double ReceivingTouchdownsPerGame { get; set; }
         public double YearsExperience { get; set; }
+        public double FumblesPerGame { get; set; }
     }
     public class WRModelSeason
     {
@@ -36,6 +39,7 @@
         public double YardsPerReception { get; set; }
         public double TouchdownsPerGame { get; set; }
         public double YearsExperience { get; set; }
+        public double FumblesPerGame { get; set; }
     }
     public class TEModelSeason
     {
@@ -47,6 +51,7 @@
         public double YardsPerReception { get; set; }
         public double TouchdownsPerGame { get; set; }
         public double YearsExperience { get; set; }
+        public double FumblesPerGame { get; set; }
     }
 
     public class QBModelWeek : QBModelSeason
