@@ -168,6 +168,25 @@ namespace Football.Projections.Services
             return seasonProjections;
         }
 
+        private async Task<IEnumerable<SeasonProjection>> DownwardTrendingAdjustment(IEnumerable<SeasonProjection> seasonProjections)
+        {
+            foreach (var sp in seasonProjections)
+            {
+                var seasonFantasy = (await fantasyDataService.GetSeasonFantasy(sp.PlayerId)).OrderByDescending(f => f.Season);
+                if (seasonFantasy.Count() > 4)
+                {
+                    var downwardTrend = seasonFantasy.ElementAt(0).FantasyPoints < seasonFantasy.ElementAt(1).FantasyPoints 
+                                     && seasonFantasy.ElementAt(1).FantasyPoints < seasonFantasy.ElementAt(2).FantasyPoints;
+                    
+                    if (downwardTrend)
+                    {
+                        var diff = (seasonFantasy.ElementAt(2).FantasyPoints - seasonFantasy.ElementAt(0).FantasyPoints) / 2;
+                        sp.ProjectedPoints -= diff;
+                    }
+                }
+            }
+            return seasonProjections;
+        }
         private async Task<List<WeekProjection>> InjuryAdustment(List<WeekProjection> weeklyProjections)
         {
             var activeInjuries = await playerService.GetActiveInSeasonInjuries(_season.CurrentSeason);
@@ -380,6 +399,7 @@ namespace Football.Projections.Services
         {
             var qbChanges = (await GetQuarterbackChanges(allTeamChanges)).ToDictionary(q => q.PlayerId);
 
+            seasonProjections = await DownwardTrendingAdjustment(seasonProjections);
             seasonProjections = await SharedBackfieldAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.RB));
             seasonProjections = await QuarterbackChangeAdjustment(seasonProjections, qbChanges);
             return seasonProjections;
