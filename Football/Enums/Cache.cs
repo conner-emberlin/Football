@@ -14,6 +14,7 @@
         NFLOdds,
         WeatherZip,
         PlayerComparisons,
-        MarketShare
+        MarketShare,
+        QuarterbackChanges
     }
 }

@@ -76,6 +76,9 @@ namespace Football.Models
         public double AverageQBProjection { get; set; }
         public double NewWRMinPoints { get; set; }
         public double NewWRAdjustmentFactor { get; set; }
+        public double ExistingWRAdjustmentFactor { get; set; }
+        public double NewRBMinPoints { get; set; }
+        public double NewRBAdjustmentFactor { get; set; }
         public double RushingQBThreshold { get; set; }
         public double ReceivingRBThreshold { get; set; }
         public double BackupQBAdjustmentMax { get; set; }

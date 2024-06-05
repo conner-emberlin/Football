@@ -233,6 +233,8 @@ namespace Football.Players.Services
             });                                        
         }
 
+        public async Task<IEnumerable<TeamChange>> GetAllTeamChanges(int currentSeason) => await playersRepository.GetAllTeamChanges(currentSeason, currentSeason - 1);
+
         private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMap(List<SleeperPlayer> sleeperPlayers)
         {
             List<SleeperPlayerMap> playerMap = [];

@@ -345,5 +345,25 @@ namespace Football.Players.Repository
             var query = $@"SELECT * FROM [dbo].SleeperPlayerMap";
             return (await dbConnection.QueryAsync<SleeperPlayerMap>(query)).ToList();
         }
+
+        public async Task<IEnumerable<TeamChange>> GetAllTeamChanges(int currentSeason, int previousSeason)
+        {
+            var query = $@"WITH previousSeasonTeams AS(
+                                        SELECT * FROM PlayerTeam pt 
+                                        WHERE pt.Season = @previousSeason),
+                                currentSeasonTeams AS(
+                                        SELECT * FROM PlayerTeam pt2
+                                        where pt2.Season = @currentSeason)
+
+                          SELECT p.PlayerId, p.Position, cst.Season, pst.TeamId AS PreviousTeamId, cst.TeamId AS CurrentTeamId 
+                          FROM currentSeasonTeams cst 
+                          JOIN previousSeasonTeams pst 
+                          ON cst.PlayerId = pst.PlayerId
+                          JOIN Players p
+                          ON cst.PlayerId = p.PlayerId
+                          WHERE cst.TeamId <> pst.TeamId
+                            AND p.Active = 1";
+            return await dbConnection.QueryAsync<TeamChange>(query, new { currentSeason, previousSeason });
+        }
     }
 }
