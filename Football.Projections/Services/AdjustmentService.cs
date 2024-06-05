@@ -146,21 +146,23 @@ namespace Football.Projections.Services
 
         private async Task<IEnumerable<SeasonProjection>> SharedBackfieldAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> rbTeamChanges)
         {
-            var seasonProjectionDictionary = seasonProjections.ToDictionary(s => s.PlayerId);
+            var seasonProjectionDictionary = seasonProjections.ToDictionary(s => s.PlayerId, s => s.ProjectedPoints);
             var playerTeams = (await playerService.GetPlayerTeams(_season.CurrentSeason, seasonProjections.Select(p => p.PlayerId))).ToDictionary(p => p.PlayerId);
             foreach (var sp in seasonProjections)
             {
                 if (playerTeams.TryGetValue(sp.PlayerId, out var team))
                 {
-                    var newRBs = rbTeamChanges.Where(w => w.CurrentTeamId == team.TeamId).Select(p => p.PlayerId);
+                    var rbsThatMovedToProjectedPlayersTeam = rbTeamChanges.Where(w => w.CurrentTeamId == team.TeamId).Select(p => p.PlayerId);
 
-                    if (newRBs.Contains(sp.PlayerId))
+                    if (rbsThatMovedToProjectedPlayersTeam.Contains(sp.PlayerId))
                     {
-                        sp.ProjectedPoints *= _tunings.NewRBAdjustmentFactor;
+                        var otherReceivers = await playerService.GetPlayersByTeamIdAndPosition(team.TeamId, Position.WR, _season.CurrentSeason, true);
+                        if (otherReceivers.Any(r => r.PlayerId != sp.PlayerId && seasonProjectionDictionary.TryGetValue(r.PlayerId, out var proj) && proj > _tunings.NewWRMinPoints))
+                            sp.ProjectedPoints *= _tunings.NewRBAdjustmentFactor;
                     }
-                    else if (newRBs.Any(w => seasonProjectionDictionary.TryGetValue(w, out var proj) && proj.ProjectedPoints > _tunings.NewRBMinPoints))
+                    else if (rbsThatMovedToProjectedPlayersTeam.Any(w => seasonProjectionDictionary.TryGetValue(w, out var proj) && proj > _tunings.NewWRMinPoints))
                     {
-                        sp.ProjectedPoints *= 0.95;
+                        sp.ProjectedPoints *= _tunings.ExistingRBAdjustmentFactor;
                     }
                 }
 
