@@ -95,6 +95,7 @@ namespace Football
 
         public List<PropertyInfo> GetPropertiesFromModel<T>()
         {
+            var t = typeof(T).GetProperties();
             return typeof(T).GetProperties().Where(p => 
                                                !p.ToString()!.Contains(Model.PlayerId.ToString())
                                             && !p.ToString()!.Contains(Model.Season.ToString())
@@ -102,6 +103,7 @@ namespace Football
                                             && !p.ToString()!.Contains(Model.TeamDrafted.ToString())
                                             && !p.ToString()!.Contains(Model.RookieSeason.ToString())
                                             && !p.ToString()!.Contains(Model.Position.ToString())
+                                            && !p.ToString()!.Contains(Model.TeamId.ToString())
                                             ).ToList();
         }
         public bool GetFromCache<T>(Cache cache, out List<T> cachedValues) => _cache.TryGetValue(cache.ToString(), out cachedValues!) && cachedValues.Count > 0;

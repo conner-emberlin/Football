@@ -85,6 +85,8 @@ namespace Football.Models
         public double BackupQBAdjustmentMax { get; set; }
         public double VetQBNewTeamYears { get; set; }
         public double VetQBNewTeamFactor { get; set; }
+        public int EliteWRDraftPositionMax { get; set; }
+        public double EliteWRRookieTopReceiverFactor { get; set; }
     }
 
     public class WeeklyTunings

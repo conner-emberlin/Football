@@ -187,6 +187,26 @@ namespace Football.Projections.Services
             }
             return seasonProjections;
         }
+
+        private async Task<IEnumerable<SeasonProjection>> EliteRookieWRTopTargetAdjustment(IEnumerable<SeasonProjection> seasonProjections)
+        {
+            var seasonProjectionDictionary = seasonProjections.ToDictionary(p => p.PlayerId, p => p.ProjectedPoints);
+            var currentEliteRookieWRsWithProjections = (await playerService.GetCurrentRookies(_season.CurrentSeason, Position.WR.ToString()))
+                                                       .Where(r => r.DraftPick <= _tunings.EliteWRDraftPositionMax).ToDictionary(c => c.PlayerId);
+            var playerTeams = await playerService.GetPlayerTeams(_season.CurrentSeason, seasonProjections.Select(s => s.PlayerId));
+            
+            foreach (var sp in seasonProjections)
+            {
+                if (currentEliteRookieWRsWithProjections.TryGetValue(sp.PlayerId, out var rookieRecord))
+                {
+                    var otherReceiversOnTeam = playerTeams.Where(p => p.TeamId == rookieRecord.TeamId && p.PlayerId != sp.PlayerId);
+                    if (!otherReceiversOnTeam.Any(o => seasonProjectionDictionary.TryGetValue(o.PlayerId, out var proj) && proj > 240))
+                        sp.ProjectedPoints *= _tunings.EliteWRRookieTopReceiverFactor;
+                }
+            }
+            return seasonProjections;
+
+        }
         private async Task<List<WeekProjection>> InjuryAdustment(List<WeekProjection> weeklyProjections)
         {
             var activeInjuries = await playerService.GetActiveInSeasonInjuries(_season.CurrentSeason);
@@ -408,11 +428,11 @@ namespace Football.Projections.Services
         private async Task<IEnumerable<SeasonProjection>> WRSeasonProjectionAdjustments(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> allTeamChanges)
         {
             var qbChanges = (await GetQuarterbackChanges(allTeamChanges)).ToDictionary(q => q.PlayerId);
-
-            seasonProjections = await QuarterbackChangeAdjustment(seasonProjections, qbChanges);
+            seasonProjections = await EliteRookieWRTopTargetAdjustment(seasonProjections);
             seasonProjections = await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges);
             seasonProjections = await SharedReceivingDutiesAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.WR));
-
+            seasonProjections = await QuarterbackChangeAdjustment(seasonProjections, qbChanges);
+                                 
             return seasonProjections;
         }
 

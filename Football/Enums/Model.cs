@@ -15,6 +15,7 @@ namespace Football.Enums
         FantasyPoints,
         TeamDrafted,
         Position,
-        RookieSeason
+        RookieSeason,
+        TeamId
     }
 }

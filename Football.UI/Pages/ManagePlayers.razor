@@ -75,7 +75,7 @@ else if(Position== "Rookies")
                       <input type="text" class="form-control" placeholder="Season" @bind="@newRookie.RookieSeason" />
                     </td>
                     <td>
-                      <input type="text" class="form-control" placeholder="Pick#" @bind="@newRookie.DraftPosition" />
+                      <input type="text" class="form-control" placeholder="Pick#" @bind="@newRookie.DraftPick" />
                     </td>
                     <td>
                       <input type="text" class="form-control" placeholder="Age" @bind="@newRookie.DeclareAge" />
@@ -167,7 +167,7 @@ else if (rookies.Any())
                         <td>@r.Position</td>
                         <td>@r.Name</td>
                         <td>@r.TeamDrafted</td>
-                        <td>@r.DraftPosition</td>
+                        <td>@r.DraftPick</td>
                         <td>@r.DeclareAge</td>
                     </tr>
                 }

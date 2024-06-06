@@ -60,9 +60,8 @@ namespace Football.Projections.Services
                 Position.TE => await CalculateProjections(await TEProjectionModel(), position),
                 _ => throw new NotImplementedException()
             };
-            projections = await adjustmentService.AdjustmentEngine(projections);
-            var withRookieProjections = (await RookieSeasonProjections(position)).Union(projections);
-            var formattedProjections = withRookieProjections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
+            var adjustedProjections = await adjustmentService.AdjustmentEngine((await RookieSeasonProjections(position)).Union(projections));
+            var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
             cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), formattedProjections);
             return formattedProjections;
         }
@@ -159,19 +158,18 @@ namespace Football.Projections.Services
             {
                 var coeff = await HistoricalRookieRegression(historicalRookies);
                 var currentRookies = await playersService.GetCurrentRookies(_season.CurrentSeason, position.ToString());
-                var model = matrixCalculator.RegressorMatrix(currentRookies);
-                var projections = (model * coeff).ToList();
 
-                for (int i = 0; i < projections.Count; i++)
+                foreach (var cr in currentRookies)
                 {
-                    var rookie = currentRookies.ElementAt(i);
+                    var rookieModel = matrixCalculator.TransformModel(cr);
+                    var projectedPoints = coeff * rookieModel;
                     rookieProjections.Add(new SeasonProjection
                     {
-                        PlayerId = rookie.PlayerId,
-                        Name = (await playersService.GetPlayer(rookie.PlayerId)).Name,
+                        PlayerId = cr.PlayerId,
+                        Name = (await playersService.GetPlayer(cr.PlayerId)).Name,
                         Season = _season.CurrentSeason,
-                        Position = rookie.Position,
-                        ProjectedPoints = projections[i]
+                        Position = cr.Position,
+                        ProjectedPoints = projectedPoints
                     });
                 }
             }

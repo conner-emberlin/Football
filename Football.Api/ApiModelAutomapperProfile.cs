@@ -12,7 +12,7 @@ namespace Football.Api
         {
             CreateMap<RookiePlayerModel, Player>()
                     .ReverseMap()
-                    .ForMember(rpm => rpm.DraftPosition, o => o.Ignore())
+                    .ForMember(rpm => rpm.DraftPick, o => o.Ignore())
                     .ForMember(rpm => rpm.TeamDrafted, o => o.Ignore())
                     .ForMember(rpm => rpm.DeclareAge, o => o.Ignore())
                     .ForMember(rpm => rpm.RookieSeason, o => o.Ignore());
