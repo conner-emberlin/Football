@@ -91,7 +91,16 @@ namespace Football.Projections.Services
 
         public SeasonDataRB CalculateStatProjection(List<SeasonDataRB> seasons)
         {
+            var secondYearLeap = true;
             if (seasons.Count == 0) return new SeasonDataRB();
+
+            if (seasons.Count > 1)
+            {
+                var recentSeasonData = seasons.OrderByDescending(s => s.Season).First();
+                var backupSeasons = seasons.Where(s => s.RushingAtt > 0 && s.RushingAtt / s.Games <= 0.5 * recentSeasonData.RushingAtt / recentSeasonData.Games).Select(s => s.Season);
+                secondYearLeap = !backupSeasons.Any();
+                seasons = seasons.Where(s => !backupSeasons.Contains(s.Season)).ToList();
+            }
 
             var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearRBLeap;
             var recentSeason = seasons.Max(s => s.Season);
