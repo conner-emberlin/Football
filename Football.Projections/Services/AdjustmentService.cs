@@ -440,7 +440,6 @@ namespace Football.Projections.Services
         {
 
             var qbChanges = (await GetQuarterbackChanges(allTeamChanges)).ToDictionary(q => q.PlayerId);
-            seasonProjections = await QuarterbackChangeAdjustment(seasonProjections, qbChanges);
             seasonProjections = await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges);
 
             return seasonProjections;

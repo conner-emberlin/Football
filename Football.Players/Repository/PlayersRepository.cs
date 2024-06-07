@@ -310,8 +310,8 @@ namespace Football.Players.Repository
 
         public async Task<bool> CreateRookie(Rookie rookie)
         {
-            var query = $@"INSERT INTO [dbo].Rookie (PlayerId, TeamDrafted, Position, RookieSeason, DraftPosition, DeclareAge, TeamId)
-                            VALUES (@PlayerId, @TeamDrafted, @Position, @RookieSeason, @DraftPosition, @DeclareAge, @TeamId)";
+            var query = $@"INSERT INTO [dbo].Rookie (PlayerId, TeamDrafted, Position, RookieSeason, DraftPick, DeclareAge, TeamId)
+                            VALUES (@PlayerId, @TeamDrafted, @Position, @RookieSeason, @DraftPick, @DeclareAge, @TeamId)";
             return await dbConnection.ExecuteAsync(query, rookie) > 0;
         }
 

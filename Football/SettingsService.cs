@@ -95,7 +95,6 @@ namespace Football
 
         public List<PropertyInfo> GetPropertiesFromModel<T>()
         {
-            var t = typeof(T).GetProperties();
             return typeof(T).GetProperties().Where(p => 
                                                !p.ToString()!.Contains(Model.PlayerId.ToString())
                                             && !p.ToString()!.Contains(Model.Season.ToString())
