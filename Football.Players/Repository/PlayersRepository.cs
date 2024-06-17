@@ -243,8 +243,8 @@ namespace Football.Players.Repository
 
         public async Task<int> PostInSeasonInjury(InSeasonInjury injury)
         {
-            var query = $@"INSERT INTO [dbo].InSeasonInjuries (Season, PlayerId, InjuryStartWeek, InjuryEndWeek, Description)
-                            VALUES (@Season, @PlayerId, @InjuryStartWeek, @InjuryEndWeek, @Description)";
+            var query = $@"INSERT INTO [dbo].InSeasonInjuries (Season, PlayerId, InjuryStartWeek, InjuryEndWeek, Description, GamesPlayedInjured)
+                            VALUES (@Season, @PlayerId, @InjuryStartWeek, @InjuryEndWeek, @Description, @GamesPlayedInjured)";
             return await dbConnection.ExecuteAsync(query, injury);
         }
 
@@ -254,13 +254,15 @@ namespace Football.Players.Repository
             var injuryStartWeek = injury.InjuryStartWeek;
             var injuryEndWeek = injury.InjuryEndWeek;
             var desc = injury.Description;
+            var injuredGames = injury.GamesPlayedInjured;
 
             var query = $@"UPDATE [dbo].InSeasonInjuries
                             SET [InjuryStartWeek] = @injuryStartWeek,
                                 [InjuryEndWeek] = @injuryEndWeek,
-                                [Description] = @desc
+                                [Description] = @desc,
+                                [GamesPlayedInjured] = @injuredGames
                             WHERE [InjuryId] = @injuryId";
-            return await dbConnection.ExecuteAsync(query, new { injuryId, injuryStartWeek, injuryEndWeek, desc }) > 0;
+            return await dbConnection.ExecuteAsync(query, new { injuryId, injuryStartWeek, injuryEndWeek, desc, injuredGames }) > 0;
         }
 
         public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges(int season)

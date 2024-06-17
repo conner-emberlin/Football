@@ -58,6 +58,7 @@
                     <th>Start Week</th>
                     <th>End Week</th>
                     <th>Description</th>
+                    <th>Injured Games</th>
                     <th></th>
                 </tr>
             </thead>
@@ -76,6 +77,9 @@
                     <td>
                       <input type="text" class="form-control" placeholder="Desc" @bind="@newInjury.Description" />
                     </td>
+                        <td>
+                            <input type="text" class="form-control" placeholder="Games Injured" @bind="@newInjury.GamesPlayedInjured" />
+                        </td>
                     <td>
                        <button type="button" class="btn btn-link" @onclick="() => CancellAdd()">
                           <i class="oi oi-circle-x" />
@@ -112,6 +116,7 @@ else if (injuryEdits.Any() && !badRequestError)
                     <th>Start Week</th>
                     <th>End Week</th>
                     <th>Description</th>
+                    <th>Games Injured</th>
                     <th></th>
                 </tr>
             </thead>
@@ -132,6 +137,9 @@ else if (injuryEdits.Any() && !badRequestError)
                         <td>
                             <input type="text" class="form-control" placeholder="Desc" @bind="@injury.Description" />
                        </td>
+                            <td>
+                                <input type="text" class="form-control" placeholder="Games Injured" @bind="@injury.GamesPlayedInjured" />
+                            </td>
                         <td>
                             <button style="color:red" type="button" class="btn btn-link" @onclick="() => EnableEditing(false, injury)">
                             <i class="oi oi-circle-x" />
@@ -225,7 +233,8 @@ else if (injuryEdits.Any() && !badRequestError)
                     InjuryId = i.InjuryId,
                     InjuryStartWeek = i.InjuryStartWeek,
                     InjuryEndWeek = i.InjuryEndWeek,
-                    Description = i.Description
+                    Description = i.Description,
+                    GamesPlayedInjured = i.GamesPlayedInjured
                 }).OrderBy(ie => ie.Player.Name).ToList();
 
             injuryEdits.ForEach(i => i.IsEditing = false);
@@ -275,7 +284,8 @@ else if (injuryEdits.Any() && !badRequestError)
             PlayerId = injuryEdit.PlayerId,
             InjuryStartWeek = injuryEdit.InjuryStartWeek,
             InjuryEndWeek = injuryEdit.InjuryEndWeek,
-            Description = injuryEdit.Description
+            Description = injuryEdit.Description,
+            GamesPlayedInjured = injuryEdit.GamesPlayedInjured
         };
         var json = JsonSerializer.Serialize(inSeasonInjury);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
