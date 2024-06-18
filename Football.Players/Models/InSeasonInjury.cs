@@ -8,7 +8,7 @@
         public int InjuryStartWeek { get; set; }
         public int InjuryEndWeek { get; set; }
         public string Description { get; set; } = "";
-        public int GamesPlayedInjured { get; set; }
+        public double GamesPlayedInjured { get; set; }
     }
 
     public class PlayerInjury : InSeasonInjury
