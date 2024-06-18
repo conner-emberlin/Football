@@ -64,6 +64,7 @@ namespace Football.Models
     }
     public class Tunings
     {
+        public int Season { get; set; }
         public int RBFloor { get; set; }
         public double LeadRBFactor { get; set; }
         public double Weight { get; set; }

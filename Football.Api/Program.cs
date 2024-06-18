@@ -59,6 +59,7 @@ builder.Services.AddScoped<IPlayersRepository, PlayersRepository>();
 builder.Services.AddScoped<IAdjustmentService, AdjustmentService>();
 builder.Services.AddScoped<IProjectionRepository, ProjectionRepository>();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
+builder.Services.AddScoped<ISettingsRepository, SettingsRepository>();
 builder.Services.AddScoped<IMatchupAnalysisService, MatchupAnalysisService>();
 builder.Services.AddScoped<IMatchupAnalysisRepository, MatchupAnalysisRepository>();
 builder.Services.AddScoped<IMarketShareService, MarketShareService>();

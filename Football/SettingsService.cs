@@ -6,16 +6,24 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Football
 {
-    public class SettingsService(IOptionsMonitor<ProjectionLimits> projectionLimits, IOptionsMonitor<BoomBustSettings> boomBust, IOptionsMonitor<WaiverWireSettings> wireSettings,
-         IMemoryCache cache, IOptionsMonitor<StartOrSitSettings> startOrSitSettings, IOptionsMonitor<ReplacementLevels> replacementLevels) : ISettingsService
+    public class SettingsService(ISettingsRepository settingsRepository, IOptionsMonitor<ProjectionLimits> projectionLimits, IOptionsMonitor<BoomBustSettings> boomBust, IOptionsMonitor<WaiverWireSettings> wireSettings,
+         IMemoryCache cache, IOptionsMonitor<StartOrSitSettings> startOrSitSettings, IOptionsMonitor<ReplacementLevels> replacementLevels, IOptionsMonitor<Season> season, IOptionsMonitor<Tunings> tunings) : ISettingsService
     {
         private readonly ProjectionLimits _projectionLimits = projectionLimits.CurrentValue;
         private readonly BoomBustSettings _boomBust = boomBust.CurrentValue;
         private readonly WaiverWireSettings _wireSettings = wireSettings.CurrentValue;
         private readonly StartOrSitSettings _startOrSitSettings = startOrSitSettings.CurrentValue;
         private readonly ReplacementLevels _replacementLevels = replacementLevels.CurrentValue;
+        private readonly Tunings _tunings = tunings.CurrentValue;
+        private readonly int _currentSeason = season.CurrentValue.CurrentSeason;
         private readonly IMemoryCache _cache = cache;
 
+        public async Task<bool> UploadCurrentSeasonTunings()
+        {
+            var seasonTunings = _tunings;
+            seasonTunings.Season  = _currentSeason;
+            return await settingsRepository.UploadCurrentSeasonTunings(seasonTunings);
+        }
         public int GetProjectionsCount(Position position) => position switch
         {
 

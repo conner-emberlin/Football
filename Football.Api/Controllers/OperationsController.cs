@@ -7,7 +7,7 @@ namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OperationsController(IUploadWeeklyDataService weeklyDataService, IFantasyDataService fantasyService, IMatchupAnalysisService matchupAnalysisService) : ControllerBase
+    public class OperationsController(IUploadWeeklyDataService weeklyDataService, IFantasyDataService fantasyService, IMatchupAnalysisService matchupAnalysisService, ISettingsService settingsService) : ControllerBase
     {
         [HttpPost("weekly-data/{season}/{week}")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
@@ -70,6 +70,10 @@ namespace Football.Api.Controllers
             count += await matchupAnalysisService.PostMatchupRankings(Position.K, week);
             return Ok(count);
         }
+
+        [HttpPost("current-season-tunings")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UploadCurrentSeasonTunings() => Ok(await settingsService.UploadCurrentSeasonTunings());
     }
 
 
