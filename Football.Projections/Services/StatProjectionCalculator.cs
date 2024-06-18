@@ -13,7 +13,7 @@ namespace Football.Projections.Services
         private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
         private readonly Season _season = season.CurrentValue;
 
-        public SeasonDataQB CalculateStatProjection(List<SeasonDataQB> seasons)
+        public SeasonDataQB CalculateStatProjection(List<SeasonDataQB> seasons, double gamesPlayedInjured)
         {
             var secondYearLeap = true;
 
@@ -45,6 +45,8 @@ namespace Football.Projections.Services
 
             foreach (var s in seasons)
             {
+                if (s.Season == _season.CurrentSeason - 1) s.Games += gamesPlayedInjured;
+
                 if (s.Games < _season.Games)
                 {
                     s.Completions += (s.Completions / s.Games) * (_season.Games - s.Games);
@@ -89,7 +91,7 @@ namespace Football.Projections.Services
             };
         }
 
-        public SeasonDataRB CalculateStatProjection(List<SeasonDataRB> seasons)
+        public SeasonDataRB CalculateStatProjection(List<SeasonDataRB> seasons, double gamesPlayedInjured)
         {
             var secondYearLeap = true;
             if (seasons.Count == 0) return new SeasonDataRB();
@@ -119,6 +121,8 @@ namespace Football.Projections.Services
 
             foreach (var s in seasons)
             {
+                if (s.Season == _season.CurrentSeason - 1) s.Games += gamesPlayedInjured;
+
                 if (s.Games < _season.Games)
                 {
                     s.RushingAtt += (s.RushingAtt / s.Games) * (_season.Games - s.Games);
@@ -155,7 +159,7 @@ namespace Football.Projections.Services
                 Fumbles = avgFum
             };
         }
-        public SeasonDataWR CalculateStatProjection(List<SeasonDataWR> seasons)
+        public SeasonDataWR CalculateStatProjection(List<SeasonDataWR> seasons, double gamesPlayedInjured)
         {
             if (seasons.Count == 0) return new SeasonDataWR();
 
@@ -177,6 +181,8 @@ namespace Football.Projections.Services
 
             foreach (var s in seasons)
             {
+                if (s.Season == _season.CurrentSeason - 1) s.Games += gamesPlayedInjured;
+
                 if (s.Games < _season.Games)
                 {
                     s.Receptions += (s.Receptions / s.Games) * (_season.Games - s.Games);
@@ -214,7 +220,7 @@ namespace Football.Projections.Services
                 Fumbles = avgFum
             };
         }
-        public SeasonDataTE CalculateStatProjection(List<SeasonDataTE> seasons)
+        public SeasonDataTE CalculateStatProjection(List<SeasonDataTE> seasons, double gamesPlayedInjured)
         {
             var secondYearLeap = true;
 
@@ -244,6 +250,8 @@ namespace Football.Projections.Services
 
             foreach (var s in seasons)
             {
+                if (s.Season == _season.CurrentSeason - 1) s.Games += gamesPlayedInjured;
+
                 if (s.Games < _season.Games)
                 {
                     s.Receptions += (s.Receptions / s.Games) * (_season.Games - s.Games);
