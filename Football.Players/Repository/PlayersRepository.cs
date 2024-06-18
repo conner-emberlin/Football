@@ -242,9 +242,10 @@ namespace Football.Players.Repository
 
         public async Task<Dictionary<int, double>> GetGamesPlayedInjuredBySeason(int season)
         {
-            var query = $@"SELECT [PlayerId], [GamesPlayedInjured]
+            var query = $@"SELECT [PlayerId], SUM(GamesPlayedInjured)
                         FROM [dbo].InSeasonInjuries
-                        WHERE [Season] = @season";                            
+                        WHERE [Season] = @season
+                        GROUP BY [PlayerId]";                            
             return (await dbConnection.QueryAsync<(int PlayerId, double GamesPlayedInjured)>(query, new { season })).ToDictionary(p => p.PlayerId, p => p.GamesPlayedInjured);
         }
 
