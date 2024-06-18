@@ -90,8 +90,7 @@ namespace Football.Players.Repository
                         FROM [dbo].SeasonProjections
                         WHERE [PlayerId] IN @playerIds
                             AND [Season] = @season";
-            var t = (await dbConnection.QueryAsync<(int PlayerId, double ProjectedPoints)>(query, new { playerIds, season })).ToDictionary(p => p.PlayerId, p => p.ProjectedPoints);
-            return t;
+            return (await dbConnection.QueryAsync<(int PlayerId, double ProjectedPoints)>(query, new { playerIds, season })).ToDictionary(p => p.PlayerId, p => p.ProjectedPoints);
         }
 
         public async Task<double> GetWeeklyProjection(int season, int week, int playerId)
@@ -239,6 +238,14 @@ namespace Football.Players.Repository
                             WHERE [Season] = @season
                                 AND [InjuryEndWeek] = 0";
             return (await dbConnection.QueryAsync<InSeasonInjury>(query, new { season })).ToList();                                          
+        }
+
+        public async Task<Dictionary<int, double>> GetGamesPlayedInjuredBySeason(int season)
+        {
+            var query = $@"SELECT [PlayerId], [GamesPlayedInjured]
+                        FROM [dbo].InSeasonInjuries
+                        WHERE [Season] = @season";                            
+            return (await dbConnection.QueryAsync<(int PlayerId, double GamesPlayedInjured)>(query, new { season })).ToDictionary(p => p.PlayerId, p => p.GamesPlayedInjured);
         }
 
         public async Task<int> PostInSeasonInjury(InSeasonInjury injury)
