@@ -94,6 +94,7 @@ namespace Football.Projections.Services
         public SeasonDataRB CalculateStatProjection(List<SeasonDataRB> seasons, double gamesPlayedInjured)
         {
             var secondYearLeap = true;
+
             if (seasons.Count == 0) return new SeasonDataRB();
 
             if (seasons.Count > 1)
@@ -105,7 +106,7 @@ namespace Football.Projections.Services
                 seasons = seasons.Where(s => !backupSeasons.Contains(s.Season)).ToList();
             }
 
-            var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearRBLeap;
+            var recentWeight = seasons.Count > 1 ? _tunings.Weight : secondYearLeap ? _tunings.SecondYearRBLeap : 1;
             var recentSeason = seasons.Max(s => s.Season);
             var previousSeasons = seasons.Count - 1;
             var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
@@ -290,32 +291,6 @@ namespace Football.Projections.Services
             };
         }
        
-        public WeeklyFantasy WeightedWeeklyAverage(List<WeeklyFantasy> weeks, int currentWeek)
-        {
-            if (weeks.Count == 0) return new WeeklyFantasy();
-
-            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
-
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
-            var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
-            var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
-            WeeklyFantasy weightedAverage = new()
-            {
-                PlayerId = weeks.First().PlayerId,
-                Season = weeks.First().Season,
-                Week = currentWeek,
-                Games = 1,
-                Name = weeks.First().Name,
-                Position = weeks.First().Position
-            };
-
-            foreach (var w in weeks)
-            {
-                weightedAverage.FantasyPoints += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.FantasyPoints : olderWeekWeight * w.FantasyPoints;
-            }
-            return weightedAverage;
-        }
-
         public WeeklyDataQB WeightedWeeklyAverage(List<WeeklyDataQB> weeks, int currentWeek)
         {
             if (weeks.Count == 0) return new WeeklyDataQB();

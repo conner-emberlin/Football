@@ -9,7 +9,6 @@ namespace Football.Projections.Interfaces
         public SeasonDataRB CalculateStatProjection(List<SeasonDataRB> seasons, double gamesPlayedInjured);
         public SeasonDataWR CalculateStatProjection(List<SeasonDataWR> seasons, double gamesPlayedInjured);
         public SeasonDataTE CalculateStatProjection(List<SeasonDataTE> seasons, double gamesPlayedInjured);
-        public WeeklyFantasy WeightedWeeklyAverage(List<WeeklyFantasy> weeks, int currentWeek);
         public WeeklyDataQB WeightedWeeklyAverage(List<WeeklyDataQB> weeks, int currentWeek);
         public WeeklyDataRB WeightedWeeklyAverage(List<WeeklyDataRB> weeks, int currentWeek);
         public WeeklyDataWR WeightedWeeklyAverage(List<WeeklyDataWR> weeks, int currentWeek);
