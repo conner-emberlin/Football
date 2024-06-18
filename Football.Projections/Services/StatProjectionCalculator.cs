@@ -45,7 +45,7 @@ namespace Football.Projections.Services
 
             foreach (var s in seasons)
             {
-                if (s.Season == _season.CurrentSeason - 1) s.Games += gamesPlayedInjured;
+                if (s.Season == _season.CurrentSeason - 1) s.Games -= gamesPlayedInjured;
 
                 if (s.Games < _season.Games)
                 {
@@ -121,7 +121,7 @@ namespace Football.Projections.Services
 
             foreach (var s in seasons)
             {
-                if (s.Season == _season.CurrentSeason - 1) s.Games += gamesPlayedInjured;
+                if (s.Season == _season.CurrentSeason - 1) s.Games -= gamesPlayedInjured;
 
                 if (s.Games < _season.Games)
                 {
@@ -181,7 +181,7 @@ namespace Football.Projections.Services
 
             foreach (var s in seasons)
             {
-                if (s.Season == _season.CurrentSeason - 1) s.Games += gamesPlayedInjured;
+                if (s.Season == _season.CurrentSeason - 1) s.Games -= gamesPlayedInjured;
 
                 if (s.Games < _season.Games)
                 {
@@ -250,7 +250,7 @@ namespace Football.Projections.Services
 
             foreach (var s in seasons)
             {
-                if (s.Season == _season.CurrentSeason - 1) s.Games += gamesPlayedInjured;
+                if (s.Season == _season.CurrentSeason - 1) s.Games -= gamesPlayedInjured;
 
                 if (s.Games < _season.Games)
                 {
