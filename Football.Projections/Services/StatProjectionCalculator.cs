@@ -1,9 +1,9 @@
-﻿using Football.Projections.Interfaces;
-using Football.Players.Models;
+﻿using Football.Fantasy.Models;
 using Football.Models;
+using Football.Players.Models;
+using Football.Projections.Interfaces;
 using Microsoft.Extensions.Options;
 using Serilog;
-using Football.Fantasy.Models;
 
 namespace Football.Projections.Services
 {
@@ -235,7 +235,7 @@ namespace Football.Projections.Services
                 seasons = seasons.Where(s => !backupSeasons.Contains(s.Season)).ToList();
             }
             
-            var recentWeight = seasons.Count > 1 ? _tunings.Weight : secondYearLeap ? _tunings.SecondYearWRLeap : 1;
+            var recentWeight = seasons.Count > 1 ? _tunings.Weight : secondYearLeap ? _tunings.SecondYearTELeap : 1;
             var recentSeason = seasons.Max(s => s.Season);
             var previousSeasons = seasons.Count - 1;
             var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;

@@ -513,6 +513,7 @@ namespace Football.Projections.Services
             adjustments.Add(await InjuryAdjustment(seasonProjections));
             adjustments.Add(await SuspensionAdjustment(seasonProjections));
             adjustments.Add(await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges));
+            adjustments.Add(await QuarterbackChangeAdjustment(seasonProjections, qbChanges));
 
             return AccumulateAdjustments(seasonProjections, adjustments);
         }

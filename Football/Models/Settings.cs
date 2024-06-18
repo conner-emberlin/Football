@@ -70,6 +70,7 @@ namespace Football.Models
         public double SecondYearWRLeap { get; set; }
         public double SecondYearRBLeap { get; set; }
         public double SecondYearQBLeap { get; set; }
+        public double SecondYearTELeap { get; set; }
         public double NewQBFloor { get; set; }
         public double NewQBCeiling { get; set; }
         public int SeasonDataTrimmingGames { get; set; }
