@@ -10,6 +10,6 @@ namespace Football.Players.Models
     {
         public int PlayerId { get; set; }
         public int Season { get; set; }
-        public int Games { get; set; }
+        public double Games { get; set; }
     }
 }

@@ -27,10 +27,10 @@ namespace Football.Projections.Services
                 seasons = seasons.Where(s => !backupSeasons.Contains(s.Season)).ToList();
             }
 
-            var recentWeight = seasons.Count > 1 ? _tunings.Weight : secondYearLeap ? _tunings.SecondYearQBLeap : 1;
+            var recentWeight = seasons.Count > 1 ? _tunings.QBWeight : secondYearLeap ? _tunings.SecondYearQBLeap : 1;
             var recentSeason = seasons.Max(s => s.Season);
             var previousSeasons = seasons.Count - 1;
-            var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
+            var previousWeight = seasons.Count > 1 ? ((1 - _tunings.QBWeight) * ((double)1 / previousSeasons)) : 0;
 
             var avgComp = 0.0;
             var avgAtt = 0.0;

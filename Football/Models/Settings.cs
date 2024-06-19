@@ -67,6 +67,7 @@ namespace Football.Models
         public int Season { get; set; }
         public int RBFloor { get; set; }
         public double LeadRBFactor { get; set; }
+        public double QBWeight { get; set; }
         public double Weight { get; set; }
         public double SecondYearWRLeap { get; set; }
         public double SecondYearRBLeap { get; set; }
