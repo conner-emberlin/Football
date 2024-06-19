@@ -231,7 +231,7 @@ namespace Football.Projections.Services
                 if (currentEliteRookieWRsWithProjections.TryGetValue(sp.PlayerId, out var rookieRecord))
                 {
                     var otherReceiversOnTeam = playerTeams.Where(p => p.TeamId == rookieRecord.TeamId && p.PlayerId != sp.PlayerId);
-                    if (!otherReceiversOnTeam.Any(o => seasonProjectionDictionary.TryGetValue(o.PlayerId, out var proj) && proj > 240))
+                    if (!otherReceiversOnTeam.Any(o => seasonProjectionDictionary.TryGetValue(o.PlayerId, out var proj) && proj > _tunings.WR1MinPoints))
                         adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (_tunings.EliteWRRookieTopReceiverFactor - 1));
                 }
             }
@@ -253,11 +253,11 @@ namespace Football.Projections.Services
                     var newRBsOnTeamProjections = seasonProjectionDictionary.Where(s => newRBsOnTeam.Contains(s.Key));
                     var previousRBsOnTeamProjections = seasonProjectionDictionary.Where(s => previousRBsOnTeam.Contains(s.Key));
                     
-                    if (!newRBsOnTeamProjections.Any(n => n.Value > 200) && previousRBsOnTeamProjections.Any(p => p.Value > 200))
+                    if (!newRBsOnTeamProjections.Any(n => n.Value > _tunings.RB1MinPoints) && previousRBsOnTeamProjections.Any(p => p.Value > _tunings.RB1MinPoints))
                     {
                         var seasonData = await statisticsService.GetSeasonData<SeasonDataRB>(Position.RB, sp.PlayerId, true);
-                        if (seasonData.Count < 3 && YardsPerCarryCareerAverage(seasonData) > 4)
-                            adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (2.5 - 1));
+                        if (seasonData.Count < 3 && YardsPerCarryCareerAverage(seasonData) > _tunings.RBPromotionMinYardsPerCarry)
+                            adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (_tunings.RBPromotionFactor - 1));
                     }
                 }
             }

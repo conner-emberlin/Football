@@ -89,6 +89,10 @@ namespace Football.Models
         public double VetQBNewTeamFactor { get; set; }
         public int EliteWRDraftPositionMax { get; set; }
         public double EliteWRRookieTopReceiverFactor { get; set; }
+        public double WR1MinPoints { get; set; }
+        public double RB1MinPoints { get; set; }
+        public double RBPromotionMinYardsPerCarry { get; set; }
+        public double RBPromotionFactor { get; set; }
     }
 
     public class WeeklyTunings

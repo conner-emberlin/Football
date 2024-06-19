@@ -11,6 +11,7 @@ using Football.Players.Models;
 using Football.Enums;
 using Football.Projections.Services;
 using Football.Fantasy.Models;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Football.Tests
 {
@@ -39,7 +40,11 @@ namespace Football.Tests
 
         private readonly Mock<IPlayersService> _mockPlayersService;
         private readonly Mock<IMatchupAnalysisService> _mockMatchupAnalysisService;
+        private readonly Mock<IStatisticsService> _mockStatisticsService;
+        private readonly Mock<IFantasyAnalysisService> _mockFantasyAnalysisService;
+        private readonly Mock<IFantasyDataService> _mockFantasyDataService;
         private readonly Mock<ILogger> _mockLogger;
+        private readonly Mock<IMemoryCache> _mockMemoryCache;
         private readonly Mock<IOptionsMonitor<Season>> _mockSeason;
         private readonly Mock<IOptionsMonitor<Tunings>> _mockTunings;
         private readonly Mock<IOptionsMonitor<WeeklyTunings>> _mockWeeklyTunings;
@@ -60,7 +65,11 @@ namespace Football.Tests
 
             _mockPlayersService = _mock.GetMock<IPlayersService>();
             _mockMatchupAnalysisService = _mock.GetMock<IMatchupAnalysisService>();
+            _mockStatisticsService = _mock.GetMock<IStatisticsService>();
+            _mockFantasyAnalysisService = _mock.GetMock<IFantasyAnalysisService>();
+            _mockFantasyDataService = _mock.GetMock<IFantasyDataService>();
             _mockLogger = _mock.GetMock<ILogger>();
+            _mockMemoryCache = _mock.GetMock<IMemoryCache>();
             _mockSeason = _mock.GetMock<IOptionsMonitor<Season>>();
             _mockTunings = _mock.GetMock<IOptionsMonitor<Tunings>>();
             _mockWeeklyTunings = _mock.GetMock<IOptionsMonitor<WeeklyTunings>>();
@@ -72,7 +81,7 @@ namespace Football.Tests
             _mockPlayersService.Setup(ps => ps.GetPlayerTeams(_season.CurrentSeason, It.IsAny<IEnumerable<int>>())).ReturnsAsync([_playerTeam]);
             _mockPlayersService.Setup(ps => ps.GetTeamId(_team)).ReturnsAsync(_teamId);
 
-            _sut = new AdjustmentService(_mockPlayersService.Object, _mockMatchupAnalysisService.Object, _mockLogger.Object, _mockSeason.Object, _mockTunings.Object, _mockWeeklyTunings.Object);
+            _sut = new AdjustmentService(_mockPlayersService.Object, _mockMatchupAnalysisService.Object, _mockStatisticsService.Object, _mockFantasyAnalysisService.Object, _mockFantasyDataService.Object, _mockSeason.Object, _mockTunings.Object, _mockWeeklyTunings.Object, _mockMemoryCache.Object);
         }
 
         [Fact]
