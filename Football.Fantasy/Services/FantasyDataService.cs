@@ -19,6 +19,7 @@ namespace Football.Fantasy.Services
         public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId) => await fantasyData.GetSeasonFantasy(playerId);
         public async Task<List<SeasonFantasy>> GetAllSeasonFantasyByPosition(Position position, int minGames) => await fantasyData.GetAllSeasonFantasyByPosition(position.ToString(), minGames);
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId) => await fantasyData.GetWeeklyFantasyByPlayer(playerId, _season.CurrentSeason);
+        public async Task<List<WeeklyFantasy>> GetWeeklyFantasyBySeason(int playerId, int season) => await fantasyData.GetWeeklyFantasyByPlayer(playerId, season);
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => await fantasyData.GetWeeklyFantasy(season, week);
         public async Task<List<WeeklyFantasy>> GetAllWeeklyFantasyByPosition(Position position) => await fantasyData.GetAllWeeklyFantasyByPosition(position.ToString());
         public async Task<int> PostSeasonFantasy(int season, Position position)

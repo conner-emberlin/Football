@@ -29,19 +29,44 @@
 {
     <div class="spinner"></div>
 }
-@if (badRequestError)
+@if (SeasonProjectionAnalyses.Any())
 {
-    <p>Unexpected Error. Please try again.</p>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Season </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("MSE"))">MSE</span>
+                        <span class="oi @(tableSort.GetSortStyle("MSE"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RSquared"))">RSqrd</span>
+                        <span class="oi @(tableSort.GetSortStyle("RSquared"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("AvgError"))">AvgError</span>
+                        <span class="oi @(tableSort.GetSortStyle("AvgError"))"></span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in SeasonProjectionAnalyses)
+                {
+                    <tr>
+                        <td>@p.Season</td>
+                        <td>@Math.Round(p.MSE, 2)</td>
+                        <td>@Math.Round(p.RSquared, 4)</td>
+                        <td>@p.AvgError</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
-
-else if (ProjectionAnalyses.Any())
+@if (ProjectionAnalyses.Any())
 {
-    @if (SeasonOver())
-    {
-        
-
-    }
-
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -110,9 +135,10 @@ else if (ProjectionAnalyses.Any())
 @code {
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
-    private bool badRequestError;
 
     private List<WeeklyProjectionAnalysis>? ProjectionAnalyses = new();
+    private List<SeasonProjectionAnalysis>? SeasonProjectionAnalyses = new();
+
     private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker"};
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
@@ -125,10 +151,8 @@ else if (ProjectionAnalyses.Any())
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
-        if (ProjectionAnalyses != null)
-        {
-            ProjectionAnalyses.Clear();
-        }
+        if (ProjectionAnalyses != null) ProjectionAnalyses.Clear();
+        if (SeasonProjectionAnalyses != null) SeasonProjectionAnalyses.Clear();
         tableSort = new();
     }
 
@@ -137,34 +161,30 @@ else if (ProjectionAnalyses.Any())
         loading = true;
         shouldRender = true;
 
-        if (ProjectionAnalyses is not null)
-        {
-            ProjectionAnalyses.Clear();
-        }
+        if (ProjectionAnalyses != null) ProjectionAnalyses.Clear();
+        if (SeasonProjectionAnalyses != null) SeasonProjectionAnalyses.Clear();
 
-        switch (Position.ToLower())
+        PositionEnum = Position.ToLower() switch
         {
-            case "quarterback":
-                PositionEnum = "QB";
-                break;
-            case "runningback":
-                PositionEnum = "RB";
-                break;
-            case "wide receiver":
-                PositionEnum = "WR";
-                break;
-            case "tight end":
-                PositionEnum = "TE";
-                break;
-            case "dst":
-                PositionEnum = "DST";
-                break;
-            case "kicker":
-                PositionEnum = "K";
-                break;
-            default: PositionEnum = "QB"; break;
-        }
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/weekly-analysis/" + @PositionEnum);
+            "quarterback" => "QB",
+            "runningback" => "RB",
+            "wide receiver" => "WR",
+            "tight end" => "TE",
+            "dst" => "DST",
+            "kicker" => "K",
+            _ => "QB"
+        };
+
+        await GetCurrentSeasonWeeklyAnalysis(PositionEnum);
+        await GetPreviousSeasonsAnalysis(PositionEnum);
+
+        loading = false;
+        shouldRender = true;
+    }
+
+    private async Task GetCurrentSeasonWeeklyAnalysis(string position)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/weekly-analysis/" + position);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -173,21 +193,24 @@ else if (ProjectionAnalyses.Any())
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
             ProjectionAnalyses = await JsonSerializer.DeserializeAsync<List<WeeklyProjectionAnalysis>>(responseStream, options);
-            badRequestError = false;
         }
-        else
-        {
-            badRequestError = true;
-        }
-        loading = false;
-        shouldRender = true;
     }
 
-    private void SetTable(string columnName)
+    private async Task GetPreviousSeasonsAnalysis(string position)
     {
-        ProjectionAnalyses = tableSort.SortTable<WeeklyProjectionAnalysis>(ProjectionAnalyses, columnName);
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/season-projection-analysis/all/" + position);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            SeasonProjectionAnalyses = await JsonSerializer.DeserializeAsync<List<SeasonProjectionAnalysis>>(responseStream, options);
+        }
     }
 
+    private void SetTable(string columnName) => ProjectionAnalyses = tableSort.SortTable<WeeklyProjectionAnalysis>(ProjectionAnalyses, columnName);
     private string GetProjectionErrorLink(string position, int week) => string.Format("{0}/{1}/{2}", "/ProjectionError", position, week);
 
 }

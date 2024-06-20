@@ -180,7 +180,7 @@ namespace Football.Projections.Services
             {
                 if (seasonProjectionDictionary.TryGetValue(player.PlayerId, out var seasonProjection))
                 {
-                    var weeklyFantasy = (await fantasyService.GetWeeklyFantasy(player.PlayerId)).Where(w => w.Season == season);
+                    var weeklyFantasy = await fantasyService.GetWeeklyFantasyBySeason(player.PlayerId, season);
                     analyses.Add(new SeasonProjectionError
                     {
                         Player = player,
@@ -217,7 +217,7 @@ namespace Football.Projections.Services
         public async Task<List<SeasonProjectionAnalysis>> GetAllSeasonProjectionAnalyses(Position position)
         {
             List<SeasonProjectionAnalysis> spa = [];
-            foreach (var season in await playersService.GetSeasons()) spa.Add(await GetSeasonProjectionAnalysis(position, season));
+            foreach (var season in (await playersService.GetSeasons()).Where(s => s < _season.CurrentSeason)) spa.Add(await GetSeasonProjectionAnalysis(position, season));
             return spa;
         }
 
