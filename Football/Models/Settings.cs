@@ -75,6 +75,7 @@ namespace Football.Models
         public double SecondYearTELeap { get; set; }
         public double NewQBFloor { get; set; }
         public double NewQBCeiling { get; set; }
+        public double NewQBCeilingForRB { get; set; }
         public int SeasonDataTrimmingGames { get; set; }
         public double AverageQBProjection { get; set; }
         public double NewWRMinPoints { get; set; }

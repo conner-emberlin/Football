@@ -30,7 +30,7 @@ namespace Football.Api.Controllers
                 List<SeasonProjectionModel> model = [];
 
                 if (positionEnum == Position.FLEX)
-                    model = mapper.Map<List<SeasonProjectionModel>>(await analysisService.SeasonFlexRankings());
+                    model = mapper.Map<List<SeasonProjectionModel>>(analysisService.SeasonFlexRankings());
 
                 else if (seasonProjectionService.GetProjectionsFromCache(positionEnum, out var projectionsCache))
                     model = mapper.Map<List<SeasonProjectionModel>>(projectionsCache);
@@ -45,8 +45,8 @@ namespace Football.Api.Controllers
 
                 var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
                 model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
-
-                return Ok(model);
+                var retVal = positionEnum == Position.FLEX ? model : model.OrderByDescending(m => m.ProjectedPoints).ToList();
+                return Ok(retVal);
             }
             return BadRequest();
         }
@@ -69,7 +69,7 @@ namespace Football.Api.Controllers
         }
 
         [HttpGet("weekly/{position}")]
-        [ProducesResponseType(typeof(List<WeekProjectionModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<WeekProjectionModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetWeeklyProjections(string position)
         {
@@ -99,7 +99,7 @@ namespace Football.Api.Controllers
                 models.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team.Team : string.Empty);                
                 models.ForEach(m => m.Opponent = teamDictionary.TryGetValue(m.PlayerId, out var team) ? scheduleDictionary[team.TeamId].OpposingTeam : string.Empty);
 
-                return Ok(models);
+                return Ok(models.OrderByDescending(m => m.ProjectedPoints));
             }
             return BadRequest();
         }

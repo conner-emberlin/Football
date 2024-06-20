@@ -57,7 +57,7 @@ namespace Football.Tests
         }
 
         [Fact]
-        public async Task SeasonFlexRankings_AreOrderedByVorp()
+        public void SeasonFlexRankings_AreOrderedByVorp()
         {
             var qbProjection1 = new SeasonProjection { Name = "QB Name1", PlayerId = 1, Position = "QB", ProjectedPoints = 100, Season = _season.CurrentSeason };
             var qbProjection2 = new SeasonProjection { Name = "QB Name2", PlayerId = 2, Position = "QB", ProjectedPoints = 110, Season = _season.CurrentSeason };
@@ -69,7 +69,7 @@ namespace Football.Tests
             _mockSeasonProjectionService.Setup(s => s.GetProjections(Position.RB)).ReturnsAsync([]);
             _mockSeasonProjectionService.Setup(s => s.GetProjections(Position.TE)).ReturnsAsync([teProjection1, teProjection2]);
 
-            var actual = await _sut.SeasonFlexRankings();
+            var actual = _sut.SeasonFlexRankings();
 
             Assert.True(actual.ElementAt(0).PlayerId == 4 && actual.ElementAt(1).PlayerId == 2);
             Assert.True(actual.ElementAt(2).Vorp == 0 && actual.ElementAt(3).Vorp == 0);

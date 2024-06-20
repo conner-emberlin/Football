@@ -141,31 +141,33 @@ namespace Football.Projections.Services
             }
             return new();
         }
-        public async Task<IEnumerable<SeasonFlex>> SeasonFlexRankings()
+        public IEnumerable<SeasonFlex> SeasonFlexRankings()
         {
             List<SeasonFlex> flexRankings = [];
-            var rankings = (await seasonProjection.GetProjections(Position.QB))
-                           .Union(await seasonProjection.GetProjections(Position.RB))
-                           .Union(await seasonProjection.GetProjections(Position.WR))
-                           .Union(await seasonProjection.GetProjections(Position.TE));
-
-            var replacementPointsDictionary = GetReplacementPointsDictionary(rankings);
-
-            foreach (var rank in rankings)
+            if (seasonProjection.GetProjectionsFromSQL(Position.QB, _season.CurrentSeason, out var qb)
+                && seasonProjection.GetProjectionsFromSQL(Position.RB, _season.CurrentSeason, out var rb)
+                && seasonProjection.GetProjectionsFromSQL(Position.WR, _season.CurrentSeason, out var wr)
+                && seasonProjection.GetProjectionsFromSQL(Position.TE, _season.CurrentSeason, out var te))
             {
-                if (Enum.TryParse(rank.Position, out Position position))
+                var rankings = qb.Union(rb).Union(wr).Union(te);
+                var replacementPointsDictionary = GetReplacementPointsDictionary(rankings);
+                foreach (var rank in rankings)
                 {
-                    flexRankings.Add(new SeasonFlex
+                    if (Enum.TryParse(rank.Position, out Position position))
                     {
-                        PlayerId = rank.PlayerId,
-                        Name = rank.Name,
-                        Position = rank.Position,
-                        ProjectedPoints = rank.ProjectedPoints,
-                        Vorp = rank.ProjectedPoints - replacementPointsDictionary[position]
-                    });
+                        flexRankings.Add(new SeasonFlex
+                        {
+                            PlayerId = rank.PlayerId,
+                            Name = rank.Name,
+                            Position = rank.Position,
+                            ProjectedPoints = rank.ProjectedPoints,
+                            Vorp = (rank.ProjectedPoints - replacementPointsDictionary[position]) / replacementPointsDictionary[position]
+                        });
+                    }
                 }
+                return flexRankings.OrderByDescending(f => f.Vorp).ToList();
             }
-            return flexRankings.OrderByDescending(f => f.Vorp).ToList();
+            return Enumerable.Empty<SeasonFlex>().ToList();           
         }
 
         public async Task<List<SeasonProjectionError>> GetSeasonProjectionError(Position position, int priorSeason = 0)

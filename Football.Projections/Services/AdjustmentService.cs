@@ -79,7 +79,7 @@ namespace Football.Projections.Services
                     var qbProjections = await playerService.GetSeasonProjections([changeRecord.PreviousQBId, changeRecord.CurrentQBId], _season.CurrentSeason);
                     var previousQbProjection = qbProjections.TryGetValue(changeRecord.PreviousQBId, out var projectPrev) ? projectPrev : _tunings.AverageQBProjection;
                     var currentQbProjection = qbProjections.TryGetValue(changeRecord.CurrentQBId, out var currentPrev) ? currentPrev : _tunings.AverageQBProjection;
-                    var ratio =  QBProjectionRatio(previousQbProjection, currentQbProjection, changeRecord.CurrentQBIsRookie);
+                    var ratio =  QBProjectionRatio(s.Position, previousQbProjection, currentQbProjection, changeRecord.CurrentQBIsRookie);
                     adjustments.Add(s.PlayerId, s.ProjectedPoints * (ratio - 1));
                 }
             }
@@ -315,11 +315,17 @@ namespace Football.Projections.Services
             return weekProjections;
         }
 
-        private double QBProjectionRatio(double previousProjection, double currentProjection, bool qbIsRookie)
+        private double QBProjectionRatio(string position, double previousProjection, double currentProjection, bool qbIsRookie)
         {
             if (previousProjection == currentProjection) return 1;
 
             if (qbIsRookie && currentProjection / previousProjection > 1) return 1;
+
+            if (position == Position.RB.ToString())
+            {
+               return previousProjection > currentProjection ? Math.Max(_tunings.NewQBFloor, currentProjection / previousProjection)
+                                            : Math.Min(_tunings.NewQBCeilingForRB, currentProjection / previousProjection);
+            }
 
             return previousProjection > currentProjection ? Math.Max(_tunings.NewQBFloor, currentProjection / previousProjection)
                                             : Math.Min(_tunings.NewQBCeiling, currentProjection / previousProjection);
