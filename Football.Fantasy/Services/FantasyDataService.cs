@@ -50,8 +50,7 @@ namespace Football.Fantasy.Services
                     foreach (var group in weeklyFantasy)
                     {
                         var total = 0.0;
-                        foreach (var week in group.Fantasy)
-                            total += week.FantasyPoints;
+                        foreach (var week in group.Fantasy) total += week.FantasyPoints;
                         seasonFantasy.Add(new SeasonFantasy
                         {
                             PlayerId = group.PlayerId,
@@ -105,8 +104,7 @@ namespace Football.Fantasy.Services
                         var opponentPID = teams.First(t => t.TeamId == opponent).PlayerId;
                         var opponentStat = stats.First(s => s.PlayerId == opponentPID);
 
-                        if(teamId > 0 && gameResult != null) 
-                            weeklyFantasy.Add(calculator.CalculateFantasy(data, opponentStat, gameResult, teamId));
+                        if(teamId > 0 && gameResult != null) weeklyFantasy.Add(calculator.CalculateFantasy(data, opponentStat, gameResult, teamId));
                     }
                     break;
                 default: break;
@@ -132,7 +130,7 @@ namespace Football.Fantasy.Services
                 }
                 return filteredFantasy;
             }
-            else return allFantasy;
+            return allFantasy;
         }
 
         public async Task<List<WeeklyFantasy>> GetWeeklyTeamFantasy(string team, int week)

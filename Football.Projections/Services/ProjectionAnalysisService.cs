@@ -209,7 +209,7 @@ namespace Football.Projections.Services
                     MSE = count > 0 ? Math.Round(sumOfSquares / count, 3) : 0,
                     RSquared = totalSumOfSquares > 0 ? 1 - (sumOfSquares / totalSumOfSquares) : 0,
                     AvgError = count > 0 ? Math.Round(totalError / count) : 0,
-                    AvgErrorPerGame = count > 0 ? Math.Round(totalError / count / _season.Games) : 0
+                    AvgErrorPerGame = count > 0 ? Math.Round(totalError / count / _season.Games, 2) : 0
                 };
             }
             return new SeasonProjectionAnalysis { };
