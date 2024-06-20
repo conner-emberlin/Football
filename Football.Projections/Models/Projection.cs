@@ -62,6 +62,7 @@ namespace Football.Projections.Models
         public double MSE { get; set; }
         public double RSquared { get; set; }
         public double AvgError { get; set; }
+        public double AvgErrorPerGame { get; set; }
     }
 }
 

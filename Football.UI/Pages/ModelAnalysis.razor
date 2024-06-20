@@ -29,7 +29,7 @@
 {
     <div class="spinner"></div>
 }
-@if (SeasonProjectionAnalyses.Any())
+@if (SeasonProjectionAnalyses.Any() && PositionEnum != "DST" && PositionEnum != "K")
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
@@ -49,6 +49,10 @@
                         <span class="sort-link" onclick="@(() => SetTable("AvgError"))">AvgError</span>
                         <span class="oi @(tableSort.GetSortStyle("AvgError"))"></span>
                     </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("AvgErrorPerGame"))">AvgErrorPerGame</span>
+                        <span class="oi @(tableSort.GetSortStyle("AvgErrorPerGame"))"></span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -59,6 +63,7 @@
                         <td>@Math.Round(p.MSE, 2)</td>
                         <td>@Math.Round(p.RSquared, 4)</td>
                         <td>@p.AvgError</td>
+                        <td>@p.AvgErrorPerGame</td>
                     </tr>
                 }
             </tbody>
