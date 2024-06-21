@@ -14,7 +14,7 @@ namespace Football.Projections.Services
 {
     public class ProjectionAnalysisService(IFantasyDataService fantasyService,
         IOptionsMonitor<Season> season, IProjectionService<SeasonProjection> seasonProjection,
-        IProjectionService<WeekProjection> weekProjection, IOptionsMonitor<Starters> starters, IPlayersService playersService, 
+        IProjectionService<WeekProjection> weekProjection, IOptionsMonitor<Starters> starters, IPlayersService playersService, IStatisticsService statisticsService,
         ISettingsService settingsService, ISleeperLeagueService sleeperLeagueService) : IProjectionAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
@@ -175,10 +175,13 @@ namespace Football.Projections.Services
             var players = await playersService.GetPlayersByPosition(position);
             var season = priorSeason > 0 ? priorSeason : _season.CurrentSeason;
             var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), season);
+            var gamesPlayedDictionary = await GamesPlayedDictionary(position, season);
+
             List<SeasonProjectionError> analyses = [];
             foreach (var player in players)
             {
-                if (seasonProjectionDictionary.TryGetValue(player.PlayerId, out var seasonProjection))
+                if (seasonProjectionDictionary.TryGetValue(player.PlayerId, out var seasonProjection)
+                    && gamesPlayedDictionary.TryGetValue(player.PlayerId, out var games) && games > 14)
                 {
                     var weeklyFantasy = await fantasyService.GetWeeklyFantasyBySeason(player.PlayerId, season);
                     analyses.Add(new SeasonProjectionError
@@ -209,7 +212,8 @@ namespace Football.Projections.Services
                     MSE = count > 0 ? Math.Round(sumOfSquares / count, 3) : 0,
                     RSquared = totalSumOfSquares > 0 ? 1 - (sumOfSquares / totalSumOfSquares) : 0,
                     AvgError = count > 0 ? Math.Round(totalError / count) : 0,
-                    AvgErrorPerGame = count > 0 ? Math.Round(totalError / count / _season.Games, 2) : 0
+                    AvgErrorPerGame = count > 0 ? Math.Round(totalError / count / _season.Games, 2) : 0,
+                    ProjectionCount = count
                 };
             }
             return new SeasonProjectionAnalysis { };
@@ -483,6 +487,18 @@ namespace Football.Projections.Services
                 }
             }
             return projections;
+        }
+
+        private async Task<Dictionary<int, double>> GamesPlayedDictionary(Position position, int season)
+        {
+            return position switch
+            {
+                Position.QB => (await statisticsService.GetSeasonData<SeasonDataQB>(position, season, false)).ToDictionary(s => s.PlayerId, s => s.Games),
+                Position.RB => (await statisticsService.GetSeasonData<SeasonDataRB>(position, season, false)).ToDictionary(s => s.PlayerId, s => s.Games),
+                Position.WR => (await statisticsService.GetSeasonData<SeasonDataWR>(position, season, false)).ToDictionary(s => s.PlayerId, s => s.Games),
+                Position.TE => (await statisticsService.GetSeasonData<SeasonDataTE>(position, season, false)).ToDictionary(s => s.PlayerId, s => s.Games),
+                _ => new Dictionary<int, double>()
+            };
         }
 
     }

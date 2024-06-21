@@ -53,6 +53,10 @@
                         <span class="sort-link" onclick="@(() => SetTable("AvgErrorPerGame"))">AvgErrorPerGame</span>
                         <span class="oi @(tableSort.GetSortStyle("AvgErrorPerGame"))"></span>
                     </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("ProjectionCount"))">Count</span>
+                        <span class="oi @(tableSort.GetSortStyle("ProjectionCount"))"></span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -64,6 +68,7 @@
                         <td>@Math.Round(p.RSquared, 4)</td>
                         <td>@p.AvgError</td>
                         <td>@p.AvgErrorPerGame</td>
+                        <td>@p.ProjectionCount</td>
                     </tr>
                 }
             </tbody>
