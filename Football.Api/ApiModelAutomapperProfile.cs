@@ -108,6 +108,26 @@ namespace Football.Api
             CreateMap<SeasonFantasy, SeasonFantasyModel>()
                 .ForMember(s => s.FantasyPointsPerGame, o => o.MapFrom(s => s.Games > 0 ? s.FantasyPoints / s.Games : 0));
 
+            CreateMap<StartOrSit, StartOrSitModel>()
+                .ForMember(s => s.Name, o => o.MapFrom(s => s.Player.Name))
+                .ForMember(s => s.Position, o => o.MapFrom(s => s.Player.Position))
+                .ForMember(s => s.Team, o => o.MapFrom(s => s.TeamMap != null ? s.TeamMap.Team : string.Empty))
+                .ForMember(s => s.TeamId, o => o.MapFrom(s => s.TeamMap != null ? s.TeamMap.TeamId : 0))
+                .ForMember(s => s.OverUnder, o => o.MapFrom(s => s.MatchLines != null ? s.MatchLines.OverUnder : 0))
+                .ForMember(s => s.Line, o => o.MapFrom(s => s.MatchLines != null ? s.MatchLines.Line : 0))
+                .ForMember(s => s.ImpliedTeamTotal, o => o.MapFrom(s => s.MatchLines != null ? s.MatchLines.ImpliedTeamTotal : 0))
+                .ForMember(s => s.GameTime, o => o.MapFrom(s => s.Weather != null ? s.Weather.GameTime : string.Empty))
+                .ForMember(s => s.Temperature, o => o.MapFrom(s => s.Weather != null ? s.Weather.Temperature : string.Empty))
+                .ForMember(s => s.Wind, o => o.MapFrom(s => s.Weather != null ? s.Weather.Wind : string.Empty))
+                .ForMember(s => s.Condition, o => o.MapFrom(s => s.Weather != null ? s.Weather.Condition : string.Empty))
+                .ForMember(s => s.ConditionURL, o => o.MapFrom(s => s.Weather != null ? s.Weather.ConditionURL : string.Empty));
+
+            CreateMap<PlayerComparison, PlayerComparisonModel>()
+                .ForMember(p => p.Name, o => o.MapFrom(p => p.Player.Name))
+                .ForMember(p => p.FantasyPoints, o => o.MapFrom(p => p.WeeklyFantasy != null ? p.WeeklyFantasy.FantasyPoints : 0))
+                .ForMember(p => p.ProjectedPoints, o => o.MapFrom(p => p.ProjectedPoints));
+
+
         }
 
     }

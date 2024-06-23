@@ -24,5 +24,21 @@ namespace Football.UI.Helpers
             DateTime dt = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             return dt.ToString("MM/dd");
         }
+        public string StartFormat(bool start) => start ? "Start" : "Sit";
+        public string GetStartColor(bool start) => start ? "color:green" : "color:red";
+        public string FormatMatchupRank(int rank)
+        {
+            return 1 <= rank && rank < 10 ? "color:red"
+                  : 10 <= rank && rank < 20 ? "color:orange"
+                  : "color:green";
+        }
+
+        public string GetDiffColor(double diff)
+        {
+            diff *= -1;
+            return diff < 3 ? "color:green"
+                  : 3 <= diff && diff < 10 ? "color:orange"
+                  : "color:red";
+        }
     }
 }

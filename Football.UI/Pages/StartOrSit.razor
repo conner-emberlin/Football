@@ -4,10 +4,9 @@
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @using System.Text;
-@using Football.Projections.Models;
 @using Football.Players.Models;
-@using Football.Fantasy.Models;
 @using Football.Enums;
+@using Football.Api.Models;
 @using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
 
@@ -35,7 +34,7 @@
                     <th>&nbsp;&nbsp;&nbsp;&nbsp;</th>
                     @foreach (var sos in StartOrSits)
                     {
-                        <th>@sos.Player.Name (@sos.Player.Position)</th>
+                        <th>@sos.Name (@sos.Position)</th>
                     }
                 </tr>
             </thead>
@@ -44,8 +43,8 @@
                     <td>Team</td>
                     @foreach (var sos in StartOrSits)
                     {
-                        if(sos.TeamMap is not null){
-                            var imgPath = "https://localhost:7176/Logos/" + sos.TeamMap.Team + ".png";
+                        if(!string.IsNullOrEmpty(sos.Team)){
+                            var imgPath = "https://localhost:7176/Logos/" + sos.Team + ".png";
                             <td><img src="@imgPath" width="30" height="30"></td>
                         }
                         else
@@ -58,14 +57,13 @@
                     <td>Opponent</td>
                     @foreach (var sos in StartOrSits)
                     {
-                        var opp = GetOpponent(sos);
-                        if (string.IsNullOrEmpty(opp))
+                        if (sos.OpponentTeamId == 0)
                         {
                             <td>BYE</td>
                         }
                         else
                         {
-                            <td>@AtIndicator(sos) @opp <b><text style="@FormatMatchupRank(sos.MatchupRanking)">(@sos.MatchupRanking.ToString())</text></b></td>
+                            <td> @string.Format("{0} {1}", sos.AtIndicator, sos.OpponentTeam) <b><text style="@formatter.FormatMatchupRank(sos.MatchupRanking)">(@sos.MatchupRanking.ToString())</text></b></td>
                         }
                     }
                 </tr>
@@ -73,53 +71,42 @@
                     <td>Betting</td>
                     @foreach (var sos in StartOrSits)
                     {
-                        if (sos.MatchLines is not null)
-                        {
-                         <td>
-                             <p>
-                                OU: @sos.MatchLines.OverUnder
-                            <br>
-                                Line: @sos.MatchLines.Line
-                            <br>
-                                Implied Total: @sos.MatchLines.ImpliedTeamTotal
-                             </p>
-                             
-                         </td>
+                        <td>
+                            <p>
+                                OU: @sos.OverUnder
+                                <br>
+                                Line: @sos.Line
+                                <br>
+                                Implied Total: @sos.ImpliedTeamTotal
+                            </p>
 
-                        }
+                        </td>
                     }
                 </tr>
                 <tr>
                     <td>Match</td>
                     @foreach (var sos in StartOrSits)
                     {
-                        if (sos.Weather is not null)
-                        {
-                            <td>
-                                <p>
-                                    Date: @sos.Weather.GameTime
+                        <td>
+                            <p>
+                                Date: @sos.GameTime
+                                <br>
+                                @if (!string.IsNullOrEmpty(sos.Temperature))
+                                {
+                                    <text>@sos.Temperature</text>
                                     <br>
-                                    @if (!string.IsNullOrEmpty(sos.Weather.Temperature))
-                                    {
-                                        <text>@sos.Weather.Temperature</text>
-                                        <br>
-                                    }
-                                    @if (!string.IsNullOrEmpty(sos.Weather.Wind))
-                                    {
-                                        <text>@sos.Weather.Wind</text>
-                                        <br>
-                                    }
-                                    @if (!string.IsNullOrEmpty(sos.Weather.Condition))
-                                    {
-                                        <text>@sos.Weather.Condition </text> <img src="@sos.Weather.ConditionURL" width="30" height="30">
-                                    }
-                                </p>
-                            </td>
-                        }
-                        else
-                        {
-                            <td>-</td>
-                        }
+                                }
+                                @if (!string.IsNullOrEmpty(sos.Wind))
+                                {
+                                    <text>@sos.Wind</text>
+                                    <br>
+                                }
+                                @if (!string.IsNullOrEmpty(sos.Condition))
+                                {
+                                    <text>@sos.Condition </text> <img src="@sos.ConditionURL" width="30" height="30">
+                                }
+                            </p>
+                        </td>
                     }
                 </tr>
                 <tr>
@@ -141,22 +128,17 @@
                     @foreach (var sos in StartOrSits)
                     {
                         <td>
-                            @if (sos.PlayerComparisons != null)
+                            @foreach (var comp in sos.PlayerComparisons)
                             {
-                                @foreach (var comp in sos.PlayerComparisons)
-                                {
-                                    @if (comp.WeeklyFantasy != null)
-                                    {
-                                        var diff = Math.Round(@comp.ProjectedPoints - @comp.WeeklyFantasy.FantasyPoints, 2);
-                                        diff *= -1;
-                                        <text> @comp.Player.Name <b>vs</b> @GetOpponent(sos): 
-                                            Proj: @Math.Round(comp.ProjectedPoints,2) 
-                                            Actual: @Math.Round(comp.WeeklyFantasy.FantasyPoints,2)
-                                            Diff: <b><text style="@GetDiffColor(diff)">@Math.Round(diff,2)</text></b>
-                                        </text>
-                                        <br>
-                                    }
-                                }
+                                var diff = Math.Round(@comp.ProjectedPoints - @comp.FantasyPoints, 2);
+                                diff *= -1;
+                                <text>
+                                    @comp.Name <b>vs</b> @sos.OpponentTeam:
+                                    Proj: @Math.Round(comp.ProjectedPoints, 2)
+                                    Actual: @Math.Round(comp.FantasyPoints, 2)
+                                    Diff: <b><text style="@formatter.GetDiffColor(diff)">@Math.Round(diff, 2)</text></b>
+                                </text>
+                                <br>
                             }
                         </td>
                     }
@@ -165,7 +147,7 @@
                 <td>Start/Sit</td>
                     @foreach (var sos in StartOrSits)
                     {
-                        <td><b><text style="@GetStartColor(sos.Start)">@StartFormat(sos.Start)</text></b></td>
+                        <td><b><text style="@formatter.GetStartColor(sos.Start)">@formatter.StartFormat(sos.Start)</text></b></td>
                     }
                 </tr>
             </tbody>
@@ -178,8 +160,7 @@ else if (badRequestError){
 }
 
 @code {
-    public List<Player> AllPlayers { get; set; } = new();
-    public List<TeamMap> AllTeams { get; set; } = new();
+    public List<Player>? AllPlayers { get; set; } = new();
 
     public bool badRequestError;
     public bool youTried;
@@ -198,14 +179,15 @@ else if (badRequestError){
     public bool loading { get; set; } = false;
     private bool shouldRender;
 
-    public List<Football.Fantasy.Models.StartOrSit>? StartOrSits { get; set; } = new();
+    public List<StartOrSitModel>? StartOrSits { get; set; } = new();
+
+    private Formatter formatter = new();
 
     protected override bool ShouldRender() => shouldRender;
 
     protected override async Task OnInitializedAsync()
     {
         await GetAllPlayers();
-        await GetAllTeams();
     }
 
     private async Task Get()
@@ -213,10 +195,7 @@ else if (badRequestError){
         loading = true;
         badRequestError = false;
         Players.Clear();
-        if (StartOrSits.Any())
-        {
-            StartOrSits.Clear();
-        }
+        if (StartOrSits.Any()) StartOrSits.Clear();
         shouldRender = true;
         SetPlayers();
 
@@ -231,11 +210,7 @@ else if (badRequestError){
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = response.Content.ReadAsStream();
-            StartOrSits = JsonSerializer.Deserialize<List<Football.Fantasy.Models.StartOrSit>>(responseStream, options);
-        }
-        else
-        {
-            badRequestError = true;
+            StartOrSits = JsonSerializer.Deserialize<List<StartOrSitModel>>(responseStream, options);
         }
         loading = false;
         shouldRender = true;
@@ -278,49 +253,10 @@ else if (badRequestError){
             shouldRender = true;
         }
     }
-    private string StartFormat(bool start) => start ? "Start" : "Sit";
-    private string GetStartColor(bool start) => start ? "color:green" : "color:red";
-    private string FormatMatchupRank(int rank)
-    {
-        return 1 <= rank && rank < 10 ? "color:red"
-              : 10 <= rank && rank < 20 ? "color:orange"
-              : "color:green";
-    }
-
-    private string GetDiffColor(double diff)
-    {
-        diff *= -1;
-        return diff < 3 ? "color:green"
-              : 3 <= diff && diff < 10 ? "color:orange"
-              : "color:red";
-    }
-    private string AtIndicator(Football.Fantasy.Models.StartOrSit sos)
-    {
-        var det = sos.ScheduleDetails;
-        var playerTeamId = sos.TeamMap!.TeamId;
-        if (det is not null)
-        {
-            return playerTeamId == det.HomeTeamId ? "vs" : "@";
-        }
-        else return string.Empty;
-    }
-   
-    private string GetOpponent(Football.Fantasy.Models.StartOrSit sos)
-    {
-        var det = sos.ScheduleDetails;
-        var playerTeamId = sos.TeamMap!.TeamId;
-        if (det is not null)
-        {
-            var opponentId = det.AwayTeamId == playerTeamId ? det.HomeTeamId : det.AwayTeamId;
-            var opponentTeamMap = AllTeams.First(a => a.TeamId == opponentId);
-            return opponentTeamMap.Team;
-        }
-        else return string.Empty;
-    }
 
     private async Task GetAllPlayers()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players");
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players?active=1");
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -333,17 +269,4 @@ else if (badRequestError){
         }
     }
 
-    private async Task GetAllTeams()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/team/all");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            AllTeams = await JsonSerializer.DeserializeAsync<List<TeamMap>>(responseStream, options);
-        }
-    }
 }

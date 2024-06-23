@@ -111,8 +111,26 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetTargetShares() =>  Ok(await marketShareService.GetTargetShares());
 
         [HttpPost("start-or-sit")]
-        [ProducesResponseType(typeof(List<StartOrSit>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetStartOrSit([FromBody] List<int> playerIds) => Ok(await startOrSitService.GetStartOrSits(playerIds));
+        [ProducesResponseType(typeof(List<StartOrSitModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetStartOrSit([FromBody] List<int> playerIds)
+        {
+            List<StartOrSitModel> sosModels = [];
+            var startOrSits = await startOrSitService.GetStartOrSits(playerIds);
+            var teamDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.Team);
+            foreach (var sos in startOrSits)
+            {
+                var sosModel = mapper.Map<StartOrSitModel>(sos);
+                if (sos.ScheduleDetails != null)
+                {
+                    sosModel.OpponentTeamId = sos.ScheduleDetails.AwayTeamId == sosModel.TeamId ? sos.ScheduleDetails.HomeTeamId : sos.ScheduleDetails.AwayTeamId;
+                    sosModel.OpponentTeam = sosModel.OpponentTeamId > 0 ? teamDictionary[sosModel.OpponentTeamId] : string.Empty;
+                    sosModel.AtIndicator = sos.ScheduleDetails.HomeTeamId == sosModel.TeamId ? "vs" : "@";
+                }
+                sosModel.PlayerComparisons = mapper.Map<List<PlayerComparisonModel>>(sos.PlayerComparisons);
+                sosModels.Add(sosModel);
+            }
+            return Ok(sosModels);
+        }
 
         [HttpGet("waiver-wire")]
         [ProducesResponseType(typeof(List<WaiverWireCandidate>), StatusCodes.Status200OK)]
