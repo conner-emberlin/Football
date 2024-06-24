@@ -5,7 +5,6 @@
 @using System.Text.Json.Serialization
 @using System.Text;
 @using Football.Players.Models;
-@using Football.Enums;
 @using Football.Api.Models;
 @using Football.UI.Helpers;
 @inject IHttpClientFactory ClientFactory
@@ -187,7 +186,7 @@ else if (badRequestError){
 
     protected override async Task OnInitializedAsync()
     {
-        await GetAllPlayers();
+        AllPlayers = await GetAllPlayers();
     }
 
     private async Task Get()
@@ -197,7 +196,8 @@ else if (badRequestError){
         Players.Clear();
         if (StartOrSits.Any()) StartOrSits.Clear();
         shouldRender = true;
-        SetPlayers();
+
+        if (AllPlayers != null) SetPlayers();
 
 
         var ids = Players.Select(p => p.PlayerId).ToList();
@@ -254,7 +254,7 @@ else if (badRequestError){
         }
     }
 
-    private async Task GetAllPlayers()
+    private async Task<List<Player>?> GetAllPlayers()
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players?active=1");
         request.Headers.Add("Accept", "application/json");
@@ -264,9 +264,9 @@ else if (badRequestError){
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            AllPlayers = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
-            AllPlayers = AllPlayers.OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
+            return await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
         }
+        return null;
     }
 
 }
