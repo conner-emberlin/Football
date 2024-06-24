@@ -8,7 +8,7 @@
 @page "/Leaders/"
 
 <h4>Fantasy Leaders</h4>
-<EditForm model="this" OnSubmit="GetFantasyResults">
+<EditForm model="this" OnSubmit="HandleInput">
 <TextBoxWeek @bind-Week ="this.week"/>
 <TextBoxPosition @bind-Position="this.position"/>
 <TextBoxSeason @bind-Season="this.season" />
@@ -21,13 +21,14 @@
     <div class="spinner"></div>
 }
 
-@if (currentLeaders.Any() && (!youTried || showAll))
+@if (currentLeaders != null && (!youTried || showAll) && !loading)
 {
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>                 
-                    <th></th>                   
+                    <th></th>  
+                    <th>Season</th>
                     <th>Name</th>
                     <th>Position</th>
                     <th>Games</th>                    
@@ -38,24 +39,26 @@
                 @foreach (var leader in currentLeaders)
                 {
                     <tr>                      
-                        <td>@form.Rank(currentLeaders, leader)</td>                      
+                        <td>@form.Rank(currentLeaders, leader)</td>
+                        <td>@leader.Season</td>
                         <td><a class="page-links" href="Players/@leader.PlayerId"> @leader.Name</a></td>
                         <td style="color:@form.PositionColor(leader.Position)"><b>@leader.Position</b></td>
                         <td>@leader.Games</td>                       
-                        <td>@leader.FantasyPoints</td>
+                        <td>@Math.Round(leader.FantasyPoints,2)</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 }
-else if(youTried && !badRequestError && filterRunning && filteredLeaders.Any())
+else if(youTried && filterRunning && filteredLeaders != null && !loading)
 {
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
-                    <th></th>                   
+                    <th></th>    
+                    <th>Season</th>
                     <th>Name</th>
                     <th>Position</th>
                     <th>Games</th>
@@ -66,24 +69,26 @@ else if(youTried && !badRequestError && filterRunning && filteredLeaders.Any())
                 @foreach (var leader in filteredLeaders)
                 {
                     <tr>
-                        <td>@form.Rank(filteredLeaders, leader)</td>                       
+                        <td>@form.Rank(filteredLeaders, leader)</td>   
+                        <td>@leader.Season</td>
                         <td><a class="page-links" href="Players/@leader.PlayerId"> @leader.Name</a></td>
                         <td style="color:@form.PositionColor(leader.Position)"><b>@leader.Position</b></td>
                         <td>@leader.Games</td>
-                        <td>@leader.FantasyPoints</td>
+                        <td>@Math.Round(leader.FantasyPoints,2)</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 }
-else if(youTried && !badRequestError && filterWeekly && weeklyResults.Any())
+else if(youTried && filterWeekly && weeklyResults != null && !loading)
 {
         <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
         <thead>
             <tr>
                 <th></th>
+                <th>Season</th>
                 <th>Name</th>
                 <th>Position</th>
                 <th>Points</th>
@@ -94,29 +99,25 @@ else if(youTried && !badRequestError && filterWeekly && weeklyResults.Any())
                 {
                     <tr>
                         <td>@form.Rank(weeklyResults, result)</td>
+                        <td>@result.Season</td>
                         <td><a class="page-links" href="Players/@result.PlayerId"> @result.Name</a></td>
                         <td style="color:@form.PositionColor(result.Position)"><b>@result.Position</b></td>
-                        <td>@result.FantasyPoints</td>
+                        <td>@Math.Round(result.FantasyPoints,2)</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 }
-else if(youTried && badRequestError)
-{
-    <text>Something Went Wrong.</text>
-}
 
 @code {
     public string week { get; set; } = "";
     public string position { get; set; } = "";
     public string season { get; set; } = "";
-    public List<WeeklyFantasy> weeklyResults = new();
-    public List<SeasonFantasy> currentLeaders = new();
+    public List<WeeklyFantasy>? weeklyResults = new();
+    public List<SeasonFantasy>? currentLeaders = new();
     public List<SeasonFantasy> filteredLeaders = new();
 
-    public bool badRequestError = false;
     public bool youTried = false;
     private bool shouldRender;
     private bool loading = false;
@@ -132,7 +133,42 @@ else if(youTried && badRequestError)
     protected override async Task OnInitializedAsync()
     {
         loading = true;
+        currentLeaders = await GetSeasonTotals();
+        loading = false;
+        shouldRender = true;
+    }
+
+    public async Task HandleInput()
+    {
+        youTried = true;
+        filterRunning = false;
+        filterWeekly = false;
+        showAll = false;
+
+        if (!string.IsNullOrEmpty(week))
+        {
+            filterWeekly = true;
+            weeklyResults = (await GetWeeklyFantasy(week, season)).OrderByDescending(p => p.FantasyPoints).ToList();
+            weeklyResults = !string.IsNullOrEmpty(position) ? weeklyResults.Where(w => w.Position.ToLower() == position.Trim().ToLower()).ToList() : weeklyResults;
+        }
+        else if(string.IsNullOrEmpty(week) && !string.IsNullOrEmpty(position))
+        {
+            filterRunning = true;
+            currentLeaders = await GetSeasonTotals(season);
+            filteredLeaders = currentLeaders.Where(c => c.Position.ToLower() == position.ToLower()).ToList();
+        }
+        else
+        {
+            currentLeaders = await GetSeasonTotals(season);
+            showAll = true;
+        }
+        shouldRender = true;
+    } 
+
+    private async Task<List<SeasonFantasy>?> GetSeasonTotals(string season = "")
+    {
         var path = "https://localhost:7028/api/Fantasy/season-totals";
+        if (!string.IsNullOrEmpty(season)) path += string.Format("?fantasySeason={0}", season);
         var request = new HttpRequestMessage(HttpMethod.Get, path);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
@@ -141,58 +177,26 @@ else if(youTried && badRequestError)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            currentLeaders = await JsonSerializer.DeserializeAsync<List<SeasonFantasy>>(responseStream, options);
+            return (await JsonSerializer.DeserializeAsync<List<SeasonFantasy>>(responseStream, options)).OrderByDescending(p => p.FantasyPoints).ToList();
         }
-        loading = false;
-        shouldRender = true;
+        return null;
     }
 
-    public async Task GetFantasyResults()
+    private async Task<List<WeeklyFantasy>?> GetWeeklyFantasy(string week, string season = "")
     {
-        youTried = true;
-        badRequestError = false;
-        filterRunning = false;
-        filterWeekly = false;
-        showAll = false;
-
-        if (!string.IsNullOrEmpty(week))
+        var path = "https://localhost:7028/api/Fantasy/data/weekly/leaders/" + week;
+        if (!string.IsNullOrEmpty(season)) path += string.Format("?season={0}", season);
+        var request = new HttpRequestMessage(HttpMethod.Get, path);
+        request.Headers.Add("Accept", "application/json");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
         {
-            filterWeekly = true;
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/data/weekly/leaders/" + week);
-            request.Headers.Add("Accept", "application/json");
-            var client = ClientFactory.CreateClient();
-            var response = await client.SendAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                using var responseStream = await response.Content.ReadAsStreamAsync();
-                weeklyResults = (await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options)).OrderByDescending(p => p.FantasyPoints).ToList();
-                foreach (var r in weeklyResults)
-                {
-                    r.FantasyPoints = Math.Round(r.FantasyPoints, 2);
-                }
-
-                weeklyResults = !String.IsNullOrEmpty(position) ? weeklyResults.Where(w => w.Position.ToLower() == position.Trim().ToLower()).ToList() : weeklyResults;
-
-                badRequestError = false;
-            }
-            else
-            {
-                badRequestError = true;
-            }
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            using var responseStream = await response.Content.ReadAsStreamAsync();
+            return await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options);            
         }
-        else if(string.IsNullOrEmpty(week) && !string.IsNullOrEmpty(position))
-        {
-            filterRunning = true;
-            filteredLeaders = currentLeaders.Where(c => c.Position.ToLower() == position.ToLower()).ToList();
-            badRequestError = false;
+        return null;
+    }
 
-        }
-        else
-        {
-            showAll = true;
-            badRequestError = false;
-        }
-        shouldRender = true;
-    }   
 }

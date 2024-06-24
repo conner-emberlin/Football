@@ -5,7 +5,7 @@ namespace Football.Fantasy.Interfaces
 {
     public interface IFantasyDataRepository
     {
-        public Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId);
+        public Task<List<SeasonFantasy>> GetSeasonFantasy(int filter, bool isPlayer = true);
         public Task<List<SeasonFantasy>> GetAllSeasonFantasyByPosition(string position, int minGames);
         public Task<int> PostSeasonFantasy(List<SeasonFantasy> data);
         public Task<int> PostWeeklyFantasy(List<WeeklyFantasy> data);

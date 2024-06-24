@@ -8,12 +8,12 @@ namespace Football.Fantasy.Repository
 {
     public class FantasyDataRepository(IDbConnection dbConnection) : IFantasyDataRepository
     {
-        public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId)
+        public async Task<List<SeasonFantasy>> GetSeasonFantasy(int filter, bool isPlayer = true)
         {
             var query = $@"SELECT [PlayerId], [Season], [Games], [FantasyPoints], [Name], [Position]
-                            FROM [dbo].SeasonFantasyData
-                            WHERE [PlayerId] = @playerId";
-            return (await dbConnection.QueryAsync<SeasonFantasy>(query, new { playerId })).ToList();
+                            FROM [dbo].SeasonFantasyData";
+            query += isPlayer ? " WHERE [PlayerId] = @filter" : " WHERE [Season] = @filter";                
+            return (await dbConnection.QueryAsync<SeasonFantasy>(query, new { filter })).ToList();
         }
         public async Task<int> PostSeasonFantasy(List<SeasonFantasy> data)
         {

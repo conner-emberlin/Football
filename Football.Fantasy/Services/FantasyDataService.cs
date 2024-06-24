@@ -16,7 +16,7 @@ namespace Football.Fantasy.Services
     {
         private readonly Season _season = season.CurrentValue;
 
-        public async Task<List<SeasonFantasy>> GetSeasonFantasy(int playerId) => await fantasyData.GetSeasonFantasy(playerId);
+        public async Task<List<SeasonFantasy>> GetSeasonFantasy(int filter, bool isPlayer = true) => await fantasyData.GetSeasonFantasy(filter, isPlayer);
         public async Task<List<SeasonFantasy>> GetAllSeasonFantasyByPosition(Position position, int minGames) => await fantasyData.GetAllSeasonFantasyByPosition(position.ToString(), minGames);
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId) => await fantasyData.GetWeeklyFantasyByPlayer(playerId, _season.CurrentSeason);
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasyBySeason(int playerId, int season) => await fantasyData.GetWeeklyFantasyByPlayer(playerId, season);
@@ -158,7 +158,7 @@ namespace Football.Fantasy.Services
         }
         public async Task<List<SeasonFantasy>> GetCurrentFantasyTotals(int season)
         {
-            if (settingsService.GetFromCache<SeasonFantasy>(Cache.SeasonTotals, out var cachedTotals))
+            if (cache.TryGetValue<List<SeasonFantasy>>(Cache.SeasonTotals.ToString() + season.ToString(), out var cachedTotals) && cachedTotals != null)
                 return cachedTotals;
             else
             {
@@ -175,7 +175,7 @@ namespace Football.Fantasy.Services
                                         Name = gw.Select(g => g.Name).First(),
                                         Position = gw.Select(g => g.Position).First()
                                     }).OrderByDescending(w => w.FantasyPoints).ToList();
-                cache.Set(Cache.SeasonTotals.ToString(), leaders);
+                cache.Set(Cache.SeasonTotals.ToString() + season.ToString(), leaders);
                 return leaders;
             }
         }

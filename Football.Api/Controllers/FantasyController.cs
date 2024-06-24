@@ -50,18 +50,19 @@ namespace Football.Api.Controllers
         [HttpGet("data/weekly/leaders/{week}")]
         [ProducesResponseType(typeof(List<WeeklyFantasy>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyFantasyLeaders([FromRoute] int week, [FromQuery] int season = 0) 
+        public async Task<IActionResult> GetWeeklyLeaders([FromRoute] int week, [FromQuery] int season) 
         {
             if (week <= 0) return BadRequest();
-            var fantasySeason = season > 0 ? season : _season.CurrentSeason;
+            
+            var fantasySeason = season > 0 ? season : await playersService.GetCurrentWeek(_season.CurrentSeason) == 1 ? _season.CurrentSeason - 1 : _season.CurrentSeason;
             return Ok(await fantasyDataService.GetWeeklyFantasy(fantasySeason, week));
         }
 
         [HttpGet("season-totals")]
         [ProducesResponseType(typeof(List<SeasonFantasy>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetCurrentFantasyTotals([FromQuery] int season = 0) 
+        public async Task<IActionResult> GetFantasyTotals([FromQuery] int fantasySeason) 
         {
-            if (season > 0) return Ok(await fantasyDataService.GetCurrentFantasyTotals(season));
+            if (fantasySeason > 0 && fantasySeason != _season.CurrentSeason) return Ok(await fantasyDataService.GetSeasonFantasy(fantasySeason, false));
             else
             {
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
