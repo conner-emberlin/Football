@@ -11,6 +11,7 @@
 <EditForm model="this" OnSubmit="GetFantasyResults">
 <TextBoxWeek @bind-Week ="this.week"/>
 <TextBoxPosition @bind-Position="this.position"/>
+<TextBoxSeason @bind-Season="this.season" />
 <button class="button-22" type="submit">Submit</button>
 </EditForm>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -110,6 +111,7 @@ else if(youTried && badRequestError)
 @code {
     public string week { get; set; } = "";
     public string position { get; set; } = "";
+    public string season { get; set; } = "";
     public List<WeeklyFantasy> weeklyResults = new();
     public List<SeasonFantasy> currentLeaders = new();
     public List<SeasonFantasy> filteredLeaders = new();
@@ -130,7 +132,8 @@ else if(youTried && badRequestError)
     protected override async Task OnInitializedAsync()
     {
         loading = true;
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/season-totals");
+        var path = "https://localhost:7028/api/Fantasy/season-totals";
+        var request = new HttpRequestMessage(HttpMethod.Get, path);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);

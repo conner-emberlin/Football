@@ -50,11 +50,26 @@ namespace Football.Api.Controllers
         [HttpGet("data/weekly/leaders/{week}")]
         [ProducesResponseType(typeof(List<WeeklyFantasy>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyFantasyLeaders(int week) => week > 0 ? Ok(await fantasyDataService.GetWeeklyFantasy(_season.CurrentSeason, week)) : BadRequest();
-                                
+        public async Task<IActionResult> GetWeeklyFantasyLeaders([FromRoute] int week, [FromQuery] int season = 0) 
+        {
+            if (week <= 0) return BadRequest();
+            var fantasySeason = season > 0 ? season : _season.CurrentSeason;
+            return Ok(await fantasyDataService.GetWeeklyFantasy(fantasySeason, week));
+        }
+
         [HttpGet("season-totals")]
         [ProducesResponseType(typeof(List<SeasonFantasy>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetCurrentFantasyTotals() => Ok(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason));
+        public async Task<IActionResult> GetCurrentFantasyTotals([FromQuery] int season = 0) 
+        {
+            if (season > 0) return Ok(await fantasyDataService.GetCurrentFantasyTotals(season));
+            else
+            {
+                var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+                if (currentWeek == 1) return Ok(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason - 1));
+                return Ok(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason));
+            }
+            
+        } 
 
         [HttpGet("matchup-rankings/{position}")]
         [ProducesResponseType(typeof(List<MatchupRankingModel>), StatusCodes.Status200OK)]
@@ -64,7 +79,10 @@ namespace Football.Api.Controllers
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-                var model = mapper.Map<List<MatchupRankingModel>>(await matchupAnalysisService.GetPositionalMatchupRankingsFromSQL(positionEnum, _season.CurrentSeason, currentWeek));
+                var week = currentWeek == 1 ? _season.Weeks + 1 : currentWeek;
+                var season = currentWeek == 1 ? _season.CurrentSeason - 1 : _season.CurrentSeason;
+
+                var model = mapper.Map<List<MatchupRankingModel>>(await matchupAnalysisService.GetPositionalMatchupRankingsFromSQL(positionEnum, season, week));
                 var teamDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
                 model.ForEach(m => m.TeamDescription = teamDictionary[m.TeamId]);
                 return Ok(model);

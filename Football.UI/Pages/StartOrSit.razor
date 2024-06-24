@@ -11,13 +11,17 @@
 
 <h4>Start or Sit Assistant</h4>
 
-<EditForm model="this" OnSubmit="Get">
+<EditForm model="this" OnSubmit="PlayerSearch">
     <TextBoxName @bind-Value="this.Name1" />
     <TextBoxName @bind-Value="this.Name2" />
     <TextBoxName @bind-Value="this.Name3" />
-    <button class="button-22" type="submit">Submit</button>
+    <button class="button-22" type="submit">Search</button>
 </EditForm>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
+@if (showSubmit)
+{
+    <button class="button-22" type="submit" @onclick="Get">Submit</button>
+}
 
 @if (loading)
 {
@@ -176,6 +180,7 @@ else if (badRequestError){
     public List<Player> Players { get; set; } = new();
 
     public bool loading { get; set; } = false;
+    private bool showSubmit = false;
     private bool shouldRender;
 
     public List<StartOrSitModel>? StartOrSits { get; set; } = new();
@@ -189,16 +194,22 @@ else if (badRequestError){
         AllPlayers = await GetAllPlayers();
     }
 
+    private void PlayerSearch()
+    {
+        showSubmit = false;
+        Players.Clear();
+        if (StartOrSits.Any()) StartOrSits.Clear();
+        if (AllPlayers != null) SetPlayers();
+        if (Players.Any()) showSubmit = true;
+        shouldRender = true;
+
+    }
+
     private async Task Get()
     {
         loading = true;
         badRequestError = false;
-        Players.Clear();
-        if (StartOrSits.Any()) StartOrSits.Clear();
-        shouldRender = true;
-
-        if (AllPlayers != null) SetPlayers();
-
+        showSubmit = false;
 
         var ids = Players.Select(p => p.PlayerId).ToList();
         var json = JsonSerializer.Serialize(ids);
@@ -223,7 +234,7 @@ else if (badRequestError){
             if (!string.IsNullOrEmpty(Name1))
             {
                 Player1 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name1.ToLower().Trim()));
-                if (Player1 is not null)
+                if (Player1 != null)
                 {
                     Players.Add(Player1);
                     Name1 = Player1.Name;
@@ -233,7 +244,7 @@ else if (badRequestError){
             if (!string.IsNullOrEmpty(Name2))
             {
                 Player2 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name2.ToLower().Trim()));
-                if (Player2 is not null)
+                if (Player2 != null)
                 {
                     Players.Add(Player2);
                     Name2 = Player2.Name;
@@ -243,7 +254,7 @@ else if (badRequestError){
             if (!string.IsNullOrEmpty(Name3))
             {
                 Player3 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name3.ToLower().Trim()));
-                if (Player3 is not null)
+                if (Player3 != null)
                 {
                     Players.Add(Player3);
                     Name3 = Player3.Name;
