@@ -2,17 +2,15 @@
 <PageTitle>Snap Count Analysis</PageTitle>
 @using System.Text.Json
 @using System.Text.Json.Serialization
-@using Football.Projections.Models;
-@using Football.Players.Models;
-@using Football.Fantasy.Models;
 @using Football.Enums;
 @using Football.UI.Helpers;
+@using Football.Api.Models;
 @inject IHttpClientFactory ClientFactory
 
 <h4>Snap Count Analysis</h4>
 
 <div>
-    @foreach (var position in Positions)
+    @foreach (var position in format.Positions())
     {
 
         <input type="radio" name="players" id=" @position" value="@position"
@@ -31,10 +29,6 @@
 @if (loading)
 {
     <div class="spinner"></div>
-}
-@if (badRequestError)
-{
-    <p>Unexpected Error. Please try again.</p>
 }
 
 @if (snapCounts.Any())
@@ -61,7 +55,7 @@
                             <span class="sort-link" onclick="@(() => SetTable("RushAttsPerSnap"))">Rush/Snap</span>
                             <span class="oi @(tableSort.GetSortStyle("RushAttsPerSnap"))"></span>
                         </th>
-                    @if (snapCounts.First().Player.Position != "QB")
+                    @if (snapCounts.First().Position != "QB")
                     {
                         <th>
                             <span class="sort-link" onclick="@(() => SetTable("TargetsPerSnap"))">Tgts/Snap</span>
@@ -80,18 +74,18 @@
                     {
                         <tr>
                             <td>
-                                <a class="page-links" href="Players/@s.Player.PlayerId"> @s.Player.Name</a> &nbsp;
+                                <a class="page-links" href="Players/@s.PlayerId"> @s.Name</a> &nbsp;
                             </td>
                             <td>@Math.Round(s.TotalSnaps)</td>
                             <td>@Math.Round(s.SnapsPerGame, 2)</td>
                             <td>@Math.Round(s.FantasyPointsPerSnap, 2)</td>
                             <td>@Math.Round(s.RushAttsPerSnap, 2)</td>
-                        @if (s.Player.Position != "QB")
+                        @if (s.Position != "QB")
                         {
                             <td>@Math.Round(s.TargetsPerSnap, 2)</td>
                         }
                         <td>@Math.Round(s.Utilization * 100)</td>
-                            <td><a href="/snaps-graph/@s.Player.PlayerId"> <i class="oi oi-graph" /></a></td>
+                            <td><a href="/snaps-graph/@s.PlayerId"> <i class="oi oi-graph" /></a></td>
                         </tr>
                     }
                 </tbody>
@@ -100,39 +94,39 @@
 }
 
 @code {
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
     public string Position { get; set; } = "Quarterback";
     public Position positionEnum { get; set; } = Enums.Position.QB;
-    public List<Football.Fantasy.Models.SnapCountAnalysis>? snapCounts = new();
+    public List<SnapCountAnalysisModel>? snapCounts = new();
 
     public bool loading { get; set; } = false;
-    public bool badRequestError { get; set; } = false;
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
 
     public TableSort tableSort = new();
+    public Formatter format = new();
 
     public void SetPosition(ChangeEventArgs args)
     {
-        Position = args.Value.ToString();
-        snapCounts.Clear();
+        if (snapCounts != null) snapCounts.Clear();
         tableSort = new();
-        positionEnum = Position switch
-        {
-            "Quarterback" => Enums.Position.QB,
-            "Runningback" => Enums.Position.RB,
-            "Wide Receiver" => Enums.Position.WR,
-            "Tight End" => Enums.Position.TE,
-            _ => Enums.Position.RB
-        };
+        positionEnum = format.SetPosition(args);
     }
+
+    private void SetTable(string columnName) => snapCounts = tableSort.SortTable<SnapCountAnalysisModel>(snapCounts, columnName);
+
     public async Task Get()
     {
         loading = true;
-        snapCounts.Clear();
+        if (snapCounts != null) snapCounts.Clear();
         shouldRender = true;
+        snapCounts = (await SnapCountAnalysisRequest(positionEnum.ToString())).OrderByDescending(s => s.TotalSnaps).ToList();
+        loading = false;
+        shouldRender = true;
+    }
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/snap-analysis/" + positionEnum.ToString());
+    public async Task<List<SnapCountAnalysisModel>?> SnapCountAnalysisRequest(string position)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/snap-analysis/" + position);
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -140,20 +134,9 @@
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            snapCounts = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Models.SnapCountAnalysis>>(responseStream, options);
-            snapCounts = snapCounts.OrderByDescending(s => s.TotalSnaps).ToList();
-            badRequestError = false;
+            return await JsonSerializer.DeserializeAsync<List<SnapCountAnalysisModel>>(responseStream, options);
         }
-        else
-        {
-            badRequestError = true;
-        }
-        loading = false;
-        shouldRender = true;
+        return null;
     }
 
-    private void SetTable(string columnName)
-    {
-        snapCounts = tableSort.SortTable<Football.Fantasy.Models.SnapCountAnalysis>(snapCounts, columnName);
-    }
 }

@@ -51,7 +51,7 @@
         </table>
     </div>
 }
-else if(youTried && filterRunning && filteredLeaders != null && !loading)
+else if(youTried && filterRunning && filteredLeaders != null && filteredLeaders.Any() && !loading)
 {
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -81,7 +81,7 @@ else if(youTried && filterRunning && filteredLeaders != null && !loading)
         </table>
     </div>
 }
-else if(youTried && filterWeekly && weeklyResults != null && !loading)
+else if(youTried && filterWeekly && weeklyResults != null && weeklyResults.Any() && !loading)
 {
         <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -114,6 +114,7 @@ else if(youTried && filterWeekly && weeklyResults != null && !loading)
     public string week { get; set; } = "";
     public string position { get; set; } = "";
     public string season { get; set; } = "";
+
     public List<WeeklyFantasy>? weeklyResults = new();
     public List<SeasonFantasy>? currentLeaders = new();
     public List<SeasonFantasy> filteredLeaders = new();
@@ -198,5 +199,4 @@ else if(youTried && filterWeekly && weeklyResults != null && !loading)
         }
         return null;
     }
-
 }

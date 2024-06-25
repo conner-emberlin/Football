@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using Football.Enums;
+using Microsoft.AspNetCore.Components;
+using System.Globalization;
 
 namespace Football.UI.Helpers
 {
@@ -39,6 +41,39 @@ namespace Football.UI.Helpers
             return diff < 3 ? "color:green"
                   : 3 <= diff && diff < 10 ? "color:orange"
                   : "color:red";
+        }
+
+        public List<string> Positions() => new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
+
+        public Position SetPosition(ChangeEventArgs? args)
+        {
+            if (args == null) return Position.QB;
+            if (args.Value == null) return Position.QB;
+
+            else return args.Value.ToString() switch
+            {
+                "Quarterback" => Enums.Position.QB,
+                "Runningback" => Enums.Position.RB,
+                "Wide Receiver" => Enums.Position.WR,
+                "Tight End" => Enums.Position.TE,
+                "DST" => Enums.Position.DST,
+                "Kicker" => Enums.Position.K,
+                _ => Enums.Position.QB
+            };
+        }
+
+        public string SetPosition(string position)
+        {
+            return position.ToLower() switch
+            {
+                "quarterback" => "QB",
+                "runningback" => "RB",
+                "wide receiver" => "WR",
+                "tight end" => "TE",
+                "dst" => "DST",
+                "kicker" => "K",
+                _ => "QB"
+            };
         }
     }
 }

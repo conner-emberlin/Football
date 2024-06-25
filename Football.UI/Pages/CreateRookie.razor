@@ -1,6 +1,5 @@
 ﻿@using System.Text.Json
 @using System.Text.Json.Serialization
-@using Football.Players.Models;
 @using Football.Api.Models;
 @using System.Text;
 @inject IHttpClientFactory ClientFactory
@@ -51,7 +50,7 @@ else{
                     <button type="button" class="btn btn-link" @onclick="() => CancellAdd()">
                         <i class="oi oi-circle-x" />
                     </button>
-                    <button type="button" class="btn btn-link" @onclick="() => AddRookie()">
+                    <button type="button" class="btn btn-link" @onclick="() => HandleInput()">
                         <i class="oi oi-circle-check" />
                     </button>
                 </td>
@@ -69,16 +68,8 @@ else
     <text>Something went wrong.</text>
 }
 
-  
-@if (badRequestError)
-{
-    <text>Something Went Wrong. Please Try Again.</text>
-}
-
-
 @code {
 
-    public bool badRequestError = false;
     private bool shouldRender;
     private bool loading = false;
 
@@ -95,23 +86,28 @@ else
         player = new RookiePlayerModel();
     }
 
-    private async Task AddRookie()
+    private async Task HandleInput()
     {
         adding = false;
         loading = true;
-        var json = JsonSerializer.Serialize(player);
+        rookieAdded = await CreateRookieRequest(player);
+        loading = false;
+    }
+
+    private async Task<bool> CreateRookieRequest(RookiePlayerModel rookie)
+    {
+        var json = JsonSerializer.Serialize(rookie);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         var client = ClientFactory.CreateClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/add-rookieson") { Content = content };
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/add-rookie") { Content = content };
         var response = await client.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = response.Content.ReadAsStream();
-            rookieAdded = await JsonSerializer.DeserializeAsync<bool>(responseStream, options);
+            return await JsonSerializer.DeserializeAsync<bool>(responseStream, options);
         }
-        else rookieAdded = false;
-        loading = false;
+        return false;
     }
 
 }

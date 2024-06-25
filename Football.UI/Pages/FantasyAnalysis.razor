@@ -10,7 +10,7 @@
 <h4>Fantasy Analysis</h4>
 
 <div>
-    @foreach (var position in Positions)
+    @foreach (var position in format.Positions())
     {
 
         <input type="radio" name="players" id=" @position" value="@position"
@@ -21,7 +21,7 @@
     }
 </div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
-<button class="button-22" role="button" @onclick="Get">
+<button class="button-22" role="button" @onclick="HandleInput">
     Submit
 </button>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -30,12 +30,8 @@
 {
     <div class="spinner"></div>
 }
-@if (badRequestError)
-{
-    <p>Unexpected Error. Please try again.</p>
-}
 
-@if (FantasyAnalyses.Any())
+@if (FantasyAnalyses != null && FantasyAnalyses.Any())
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
@@ -116,38 +112,27 @@
     protected override bool ShouldRender() => shouldRender;
 
     public TableSort tableSort = new();
+    public Formatter format = new();
 
     public void SetPosition(ChangeEventArgs args)
     {
-        Position = args.Value.ToString();
         FantasyAnalyses?.Clear();
         tableSort = new();
-        positionEnum = Position switch
-        {
-            "Quarterback" => Enums.Position.QB,
-            "Runningback" => Enums.Position.RB,
-            "Wide Receiver" => Enums.Position.WR,
-            "Tight End" => Enums.Position.TE,
-            "DST" => Enums.Position.DST,
-            "Kicker" => Enums.Position.K,
-            _ => Enums.Position.QB
-        };
+        positionEnum = format.SetPosition(args);
     }
 
-    public async Task Get()
+    public async Task HandleInput()
     {
         loading = true;
         FantasyAnalyses?.Clear();
         shouldRender = true;
-
-        await GetFantasyAnalyses();
-
+        FantasyAnalyses = (await GetFantasyAnalysesRequest(positionEnum)).Where(f => f.AvgFantasy >= 5).ToList(); ;
         loading = false;
         shouldRender = true;
     }
-    public async Task GetFantasyAnalyses()
+    public async Task<List<FantasyAnalysisModel>?> GetFantasyAnalysesRequest(Position position)
     {      
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/fantasy-analysis/" + positionEnum.ToString());
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/fantasy-analysis/" + position.ToString());
         request.Headers.Add("Accept", "application/json");
         var client = ClientFactory.CreateClient();
         var response = await client.SendAsync(request);
@@ -155,11 +140,9 @@
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            FantasyAnalyses = await JsonSerializer.DeserializeAsync<List<FantasyAnalysisModel>>(responseStream, options);
-            FantasyAnalyses = FantasyAnalyses.Where(f => f.AvgFantasy >= 5).ToList();
-            badRequestError = false;
+            return await JsonSerializer.DeserializeAsync<List<FantasyAnalysisModel>>(responseStream, options);
         }
-        else badRequestError = true;
+        return null;
     }
 
     public void SetTable(string columnName) => FantasyAnalyses = tableSort.SortTable<FantasyAnalysisModel>(FantasyAnalyses, columnName);

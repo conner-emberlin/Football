@@ -8,7 +8,7 @@
 @inject IHttpClientFactory ClientFactory
 <h4>Model Analysis</h4>
 <div>
-    @foreach (var position in Positions)
+    @foreach (var position in format.Positions())
     {
 
         <input type="radio" name="players" id=" @position" value="@position"
@@ -19,7 +19,7 @@
     }
 </div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
-<button class="button-22" role="button" @onclick="GetModelAnalysis">
+<button class="button-22" role="button" @onclick="HandleInput">
     Submit
 </button>
 
@@ -149,13 +149,13 @@
     private List<WeeklyProjectionAnalysis>? ProjectionAnalyses = new();
     private List<SeasonProjectionAnalysis>? SeasonProjectionAnalyses = new();
 
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker"};
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
     private bool loading { get; set; }
     int count = 0;
 
     public TableSort tableSort = new();
+    public Formatter format = new();
 
     public bool SeasonOver() => ProjectionAnalyses?.Count > 0 ? ProjectionAnalyses.Max(p => p.Week) == 18 : false;
     public void SetPosition(ChangeEventArgs args)
@@ -166,33 +166,23 @@
         tableSort = new();
     }
 
-    public async Task GetModelAnalysis()
+    public async Task HandleInput()
     {
         loading = true;
         shouldRender = true;
-
         if (ProjectionAnalyses != null) ProjectionAnalyses.Clear();
         if (SeasonProjectionAnalyses != null) SeasonProjectionAnalyses.Clear();
-
-        PositionEnum = Position.ToLower() switch
-        {
-            "quarterback" => "QB",
-            "runningback" => "RB",
-            "wide receiver" => "WR",
-            "tight end" => "TE",
-            "dst" => "DST",
-            "kicker" => "K",
-            _ => "QB"
-        };
-
-        await GetCurrentSeasonWeeklyAnalysis(PositionEnum);
-        await GetPreviousSeasonsAnalysis(PositionEnum);
-
+        PositionEnum = format.SetPosition(Position);
+        ProjectionAnalyses = await GetCurrentSeasonWeeklyAnalysisRequest(PositionEnum);
+        SeasonProjectionAnalyses = await GetPreviousSeasonsAnalysisRequest(PositionEnum);
         loading = false;
         shouldRender = true;
     }
 
-    private async Task GetCurrentSeasonWeeklyAnalysis(string position)
+    private void SetTable(string columnName) => ProjectionAnalyses = tableSort.SortTable<WeeklyProjectionAnalysis>(ProjectionAnalyses, columnName);
+    private string GetProjectionErrorLink(string position, int week) => string.Format("{0}/{1}/{2}", "/ProjectionError", position, week);
+
+    private async Task<List<WeeklyProjectionAnalysis>?> GetCurrentSeasonWeeklyAnalysisRequest(string position)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/weekly-analysis/" + position);
         request.Headers.Add("Accept", "application/json");
@@ -202,11 +192,12 @@
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            ProjectionAnalyses = await JsonSerializer.DeserializeAsync<List<WeeklyProjectionAnalysis>>(responseStream, options);
+            return await JsonSerializer.DeserializeAsync<List<WeeklyProjectionAnalysis>>(responseStream, options);
         }
+        return null;
     }
 
-    private async Task GetPreviousSeasonsAnalysis(string position)
+    private async Task<List<SeasonProjectionAnalysis>?> GetPreviousSeasonsAnalysisRequest(string position)
     {
         var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/season-projection-analysis/all/" + position);
         request.Headers.Add("Accept", "application/json");
@@ -216,12 +207,12 @@
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             using var responseStream = await response.Content.ReadAsStreamAsync();
-            SeasonProjectionAnalyses = await JsonSerializer.DeserializeAsync<List<SeasonProjectionAnalysis>>(responseStream, options);
+            return await JsonSerializer.DeserializeAsync<List<SeasonProjectionAnalysis>>(responseStream, options);
         }
+        return null;
     }
 
-    private void SetTable(string columnName) => ProjectionAnalyses = tableSort.SortTable<WeeklyProjectionAnalysis>(ProjectionAnalyses, columnName);
-    private string GetProjectionErrorLink(string position, int week) => string.Format("{0}/{1}/{2}", "/ProjectionError", position, week);
+
 
 }
 

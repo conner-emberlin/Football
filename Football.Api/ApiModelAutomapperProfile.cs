@@ -126,8 +126,10 @@ namespace Football.Api
                 .ForMember(p => p.Name, o => o.MapFrom(p => p.Player.Name))
                 .ForMember(p => p.FantasyPoints, o => o.MapFrom(p => p.WeeklyFantasy != null ? p.WeeklyFantasy.FantasyPoints : 0))
                 .ForMember(p => p.ProjectedPoints, o => o.MapFrom(p => p.ProjectedPoints));
-
-
+            CreateMap<SnapCountAnalysis, SnapCountAnalysisModel>()
+                .ForMember(s => s.Name, o => o.MapFrom(s => s.Player.Name))
+                .ForMember(s => s.Position, o => o.MapFrom(s => s.Player.Position))
+                .ForMember(s => s.PlayerId, o => o.MapFrom(s => s.Player.PlayerId));
         }
 
     }
