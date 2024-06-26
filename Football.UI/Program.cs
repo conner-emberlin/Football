@@ -1,3 +1,5 @@
+using Football.UI.Helpers;
+using Football.UI;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IRequests, Requests>();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

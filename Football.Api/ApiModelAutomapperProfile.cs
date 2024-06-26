@@ -107,7 +107,6 @@ namespace Football.Api
                 .ForMember(w => w.SpecialTeamsTouchdowns, o => o.MapFrom(w => w.SpecialTD));
             CreateMap<SeasonFantasy, SeasonFantasyModel>()
                 .ForMember(s => s.FantasyPointsPerGame, o => o.MapFrom(s => s.Games > 0 ? s.FantasyPoints / s.Games : 0));
-
             CreateMap<StartOrSit, StartOrSitModel>()
                 .ForMember(s => s.Name, o => o.MapFrom(s => s.Player.Name))
                 .ForMember(s => s.Position, o => o.MapFrom(s => s.Player.Position))
@@ -121,7 +120,6 @@ namespace Football.Api
                 .ForMember(s => s.Wind, o => o.MapFrom(s => s.Weather != null ? s.Weather.Wind : string.Empty))
                 .ForMember(s => s.Condition, o => o.MapFrom(s => s.Weather != null ? s.Weather.Condition : string.Empty))
                 .ForMember(s => s.ConditionURL, o => o.MapFrom(s => s.Weather != null ? s.Weather.ConditionURL : string.Empty));
-
             CreateMap<PlayerComparison, PlayerComparisonModel>()
                 .ForMember(p => p.Name, o => o.MapFrom(p => p.Player.Name))
                 .ForMember(p => p.FantasyPoints, o => o.MapFrom(p => p.WeeklyFantasy != null ? p.WeeklyFantasy.FantasyPoints : 0))
@@ -130,6 +128,9 @@ namespace Football.Api
                 .ForMember(s => s.Name, o => o.MapFrom(s => s.Player.Name))
                 .ForMember(s => s.Position, o => o.MapFrom(s => s.Player.Position))
                 .ForMember(s => s.PlayerId, o => o.MapFrom(s => s.Player.PlayerId));
+            CreateMap<TargetShare, TargetShareModel>()
+                .ForMember(t => t.TeamDescription, o => o.MapFrom(t => t.Team.TeamDescription))
+                .ForMember(t => t.TeamId, o => o.MapFrom(t => t.Team.TeamId));
         }
 
     }

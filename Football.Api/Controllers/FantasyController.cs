@@ -126,8 +126,8 @@ namespace Football.Api.Controllers
 
 
         [HttpGet("targetshares")]
-        [ProducesResponseType(typeof(TargetShare), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetTargetShares() =>  Ok(await marketShareService.GetTargetShares());
+        [ProducesResponseType(typeof(List<TargetShareModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetTargetShares() => Ok(mapper.Map<List<TargetShareModel>>(await marketShareService.GetTargetShares()));
 
         [HttpPost("start-or-sit")]
         [ProducesResponseType(typeof(List<StartOrSitModel>), StatusCodes.Status200OK)]
@@ -170,9 +170,9 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetFantasyPercentages([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await fantasyAnalysisService.GetFantasyPercentages(posEnum)) : BadRequest();
 
         [HttpGet("snap-analysis/{position}")]
-        [ProducesResponseType(typeof(List<SnapCountAnalysis>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<SnapCountAnalysisModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetSnapCountAnalysis([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await snapCountService.GetSnapCountAnalysis(posEnum, _season.CurrentSeason)) : BadRequest();
+        public async Task<IActionResult> GetSnapCountAnalysis([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<SnapCountAnalysisModel>>(await snapCountService.GetSnapCountAnalysis(posEnum, _season.CurrentSeason))) : BadRequest();
 
     }
 }

@@ -5,7 +5,7 @@
 @using Football.Enums;
 @using Football.UI.Helpers;
 @using Football.Api.Models;
-@inject IHttpClientFactory ClientFactory
+@inject IRequests requests;
 
 <h4>Snap Count Analysis</h4>
 
@@ -21,7 +21,7 @@
     }
 </div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
-<button class="button-22" role="button" @onclick="Get">
+<button class="button-22" role="button" @onclick="HandleInput">
     Submit
 </button>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -105,7 +105,7 @@
     public TableSort tableSort = new();
     public Formatter format = new();
 
-    public void SetPosition(ChangeEventArgs args)
+    private void SetPosition(ChangeEventArgs args)
     {
         if (snapCounts != null) snapCounts.Clear();
         tableSort = new();
@@ -114,29 +114,13 @@
 
     private void SetTable(string columnName) => snapCounts = tableSort.SortTable<SnapCountAnalysisModel>(snapCounts, columnName);
 
-    public async Task Get()
+    private async Task HandleInput()
     {
         loading = true;
         if (snapCounts != null) snapCounts.Clear();
         shouldRender = true;
-        snapCounts = (await SnapCountAnalysisRequest(positionEnum.ToString())).OrderByDescending(s => s.TotalSnaps).ToList();
+        snapCounts = (await requests.SnapCountAnalysisRequest(positionEnum.ToString())).OrderByDescending(s => s.TotalSnaps).ToList();
         loading = false;
         shouldRender = true;
     }
-
-    public async Task<List<SnapCountAnalysisModel>?> SnapCountAnalysisRequest(string position)
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/snap-analysis/" + position);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<List<SnapCountAnalysisModel>>(responseStream, options);
-        }
-        return null;
-    }
-
 }

@@ -25,30 +25,28 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetSeasonProjections(string position)
         {
-            if(Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
+            if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
+
+            List<SeasonProjectionModel> model = [];
+
+            if (positionEnum == Position.FLEX)
+                model = mapper.Map<List<SeasonProjectionModel>>(analysisService.SeasonFlexRankings());
+
+            else if (seasonProjectionService.GetProjectionsFromCache(positionEnum, out var projectionsCache))
+                model = mapper.Map<List<SeasonProjectionModel>>(projectionsCache);
+
+            else if (seasonProjectionService.GetProjectionsFromSQL(positionEnum, _season.CurrentSeason, out var projectionsSQL))
             {
-                List<SeasonProjectionModel> model = [];
-
-                if (positionEnum == Position.FLEX)
-                    model = mapper.Map<List<SeasonProjectionModel>>(analysisService.SeasonFlexRankings());
-
-                else if (seasonProjectionService.GetProjectionsFromCache(positionEnum, out var projectionsCache))
-                    model = mapper.Map<List<SeasonProjectionModel>>(projectionsCache);
-
-                else if (seasonProjectionService.GetProjectionsFromSQL(positionEnum, _season.CurrentSeason, out var projectionsSQL))
-                {
-                    model = mapper.Map<List<SeasonProjectionModel>>(projectionsSQL);
-                    model.ForEach(m => m.CanDelete = true);
-                }
-                else 
-                    model = mapper.Map<List<SeasonProjectionModel>>(await seasonProjectionService.GetProjections(positionEnum));
-
-                var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
-                model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
-                var retVal = positionEnum == Position.FLEX ? model : model.OrderByDescending(m => m.ProjectedPoints).ToList();
-                return Ok(retVal);
+                model = mapper.Map<List<SeasonProjectionModel>>(projectionsSQL);
+                model.ForEach(m => m.CanDelete = true);
             }
-            return BadRequest();
+            else
+                model = mapper.Map<List<SeasonProjectionModel>>(await seasonProjectionService.GetProjections(positionEnum));
+
+            var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
+            model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
+            var retVal = positionEnum == Position.FLEX ? model : model.OrderByDescending(m => m.ProjectedPoints).ToList();
+            return Ok(retVal);
         }
         [HttpGet("season/player/{playerId}")]
         [ProducesResponseType(typeof(SeasonProjection), StatusCodes.Status200OK)]
@@ -73,35 +71,34 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetWeeklyProjections(string position)
         {
-            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
+            if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
+
+            List<WeekProjectionModel> models = [];
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            if (currentWeek > _season.Weeks)
+                return Ok(models);
+
+            if (positionEnum == Position.FLEX)
+                models = mapper.Map<List<WeekProjectionModel>>(await analysisService.WeeklyFlexRankings());
+
+            else if (weekProjectionService.GetProjectionsFromCache(positionEnum, out var projectionsCache))
+                models = mapper.Map<List<WeekProjectionModel>>(projectionsCache);
+
+            else if (weekProjectionService.GetProjectionsFromSQL(positionEnum, currentWeek, out var projectionsSQL))
             {
-                List<WeekProjectionModel> models = [];
-                var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-                if (currentWeek > _season.Weeks) 
-                    return Ok(models);
-
-                if (positionEnum == Position.FLEX)
-                    models = mapper.Map<List<WeekProjectionModel>>(await analysisService.WeeklyFlexRankings());
-
-                else if (weekProjectionService.GetProjectionsFromCache(positionEnum, out var projectionsCache))
-                    models = mapper.Map<List<WeekProjectionModel>>(projectionsCache);
-
-                else if (weekProjectionService.GetProjectionsFromSQL(positionEnum, currentWeek, out var projectionsSQL))
-                {
-                    models = mapper.Map<List<WeekProjectionModel>>(projectionsSQL);
-                    models.ForEach(m => m.CanDelete = true);
-                }
-                else
-                    models = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum));
-
-                var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId);
-                var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, currentWeek)).ToDictionary(s => s.TeamId);
-                models.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team.Team : string.Empty);                
-                models.ForEach(m => m.Opponent = teamDictionary.TryGetValue(m.PlayerId, out var team) ? scheduleDictionary[team.TeamId].OpposingTeam : string.Empty);
-
-                return Ok(models.OrderByDescending(m => m.ProjectedPoints));
+                models = mapper.Map<List<WeekProjectionModel>>(projectionsSQL);
+                models.ForEach(m => m.CanDelete = true);
             }
-            return BadRequest();
+            else
+                models = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum));
+
+            var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId);
+            var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, currentWeek)).ToDictionary(s => s.TeamId);
+            models.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team.Team : string.Empty);
+            models.ForEach(m => m.Opponent = teamDictionary.TryGetValue(m.PlayerId, out var team) ? scheduleDictionary[team.TeamId].OpposingTeam : string.Empty);
+
+            return Ok(models.OrderByDescending(m => m.ProjectedPoints));
+
         }
         [HttpPost("weekly/{position}")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]

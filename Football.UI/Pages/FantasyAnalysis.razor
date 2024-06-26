@@ -5,7 +5,7 @@
 @using Football.Api.Models;
 @using Football.Enums;
 @using Football.UI.Helpers;
-@inject IHttpClientFactory ClientFactory
+@inject IRequests requests;
 
 <h4>Fantasy Analysis</h4>
 
@@ -101,7 +101,6 @@
 
 
 @code {
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
     public string Position { get; set; } = "Quarterback";
     public Position positionEnum { get; set; }
     public List<FantasyAnalysisModel>? FantasyAnalyses = new();
@@ -114,37 +113,23 @@
     public TableSort tableSort = new();
     public Formatter format = new();
 
-    public void SetPosition(ChangeEventArgs args)
+    private void SetPosition(ChangeEventArgs args)
     {
         FantasyAnalyses?.Clear();
         tableSort = new();
         positionEnum = format.SetPosition(args);
     }
 
-    public async Task HandleInput()
+    private async Task HandleInput()
     {
         loading = true;
         FantasyAnalyses?.Clear();
         shouldRender = true;
-        FantasyAnalyses = (await GetFantasyAnalysesRequest(positionEnum)).Where(f => f.AvgFantasy >= 5).ToList(); ;
+        FantasyAnalyses = (await requests.GetFantasyAnalysesRequest(positionEnum)).Where(f => f.AvgFantasy >= 5).ToList(); ;
         loading = false;
         shouldRender = true;
     }
-    public async Task<List<FantasyAnalysisModel>?> GetFantasyAnalysesRequest(Position position)
-    {      
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/fantasy-analysis/" + position.ToString());
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<List<FantasyAnalysisModel>>(responseStream, options);
-        }
-        return null;
-    }
 
-    public void SetTable(string columnName) => FantasyAnalyses = tableSort.SortTable<FantasyAnalysisModel>(FantasyAnalyses, columnName);
+    private void SetTable(string columnName) => FantasyAnalyses = tableSort.SortTable<FantasyAnalysisModel>(FantasyAnalyses, columnName);
 
 }
