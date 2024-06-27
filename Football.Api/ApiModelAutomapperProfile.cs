@@ -131,6 +131,7 @@ namespace Football.Api
             CreateMap<TargetShare, TargetShareModel>()
                 .ForMember(t => t.TeamDescription, o => o.MapFrom(t => t.Team.TeamDescription))
                 .ForMember(t => t.TeamId, o => o.MapFrom(t => t.Team.TeamId));
+            CreateMap<WeeklyFantasy, WeeklyFantasyModel>();
         }
 
     }

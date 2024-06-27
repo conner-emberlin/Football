@@ -1,8 +1,6 @@
 ﻿@using System.Text.Json
 @using System.Text.Json.Serialization
-@using Football.Data.Models;
-@using Football.Fantasy.Models;
-@using Football.Players.Models;
+@using Football.Api.Models;
 @using Football.UI.Helpers;
 @inject IRequests requests;
 @page "/Leaders/"
@@ -115,32 +113,32 @@ else if(youTried && filterWeekly && weeklyResults != null && weeklyResults.Any()
     public string position { get; set; } = "";
     public string season { get; set; } = "";
 
-    public List<WeeklyFantasy>? weeklyResults = new();
-    public List<SeasonFantasy>? currentLeaders = new();
-    public List<SeasonFantasy> filteredLeaders = new();
+    public List<WeeklyFantasyModel>? weeklyResults = new();
+    public List<SeasonFantasyModel>? currentLeaders = new();
+    public List<SeasonFantasyModel> filteredLeaders = new();
 
     public bool youTried = false;
     private bool shouldRender;
     private bool loading = false;
-
     private bool filterWeekly = false;
     private bool filterRunning = false;
     private bool showAll = false;
 
-    protected override bool ShouldRender() => shouldRender;
-
     public Formatter form = new();
+
+    protected override bool ShouldRender() => shouldRender;
 
     protected override async Task OnInitializedAsync()
     {
         loading = true;
-        currentLeaders = await requests.GetSeasonTotals();
+        currentLeaders = await requests.GetSeasonTotalsRequest();
         loading = false;
         shouldRender = true;
     }
 
     public async Task HandleInput()
     {
+        loading = true;
         youTried = true;
         filterRunning = false;
         filterWeekly = false;
@@ -149,22 +147,22 @@ else if(youTried && filterWeekly && weeklyResults != null && weeklyResults.Any()
         if (!string.IsNullOrEmpty(week))
         {
             filterWeekly = true;
-            weeklyResults = (await requests.GetWeeklyFantasy(week, season)).OrderByDescending(p => p.FantasyPoints).ToList();
+            weeklyResults = (await requests.GetWeeklyFantasyRequest(week, season)).OrderByDescending(p => p.FantasyPoints).ToList();
             weeklyResults = !string.IsNullOrEmpty(position) ? weeklyResults.Where(w => w.Position.ToLower() == position.Trim().ToLower()).ToList() : weeklyResults;
         }
         else if(string.IsNullOrEmpty(week) && !string.IsNullOrEmpty(position))
         {
             filterRunning = true;
-            currentLeaders = await requests.GetSeasonTotals(season);
+            currentLeaders = await requests.GetSeasonTotalsRequest(season);
             filteredLeaders = currentLeaders.Where(c => c.Position.ToLower() == position.ToLower()).ToList();
         }
         else
         {
-            currentLeaders = await requests.GetSeasonTotals(season);
+            currentLeaders = (await requests.GetSeasonTotalsRequest(season)).OrderByDescending(s => s.FantasyPoints).ToList();
             showAll = true;
         }
+
+        loading = false;
         shouldRender = true;
     } 
-
-
 }

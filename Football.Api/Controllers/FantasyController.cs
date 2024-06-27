@@ -48,26 +48,26 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetWeeklyFantasy(int playerId) => playerId > 0 ? Ok(await fantasyDataService.GetWeeklyFantasy(playerId)) : BadRequest();
 
         [HttpGet("data/weekly/leaders/{week}")]
-        [ProducesResponseType(typeof(List<WeeklyFantasy>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<WeeklyFantasyModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetWeeklyLeaders([FromRoute] int week, [FromQuery] int season) 
         {
             if (week <= 0) return BadRequest();
             
             var fantasySeason = season > 0 ? season : await playersService.GetCurrentWeek(_season.CurrentSeason) == 1 ? _season.CurrentSeason - 1 : _season.CurrentSeason;
-            return Ok(await fantasyDataService.GetWeeklyFantasy(fantasySeason, week));
+            return Ok(mapper.Map<List<WeeklyFantasyModel>>(await fantasyDataService.GetWeeklyFantasy(fantasySeason, week)));
         }
 
         [HttpGet("season-totals")]
-        [ProducesResponseType(typeof(List<SeasonFantasy>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<SeasonFantasyModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetFantasyTotals([FromQuery] int fantasySeason) 
         {
-            if (fantasySeason > 0 && fantasySeason != _season.CurrentSeason) return Ok(await fantasyDataService.GetSeasonFantasy(fantasySeason, false));
+            if (fantasySeason > 0 && fantasySeason != _season.CurrentSeason) return Ok(mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetSeasonFantasy(fantasySeason, false)));
             else
             {
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-                if (currentWeek == 1) return Ok(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason - 1));
-                return Ok(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason));
+                if (currentWeek == 1) return Ok(mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason - 1)));
+                return Ok(mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason)));
             }
             
         } 
