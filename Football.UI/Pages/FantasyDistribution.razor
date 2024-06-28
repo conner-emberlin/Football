@@ -1,18 +1,14 @@
 ﻿@page "/FantasyDistribution"
 <PageTitle>Market Share</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Projections.Models;
-@using Football.Players.Models;
-@using Football.Fantasy.Models;
 @using Football.Enums;
+@using Football.Api.Models;
 @using Football.UI.Helpers;
-@inject IHttpClientFactory ClientFactory
+@inject IRequests requests;
 
 <h4>Fantasy Distribution</h4>
 
 <div>
-    @foreach (var position in Positions)
+    @foreach (var position in format.Positions())
     {
 
         <input type="radio" name="players" id=" @position" value="@position"
@@ -31,10 +27,6 @@
 @if (loading)
 {
     <div class="spinner"></div>
-}
-@if (badRequestError)
-{
-    <p>Unexpected Error. Please try again.</p>
 }
 
 @if (fantasyShare.Any())
@@ -136,59 +128,32 @@
 }
 
 @code {
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End" };
-    public string Position { get; set; } = "Quarterback";
-    public Position positionEnum { get; set; } = Enums.Position.QB;
-    public List<Football.Fantasy.Models.FantasyPercentage> fantasyShare = new();
+    public Position positionEnum { get; set; }
+
+    public List<FantasyPercentageModel>? fantasyShare = new();
 
     public bool loading { get; set; } = false;
-    public bool badRequestError { get; set; } = false;
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
 
     public TableSort tableSort = new();
+    public Formatter format = new();
 
     public void SetPosition(ChangeEventArgs args)
     {
-        Position = args.Value.ToString();
-        fantasyShare.Clear();
+        fantasyShare?.Clear();
         tableSort = new();
-        positionEnum = Position switch
-        {
-            "Quarterback" => Enums.Position.QB,
-            "Runningback" => Enums.Position.RB,
-            "Wide Receiver" => Enums.Position.WR,
-            "Tight End" => Enums.Position.TE,
-            _ => Enums.Position.RB
-        };
+        positionEnum = format.SetPosition(args);
     }
     public async Task Get()
     {
         loading = true;
-        fantasyShare.Clear();
+        fantasyShare?.Clear();
         shouldRender = true;
-
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/shares/" + positionEnum.ToString());
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            fantasyShare = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Models.FantasyPercentage>>(responseStream, options);
-            badRequestError = false;
-        }
-        else
-        {
-            badRequestError = true;
-        }
+        fantasyShare = await requests.GetFantasyPercentageRequest(positionEnum.ToString());
         loading = false;
         shouldRender = true;
     }
+    private void SetTable(string columnName) => fantasyShare = tableSort.SortTable<FantasyPercentageModel>(fantasyShare, columnName);
 
-    private void SetTable(string columnName)
-    {
-        fantasyShare = tableSort.SortTable<Football.Fantasy.Models.FantasyPercentage>(fantasyShare, columnName);
-    }
 }

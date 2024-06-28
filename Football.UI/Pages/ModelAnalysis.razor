@@ -161,8 +161,8 @@
     private void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
-        if (ProjectionAnalyses != null) ProjectionAnalyses.Clear();
-        if (SeasonProjectionAnalyses != null) SeasonProjectionAnalyses.Clear();
+        ProjectionAnalyses?.Clear();
+        SeasonProjectionAnalyses?.Clear();
         tableSort = new();
     }
 

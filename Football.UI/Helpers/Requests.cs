@@ -34,6 +34,8 @@ namespace Football.UI.Helpers
         public async Task<List<SeasonProjectionModel>?> GetSeasonProjectionsRequest(string position) => await Get<List<SeasonProjectionModel>?>("https://localhost:7028/api/Projection/season/" + position);
         public async Task<bool> DeleteSeasonProjectionRequest(int playerId, int season) => await Delete<bool>(string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Projection/season", playerId, season));
         public async Task<int> PostSeasonProjectionRequest(string position) => await PostWithoutBody<int>("https://localhost:7028/api/Projection/season/" + position);
+        public async Task<List<MatchupRankingModel>?> GetMatchupRankingsRequest(string position) => await Get<List<MatchupRankingModel>?>("https://localhost:7028/api/Fantasy/matchup-rankings/" + position);
+        public async Task<List<FantasyPercentageModel>?> GetFantasyPercentageRequest(string position) => await Get<List<FantasyPercentageModel>?>("https://localhost:7028/api/Fantasy/shares/" + position);
 
         private async Task<T?> Get<T>(string path)
         {

@@ -165,9 +165,9 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetBoomBustByWeek([FromRoute] int playerId) => playerId > 0 ? Ok(await fantasyAnalysisService.GetBoomBustsByWeek(playerId)) : BadRequest();
 
         [HttpGet("shares/{position}")]
-        [ProducesResponseType(typeof(List<FantasyPerformance>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<FantasyPercentageModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetFantasyPercentages([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await fantasyAnalysisService.GetFantasyPercentages(posEnum)) : BadRequest();
+        public async Task<IActionResult> GetFantasyPercentages([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<FantasyPercentageModel>>(await fantasyAnalysisService.GetFantasyPercentages(posEnum))) : BadRequest();
 
         [HttpGet("snap-analysis/{position}")]
         [ProducesResponseType(typeof(List<SnapCountAnalysisModel>), StatusCodes.Status200OK)]

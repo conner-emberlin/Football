@@ -136,6 +136,7 @@ namespace Football.Api
                 .ForMember(s => s.PlayerId, o => o.MapFrom(s => s.Player.PlayerId));
             CreateMap<WeeklyProjectionAnalysis, WeeklyProjectionAnalysisModel>();
             CreateMap<SeasonProjectionAnalysis, SeasonProjectionAnalysisModel>();
+            CreateMap<FantasyPercentage, FantasyAnalysisModel>();
         }
 
     }
