@@ -45,8 +45,18 @@ namespace Football.Api.Controllers
 
             var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
             model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
-            var retVal = positionEnum == Position.FLEX ? model : model.OrderByDescending(m => m.ProjectedPoints).ToList();
-            return Ok(retVal);
+            if (positionEnum == Position.FLEX) return Ok(model);
+            else
+            {
+                var activeSeason = await playersService.GetCurrentWeek(_season.CurrentSeason) <= _season.Weeks;
+                if (activeSeason) return Ok(model.OrderByDescending(m => m.ProjectedPoints).ToList());
+                else
+                {
+                    var seasonProjectionErrorDictionary = mapper.Map<List<SeasonProjectionErrorModel>>(await analysisService.GetSeasonProjectionError(positionEnum)).ToDictionary(s => s.PlayerId);
+                    model.ForEach(m => m.SeasonProjectionError = seasonProjectionErrorDictionary.TryGetValue(m.PlayerId, out var error) ? error : null);
+                    return Ok(model.OrderByDescending(m => m.ProjectedPoints).ToList());
+                }
+            }
         }
         [HttpGet("season/player/{playerId}")]
         [ProducesResponseType(typeof(SeasonProjection), StatusCodes.Status200OK)]
@@ -114,17 +124,17 @@ namespace Football.Api.Controllers
         }
 
         [HttpGet("weekly-analysis/{position}")]
-        [ProducesResponseType(typeof(List<WeeklyProjectionAnalysis>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<WeeklyProjectionAnalysisModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetWeeklyProjectionAnalysis(string position)
         {
             if (Enum.TryParse(position, out Position positionEnum))
             {
-                List<WeeklyProjectionAnalysis> projectionAnalyses = [];
+                List<WeeklyProjectionAnalysisModel> projectionAnalyses = [];
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
                 for (int i = 1; i < currentWeek; i++)
                 {
-                    projectionAnalyses.Add(await analysisService.GetWeeklyProjectionAnalysis(positionEnum, i));
+                    projectionAnalyses.Add(mapper.Map<WeeklyProjectionAnalysisModel>(await analysisService.GetWeeklyProjectionAnalysis(positionEnum, i)));
                 }
                 return Ok(projectionAnalyses);
             }
@@ -132,9 +142,9 @@ namespace Football.Api.Controllers
         }
 
         [HttpGet("weekly-analysis/player/{playerId}")]
-        [ProducesResponseType(typeof(WeeklyProjectionAnalysis), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(WeeklyProjectionAnalysisModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyProjectionAnalysis(int playerId) => playerId > 0 ? Ok(await analysisService.GetWeeklyProjectionAnalysis(playerId)) : BadRequest();
+        public async Task<IActionResult> GetWeeklyProjectionAnalysis(int playerId) => Ok(mapper.Map<List<WeeklyProjectionAnalysisModel>>(await analysisService.GetWeeklyProjectionAnalysis(playerId)));
 
         [HttpGet("weekly-error/{position}/{week}")]
         [ProducesResponseType(typeof(List<WeeklyProjectionError>), StatusCodes.Status200OK)]
@@ -184,14 +194,14 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetSeasonProjectionError([FromRoute] string position, [FromQuery] int season) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetSeasonProjectionError(posEnum, season)) : BadRequest();
 
         [HttpGet("season-projection-analysis/{position}")]
-        [ProducesResponseType(typeof(SeasonProjectionAnalysis), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SeasonProjectionAnalysisModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetSeasonProjectionAnalysis([FromRoute] string position, [FromQuery] int season) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetSeasonProjectionAnalysis(posEnum, season)) : BadRequest();
+        public async Task<IActionResult> GetSeasonProjectionAnalysis([FromRoute] string position, [FromQuery] int season) => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<SeasonProjectionAnalysisModel>(await analysisService.GetSeasonProjectionAnalysis(posEnum, season))) : BadRequest();
 
         [HttpGet("season-projection-analysis/all/{position}")]
         [ProducesResponseType(typeof(List<SeasonProjectionAnalysis>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetAllSeasonProjectionAnalyses([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(await analysisService.GetAllSeasonProjectionAnalyses(posEnum)) : BadRequest();
+        public async Task<IActionResult> GetAllSeasonProjectionAnalyses([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<SeasonProjectionAnalysisModel>>(await analysisService.GetAllSeasonProjectionAnalyses(posEnum))) : BadRequest();
 
     }
 }

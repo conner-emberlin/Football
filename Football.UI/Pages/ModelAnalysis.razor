@@ -1,8 +1,6 @@
 ﻿@page "/ModelAnalysis"
 <PageTitle>Model Analysis</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Projections.Models;
+@using Football.Api.Models;
 @using Football.UI.Helpers;
 @using ApexCharts;
 @inject IRequests requests;
@@ -135,9 +133,9 @@
     <hr style="width:100%;text-align:left;margin-left:0">
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <h6>Avg Error by Week</h6>
-        <ApexChart TItem="WeeklyProjectionAnalysis"
+        <ApexChart TItem="WeeklyProjectionAnalysisModel"
                 Height="400">
-        <ApexPointSeries TItem="WeeklyProjectionAnalysis"
+        <ApexPointSeries TItem="WeeklyProjectionAnalysisModel"
                          Items="ProjectionAnalyses"
                          Name="Avg Error"
                          SeriesType="SeriesType.Line"
@@ -149,8 +147,8 @@
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
 
-    private List<WeeklyProjectionAnalysis>? ProjectionAnalyses = new();
-    private List<SeasonProjectionAnalysis>? SeasonProjectionAnalyses = new();
+    private List<WeeklyProjectionAnalysisModel>? ProjectionAnalyses = new();
+    private List<SeasonProjectionAnalysisModel>? SeasonProjectionAnalyses = new();
 
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
@@ -159,8 +157,6 @@
 
     public TableSort tableSort = new();
     public Formatter format = new();
-
-    public bool SeasonOver() => ProjectionAnalyses?.Count > 0 ? ProjectionAnalyses.Max(p => p.Week) == 18 : false;
 
     private void SetPosition(ChangeEventArgs args)
     {
@@ -183,7 +179,7 @@
         shouldRender = true;
     }
 
-    private void SetTable(string columnName) => ProjectionAnalyses = tableSort.SortTable<WeeklyProjectionAnalysis>(ProjectionAnalyses, columnName);
+    private void SetTable(string columnName) => ProjectionAnalyses = tableSort.SortTable<WeeklyProjectionAnalysisModel>(ProjectionAnalyses, columnName);
     private string GetProjectionErrorLink(string position, int week) => string.Format("{0}/{1}/{2}", "/ProjectionError", position, week);
 
 

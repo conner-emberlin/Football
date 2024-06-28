@@ -1,15 +1,12 @@
 ﻿@page "/Projections"
 <PageTitle>Season Projections</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
 @using Football.Api.Models;
-@using Football.Projections.Models;
-@using Football.Fantasy.Models;
-@inject IHttpClientFactory ClientFactory
+@using Football.UI.Helpers;
+@inject IRequests requests;
 
 <h4>Season Projections</h4>
 <div>
-@foreach(var position in Positions)
+@foreach(var position in format.Positions())
 {
     
         <input type="radio" name="players" id=" @position" value="@position" 
@@ -21,7 +18,7 @@
 }
 </div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
-<button class="button-22" role="button" @onclick="GetProjections"> 
+<button class="button-22" role="button" @onclick="HandleInput"> 
     Submit
     </button>
 
@@ -31,16 +28,12 @@
 {   
     <div class="spinner"></div>
 }
-@if (badRequestError || players is null)
-{
-    <p>Unexpected Error. Please try again.</p>
-}
 
-else if(players.Count > 0)
+@if(players != null && players.Count > 0)
 {
-    @if (!players.First().CanDelete)
+    @if (!players.Any(p => p.CanDelete))
     {
-    <button class="button-22" role = "button" @onclick="UploadProjections">
+    <button class="button-22" role = "button" @onclick="HandleUpload">
         Upload
     </button>
     }
@@ -64,14 +57,14 @@ else if(players.Count > 0)
                     <th>Team</th>
                     <th>Total Points</th>
                     <th>PPG</th>
-                    @if (seasonOver && PositionEnum != "FLEX")
+                    @if (players.Any(p => p.SeasonProjectionError != null))
                     {
                         <th>ActualTotal</th>
                         <th>ActualPPG</th>
                         <th>TotalError</th>
                         <th>PPGError</th>
                     }
-                    @if (players.First().CanDelete)
+                    @if (players.Any(p => p.CanDelete))
                     {
                         <th></th>                        
                     }
@@ -81,166 +74,83 @@ else if(players.Count > 0)
         <tbody>
         @foreach (var p in players)
         {  
-                    var logoPhotoPath = p.Team != string.Empty ? "https://localhost:7176/Logos/" + p.Team + ".png" : "https://localhost:7176/Logos/nfl.png";
+             var logoPhotoPath = p.Team != string.Empty ? "https://localhost:7176/Logos/" + p.Team + ".png" : "https://localhost:7176/Logos/nfl.png";
+             var sa = p.SeasonProjectionError;
+
             <tr>
-            <td>@GetRank(p)</td>
+            <td>@format.Rank(players, p)</td>
             <td><a class = "page-links" href="Players/@p.PlayerId"> @p.Name</a></td>
             <td>@p.Position</td>
             <td><img src="@logoPhotoPath" width="30" height="30"></td>
             <td>@Math.Round((double)p.ProjectedPoints,2)</td>
             <td>@Math.Round((double)p.ProjectedPoints/17,2)</td>
-                        @if (seasonOver && PositionEnum != "FLEX")
-                        {
-                            var sa = GetSeasonProjectionAnalysis(p.PlayerId);
-                            if (sa != null && sa.WeeksPlayed > 0)
-                            {
-                                <td>@Math.Round(sa.TotalFantasy,2)</td>
-                                <td>@Math.Round(sa.TotalFantasy/sa.WeeksPlayed, 2)</td>
-                                <td>@Math.Round(sa.TotalFantasy - sa.SeasonFantasyProjection, 2)</td>
-                                <td>@Math.Round((sa.SeasonFantasyProjection/17) - (sa.TotalFantasy/sa.WeeksPlayed), 2)</td>
-                            }
-                            else
-                            {
-                                <td>--</td>
-                                <td>--</td>
-                                <td>--</td>
-                                <td>--</td>
-                            }
-                        }
-                        @if (p.CanDelete)
-                        {
-                            <td>
-                                <button type="button" style="color:red" class="btn btn-link" @onclick="() => DeleteProjection(p.PlayerId, p.Season)">
-                                    <i sytle="color:red" class="oi oi-x" />
-                                </button>
-                            </td>
-                        }
-                    </tr>
+             @if (sa != null)
+             {
+                <td>@Math.Round(sa.TotalFantasy, 2)</td>
+                <td>@Math.Round(sa.TotalFantasy / sa.WeeksPlayed, 2)</td>
+                <td>@Math.Round(sa.TotalFantasy - sa.SeasonFantasyProjection, 2)</td>
+                <td>@Math.Round((sa.SeasonFantasyProjection / 17) - (sa.TotalFantasy / sa.WeeksPlayed), 2)</td>
+             }
+             @if (p.CanDelete)
+             {
+                <td>
+                <button type="button" style="color:red" class="btn btn-link" @onclick="() => HandleDelete(p.PlayerId, p.Season)"> <i sytle="color:red" class="oi oi-x" /></button>
+                </td>
+             }
+            </tr>
         }
         </tbody>
     </table>
     </div>
 }
 @code {
-    JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
-    private bool shouldRender;
-    protected override bool ShouldRender() => shouldRender;
-    private bool badRequestError;   
-    private List<SeasonProjectionModel> players = new();
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "Flex" };
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
+
+    private List<SeasonProjectionModel>? players = new();
+
+    private bool shouldRender;
+    private int count = 0;
     private bool loading { get; set; }
-    int count = 0;
     public bool seasonOver { get; set; } = false;
     private bool recordDeleted = false;
-    public List<SeasonProjectionError>? analysis;
 
-    protected override async Task OnInitializedAsync()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/current-week");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            seasonOver = await JsonSerializer.DeserializeAsync<int>(responseStream, options) > 18;
-        }
-    }
-    public async Task UploadProjections()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Projection/season/" + @PositionEnum);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            count  = await JsonSerializer.DeserializeAsync<int>(responseStream, options);
-        }
-    }
+    private Formatter format = new();
+
+    protected override bool ShouldRender() => shouldRender;
 
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
         recordDeleted = false;
-        players.Clear();
+        players?.Clear();
     }
 
-    public async Task GetProjections()
+    public async Task HandleInput()
     {
         loading = true;
-        shouldRender = true;
-        players.Clear();
-        switch (Position.ToLower())
-        {
-            case "quarterback":
-                PositionEnum = "QB";
-                break;
-            case "runningback":
-                PositionEnum = "RB";
-                break;
-            case "wide receiver":
-                PositionEnum = "WR";
-                break;
-            case "tight end":
-                PositionEnum = "TE";
-                break;
-            case "flex":
-                PositionEnum = "FLEX";
-                break;
-            default: PositionEnum = "QB"; break;
-        }
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/season/" + PositionEnum);          
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            players = await JsonSerializer.DeserializeAsync<List<SeasonProjectionModel>>(responseStream, options);
-            if (PositionEnum != "FLEX") analysis = await GetSeasonProjectionAnalyses(PositionEnum);
-            badRequestError = false;
-        }
-        else badRequestError = true;
+        players?.Clear();
+        PositionEnum = format.SetPosition(Position);
+        players = await requests.GetSeasonProjectionsRequest(PositionEnum);
         loading = false;
         shouldRender = true;
     }
 
-    public async Task<List<SeasonProjectionError>?> GetSeasonProjectionAnalyses(string position)
+    public async Task HandleDelete(int playerId, int season)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/season-projection-error/" + @PositionEnum);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<List<SeasonProjectionError>>(responseStream, options);
-        }
-        return null;
-    }
-
-    public async Task DeleteProjection(int playerId, int season)
-    {
-        var url = string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Projection/season", playerId, season);
-        var request = new HttpRequestMessage(HttpMethod.Delete, url);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            recordDeleted = await JsonSerializer.DeserializeAsync<bool>(responseStream, options);
-            await GetProjections();
-        }
-        else badRequestError = true;
+        loading = true;
+        recordDeleted = await requests.DeleteSeasonProjectionRequest(playerId, season);
+        await HandleInput();
+        loading = false;
         shouldRender = true;
     }
-    private SeasonProjectionError? GetSeasonProjectionAnalysis(int playerId) => analysis.FirstOrDefault(a => a.Player.PlayerId == playerId);
 
-    private int GetRank(SeasonProjectionModel projection) => players.IndexOf(projection) + 1;
+    public async Task HandleUpload()
+    {
+        loading = true;
+        count = await requests.PostSeasonProjectionRequest(PositionEnum);
+        loading= false;
+        shouldRender = true;
+    }
 }
 
