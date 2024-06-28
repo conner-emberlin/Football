@@ -147,14 +147,14 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetWeeklyProjectionAnalysis(int playerId) => Ok(mapper.Map<List<WeeklyProjectionAnalysisModel>>(await analysisService.GetWeeklyProjectionAnalysis(playerId)));
 
         [HttpGet("weekly-error/{position}/{week}")]
-        [ProducesResponseType(typeof(List<WeeklyProjectionError>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<WeeklyProjectionErrorModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyProjectionError(string position, int week) => Enum.TryParse(position, out Position positionEnum) ? Ok(await analysisService.GetWeeklyProjectionError(positionEnum, week)) : BadRequest();
+        public async Task<IActionResult> GetWeeklyProjectionError(string position, int week) => Enum.TryParse(position, out Position positionEnum) ? Ok(mapper.Map<List<WeeklyProjectionErrorModel>>(await analysisService.GetWeeklyProjectionError(positionEnum, week))) : BadRequest();
 
         [HttpGet("weekly-error/{playerId}")]
-        [ProducesResponseType(typeof(List<WeeklyProjectionError>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<WeeklyProjectionErrorModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyProjectionError(int playerId) => playerId > 0 ? Ok(await analysisService.GetWeeklyProjectionError(playerId)) : BadRequest();
+        public async Task<IActionResult> GetWeeklyProjectionError(int playerId) => playerId > 0 ? Ok(mapper.Map<List<WeeklyProjectionErrorModel>>(await analysisService.GetWeeklyProjectionError(playerId))) : BadRequest();
 
         [HttpGet("sleeper-projections/{username}")]
         [ProducesResponseType(typeof(List<WeekProjection>), StatusCodes.Status200OK)]

@@ -120,9 +120,9 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetTeamTotals() => Ok(await marketShareService.GetTeamTotals());
 
         [HttpGet("marketshare/{position}")]
-        [ProducesResponseType(typeof(List<TeamTotals>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<MarketShareModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetMarketShare(string position) => Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum) ? Ok(await marketShareService.GetMarketShare(positionEnum)) : BadRequest();
+        public async Task<IActionResult> GetMarketShare(string position) => Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum) ? Ok(mapper.Map<List<MarketShareModel>?>(await marketShareService.GetMarketShare(positionEnum))) : BadRequest();
 
 
         [HttpGet("targetshares")]

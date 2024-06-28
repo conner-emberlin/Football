@@ -17,5 +17,7 @@ namespace Football.UI
         public Task<int> PostSeasonProjectionRequest(string position);
         public Task<List<MatchupRankingModel>?> GetMatchupRankingsRequest(string position);
         public Task<List<FantasyPercentageModel>?> GetFantasyPercentageRequest(string position);
+        public Task<List<MarketShareModel>?> GetMarketShareRequest(string position);
+        public Task<List<WeeklyProjectionErrorModel>?> GetWeeklyProjectionErrorRequest(string position, string week);
     }
 }

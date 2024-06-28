@@ -36,6 +36,8 @@ namespace Football.UI.Helpers
         public async Task<int> PostSeasonProjectionRequest(string position) => await PostWithoutBody<int>("https://localhost:7028/api/Projection/season/" + position);
         public async Task<List<MatchupRankingModel>?> GetMatchupRankingsRequest(string position) => await Get<List<MatchupRankingModel>?>("https://localhost:7028/api/Fantasy/matchup-rankings/" + position);
         public async Task<List<FantasyPercentageModel>?> GetFantasyPercentageRequest(string position) => await Get<List<FantasyPercentageModel>?>("https://localhost:7028/api/Fantasy/shares/" + position);
+        public async Task<List<MarketShareModel>?> GetMarketSharesRequest(string position) => await Get<List<MarketShareModel>?>("https://localhost:7028/api/Fantasy/marketshare/" + position);
+        public async Task<List<WeeklyProjectionErrorModel>?> GetWeeklyProjectionErrorRequest(string position, string week) => await Get<List<WeeklyProjectionAnalysisModel>?>(string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Projection/weekly-error", position, week));
 
         private async Task<T?> Get<T>(string path)
         {

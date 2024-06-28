@@ -1,7 +1,5 @@
 ﻿@page "/MatchupRankings"
 <PageTitle>Matchup Rankings</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
 @using Football.Api.Models;
 @using Football.Enums;
 @using Football.UI.Helpers;
@@ -73,6 +71,7 @@
 
 
 @code {
+    public string Position { get; set; }
     public Position positionEnum { get; set; }
     public List<MatchupRankingModel>? Rankings = new();
 

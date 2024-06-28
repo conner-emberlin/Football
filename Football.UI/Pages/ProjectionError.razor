@@ -1,21 +1,15 @@
 ﻿@page "/ProjectionError/{position}/{week}"
 <PageTitle>Projection Error</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Projections.Models;
 @using Football.Enums;
+@using Football.Api.Models;
 @using Football.UI.Helpers;
-@inject IHttpClientFactory ClientFactory
+@inject IRequests requests;
 
 <h4>@GetHeader()</h4>
 
 @if (loading)
 {
     <div class="spinner"></div>
-}
-@if (badRequestError)
-{
-    <p>Unexpected Error. Please try again.</p>
 }
 
 @if (projectionErrors.Any())
@@ -65,55 +59,30 @@
     [Parameter]
     public string week { get; set; } = "";
 
-
-    public List<WeeklyProjectionError>? projectionErrors = [];
+    public List<WeeklyProjectionErrorModel>? projectionErrors = [];
 
     public bool loading { get; set; } = false;
-    public bool badRequestError { get; set; } = false;
     private bool shouldRender;
-    protected override bool ShouldRender() => shouldRender;
-
+    
     private TableSort tableSort = new();
 
-    protected override async Task OnInitializedAsync()
-    {
-        await Get();
-    }
+    protected override bool ShouldRender() => shouldRender;
+    protected override async Task OnInitializedAsync() => await HandleInput();
 
-    public async Task Get()
+    public async Task HandleInput()
     {
         loading = true;
-
-        if (projectionErrors != null)
-            projectionErrors.Clear();
-
+        projectionErrors?.Clear();
         shouldRender = true;
-
-        var url = string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Projection/weekly-error", position, week);
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            projectionErrors = await JsonSerializer.DeserializeAsync<List<WeeklyProjectionError>>(responseStream, options);
-            badRequestError = false;
-        }
-        else
-        {
-            badRequestError = true;
-        }
+        projectionErrors = await requests.GetWeeklyProjectionErrorRequest(position, week);
         loading = false;
         shouldRender = true;
     }
 
-    private void SetTable(string columnName)
-    {
-        projectionErrors = tableSort.SortTable<WeeklyProjectionError>(projectionErrors, columnName);
-    }
-
+    private void SetTable(string columnName) => projectionErrors = tableSort.SortTable<WeeklyProjectionErrorModel>(projectionErrors, columnName);
     private string GetHeader() => position + " Projection Error - Week " + week;
     private string GetGraphLink(int playerId) => string.Format("{0}/{1}", "/error-graph", playerId);
+
+
+
 }
