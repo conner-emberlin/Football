@@ -8,7 +8,7 @@
 <h4>Market Share</h4>
 
 <div>
-    @foreach (var position in format.Positions())
+    @foreach (var position in format.Positions().Where(p => p != "Quarterback"))
     {
 
         <input type="radio" name="players" id=" @position" value="@position"
@@ -29,7 +29,7 @@
     <div class="spinner"></div>
 }
 
-@if (marketShare.Any())
+@if (marketShare != null)
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
@@ -125,5 +125,4 @@
 
     private void SetTable(string columnName) => marketShare = tableSort.SortTable<MarketShareModel>(marketShare, columnName);
 
-    }
 }

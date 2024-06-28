@@ -129,6 +129,7 @@
     public async Task HandleInput()
     {
         loading = true;
+        shouldRender = true;
         players?.Clear();
         PositionEnum = format.SetPosition(Position);
         players = await requests.GetSeasonProjectionsRequest(PositionEnum);
