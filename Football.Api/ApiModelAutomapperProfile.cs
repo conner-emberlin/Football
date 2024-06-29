@@ -143,6 +143,12 @@ namespace Football.Api
                 .ForMember(m => m.Position, o => o.MapFrom(m => m.Player.Position))
                 .ForMember(m => m.Team, o => o.MapFrom(m => m.PlayerTeam.Team));
             CreateMap<WeeklyProjectionError, WeeklyProjectionAnalysisModel>();
+            CreateMap<TeamMap, TeamMapModel>();
+            CreateMap<GameResult, GameResultModel>();
+            CreateMap<TeamRecord, TeamRecordModel>()
+                .ForMember(t => t.TeamId, o => o.MapFrom(t => t.TeamMap.TeamId));
+            CreateMap<ScheduleDetails, ScheduleDetailsModel>();
+            CreateMap<FantasyPerformance, FantasyPerformanceModel>();
         }
 
     }

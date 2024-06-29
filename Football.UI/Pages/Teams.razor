@@ -1,12 +1,8 @@
 ﻿@page "/Teams/{id?}"
 <PageTitle>Teams</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using System.Globalization;
-@using Football.Fantasy.Models;
-@using Football.Players.Models;
 @using Football.UI.Helpers;
-@inject IHttpClientFactory ClientFactory
+@using Football.Api.Models;
+@inject IRequests requests;
 
 @if (!badRequestError && teams.Any())
 {
@@ -100,90 +96,87 @@ else if (badRequestError)
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <h5>Team Leaders</h5>
 
-    @if (allPerformances.Any())
-    {
-        <div class="table_container">
-            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
-                <thead>
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>Name</th>
+                    <th>Total Fantasy</th>
+                    <th>Average Fantasy</th>
+                    <th>StdDev</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (qbPerformance != null)
+                {
                     <tr>
-                        <th>Position</th>
-                        <th>Name</th>
-                        <th>Total Fantasy</th>
-                        <th>Average Fantasy</th>
-                        <th>StdDev</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (qbPerformance != null)
-                    {
-                        <tr>
-                            <td><b style="color:@form.PositionColor("QB")">QB</b></td>
+                        <td><b style="color:@form.PositionColor("QB")">QB</b></td>
                         <td><a class="page-links" href="Players/@qbPerformance.PlayerId"> @qbPerformance.Name</a></td>
                         <td>@Math.Round(qbPerformance.TotalFantasy, 2)</td>
                         <td>@Math.Round(qbPerformance.AvgFantasy, 2)</td>
                         <td>@Math.Round(qbPerformance.StdDev, 2)</td>
                     </tr>
-                    }
-                    @if (rbPerformance.Any())
-                    {
-                        @foreach (var rb in rbPerformance)
-                        {
-                            <tr>
-                                <td><b style="color:@form.PositionColor("RB")">RB</b></td>
-                                <td><a class="page-links" href="Players/@rb.PlayerId"> @rb.Name</a></td>
-                                <td>@Math.Round(rb.TotalFantasy, 2)</td>
-                                <td>@Math.Round(rb.AvgFantasy, 2)</td>
-                                <td>@Math.Round(rb.StdDev, 2)</td>
-                            </tr>
-                        }
-                    }
-                    @if (wrPerformance.Any())
-                    {
-                        @foreach (var wr in wrPerformance)
-                        {
-                            <tr>
-                                <td><b style="color:@form.PositionColor("WR")">WR</b></td>
-                                <td><a class="page-links" href="Players/@wr.PlayerId"> @wr.Name</a></td>
-                                <td>@Math.Round(wr.TotalFantasy, 2)</td>
-                                <td>@Math.Round(wr.AvgFantasy, 2)</td>
-                                <td>@Math.Round(wr.StdDev, 2)</td>
-                            </tr>
-                        }
-                    }
-                    @if (tePerformance != null)
+                }
+                @if (rbPerformance.Any())
+                {
+                    @foreach (var rb in rbPerformance)
                     {
                         <tr>
-                            <td><b style="color:@form.PositionColor("TE")">TE</b></td>
+                            <td><b style="color:@form.PositionColor("RB")">RB</b></td>
+                            <td><a class="page-links" href="Players/@rb.PlayerId"> @rb.Name</a></td>
+                            <td>@Math.Round(rb.TotalFantasy, 2)</td>
+                            <td>@Math.Round(rb.AvgFantasy, 2)</td>
+                            <td>@Math.Round(rb.StdDev, 2)</td>
+                        </tr>
+                    }
+                }
+                @if (wrPerformance.Any())
+                {
+                    @foreach (var wr in wrPerformance)
+                    {
+                        <tr>
+                            <td><b style="color:@form.PositionColor("WR")">WR</b></td>
+                            <td><a class="page-links" href="Players/@wr.PlayerId"> @wr.Name</a></td>
+                            <td>@Math.Round(wr.TotalFantasy, 2)</td>
+                            <td>@Math.Round(wr.AvgFantasy, 2)</td>
+                            <td>@Math.Round(wr.StdDev, 2)</td>
+                        </tr>
+                    }
+                }
+                @if (tePerformance != null)
+                {
+                    <tr>
+                        <td><b style="color:@form.PositionColor("TE")">TE</b></td>
                         <td><a class="page-links" href="Players/@tePerformance.PlayerId"> @tePerformance.Name</a></td>
                         <td>@Math.Round(tePerformance.TotalFantasy, 2)</td>
                         <td>@Math.Round(tePerformance.AvgFantasy, 2)</td>
                         <td>@Math.Round(tePerformance.StdDev, 2)</td>
                     </tr>
-                    }
-                    @if (dstPerformance != null)
-                    {
-                        <tr>
-                            <td><b style="color:@form.PositionColor("DST")">DST</b></td>
+                }
+                @if (dstPerformance != null)
+                {
+                    <tr>
+                        <td><b style="color:@form.PositionColor("DST")">DST</b></td>
                         <td><a class="page-links" href="Players/@dstPerformance.PlayerId"> @dstPerformance.Name</a></td>
                         <td>@Math.Round(dstPerformance.TotalFantasy, 2)</td>
                         <td>@Math.Round(dstPerformance.AvgFantasy, 2)</td>
                         <td>@Math.Round(dstPerformance.StdDev, 2)</td>
                     </tr>
-                    }
-                    @if (kPerformance != null)
-                    {
-                        <tr>
-                            <td><b style="color:@form.PositionColor("K")">K</b></td>
+                }
+                @if (kPerformance != null)
+                {
+                    <tr>
+                        <td><b style="color:@form.PositionColor("K")">K</b></td>
                         <td><a class="page-links" href="Players/@kPerformance.PlayerId"> @kPerformance.Name</a></td>
                         <td>@Math.Round(kPerformance.TotalFantasy, 2)</td>
                         <td>@Math.Round(kPerformance.AvgFantasy, 2)</td>
                         <td>@Math.Round(kPerformance.StdDev, 2)</td>
                     </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
+                }
+            </tbody>
+        </table>
+    </div>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <h5>Game Results</h5>
     @if (teamGameResults.Any())
@@ -251,27 +244,26 @@ else if (badRequestError)
     public bool badRequestError { get; set; } = false;
     public bool youTried { get; set; } = false;
 
-    public List<TeamMap>? teams = new();
-    public List<TeamMap>? filteredTeams { get; set; }
+    public List<TeamMapModel>? teams = new();
+    public List<TeamMapModel>? filteredTeams { get; set; }
     public bool teamSelected { get; set; } = false;
     public string selectedTeam { get; set; } = "";
-    public TeamMap teamChosen = new();
+    public TeamMapModel teamChosen = new();
 
-    public List<GameResult>? gameResults = new();
-    public List<GameResult>? teamGameResults = new();
-    public List<TeamRecord>? teamRecords = new();
-    public TeamRecord? teamRecord = new();
+    public List<GameResultModel>? gameResults = new();
+    public List<GameResultModel>? teamGameResults = new();
+    public List<TeamRecordModel>? teamRecords = new();
+    public TeamRecordModel? teamRecord = new();
 
     public bool showSchedule { get; set; } = false;
-    public List<ScheduleDetails>? scheduleDetails = new();
+    public List<ScheduleDetailsModel>? scheduleDetails = new();
 
-    public List<FantasyPerformance>? allPerformances = new();
-    public FantasyPerformance? qbPerformance = new();
-    public List<FantasyPerformance>? rbPerformance = new();
-    public List<FantasyPerformance>? wrPerformance = new();
-    public FantasyPerformance? tePerformance = new();
-    public FantasyPerformance? dstPerformance = new();
-    public FantasyPerformance? kPerformance = new();
+    public FantasyPerformanceModel? qbPerformance = new();
+    public List<FantasyPerformanceModel>? rbPerformance = new();
+    public List<FantasyPerformanceModel>? wrPerformance = new();
+    public FantasyPerformanceModel? tePerformance = new();
+    public FantasyPerformanceModel? dstPerformance = new();
+    public FantasyPerformanceModel? kPerformance = new();
 
     public Formatter form = new();
 
@@ -281,9 +273,9 @@ else if (badRequestError)
     {
         loading = true;
         shouldRender = true;
-        await GetAllTeams();
-        await GetTeamRecords();
-        await GetGameResults();  
+        teams = await requests.GetAllTeamsRequest();
+        teamRecords = await requests.GetTeamRecordsRequest();
+        gameResults = await requests.GetGameResultsRequest();  
 
         if (!String.IsNullOrEmpty(id))
         {
@@ -293,7 +285,7 @@ else if (badRequestError)
         else
         {
             showSchedule = true;
-            await GetScheduleDetails();
+            scheduleDetails = await requests.GetScheduleDetailsRequest();
         }
         loading = false;
         shouldRender = true;
@@ -313,94 +305,15 @@ else if (badRequestError)
         showSchedule = false;
 
         teamChosen = teams.First(t => t.TeamId == tid);
-        teamGameResults = gameResults.Where(g => g.HomeTeamId == tid || g.AwayTeamId == tid).OrderBy(g => g.Week).ToList();
-        teamRecord = teamRecords.FirstOrDefault(t => t.TeamMap.TeamId == tid);
+        teamGameResults = gameResults.Where(g => g.WinnerId == tid || g.LoserId == tid).OrderBy(g => g.Week).ToList();
+        teamRecord = teamRecords.FirstOrDefault(t => t.TeamId == tid);
 
-        await GetFantasyPerformances(tid);
+        SetFantasyPerformances(await requests.GetFantasyPerformancesRequest(tid));
 
         selectedTeam = teamChosen.TeamDescription;
         teamSelected = true;
         filteredTeams = null;
         StateHasChanged();
-    }
-
-    private async Task GetAllTeams()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/all");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            teams = await JsonSerializer.DeserializeAsync<List<TeamMap>>(responseStream, options);
-            badRequestError = false;
-        }
-        else badRequestError = true;
-    }
-
-    private async Task GetGameResults()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/game-results");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            gameResults = await JsonSerializer.DeserializeAsync<List<GameResult>>(responseStream, options);
-        }
-    }
-
-    private async Task GetTeamRecords()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/team-records");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            teamRecords = await JsonSerializer.DeserializeAsync<List<TeamRecord>>(responseStream, options);
-        }
-    }
-
-    private async Task GetFantasyPerformances(int teamId)
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/fantasy-performances/" + teamId.ToString());
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            allPerformances = await JsonSerializer.DeserializeAsync<List<FantasyPerformance>>(responseStream, options);
-
-            qbPerformance = allPerformances.Where(p => p.Position == "QB").OrderByDescending(p => p.TotalFantasy).FirstOrDefault();
-            rbPerformance = allPerformances.Where(p => p.Position == "RB").OrderByDescending(p => p.TotalFantasy).Take(2).ToList();
-            wrPerformance = allPerformances.Where(p => p.Position == "WR").OrderByDescending(p => p.TotalFantasy).Take(3).ToList();
-            tePerformance = allPerformances.Where(p => p.Position == "TE").OrderByDescending(p => p.TotalFantasy).FirstOrDefault();
-            dstPerformance = allPerformances.Where(p => p.Position == "DST").FirstOrDefault();
-            kPerformance = allPerformances.Where(p => p.Position == "K").FirstOrDefault();
-        }       
-    }
-
-    private async Task GetScheduleDetails()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/schedule-details/current");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            scheduleDetails = await JsonSerializer.DeserializeAsync<List<ScheduleDetails>>(responseStream, options);
-        }
     }
 
     private string ScheduleHeader() => scheduleDetails != null ? "Week " + scheduleDetails.First().Week + " Schedule" : "Schedule";
@@ -412,6 +325,18 @@ else if (badRequestError)
         var team = (teams.First(t => t.TeamId == teamId)).Team;
         var opponent = (teams.First(t => t.TeamId == opponentId)).Team;
         return string.Format("{0}/{1}/{2}/{3}", "/team-fantasy", team, opponent, week.ToString());
+    }
 
+    private void SetFantasyPerformances(List<FantasyPerformanceModel>? allPerformances)
+    {
+        if (allPerformances != null)
+        {
+            qbPerformance = allPerformances.Where(p => p.Position == "QB").OrderByDescending(p => p.TotalFantasy).FirstOrDefault();
+            rbPerformance = allPerformances.Where(p => p.Position == "RB").OrderByDescending(p => p.TotalFantasy).Take(2).ToList();
+            wrPerformance = allPerformances.Where(p => p.Position == "WR").OrderByDescending(p => p.TotalFantasy).Take(3).ToList();
+            tePerformance = allPerformances.Where(p => p.Position == "TE").OrderByDescending(p => p.TotalFantasy).FirstOrDefault();
+            dstPerformance = allPerformances.Where(p => p.Position == "DST").FirstOrDefault();
+            kPerformance = allPerformances.Where(p => p.Position == "K").FirstOrDefault();
+        }
     }
 }

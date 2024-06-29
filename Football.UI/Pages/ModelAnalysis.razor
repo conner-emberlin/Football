@@ -170,8 +170,8 @@
     {
         loading = true;
         shouldRender = true;
-        if (ProjectionAnalyses != null) ProjectionAnalyses.Clear();
-        if (SeasonProjectionAnalyses != null) SeasonProjectionAnalyses.Clear();
+        ProjectionAnalyses?.Clear();
+        SeasonProjectionAnalyses?.Clear();
         PositionEnum = format.SetPosition(Position);
         ProjectionAnalyses = await requests.GetCurrentSeasonWeeklyAnalysisRequest(PositionEnum);
         SeasonProjectionAnalyses = await requests.GetPreviousSeasonsAnalysisRequest(PositionEnum);

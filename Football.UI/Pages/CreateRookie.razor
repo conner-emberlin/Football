@@ -1,8 +1,5 @@
-﻿@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Api.Models;
-@using System.Text;
-@inject IHttpClientFactory ClientFactory
+﻿@using Football.Api.Models;
+@inject IRequests requests;
 @page "/AddRookie/"
 
 @if (loading)
@@ -90,24 +87,8 @@ else
     {
         adding = false;
         loading = true;
-        rookieAdded = await CreateRookieRequest(player);
+        rookieAdded = await requests.CreateRookieRequest(player);
         loading = false;
-    }
-
-    private async Task<bool> CreateRookieRequest(RookiePlayerModel rookie)
-    {
-        var json = JsonSerializer.Serialize(rookie);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var client = ClientFactory.CreateClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/add-rookie") { Content = content };
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = response.Content.ReadAsStream();
-            return await JsonSerializer.DeserializeAsync<bool>(responseStream, options);
-        }
-        return false;
     }
 
 }
