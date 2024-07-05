@@ -73,15 +73,26 @@ namespace Football.Projections.Services
             return projections;
         }
 
+        public async Task<Vector<double>> GetCoefficients(Position position)
+        {
+            var coefficients = position switch
+            {
+                Position.QB => await CalculateCoefficients(await QBProjectionModel(), position),
+                Position.RB => await CalculateCoefficients(await RBProjectionModel(), position),
+                Position.WR => await CalculateCoefficients(await WRProjectionModel(), position),
+                Position.TE => await CalculateCoefficients(await TEProjectionModel(), position),
+                _ => throw new NotImplementedException()
+            };
+
+            return coefficients;
+        }
+
         private async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, Position position, int currentWeek)
         {
             List<WeekProjection> projections = [];
-            var regressorMatrix = matrixCalculator.RegressorMatrix(model);
-            var fantasyModel = await FantasyProjectionModel(position);
-            var dependentVector = matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
-            var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
-            var players = await playersService.GetPlayersByPosition(position, activeOnly: true);
+            var coefficients = await CalculateCoefficients(model, position);
 
+            var players = await playersService.GetPlayersByPosition(position, activeOnly: true);
             var seasonProjections = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
 
             foreach (var player in players)
@@ -108,6 +119,14 @@ namespace Football.Projections.Services
             }
 
             return projections;
+        }
+
+        private async Task<Vector<double>> CalculateCoefficients<T>(List<T> model, Position position)
+        {
+            var regressorMatrix = matrixCalculator.RegressorMatrix(model);
+            var fantasyModel = await FantasyProjectionModel(position);
+            var dependentVector = matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
+            return MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
         }
 
         private async Task<double> GetAverageProjectionError(int playerId)

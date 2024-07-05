@@ -43,7 +43,16 @@ namespace Football.UI.Helpers
                   : "color:red";
         }
 
-        public List<string> Positions() => new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
+        public List<string> Positions(bool includeFlex = false, bool includeQB = true, bool includeDST = true, bool includeK = true) 
+        {
+            var list = new List<string> { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
+
+            if (includeFlex) list.Add("Flex");
+            if (!includeQB) list.Remove("Quarterback");
+            if (!includeDST) list.Remove("DST");
+            if (!includeK) list.Remove("Kicker");
+            return list;
+        }
 
         public Position SetPosition(ChangeEventArgs? args)
         {
@@ -58,6 +67,7 @@ namespace Football.UI.Helpers
                 "Tight End" => Enums.Position.TE,
                 "DST" => Enums.Position.DST,
                 "Kicker" => Enums.Position.K,
+                "Flex" => Enums.Position.FLEX,
                 _ => Enums.Position.QB
             };
         }
@@ -72,6 +82,7 @@ namespace Football.UI.Helpers
                 "tight end" => "TE",
                 "dst" => "DST",
                 "kicker" => "K",
+                "flex" => "FLEX",
                 _ => "QB"
             };
         }

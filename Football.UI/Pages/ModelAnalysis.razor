@@ -12,7 +12,7 @@
 
         <input type="radio" name="players" id=" @position" value="@position"
         @onchange="SetPosition"
-               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+               checked=@(Position?.Equals(position,StringComparison.OrdinalIgnoreCase)) />
         <label for="@position ">@position</label>
 
     }
@@ -144,23 +144,26 @@
     </ApexChart>
 }
 @code {
-    private bool shouldRender;
-    protected override bool ShouldRender() => shouldRender;
+    
+    
 
     private List<WeeklyProjectionAnalysisModel>? ProjectionAnalyses = new();
     private List<SeasonProjectionAnalysisModel>? SeasonProjectionAnalyses = new();
 
-    public string Position { get; set; } = "Quarterback";
+    public string? Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "1";
+    private bool shouldRender;
     private bool loading { get; set; }
     int count = 0;
 
     public TableSort tableSort = new();
     public Formatter format = new();
 
+    protected override bool ShouldRender() => shouldRender;
+
     private void SetPosition(ChangeEventArgs args)
     {
-        Position = args.Value.ToString();
+        Position = args.Value?.ToString();
         ProjectionAnalyses?.Clear();
         SeasonProjectionAnalyses?.Clear();
         tableSort = new();
@@ -181,11 +184,6 @@
 
     private void SetTable(string columnName) => ProjectionAnalyses = tableSort.SortTable<WeeklyProjectionAnalysisModel>(ProjectionAnalyses, columnName);
     private string GetProjectionErrorLink(string position, int week) => string.Format("{0}/{1}/{2}", "/ProjectionError", position, week);
-
-
-
-
-
 }
 
 

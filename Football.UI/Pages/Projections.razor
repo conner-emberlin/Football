@@ -6,7 +6,7 @@
 
 <h4>Season Projections</h4>
 <div>
-@foreach(var position in format.Positions())
+@foreach(var position in format.Positions(includeFlex: true, includeDST: false, includeK: false))
 {
     
         <input type="radio" name="players" id=" @position" value="@position" 

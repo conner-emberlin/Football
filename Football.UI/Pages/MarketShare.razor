@@ -8,7 +8,7 @@
 <h4>Market Share</h4>
 
 <div>
-    @foreach (var position in format.Positions().Where(p => p != "Quarterback"))
+    @foreach (var position in format.Positions(includeQB: false))
     {
 
         <input type="radio" name="players" id=" @position" value="@position"
@@ -19,7 +19,7 @@
     }
 </div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
-<button class="button-22" role="button" @onclick="GetMarketShare">
+<button class="button-22" role="button" @onclick="HandleInput">
     Submit
 </button>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -29,7 +29,7 @@
     <div class="spinner"></div>
 }
 
-@if (marketShare != null)
+@if (marketShare?.Any() == true)
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
@@ -97,7 +97,7 @@
 @code {
 
     public string Position { get; set; } = "Runningback";
-    public Position positionEnum { get; set; }
+    public Position positionEnum { get; set; } = Enums.Position.RB;
     public List<MarketShareModel>? marketShare = new();
 
     public bool loading { get; set; } = false;
@@ -113,7 +113,7 @@
         marketShare?.Clear();
         positionEnum = format.SetPosition(args);
     }
-    public async Task GetMarketShare()
+    public async Task HandleInput()
     {
         loading = true;
         marketShare?.Clear();

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Football.Api.Models;
 using AutoMapper;
 using Football.Players.Models;
+using MathNet.Numerics.LinearAlgebra;
 
 
 namespace Football.Api.Controllers
@@ -74,6 +75,26 @@ namespace Football.Api.Controllers
                 return Ok(await seasonProjectionService.PostProjections(proj));
             }
             return BadRequest();
+        }
+
+        [HttpGet("season/coefficients/{position}")]
+        [ProducesResponseType(typeof(double[]), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetSeasonCoefficients(string position)
+        {
+            if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
+
+            return Ok((await seasonProjectionService.GetCoefficients(positionEnum)).ToArray<double>());
+        }
+
+        [HttpGet("weekly/coefficients/{position}")]
+        [ProducesResponseType(typeof(double[]), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetWeeklyCoefficients(string position)
+        {
+            if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
+
+            return Ok((await weekProjectionService.GetCoefficients(positionEnum)).ToArray<double>());
         }
 
         [HttpGet("weekly/{position}")]

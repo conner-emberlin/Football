@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using MathNet.Numerics.LinearRegression;
 using MathNet.Numerics.LinearAlgebra;
 using AutoMapper;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Football.Projections.Services
 {
@@ -65,20 +66,30 @@ namespace Football.Projections.Services
             cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), formattedProjections);
             return formattedProjections;
         }
+
+        public async Task<Vector<double>> GetCoefficients(Position position)
+        {
+            var coefficients = position switch
+            {
+                Position.QB => await CalculateCoefficients(await QBProjectionModel(), position),
+                Position.RB => await CalculateCoefficients(await RBProjectionModel(), position),
+                Position.WR => await CalculateCoefficients(await WRProjectionModel(), position),
+                Position.TE => await CalculateCoefficients(await TEProjectionModel(), position),
+                _ => throw new NotImplementedException()
+            };
+
+            return coefficients;
+        }
         private async Task<IEnumerable<SeasonProjection>> CalculateProjections<T1>(List<T1> model, Position position)
         {
             List<SeasonProjection> projections = [];
-            var regressorMatrix = matrixCalculator.RegressorMatrix(model);            
-            var fantasyModel = await FantasyProjectionModel(position);
-            var dependentVector = matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
-            var coefficients = MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
-
+            var coefficients = await CalculateCoefficients(model, position);
             var players = await playersService.GetPlayersByPosition(position, activeOnly: true);
             var gamesInjuredDictionary = await playersService.GetGamesPlayedInjuredBySeason(_season.CurrentSeason - 1);
 
             foreach (var player in players)
             {
-                var gamesPlayedInjured = gamesInjuredDictionary.ContainsKey(player.PlayerId) ? gamesInjuredDictionary[player.PlayerId] : 0;
+                var gamesPlayedInjured = gamesInjuredDictionary.TryGetValue(player.PlayerId, out var inj) ? inj : 0;
                 var weightedVector = await GetWeightedAverageVector(player, gamesPlayedInjured);
                 var projectedPoints = weightedVector * coefficients;
 
@@ -95,6 +106,14 @@ namespace Football.Projections.Services
                 }
             }           
             return projections;
+        }
+
+        private async Task<Vector<double>> CalculateCoefficients<T>(List<T> model, Position position)
+        {
+            var regressorMatrix = matrixCalculator.RegressorMatrix(model);
+            var fantasyModel = await FantasyProjectionModel(position);
+            var dependentVector = matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
+            return MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
         }
         private async Task<List<SeasonFantasy>> FantasyProjectionModel(Position position) 
         {

@@ -1,12 +1,9 @@
-﻿@page "/TargetShare"
-<PageTitle>Target Share</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Enums;
-@using Football.Api.Models;
+﻿@using Football.Api.Models;
 @using Football.UI.Helpers;
 @inject IRequests requests;
 
+@page "/TargetShare"
+<PageTitle>Target Share</PageTitle>
 <h4>Target Share</h4>
 
 @if (loading)
@@ -14,7 +11,7 @@
     <div class="spinner"></div>
 }
 
-@if (targetShare != null)
+@if (targetShare?.Any() == true)
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
@@ -70,7 +67,6 @@
     public List<TargetShareModel>? targetShare = new();
 
     public bool loading { get; set; } = false;
-    public bool badRequestError { get; set; } = false;
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
 
@@ -78,18 +74,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        targetShare = await requests.GetTargetShareRequest();
-    }
-    private void SetTable(string columnName) => targetShare = tableSort.SortTable<TargetShareModel>(targetShare, columnName);
-
-    private async Task HandleInput()
-    {
         loading = true;
-        if (targetShare != null) targetShare.Clear();
         shouldRender = true;
         targetShare = await requests.GetTargetShareRequest();
         loading = false;
         shouldRender = true;
     }
+    private void SetTable(string columnName) => targetShare = tableSort.SortTable<TargetShareModel>(targetShare, columnName);
     
 }

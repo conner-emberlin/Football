@@ -10,7 +10,7 @@
 
 <h4>Weekly Projections</h4>
 <div>
-    @foreach (var position in format.Positions())
+    @foreach (var position in format.Positions(includeFlex: true))
     {
 
         <input type="radio" name="players" id=" @position" value="@position"

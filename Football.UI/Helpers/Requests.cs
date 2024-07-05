@@ -16,19 +16,6 @@ namespace Football.UI.Helpers
         }
         public async Task<List<SnapCountAnalysisModel>?> SnapCountAnalysisRequest(string position) => await Get<List<SnapCountAnalysisModel>?>("https://localhost:7028/api/Fantasy/snap-analysis/" + position);
         public async Task<List<FantasyAnalysisModel>?> GetFantasyAnalysesRequest(Position position) => await Get<List<FantasyAnalysisModel>?>("https://localhost:7028/api/Fantasy/fantasy-analysis/" + position.ToString());
-        public async Task<List<SeasonFantasyModel>?> GetSeasonTotalsRequest(string season = "")
-        {
-            var path = "https://localhost:7028/api/Fantasy/season-totals";
-            if (!string.IsNullOrEmpty(season)) path += string.Format("?fantasySeason={0}", season);
-            return await Get<List<SeasonFantasyModel>?>(path);
-        }
-
-        public async Task<List<WeeklyFantasyModel>?> GetWeeklyFantasyRequest(string week, string season = "")
-        {
-            var path = "https://localhost:7028/api/Fantasy/data/weekly/leaders/" + week;
-            if (!string.IsNullOrEmpty(season)) path += string.Format("?season={0}", season);
-            return await Get<List<WeeklyFantasyModel>?>(path);
-        }
         public async Task<List<WeeklyProjectionAnalysisModel>?> GetCurrentSeasonWeeklyAnalysisRequest(string position) => await Get<List<WeeklyProjectionAnalysisModel>?>("https://localhost:7028/api/Projection/weekly-analysis/" + position); 
         public async Task<List<SeasonProjectionAnalysisModel>?> GetPreviousSeasonsAnalysisRequest(string position) => await Get<List<SeasonProjectionAnalysisModel>?>("https://localhost:7028/api/Projection/season-projection-analysis/all/" + position);
         public async Task<List<TargetShareModel>?> GetTargetShareRequest() => await Get<List<TargetShareModel>?>("https://localhost:7028/api/Fantasy/targetshares");
@@ -45,7 +32,19 @@ namespace Football.UI.Helpers
         public async Task<List<TeamRecordModel>?> GetTeamRecordsRequest() => await Get<List<TeamRecordModel>?>("https://localhost:7028/api/Team/team-records");
         public async Task<List<FantasyPerformanceModel>?> GetFantasyPerformancesRequest(int teamId) => await Get<List<FantasyPerformanceModel>?>("https://localhost:7028/api/Team/fantasy-performances/" + teamId.ToString());
         public async Task<List<ScheduleDetailsModel>?> GetScheduleDetailsRequest() => await Get<List<ScheduleDetailsModel>?>("https://localhost:7028/api/Team/schedule-details/current");
+        public async Task<List<SeasonFantasyModel>?> GetSeasonTotalsRequest(string season = "")
+        {
+            var path = "https://localhost:7028/api/Fantasy/season-totals";
+            if (!string.IsNullOrEmpty(season)) path += string.Format("?fantasySeason={0}", season);
+            return await Get<List<SeasonFantasyModel>?>(path);
+        }
 
+        public async Task<List<WeeklyFantasyModel>?> GetWeeklyFantasyRequest(string week, string season = "")
+        {
+            var path = "https://localhost:7028/api/Fantasy/data/weekly/leaders/" + week;
+            if (!string.IsNullOrEmpty(season)) path += string.Format("?season={0}", season);
+            return await Get<List<WeeklyFantasyModel>?>(path);
+        }
         private async Task<T?> Get<T>(string path)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, path);
