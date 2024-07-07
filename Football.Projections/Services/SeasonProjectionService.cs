@@ -11,7 +11,6 @@ using Microsoft.Extensions.Options;
 using MathNet.Numerics.LinearRegression;
 using MathNet.Numerics.LinearAlgebra;
 using AutoMapper;
-using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace Football.Projections.Services
 {

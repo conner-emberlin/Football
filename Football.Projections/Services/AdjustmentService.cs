@@ -504,6 +504,7 @@ namespace Football.Projections.Services
             adjustments.Add(await InjuryAdjustment(seasonProjections));
             adjustments.Add(await SuspensionAdjustment(seasonProjections));
             adjustments.Add(await EliteRookieWRTopTargetAdjustment(seasonProjections));
+            adjustments.Add(await DownwardTrendingAdjustment(seasonProjections));
             adjustments.Add(await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges));
             adjustments.Add(await SharedReceivingDutiesAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.WR)));
             adjustments.Add(await QuarterbackChangeAdjustment(seasonProjections, qbChanges));
