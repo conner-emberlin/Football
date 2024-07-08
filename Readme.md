@@ -1,4 +1,4 @@
-- Multi-Regression models to predict both season total fantasy points and weekly predictions
+- Multi-Regression models to predict both season total fantasy points and in-season weekly totals
 - In Season Fantasy tools - Start or Sit Assistant, Positional Matchup Analysis, Waiver Wire Assistant etc.
 - Scraper to retrieve data from the web and insert into an SQL Server database. Scraper is accessible through the API
 - Blazor UI
