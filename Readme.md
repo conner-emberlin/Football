@@ -1,3 +1,13 @@
+- Multi-Regression models to predict both season total fantasy points and weekly predictions, also a variety of in-season fantasy analyses
+- Scraper to retrieve data from the web and insert into an SQL Server database. Scraper is accessible through the API
+- Blazor UI
+  
+Adding a variable to regression models:
+1. Add to the correpsonding classes in RegressionModels.cs
+2. If the variable only uses Season/Weekly data, populate it in the AutomapperProfile. Otherwise, populate in the corresponding Projection service.
+3. If the variable requires averaging, do so in StatProjectionCalculator.cs
+
+APIs:
 Weekly 
 1. Upload weekly statistics: POST /api/uploaddata/{position}/{season}/{week}
 2. Upload weekly game results: POST /api/uploaddata/game-results/{season}/{week}
@@ -23,8 +33,4 @@ External APIs
 2. BettingOdds: https://the-odds-api.com/liveapi/guides/v4/#overview
 3. ESPN: https://gist.github.com/akeaswaran/b48b02f1c94f873c6655e7129910fc3b
 4. Sleeper: https://docs.sleeper.com/
-
-Adding to a Regression Model
-1. Add variable to corresponding model class: Football.Projections.Models.RegressionModels.cs
-2. Populate variable in Football.Projections.Services.RegressionModelService.cs
 
