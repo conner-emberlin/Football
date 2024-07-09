@@ -66,6 +66,7 @@
         public double RushingYardsPerAttempt { get; set; }
         public double SacksPerGame { get; set; }
         public double SnapsPerGame { get; set; }
+        public double OppAvgPointsAllowed { get; set; }
     }
 
     public class RBModelWeek 
@@ -78,6 +79,7 @@
         public double TargetsPerGame { get; set; }
         public double ReceivingYardsPerReception { get; set; }
         public double SnapsPerGame { get; set; }
+        public double OppAvgPointsAllowed { get; set; }
     }
 
     public class WRModelWeek
@@ -91,6 +93,7 @@
         public double ReceivingYardsPerReception { get; set; }
         public double SnapsPerGame { get; set; }
         public double ReceptionRate { get; set; }
+        public double OppAvgPointsAllowed { get; set; }
     }
     public class TEModelWeek 
     {
@@ -103,6 +106,7 @@
         public double ReceivingYardsPerReception { get; set; }
         public double SnapsPerGame { get; set; }
         public double ReceptionRate { get; set;}
+        public double OppAvgPointsAllowed { get; set; }
     }
 
     public class DSTModelWeek

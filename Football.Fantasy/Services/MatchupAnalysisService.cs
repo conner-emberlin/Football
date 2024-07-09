@@ -3,23 +3,31 @@ using Football.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.Players.Interfaces;
-using Serilog;
 using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Services
 {
     public class MatchupAnalysisService(IPlayersService playersService, IFantasyDataService fantasyDataService,
-        IOptionsMonitor<Season> season, IMatchupAnalysisRepository matchupAnalysisRepository, ILogger logger) : IMatchupAnalysisService
+        IOptionsMonitor<Season> season, IMatchupAnalysisRepository matchupAnalysisRepository) : IMatchupAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
 
         public async Task<List<MatchupRanking>> GetPositionalMatchupRankingsFromSQL(Position position, int season, int week) => await matchupAnalysisRepository.GetPositionalMatchupRankingsFromSQL(position.ToString(), season, week);
         public async Task<int> PostMatchupRankings(Position position, int week = 0)
         {
-            logger.Information("Uploading matchup rankings for {0}", position.ToString());
-            var count = await matchupAnalysisRepository.PostMatchupRankings(await CalculatePositionalMatchupRankings(position, week));
-            logger.Information("{0} records uploaded", count);
-            return count;
+            if (week == 1)
+            {
+                var weekOneRankings = await GetPositionalMatchupRankingsFromSQL(position, _season.CurrentSeason - 1, _season.Weeks + 1);
+                foreach (var w in weekOneRankings)
+                {
+                    w.Season = _season.CurrentSeason;
+                    w.Week = week;
+                    w.GamesPlayed = 0;
+                    w.AvgPointsAllowed = 0;
+                }
+                return await matchupAnalysisRepository.PostMatchupRankings(weekOneRankings);
+            }
+            return await matchupAnalysisRepository.PostMatchupRankings(await CalculatePositionalMatchupRankings(position, week));
         }
 
         public async Task<int> GetMatchupRanking(int playerId)
@@ -88,7 +96,7 @@ namespace Football.Fantasy.Services
                     GamesPlayed = filteredGames.Count(),
                     Position = position.ToString(),
                     PointsAllowed = Math.Round(fpTotal, 2),
-                    AvgPointsAllowed = filteredGames.Count() > 1 ? Math.Round(fpTotal / filteredGames.Count(), 2) : 0
+                    AvgPointsAllowed = filteredGames.Any() ? Math.Round(fpTotal / filteredGames.Count(), 2) : 0
                 });
             }
             var matchupRanks = rankings.OrderBy(r => r.AvgPointsAllowed).ToList();

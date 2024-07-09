@@ -282,10 +282,7 @@ namespace Football.Projections.Services
             if (weekProjections.Count == 0) return weekProjections;
 
             _= Enum.TryParse(weekProjections.First().Position, out Position position);
-            var matchupSeason = weekProjections.First().Week == 1 ? _season.CurrentSeason - 1 : _season.CurrentSeason;
-            var matchupWeek = weekProjections.First().Week == 1 ? _season.Weeks + 1 : weekProjections.First().Week;
-
-            var matchupRanks = await mathupAnalysisService.GetPositionalMatchupRankingsFromSQL(position, matchupSeason, matchupWeek);
+            var matchupRanks = await mathupAnalysisService.GetPositionalMatchupRankingsFromSQL(position, weekProjections.First().Season, weekProjections.First().Week);
             if (matchupRanks.Count > 0)
             {
                 var avgMatchup = matchupRanks.ElementAt((int)Math.Floor((double)(matchupRanks.Count / 2)));

@@ -80,10 +80,7 @@ namespace Football.Api.Controllers
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-                var week = currentWeek == 1 ? _season.Weeks + 1 : currentWeek;
-                var season = currentWeek == 1 ? _season.CurrentSeason - 1 : _season.CurrentSeason;
-
-                var model = mapper.Map<List<MatchupRankingModel>>(await matchupAnalysisService.GetPositionalMatchupRankingsFromSQL(positionEnum, season, week));
+                var model = mapper.Map<List<MatchupRankingModel>>(await matchupAnalysisService.GetPositionalMatchupRankingsFromSQL(positionEnum, _season.CurrentSeason, currentWeek));
                 var teamDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
                 model.ForEach(m => m.TeamDescription = teamDictionary[m.TeamId]);
                 return Ok(model);

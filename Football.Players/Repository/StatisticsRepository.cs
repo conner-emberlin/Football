@@ -23,25 +23,21 @@ namespace Football.Players.Repository
 
         public async Task<List<T>> GetAllWeeklyDataByPosition<T>(Position position)
         {
-            var query = "";
 
             if (position == Position.DST || position == Position.K)
             {
-                query = $@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}] w";
+                return (await dbConnection.QueryAsync<T>($@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}] w", position)).ToList();
 
             }
-            else
-            {
-                query = $@" SELECT w.*, COALESCE(s.Snaps, 0) AS Snaps
-                            FROM [dbo].[{GetWeeklyTable(position)}] w
-                            LEFT OUTER JOIN SnapCount s
-                            ON w.PlayerId = s.PlayerId
-                            AND w.Season = s.Season
-                            AND w.Week = s.Week
-                            ORDER BY w.[PlayerId], w.[Season], w.[Week]";
-            }   
-
-            return (await dbConnection.QueryAsync<T>(query)).ToList();
+            var pos = position.ToString();
+            var query = $@" select w.*, COALESCE(sc.Snaps, 0) as Snaps, COALESCE(mr.AvgPointsAllowed, 0) as OppAvgPointsAllowed from [dbo].[{GetWeeklyTable(position)}] w
+                            left outer join SnapCount sc on w.PlayerId = sc.PlayerId and w.Season = sc.Season and w.Week = sc.Week
+                            left outer join PlayerTeam pt on w.PlayerId = pt.PlayerId and w.Season = pt.Season
+                            left outer join Schedule s on pt.TeamId = s.TeamId and w.Season = s.Season and w.Week = s.Week
+                            left outer join MatchupRanking mr on w.Season = mr.Season and w.Week = mr.Week and s.OpposingTeamId = mr.TeamId and mr.Position = @pos
+                            order by w.PlayerId, w.Season, w.Week";
+            
+            return (await dbConnection.QueryAsync<T>(query, new { pos})).ToList();
         }
 
         public async Task<List<T>> GetAllSeasonDataByPosition<T>(Position position)
