@@ -40,6 +40,8 @@
         public double TouchdownsPerGame { get; set; }
         public double YearsExperience { get; set; }
         public double FumblesPerGame { get; set; }
+        public double RushingAttemptsPerGame { get; set; }
+        public double RushingYardsPerGame { get; set; }
     }
     public class TEModelSeason
     {

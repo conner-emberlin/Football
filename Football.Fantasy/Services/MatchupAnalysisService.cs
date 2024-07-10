@@ -23,7 +23,7 @@ namespace Football.Fantasy.Services
                     w.Season = _season.CurrentSeason;
                     w.Week = week;
                     w.GamesPlayed = 0;
-                    w.AvgPointsAllowed = 0;
+                    w.AvgPointsAllowed = w.PointsAllowed/_season.Games;
                 }
                 return await matchupAnalysisRepository.PostMatchupRankings(weekOneRankings);
             }

@@ -300,7 +300,7 @@ namespace Football.Projections.Services
                             var opponentRank = matchupRanks.FirstOrDefault(mr => mr.TeamId == matchup.OpposingTeamId);
                             if (opponentRank != null)
                             {
-                                var ratio = opponentRank.AvgPointsAllowed / avgMatchup.AvgPointsAllowed;
+                                var ratio = avgMatchup.AvgPointsAllowed > 0 ? opponentRank.AvgPointsAllowed / avgMatchup.AvgPointsAllowed : 0;
                                 var tamperedRatio = ratio > 1 ? Math.Min(ratio, _weeklyTunings.TamperedMax) : Math.Max(ratio, _weeklyTunings.TamperedMin);
                                 w.ProjectedPoints = w.Position != Position.DST.ToString() ? w.ProjectedPoints * (tamperedRatio + 1) / 2 : tamperedRatio * w.ProjectedPoints;
                             }
@@ -501,7 +501,6 @@ namespace Football.Projections.Services
             adjustments.Add(await InjuryAdjustment(seasonProjections));
             adjustments.Add(await SuspensionAdjustment(seasonProjections));
             adjustments.Add(await EliteRookieWRTopTargetAdjustment(seasonProjections));
-            adjustments.Add(await DownwardTrendingAdjustment(seasonProjections));
             adjustments.Add(await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges));
             adjustments.Add(await SharedReceivingDutiesAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.WR)));
             adjustments.Add(await QuarterbackChangeAdjustment(seasonProjections, qbChanges));

@@ -202,6 +202,7 @@ namespace Football.Projections.Services
                     {
                         PlayerId = player.PlayerId,
                         Name = player.Name,
+                        Position = position.ToString(),
                         Season = _season.CurrentSeason,
                         Week = 1,
                         ProjectedPoints = seasonProjection / _season.Games

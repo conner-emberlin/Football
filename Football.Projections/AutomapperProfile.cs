@@ -86,7 +86,9 @@ namespace Football.Projections
                 .ForMember(q => q.YardsPerGame, o => o.MapFrom(q => q.Yards / q.Games))
                 .ForMember(q => q.YardsPerReception, o => o.MapFrom(q => q.Receptions > 0 ? q.Yards / q.Receptions : 0))
                 .ForMember(q => q.TouchdownsPerGame, o => o.MapFrom(q => q.TD / q.Games))
-                .ForMember(q => q.FumblesPerGame, o => o.MapFrom(q => q.Fumbles / q.Games));
+                .ForMember(q => q.FumblesPerGame, o => o.MapFrom(q => q.Fumbles / q.Games))
+                .ForMember(q => q.RushingAttemptsPerGame, q => q.MapFrom(q => q.RushingAtt / q.Games))
+                .ForMember(q => q.RushingYardsPerGame, q => q.MapFrom(q => q.RushingYds / q.Games));
 
             CreateMap<WeeklyDataWR, WRModelWeek>()
                 .ForMember(q => q.RushingAttemptsPerGame, q => q.MapFrom(q => q.RushingAtt))
@@ -109,8 +111,9 @@ namespace Football.Projections
                 .ForMember(q => q.YardsPerGame, o => o.MapFrom(q => q.Yards / q.Games))
                 .ForMember(q => q.YardsPerReception, o => o.MapFrom(q => q.Receptions > 0 ? q.Yards / q.Receptions : 0))
                 .ForMember(q => q.TouchdownsPerGame, o => o.MapFrom(q => q.TD / q.Games))
-                .ForMember(q => q.FumblesPerGame, o => o.MapFrom(q => q.Fumbles / q.Games));
-
+                .ForMember(q => q.FumblesPerGame, o => o.MapFrom(q => q.Fumbles / q.Games))
+                .ForMember(q => q.RushingAttemptsPerGame, q => q.MapFrom(q => q.RushingAtt / q.Games))
+                .ForMember(q => q.RushingYardsPerGame, q => q.MapFrom(q => q.RushingYds / q.Games));
             CreateMap<SeasonDataTE, TEModelSeason>()
                 .ForMember(q => q.TargetsPerGame, o => o.MapFrom(q => q.Targets / q.Games))
                 .ForMember(q => q.ReceptionsPerGame, o => o.MapFrom(q => q.Receptions / q.Games))
