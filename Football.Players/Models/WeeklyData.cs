@@ -149,25 +149,21 @@
     public class AllWeeklyDataQB: WeeklyDataQB
     {
         public double Snaps { get; set; }
-        public double OppAvgPointsAllowed { get; set; }
     }
 
     public class AllWeeklyDataRB : WeeklyDataRB
     {
         public double Snaps { get; set;}
-        public double OppAvgPointsAllowed { get; set; }
     }
 
     public class AllWeeklyDataWR : WeeklyDataWR
     {
         public double Snaps { get; set; }
-        public double OppAvgPointsAllowed { get; set; }
     }
 
     public class AllWeeklyDataTE : WeeklyDataTE
     {
         public double Snaps { get; set; }
-        public double OppAvgPointsAllowed { get; set; }
     } 
 
     public class AllWeeklyDataK : WeeklyDataK

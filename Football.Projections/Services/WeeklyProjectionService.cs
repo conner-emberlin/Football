@@ -93,13 +93,10 @@ namespace Football.Projections.Services
             var coefficients = await CalculateCoefficients(model, position);
             var players = await playersService.GetPlayersByPosition(position, activeOnly: true);
             var seasonProjections = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
-            var matchupRankings = await matchupAnalysisService.GetPositionalMatchupRankingsFromSQL(position, _season.CurrentSeason, currentWeek);
-            var playerTeamsDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, players.Select(p => p.PlayerId))).ToDictionary(p => p.PlayerId, p => p.TeamId);
-            var currentWeekSchedule = await playersService.GetGames(_season.CurrentSeason, currentWeek);
 
             foreach (var player in players)
             {
-                var weightedVector = await GetWeightedAverageVector(player, currentWeek, matchupRankings, playerTeamsDictionary, currentWeekSchedule);
+                var weightedVector = await GetWeightedAverageVector(player, currentWeek);
                 var projectedPoints = weightedVector * coefficients;
 
                 if (projectedPoints > 0)
@@ -150,7 +147,7 @@ namespace Football.Projections.Services
         private async Task<List<TEModelWeek>> TEProjectionModel() => mapper.Map<List<TEModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataTE>(Position.TE));
         private async Task<List<KModelWeek>> KProjectionModel() => mapper.Map<List<KModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataK>(Position.K));
         private async Task<List<DSTModelWeek>> DSTProjectionModel() => mapper.Map<List<DSTModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataDST>(Position.TE));
-        private async Task<Vector<double>> GetWeightedAverageVector(Player player, int currentWeek, List<MatchupRanking> matchupRankings, Dictionary<int, int> playerTeamDictionary, List<Schedule> currentWeekSchedule)
+        private async Task<Vector<double>> GetWeightedAverageVector(Player player, int currentWeek)
         {
             _ = Enum.TryParse(player.Position, out Position position);
 
@@ -159,22 +156,18 @@ namespace Football.Projections.Services
                 case Position.QB:
                     var modelQB = mapper.Map<QBModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId), currentWeek));
                     modelQB.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek)).Snaps;
-                    modelQB.OppAvgPointsAllowed = GetOpponentAvgPointsAllowedToPosition(player.PlayerId, matchupRankings, playerTeamDictionary, currentWeekSchedule);
                     return matrixCalculator.TransformModel(modelQB);
                 case Position.RB:
                     var modelRB = mapper.Map<RBModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, player.PlayerId), currentWeek));
                     modelRB.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek)).Snaps;
-                    modelRB.OppAvgPointsAllowed = GetOpponentAvgPointsAllowedToPosition(player.PlayerId, matchupRankings, playerTeamDictionary, currentWeekSchedule);
                     return matrixCalculator.TransformModel(modelRB);
                 case Position.WR:
                     var modelWR = mapper.Map<WRModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, player.PlayerId), currentWeek));
                     modelWR.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek)).Snaps;
-                    modelWR.OppAvgPointsAllowed = GetOpponentAvgPointsAllowedToPosition(player.PlayerId, matchupRankings, playerTeamDictionary, currentWeekSchedule);
                     return matrixCalculator.TransformModel(modelWR);
                 case Position.TE:
                     var modelTE = mapper.Map<TEModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, player.PlayerId), currentWeek));
                     modelTE.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek)).Snaps;
-                    modelTE.OppAvgPointsAllowed = GetOpponentAvgPointsAllowedToPosition(player.PlayerId, matchupRankings, playerTeamDictionary, currentWeekSchedule);
                     return matrixCalculator.TransformModel(modelTE);
                 case Position.K:
                     var modelK = mapper.Map<KModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataK>(Position.K, player.PlayerId), currentWeek));
@@ -217,14 +210,5 @@ namespace Football.Projections.Services
             }
             return await adjustmentService.AdjustmentEngine(weekOneProjections);
         }
-
-        private double GetOpponentAvgPointsAllowedToPosition(int playerId, List<MatchupRanking> matchupRankings, Dictionary<int, int> playerTeamDictionary, List<Schedule> currentWeekGames)
-        {
-            if (!playerTeamDictionary.TryGetValue(playerId, out var teamId)) return 0;
-            var opposingTeamId = currentWeekGames.First(c => c.TeamId == teamId).OpposingTeamId;
-            if (opposingTeamId == 0) return 0;
-            return matchupRankings.First(m => m.TeamId == opposingTeamId).AvgPointsAllowed;
-        }
-
     }    
 }

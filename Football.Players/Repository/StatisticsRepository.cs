@@ -3,7 +3,6 @@ using Football.Players.Models;
 using System.Data;
 using Dapper;
 using Football.Enums;
-using Football.Models;
 
 namespace Football.Players.Repository
 {
@@ -29,15 +28,12 @@ namespace Football.Players.Repository
                 return (await dbConnection.QueryAsync<T>($@"SELECT * FROM [dbo].[{GetWeeklyTable(position)}] w", position)).ToList();
 
             }
-            var pos = position.ToString();
-            var query = $@" select w.*, COALESCE(sc.Snaps, 0) as Snaps, COALESCE(mr.AvgPointsAllowed, 0) as OppAvgPointsAllowed from [dbo].[{GetWeeklyTable(position)}] w
+            var query = $@" select w.*, COALESCE(sc.Snaps, 0) as Snaps 
+                            from [dbo].[{GetWeeklyTable(position)}] w
                             left outer join SnapCount sc on w.PlayerId = sc.PlayerId and w.Season = sc.Season and w.Week = sc.Week
-                            left outer join PlayerTeam pt on w.PlayerId = pt.PlayerId and w.Season = pt.Season
-                            left outer join Schedule s on pt.TeamId = s.TeamId and w.Season = s.Season and w.Week = s.Week
-                            left outer join MatchupRanking mr on w.Season = mr.Season and w.Week = mr.Week and s.OpposingTeamId = mr.TeamId and mr.Position = @pos
                             order by w.PlayerId, w.Season, w.Week";
             
-            return (await dbConnection.QueryAsync<T>(query, new { pos})).ToList();
+            return (await dbConnection.QueryAsync<T>(query)).ToList();
         }
 
         public async Task<List<T>> GetAllSeasonDataByPosition<T>(Position position)
