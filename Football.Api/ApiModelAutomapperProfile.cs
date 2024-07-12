@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Football.Api.Models;
 using Football.Enums;
+using Football.Models;
 using Football.Fantasy.Models;
 using Football.Players.Models;
 using Football.Projections.Models;
@@ -149,6 +150,7 @@ namespace Football.Api
                 .ForMember(t => t.TeamId, o => o.MapFrom(t => t.TeamMap.TeamId));
             CreateMap<ScheduleDetails, ScheduleDetailsModel>();
             CreateMap<FantasyPerformance, FantasyPerformanceModel>();
+            CreateMap<Tunings, TuningsModel>().ReverseMap();
         }
 
     }

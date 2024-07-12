@@ -4,6 +4,6 @@ namespace Football
 {
     public interface ISettingsRepository
     {
-        public Task<bool> UploadCurrentSeasonTunings(Tunings tunings);
+        public Task<bool> UploadSeasonTunings(Tunings tunings);
     }
 }

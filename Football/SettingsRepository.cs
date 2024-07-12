@@ -6,9 +6,9 @@ namespace Football
 {
     public class SettingsRepository(IDbConnection dbConnection) : ISettingsRepository
     {
-        public async Task<bool> UploadCurrentSeasonTunings(Tunings tunings)
+        public async Task<bool> UploadSeasonTunings(Tunings tunings)
         {
-            _ = await DeleteCurrentSeasonTunings(tunings.Season);
+            _ = await DeleteSeasonTunings(tunings.Season);
 
             var query = $@"INSERT INTO [dbo].Tunings (Season,	
                             RBFloor, LeadRBFactor, QBWeight, Weight, SecondYearWRLeap, SecondYearRBLeap, SecondYearQBLeap, SecondYearTELeap, NewQBFloor, NewQBCeiling, SeasonDataTrimmingGames,
@@ -24,7 +24,7 @@ namespace Football
             return (await dbConnection.ExecuteAsync(query, tunings)) > 0;
         }
 
-        private async Task<int> DeleteCurrentSeasonTunings(int season)
+        private async Task<int> DeleteSeasonTunings(int season)
         {
             var query = $@"DELETE FROM [dbo].Tunings WHERE [Season] = @season";
             return await dbConnection.ExecuteAsync(query, new { season });

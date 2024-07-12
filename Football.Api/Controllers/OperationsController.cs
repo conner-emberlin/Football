@@ -1,14 +1,22 @@
-﻿using Football.Data.Interfaces;
+﻿using AutoMapper;
+using Football.Api.Models;
+using Football.Data.Interfaces;
 using Football.Enums;
+using Football.Models;
 using Football.Fantasy.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OperationsController(IUploadWeeklyDataService weeklyDataService, IFantasyDataService fantasyService, IMatchupAnalysisService matchupAnalysisService, ISettingsService settingsService) : ControllerBase
+    public class OperationsController(IUploadWeeklyDataService weeklyDataService, IFantasyDataService fantasyService, IMatchupAnalysisService matchupAnalysisService, 
+        ISettingsService settingsService, IMapper mapper, IOptionsMonitor<Season> season) : ControllerBase
     {
+        private readonly Season _season = season.CurrentValue;
+
         [HttpPost("weekly-data/{season}/{week}")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -74,6 +82,15 @@ namespace Football.Api.Controllers
         [HttpPost("current-season-tunings")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> UploadCurrentSeasonTunings() => Ok(await settingsService.UploadCurrentSeasonTunings());
+
+        [HttpPost("season-tunings")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UploadSeasonTunings([FromBody] TuningsModel tuningsModel)
+        {
+            var tunings = mapper.Map<Tunings>(tuningsModel);
+            tunings.Season = _season.CurrentSeason;
+            return Ok(await settingsService.UploadSeasonTunings(tunings));
+        }
     }
 
 

@@ -1,4 +1,5 @@
 ﻿using Football.Enums;
+using Football.Models;
 using System.Reflection;
 
 namespace Football
@@ -6,6 +7,7 @@ namespace Football
     public interface ISettingsService
     {
         public Task<bool> UploadCurrentSeasonTunings();
+        public Task<bool> UploadSeasonTunings(Tunings tunings);
         public int GetProjectionsCount(Position position);
         public double GetBoomSetting(Position position);
         public double GetBustSetting(Position position);
