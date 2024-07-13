@@ -1,0 +1,16 @@
+﻿@using Football.Api.Models;
+@inject IRequests requests;
+
+
+<h3>ManageSettings</h3>
+
+@code {
+    private bool loadings { get; set; } = false;
+    private TuningsModel tunings { get; set; } = new();
+    protected override OnInitializedAsync()
+    {
+        loading = true;
+        tunings = await requests.GetSeasonTunings();
+        loading = false;s
+    }
+}
