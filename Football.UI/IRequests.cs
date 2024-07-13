@@ -25,5 +25,7 @@ namespace Football.UI
         public Task<List<TeamRecordModel>?> GetTeamRecordsRequest();
         public Task<List<FantasyPerformanceModel>?> GetFantasyPerformancesRequest(int teamId);
         public Task<List<ScheduleDetailsModel>?> GetScheduleDetailsRequest();
+        public Task<TuningsModel?> GetSeasonTuningsRequest();
+        public Task<bool> PostSeasonTuningsRequest(TuningsModel model);
     }
 }

@@ -7,13 +7,12 @@ using Serilog;
 
 namespace Football.Projections.Services
 {
-    public class StatProjectionCalculator(IOptionsMonitor<Tunings> tunings, IOptionsMonitor<WeeklyTunings> weeklyTunings, IOptionsMonitor<Season> season, ILogger logger) : IStatProjectionCalculator
+    public class StatProjectionCalculator(IOptionsMonitor<WeeklyTunings> weeklyTunings, IOptionsMonitor<Season> season, ILogger logger) : IStatProjectionCalculator
     {
-        private readonly Tunings _tunings = tunings.CurrentValue;
         private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
         private readonly Season _season = season.CurrentValue;
 
-        public SeasonDataQB CalculateStatProjection(List<SeasonDataQB> seasons, double gamesPlayedInjured)
+        public SeasonDataQB CalculateStatProjection(List<SeasonDataQB> seasons, double gamesPlayedInjured, Tunings tunings)
         {
             var secondYearLeap = true;
 
@@ -27,10 +26,10 @@ namespace Football.Projections.Services
                 seasons = seasons.Where(s => !backupSeasons.Contains(s.Season)).ToList();
             }
 
-            var recentWeight = seasons.Count > 1 ? _tunings.QBWeight : secondYearLeap ? _tunings.SecondYearQBLeap : 1;
+            var recentWeight = seasons.Count > 1 ? tunings.QBWeight : secondYearLeap ? tunings.SecondYearQBLeap : 1;
             var recentSeason = seasons.Max(s => s.Season);
             var previousSeasons = seasons.Count - 1;
-            var previousWeight = seasons.Count > 1 ? ((1 - _tunings.QBWeight) * ((double)1 / previousSeasons)) : 0;
+            var previousWeight = seasons.Count > 1 ? ((1 - tunings.QBWeight) * ((double)1 / previousSeasons)) : 0;
 
             var avgComp = 0.0;
             var avgAtt = 0.0;
@@ -91,7 +90,7 @@ namespace Football.Projections.Services
             };
         }
 
-        public SeasonDataRB CalculateStatProjection(List<SeasonDataRB> seasons, double gamesPlayedInjured)
+        public SeasonDataRB CalculateStatProjection(List<SeasonDataRB> seasons, double gamesPlayedInjured, Tunings tunings)
         {
             var secondYearLeap = true;
 
@@ -106,10 +105,10 @@ namespace Football.Projections.Services
                 seasons = seasons.Where(s => !backupSeasons.Contains(s.Season)).ToList();
             }
 
-            var recentWeight = seasons.Count > 1 ? _tunings.Weight : secondYearLeap ? _tunings.SecondYearRBLeap : 1;
+            var recentWeight = seasons.Count > 1 ? tunings.Weight : secondYearLeap ? tunings.SecondYearRBLeap : 1;
             var recentSeason = seasons.Max(s => s.Season);
             var previousSeasons = seasons.Count - 1;
-            var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
+            var previousWeight = seasons.Count > 1 ? ((1 - tunings.Weight) * ((double)1 / previousSeasons)) : 0;
 
             var avgRAtt = 0.0;
             var avgRYd = 0.0;
@@ -160,16 +159,16 @@ namespace Football.Projections.Services
                 Fumbles = avgFum
             };
         }
-        public SeasonDataWR CalculateStatProjection(List<SeasonDataWR> seasons, double gamesPlayedInjured)
+        public SeasonDataWR CalculateStatProjection(List<SeasonDataWR> seasons, double gamesPlayedInjured, Tunings tunings)
         {
             if (seasons.Count == 0) return new SeasonDataWR();
 
             if (seasons.Count > 3) seasons = seasons.Where(s => s.Season != seasons.Min(s => s.Season)).ToList();
 
-            var recentWeight = seasons.Count > 1 ? _tunings.Weight : _tunings.SecondYearWRLeap;
+            var recentWeight = seasons.Count > 1 ? tunings.Weight : tunings.SecondYearWRLeap;
             var recentSeason = seasons.Max(s => s.Season);
             var previousSeasons = seasons.Count - 1;
-            var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
+            var previousWeight = seasons.Count > 1 ? ((1 - tunings.Weight) * ((double)1 / previousSeasons)) : 0;
 
             var avgRec = 0.0;
             var avgTgt = 0.0;
@@ -221,7 +220,7 @@ namespace Football.Projections.Services
                 Fumbles = avgFum
             };
         }
-        public SeasonDataTE CalculateStatProjection(List<SeasonDataTE> seasons, double gamesPlayedInjured)
+        public SeasonDataTE CalculateStatProjection(List<SeasonDataTE> seasons, double gamesPlayedInjured, Tunings tunings)
         {
             var secondYearLeap = true;
 
@@ -235,10 +234,10 @@ namespace Football.Projections.Services
                 seasons = seasons.Where(s => !backupSeasons.Contains(s.Season)).ToList();
             }
             
-            var recentWeight = seasons.Count > 1 ? _tunings.Weight : secondYearLeap ? _tunings.SecondYearTELeap : 1;
+            var recentWeight = seasons.Count > 1 ? tunings.Weight : secondYearLeap ? tunings.SecondYearTELeap : 1;
             var recentSeason = seasons.Max(s => s.Season);
             var previousSeasons = seasons.Count - 1;
-            var previousWeight = seasons.Count > 1 ? ((1 - _tunings.Weight) * ((double)1 / previousSeasons)) : 0;
+            var previousWeight = seasons.Count > 1 ? ((1 - tunings.Weight) * ((double)1 / previousSeasons)) : 0;
 
             var avgRec = 0.0;
             var avgTgt = 0.0;
