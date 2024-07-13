@@ -7,9 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Football.Api.Models;
 using AutoMapper;
-using Football.Players.Models;
-using MathNet.Numerics.LinearAlgebra;
-
 
 namespace Football.Api.Controllers
 {
@@ -32,9 +29,6 @@ namespace Football.Api.Controllers
 
             if (positionEnum == Position.FLEX)
                 model = mapper.Map<List<SeasonProjectionModel>>(analysisService.SeasonFlexRankings());
-
-            else if (seasonProjectionService.GetProjectionsFromCache(positionEnum, out var projectionsCache))
-                model = mapper.Map<List<SeasonProjectionModel>>(projectionsCache);
 
             else if (seasonProjectionService.GetProjectionsFromSQL(positionEnum, _season.CurrentSeason, out var projectionsSQL))
             {

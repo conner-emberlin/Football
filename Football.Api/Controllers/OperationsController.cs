@@ -91,6 +91,14 @@ namespace Football.Api.Controllers
             tunings.Season = _season.CurrentSeason;
             return Ok(await settingsService.UploadSeasonTunings(tunings));
         }
+
+        [HttpGet("season-tunings")]
+        [ProducesResponseType(typeof(TuningsModel), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSeasonTunings([FromQuery] int seasonParam)
+        {
+            var season = seasonParam > 0 ? seasonParam : _season.CurrentSeason;
+            return Ok(mapper.Map<TuningsModel>(await settingsService.GetSeasonTunings(season)));
+        }
     }
 
 

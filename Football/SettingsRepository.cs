@@ -24,6 +24,12 @@ namespace Football
             return (await dbConnection.ExecuteAsync(query, tunings)) > 0;
         }
 
+        public async Task<Tunings> GetSeasonTunings(int season)
+        {
+            var query = $@"SELECT * FROM [dbo].Tunings WHERE [Season] = @season";
+            return (await dbConnection.QueryAsync<Tunings>(query, new { season })).First();
+        }
+
         private async Task<int> DeleteSeasonTunings(int season)
         {
             var query = $@"DELETE FROM [dbo].Tunings WHERE [Season] = @season";

@@ -8,6 +8,7 @@ namespace Football
     {
         public Task<bool> UploadCurrentSeasonTunings();
         public Task<bool> UploadSeasonTunings(Tunings tunings);
+        public Task<Tunings> GetSeasonTunings(int season);
         public int GetProjectionsCount(Position position);
         public double GetBoomSetting(Position position);
         public double GetBustSetting(Position position);

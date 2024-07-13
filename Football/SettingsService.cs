@@ -26,6 +26,7 @@ namespace Football
         }
 
         public async Task<bool> UploadSeasonTunings(Tunings tunings) => await settingsRepository.UploadSeasonTunings(tunings);
+        public async Task<Tunings> GetSeasonTunings(int season) => await settingsRepository.GetSeasonTunings(season);
         public int GetProjectionsCount(Position position) => position switch
         {
 
