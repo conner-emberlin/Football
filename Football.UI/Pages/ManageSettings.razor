@@ -46,146 +46,34 @@
             <tbody>
                 <tr>
                     <td>
-                         RBFloor  
-                    </td>                                           
+                        AverageQBProjection
+                    </td>
                     <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.RBFloor" />
+                        <input type="text" class="form-control" @bind="@tunings.AverageQBProjection" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                         LeadRBFactor  
+                        BackupQBAdjustment
                     </td>
                     <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.LeadRBFactor" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         QBWeight  
-                    </td>                                           
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.QBWeight" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         Weight  
-                    </td>                                           
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.Weight" />
+                        <input type="text" class="form-control" @bind="@tunings.BackupQBAdjustmentMax" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                         SecondYearWRLeap  
+                        EliteWRDraftPositionMax
                     </td>
                     <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.SecondYearWRLeap" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                         SecondYearQBLeap  
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.SecondYearQBLeap" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         SecondYearRBLeap  
-                    </td>                                           
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.SecondYearRBLeap" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         SecondYearTELeap  
-                    </td>                                           
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.SecondYearTELeap" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         NewQBFloor  
-                    </td>                                           
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewQBFloor" />
+                        <input type="text" class="form-control" @bind="@tunings.EliteWRDraftPositionMax" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                         NewQBCeiling  
+                        EliteWRTopReceiverFactor
                     </td>
                     <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewQBCeiling" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         NewQBCeilingForRB 
-                    </td>                                           
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewQBCeilingForRB" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         SeasonDataTrimmingGames 
-                    </td>                                           
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.SeasonDataTrimmingGames" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                         AverageQBProjection 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.AverageQBProjection" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                         NewWRMinPoints 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewWRMinPoints" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         NewWRAdjustmentFactor 
-                    </td>                                           
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewWRAdjustmentFactor" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                         ExistingWRAdjustmentFactor 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.ExistingWRAdjustmentFactor" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                         NewRBMinPoints 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewRBMinPoints" />
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                         NewRBAdjustmentFactor 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewRBAdjustmentFactor" />
+                        <input type="text" class="form-control" @bind="@tunings.EliteWRRookieTopReceiverFactor" />
                     </td>
                 </tr>
                 <tr>
@@ -193,95 +81,210 @@
                          ExistingRBAdjustmentFactor 
                     </td>
                     <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.ExistingRBAdjustmentFactor" />
+                        <input type="text" class="form-control"   @bind="@tunings.ExistingRBAdjustmentFactor" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        ExistingWRAdjustmentFactor
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.ExistingWRAdjustmentFactor" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                         LeadRBFactor  
+                    </td>
+                    <td>
+                        <input type="text" class="form-control"   @bind="@tunings.LeadRBFactor" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                         NewQBCeiling  
+                    </td>
+                    <td>
+                        <input type="text" class="form-control"   @bind="@tunings.NewQBCeiling" />
                     </td>
                 </tr>
                                 <tr>
+                    <td>
+                         NewQBCeilingForRB 
+                    </td>                                           
+                    <td>
+                        <input type="text" class="form-control"   @bind="@tunings.NewQBCeilingForRB" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        NewQBFloor
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.NewQBFloor" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                         NewWRMinPoints 
+                    </td>
+                    <td>
+                        <input type="text" class="form-control"   @bind="@tunings.NewWRMinPoints" />
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                         NewWRAdjustmentFactor 
+                    </td>                                           
+                    <td>
+                        <input type="text" class="form-control"   @bind="@tunings.NewWRAdjustmentFactor" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                         NewRBMinPoints 
+                    </td>
+                    <td>
+                        <input type="text" class="form-control"   @bind="@tunings.NewRBMinPoints" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                         NewRBAdjustmentFactor 
+                    </td>
+                    <td>
+                        <input type="text" class="form-control"   @bind="@tunings.NewRBAdjustmentFactor" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        QBWeight
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.QBWeight" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        RBFloor
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.RBFloor" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        RBPromotionMinYardsPerCarry
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.RBPromotionMinYardsPerCarry" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        RBPromotionFactor
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.RBPromotionFactor" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        RB1MinPoints
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.RB1MinPoints" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        ReceivingRBThreshold
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.ReceivingRBThreshold" />
+                    </td>
+                </tr>
+                <tr>
                     <td>
                          RushingQBThreshold 
                     </td>
                     <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.RushingQBThreshold" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         ReceivingRBThreshold 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.ReceivingRBThreshold" />
+                        <input type="text" class="form-control"   @bind="@tunings.RushingQBThreshold" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                         BackupQBAdjustment 
+                        SeasonDataTrimmingGames
                     </td>
                     <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.BackupQBAdjustmentMax" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         VetQBNewTeamYears 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.VetQBNewTeamYears" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         VetQBNewTeamFactor 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.VetQBNewTeamFactor" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         EliteWRDraftPositionMax 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.EliteWRDraftPositionMax" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         EliteWRTopReceiverFactor 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.EliteWRRookieTopReceiverFactor" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         WR1MinPoints 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.WR1MinPoints" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         RB1MinPoints 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.RB1MinPoints" />
-                    </td>
-                </tr>
-                                <tr>
-                    <td>
-                         RBPromotionMinYardsPerCarry 
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.RBPromotionMinYardsPerCarry" />
+                        <input type="text" class="form-control" @bind="@tunings.SeasonDataTrimmingGames" />
                     </td>
                 </tr>
                 <tr>
                     <td>
-                         RBPromotionFactor 
+                        SecondYearWRLeap
                     </td>
                     <td>
-                        <input type="text" class="form-control" placeholder="Season" @bind="@tunings.RBPromotionFactor" />
+                        <input type="text" class="form-control" @bind="@tunings.SecondYearWRLeap" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        SecondYearQBLeap
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.SecondYearQBLeap" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        SecondYearRBLeap
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.SecondYearRBLeap" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        SecondYearTELeap
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.SecondYearTELeap" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        VetQBNewTeamYears
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.VetQBNewTeamYears" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        VetQBNewTeamFactor
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.VetQBNewTeamFactor" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Weight
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.Weight" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        WR1MinPoints
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.WR1MinPoints" />
                     </td>
                 </tr>
             </tbody>
