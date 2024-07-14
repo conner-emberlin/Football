@@ -5,10 +5,15 @@
 
 
 <h3>Manage Settings</h3>
-
+<div style="height:10px;font-size:1px;">&nbsp;</div>
 @if (loading)
 {
     <div class="spinner"></div>
+}
+
+@if (tuningsUpdated)
+{
+    <text>Tunings updated</text>
 }
 
 @if (tunings!= null && !loading)
@@ -24,7 +29,7 @@
             <tbody>
                 <tr>
                     <td>
-                        <b>RBFloor </b>
+                         RBFloor  
                     </td>                                           
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.RBFloor" />
@@ -32,7 +37,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>LeadRBFactor </b>
+                         LeadRBFactor  
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.LeadRBFactor" />
@@ -40,7 +45,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>QBWeight </b>
+                         QBWeight  
                     </td>                                           
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.QBWeight" />
@@ -48,7 +53,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>Weight </b>
+                         Weight  
                     </td>                                           
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.Weight" />
@@ -56,7 +61,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>SecondYearWRLeap </b>
+                         SecondYearWRLeap  
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.SecondYearWRLeap" />
@@ -64,7 +69,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>SecondYearQBLeap </b>
+                         SecondYearQBLeap  
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.SecondYearQBLeap" />
@@ -72,7 +77,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>SecondYearRBLeap </b>
+                         SecondYearRBLeap  
                     </td>                                           
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.SecondYearRBLeap" />
@@ -80,7 +85,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>SecondYearTELeap </b>
+                         SecondYearTELeap  
                     </td>                                           
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.SecondYearTELeap" />
@@ -88,7 +93,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>NewQBFloor </b>
+                         NewQBFloor  
                     </td>                                           
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewQBFloor" />
@@ -96,7 +101,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>NewQBCeiling </b>
+                         NewQBCeiling  
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewQBCeiling" />
@@ -104,7 +109,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>NewQBCeilingForRB</b>
+                         NewQBCeilingForRB 
                     </td>                                           
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewQBCeilingForRB" />
@@ -112,7 +117,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>SeasonDataTrimmingGames</b>
+                         SeasonDataTrimmingGames 
                     </td>                                           
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.SeasonDataTrimmingGames" />
@@ -120,7 +125,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>AverageQBProjection</b>
+                         AverageQBProjection 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.AverageQBProjection" />
@@ -128,7 +133,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>NewWRMinPoints</b>
+                         NewWRMinPoints 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewWRMinPoints" />
@@ -136,7 +141,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>NewWRAdjustmentFactor</b>
+                         NewWRAdjustmentFactor 
                     </td>                                           
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewWRAdjustmentFactor" />
@@ -144,7 +149,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>ExistingWRAdjustmentFactor</b>
+                         ExistingWRAdjustmentFactor 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.ExistingWRAdjustmentFactor" />
@@ -152,7 +157,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>NewRBMinPoints</b>
+                         NewRBMinPoints 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewRBMinPoints" />
@@ -160,7 +165,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>NewRBAdjustmentFactor</b>
+                         NewRBAdjustmentFactor 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.NewRBAdjustmentFactor" />
@@ -168,7 +173,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>ExistingRBAdjustmentFactor</b>
+                         ExistingRBAdjustmentFactor 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.ExistingRBAdjustmentFactor" />
@@ -176,7 +181,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>RushingQBThreshold</b>
+                         RushingQBThreshold 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.RushingQBThreshold" />
@@ -184,7 +189,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>ReceivingRBThreshold</b>
+                         ReceivingRBThreshold 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.ReceivingRBThreshold" />
@@ -192,7 +197,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>BackupQBAdjustment</b>
+                         BackupQBAdjustment 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.BackupQBAdjustmentMax" />
@@ -200,7 +205,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>VetQBNewTeamYears</b>
+                         VetQBNewTeamYears 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.VetQBNewTeamYears" />
@@ -208,7 +213,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>VetQBNewTeamFactor</b>
+                         VetQBNewTeamFactor 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.VetQBNewTeamFactor" />
@@ -216,7 +221,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>EliteWRDraftPositionMax</b>
+                         EliteWRDraftPositionMax 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.EliteWRDraftPositionMax" />
@@ -224,7 +229,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>EliteWRTopReceiverFactor</b>
+                         EliteWRTopReceiverFactor 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.EliteWRRookieTopReceiverFactor" />
@@ -232,7 +237,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>WR1MinPoints</b>
+                         WR1MinPoints 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.WR1MinPoints" />
@@ -240,7 +245,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>RB1MinPoints</b>
+                         RB1MinPoints 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.RB1MinPoints" />
@@ -248,7 +253,7 @@
                 </tr>
                                 <tr>
                     <td>
-                        <b>RBPromotionMinYardsPerCarry</b>
+                         RBPromotionMinYardsPerCarry 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.RBPromotionMinYardsPerCarry" />
@@ -256,7 +261,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>RBPromotionFactor</b>
+                         RBPromotionFactor 
                     </td>
                     <td>
                         <input type="text" class="form-control" placeholder="Season" @bind="@tunings.RBPromotionFactor" />
@@ -265,15 +270,20 @@
             </tbody>
         </table>
     </div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
     <button class="button-22" role="button" @onclick="HandleUpdate">
         Update
     </button>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
 }
 
-@if (tuningsUpdated)
-{
-    <text>Tunings updated</text>
-}
+
 
 @code {
     private bool loading { get; set; } = false;
