@@ -1,16 +1,66 @@
 ﻿@using Football.Api.Models;
 @inject IRequests requests;
 
+@page "/ManageSettings";
 
 <h3>ManageSettings</h3>
 
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+@if (tunings!= null && !loading)
+{
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Tuning</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <b>@tunings.RBFloor </b><input type="text" class="form-control" placeholder="Season" @bind="@tunings.RBFloor" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <button class="button-22" role="button" @onclick="HandleUpdate">
+        Update
+    </button>
+}
+
+@if (tuningsUpdated)
+{
+    <text>Tunings updated</text>
+}
+
 @code {
-    private bool loadings { get; set; } = false;
-    private TuningsModel tunings { get; set; } = new();
-    protected override OnInitializedAsync()
+    private bool loading { get; set; } = false;
+    private bool shouldRender { get; set; }
+    private TuningsModel? tunings { get; set; } = new();
+    private bool tuningsUpdated { get; set; } = false;
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
     {
         loading = true;
-        tunings = await requests.GetSeasonTunings();
-        loading = false;s
+        tunings = await requests.GetSeasonTuningsRequest();
+        loading = false;
+        shouldRender = true;
+    }
+
+    private async Task HandleUpdate()
+    {
+        loading = true;
+        tuningsUpdated = await requests.PostSeasonTuningsRequest(tunings);
+        tunings = await requests.GetSeasonTuningsRequest();
+        loading= false;
+        shouldRender = true;
     }
 }
