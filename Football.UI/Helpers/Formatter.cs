@@ -1,5 +1,6 @@
 ﻿using Football.Enums;
 using Microsoft.AspNetCore.Components;
+using Newtonsoft.Json.Linq;
 using System.Globalization;
 
 namespace Football.UI.Helpers
@@ -43,7 +44,7 @@ namespace Football.UI.Helpers
                   : "color:red";
         }
 
-        public List<string> Positions(bool includeFlex = false, bool includeQB = true, bool includeDST = true, bool includeK = true) 
+        public List<string> Positions(bool includeFlex = false, bool includeQB = true, bool includeDST = true, bool includeK = true)
         {
             var list = new List<string> { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
 
