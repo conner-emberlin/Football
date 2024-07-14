@@ -5,18 +5,35 @@
 
 
 <h3>Manage Settings</h3>
+
+@if (tuningsUpdated)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <text>Tunings updated</text>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+}
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@foreach (var setting in settings)
+{
+
+    <input type="radio" name="players" id=" @setting" value="@setting"
+           @onchange="SetSetting"
+           checked=@(Setting.Equals(setting,StringComparison.OrdinalIgnoreCase)) />
+    <label for="@setting ">@setting</label>
+
+}
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="HandleInput">
+    Submit
+</button>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 @if (loading)
 {
     <div class="spinner"></div>
 }
 
-@if (tuningsUpdated)
-{
-    <text>Tunings updated</text>
-}
-
-@if (tunings!= null && !loading)
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@if (tunings!= null && !loading && seasonTuningsSetting)
 {
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -286,20 +303,18 @@
 
 
 @code {
-    private bool loading { get; set; } = false;
+    private bool loading { get; set; }
     private bool shouldRender { get; set; }
     private bool tuningsUpdated { get; set; } = false;
+    private string Setting { get; set; } = "Season";
+
+    private List<string> settings = ["Season", "Season Tunings", "Weekly Tunings"];
+    private bool seasonSetting { get; set; }
+    private bool seasonTuningsSetting { get; set; }
+    private bool weeklyTuningsSetting { get; set; }
 
     private TuningsModel? tunings { get; set; } = new();
     protected override bool ShouldRender() => shouldRender;
-
-    protected override async Task OnInitializedAsync()
-    {
-        loading = true;
-        tunings = await requests.GetSeasonTuningsRequest();
-        loading = false;
-        shouldRender = true;
-    }
 
     private async Task HandleUpdate()
     {
@@ -310,5 +325,35 @@
         shouldRender = true;
     }
 
+    private async Task HandleInput()
+    {
+        loading = true;
+        shouldRender = true;
 
+        if (Setting == "Season")
+        {
+            seasonSetting = true;
+        }
+        else if(Setting == "Season Tunings")
+        {
+            tunings = await requests.GetSeasonTuningsRequest();
+            seasonTuningsSetting = true;
+        }
+        else if (Setting == "Weekly Tunings")
+        {
+            weeklyTuningsSetting = true;
+        }
+
+        loading = false;
+        shouldRender = true;
+    }
+
+    public async Task SetSetting(ChangeEventArgs args)
+    {
+        Setting = args.Value.ToString();
+        tuningsUpdated = false;
+        seasonSetting = false;
+        seasonTuningsSetting = false;
+        weeklyTuningsSetting = false;
+    }
 }
