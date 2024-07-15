@@ -295,15 +295,38 @@
     <button class="button-22" role="button" @onclick="HandleUpdate">
         Update
     </button>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
 }
 
+else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
+{
+    <div class="table_container">
+        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <thead>
+                <tr>
+                    <th>Tuning</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        AverageQBProjection
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.AverageQBProjection" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
 
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
 
 @code {
     private bool loading { get; set; }
@@ -317,6 +340,7 @@
     private bool weeklyTuningsSetting { get; set; }
 
     private TuningsModel? tunings { get; set; } = new();
+    private WeeklyTuningsModel? weeklyTunings { get; set; } = new();
     protected override bool ShouldRender() => shouldRender;
 
     private async Task HandleUpdate()
@@ -344,7 +368,7 @@
         }
         else if (Setting == "Weekly Tunings")
         {
-            weeklyTuningsSetting = true;
+            weeklyTuningsSetting = true;          
         }
 
         loading = false;
