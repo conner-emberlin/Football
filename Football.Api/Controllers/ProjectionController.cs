@@ -106,9 +106,6 @@ namespace Football.Api.Controllers
             if (positionEnum == Position.FLEX)
                 models = mapper.Map<List<WeekProjectionModel>>(await analysisService.WeeklyFlexRankings());
 
-            else if (weekProjectionService.GetProjectionsFromCache(positionEnum, out var projectionsCache))
-                models = mapper.Map<List<WeekProjectionModel>>(projectionsCache);
-
             else if (weekProjectionService.GetProjectionsFromSQL(positionEnum, currentWeek, out var projectionsSQL))
             {
                 models = mapper.Map<List<WeekProjectionModel>>(projectionsSQL);

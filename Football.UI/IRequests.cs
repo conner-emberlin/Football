@@ -27,5 +27,7 @@ namespace Football.UI
         public Task<List<ScheduleDetailsModel>?> GetScheduleDetailsRequest();
         public Task<TuningsModel?> GetSeasonTuningsRequest();
         public Task<bool> PostSeasonTuningsRequest(TuningsModel model);
+        public Task<WeeklyTuningsModel?> GetWeeklyTuningsRequest();
+        public Task<bool> PostWeeklyTuningsRequest(WeeklyTuningsModel model);
     }
 }

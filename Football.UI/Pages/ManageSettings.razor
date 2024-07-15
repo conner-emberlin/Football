@@ -292,7 +292,7 @@
     </div>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
 
-    <button class="button-22" role="button" @onclick="HandleUpdate">
+    <button class="button-22" role="button" @onclick="HandleSeasonTuningsUpdate">
         Update
     </button>
 }
@@ -310,15 +310,58 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
             <tbody>
                 <tr>
                     <td>
-                        AverageQBProjection
+                        RecentWeekWeight
                     </td>
                     <td>
-                        <input type="text" class="form-control" @bind="@tunings.AverageQBProjection" />
+                        <input type="text" class="form-control" @bind="@weeklyTunings.RecentWeekWeight" />
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        ProjectionWeight
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@weeklyTunings.ProjectionWeight" />
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        TamperedMin
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@weeklyTunings.TamperedMin" />
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        TamperedMax
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@weeklyTunings.TamperedMax" />
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        MinWeekWeighted
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@weeklyTunings.MinWeekWeighted" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        RecentWeeks
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@weeklyTunings.RecentWeeks" />
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
+    <button class="button-22" role="button" @onclick="HandleWeeklyTuningsUpdate">
+        Update
+    </button>
 }
 
 <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -332,6 +375,7 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
     private bool loading { get; set; }
     private bool shouldRender { get; set; }
     private bool tuningsUpdated { get; set; } = false;
+    private bool weeklyTuningsUpdated { get; set; } = false;
     private string Setting { get; set; } = "Season Tunings";
 
     private List<string> settings = ["Season Tunings", "Weekly Tunings"];
@@ -343,7 +387,7 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
     private WeeklyTuningsModel? weeklyTunings { get; set; } = new();
     protected override bool ShouldRender() => shouldRender;
 
-    private async Task HandleUpdate()
+    private async Task HandleSeasonTuningsUpdate()
     {
         loading = true;
         tuningsUpdated = await requests.PostSeasonTuningsRequest(tunings);
@@ -352,6 +396,16 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
         shouldRender = true;
     }
 
+    private async Task HandleWeeklyTuningsUpdate()
+    {
+        
+        loading = true;
+        weeklyTuningsUpdated = await requests.PostSeasonTuningsRequest(tunings);
+        weeklyTunings = await requests.GetWeeklyTuningsRequest();
+        loading = false;
+        shouldRender = true;
+
+    }
     private async Task HandleInput()
     {
         loading = true;
@@ -368,6 +422,7 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
         }
         else if (Setting == "Weekly Tunings")
         {
+            weeklyTunings = await requests.GetWeeklyTuningsRequest();
             weeklyTuningsSetting = true;          
         }
 

@@ -33,7 +33,9 @@ namespace Football.UI.Helpers
         public async Task<List<FantasyPerformanceModel>?> GetFantasyPerformancesRequest(int teamId) => await Get<List<FantasyPerformanceModel>?>("https://localhost:7028/api/Team/fantasy-performances/" + teamId.ToString());
         public async Task<List<ScheduleDetailsModel>?> GetScheduleDetailsRequest() => await Get<List<ScheduleDetailsModel>?>("https://localhost:7028/api/Team/schedule-details/current");
         public async Task<TuningsModel?> GetSeasonTuningsRequest() => await Get<TuningsModel>("https://localhost:7028/api/operations/season-tunings");
-        public async Task<bool> PostSeasonTuningsRequest(TuningsModel tunings) => await Post<bool, TuningsModel>("https://localhost:7028/api/operations/season-tunings", tunings); 
+        public async Task<bool> PostSeasonTuningsRequest(TuningsModel tunings) => await Post<bool, TuningsModel>("https://localhost:7028/api/operations/season-tunings", tunings);
+        public async Task<WeeklyTuningsModel?> GetWeeklyTuningsRequest() => await Get<WeeklyTuningsModel>("https://localhost:7028/api/operations/weekly-tunings");
+        public async Task<bool> PostWeeklyTuningsRequest(WeeklyTuningsModel tunings) => await Post<bool, WeeklyTuningsModel>("https://localhost:7028/api/operations/weekly-tunings", tunings);
         public async Task<List<SeasonFantasyModel>?> GetSeasonTotalsRequest(string season = "")
         {
             var path = "https://localhost:7028/api/Fantasy/season-totals";
