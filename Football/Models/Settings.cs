@@ -99,6 +99,8 @@ namespace Football.Models
 
     public class WeeklyTunings
     {
+        public int Season { get; set; }
+        public int Week { get; set; }
         public double RecentWeekWeight { get; set; }
         public double ProjectionWeight { get; set; }
         public double TamperedMin { get; set; }

@@ -15,11 +15,9 @@ using MathNet.Numerics.LinearAlgebra;
 namespace Football.Projections.Services
 {
     public class WeeklyProjectionService(IFantasyDataService fantasyService, IMemoryCache cache,IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
-    IStatisticsService statisticsService, IOptionsMonitor<Season> season, IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository,
-    IOptionsMonitor<WeeklyTunings> weeklyTunings, ISettingsService settingsService, IOptionsMonitor<ProjectionLimits> settings, IMapper mapper, IMatchupAnalysisService matchupAnalysisService) : IProjectionService<WeekProjection>
+    IStatisticsService statisticsService, IOptionsMonitor<Season> season, IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService, IOptionsMonitor<ProjectionLimits> settings, IMapper mapper) : IProjectionService<WeekProjection>
     {
         private readonly Season _season = season.CurrentValue;
-        private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
         private readonly ProjectionLimits _settings = settings.CurrentValue;
 
         public async Task<bool> DeleteProjection(WeekProjection projection) 
@@ -50,22 +48,23 @@ namespace Football.Projections.Services
         public async Task<IEnumerable<WeekProjection>> GetProjections(Position position)
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            if (currentWeek == 1) return await GetWeekOneProjections(position);
+            var tunings = await settingsService.GetWeeklyTunings(_season.CurrentSeason, currentWeek);
+            if (currentWeek == 1) return await GetWeekOneProjections(position, tunings);
 
             var projections = position switch
             {
-                Position.QB => await CalculateProjections(await QBProjectionModel(), position, currentWeek),
-                Position.RB => await CalculateProjections(await RBProjectionModel(), position, currentWeek),
-                Position.WR => await CalculateProjections(await WRProjectionModel(), position, currentWeek),
-                Position.TE => await CalculateProjections(await TEProjectionModel(), position, currentWeek),
-                Position.DST => await CalculateProjections(await DSTProjectionModel(), position, currentWeek),
-                Position.K => await CalculateProjections(await KProjectionModel(), position, currentWeek),
+                Position.QB => await CalculateProjections(await QBProjectionModel(), position, currentWeek, tunings),
+                Position.RB => await CalculateProjections(await RBProjectionModel(), position, currentWeek, tunings),
+                Position.WR => await CalculateProjections(await WRProjectionModel(), position, currentWeek, tunings),
+                Position.TE => await CalculateProjections(await TEProjectionModel(), position, currentWeek, tunings),
+                Position.DST => await CalculateProjections(await DSTProjectionModel(), position, currentWeek, tunings),
+                Position.K => await CalculateProjections(await KProjectionModel(), position, currentWeek, tunings),
                 _ => throw new NotImplementedException()
             };
 
             if (projections.Any())
             {
-                projections = await adjustmentService.AdjustmentEngine(projections.ToList());
+                projections = await adjustmentService.AdjustmentEngine(projections.ToList(), tunings);
                 var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
                 cache.Set(position.ToString() + Cache.WeeklyProjections.ToString(), formattedProjections);
                 return formattedProjections;
@@ -87,7 +86,7 @@ namespace Football.Projections.Services
             return coefficients;
         }
 
-        private async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, Position position, int currentWeek)
+        private async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, Position position, int currentWeek, WeeklyTunings tunings)
         {
             List<WeekProjection> projections = [];
             var coefficients = await CalculateCoefficients(model, position);
@@ -102,7 +101,7 @@ namespace Football.Projections.Services
                 if (projectedPoints > 0)
                 {
                     var seasonProjection = seasonProjections.TryGetValue(player.PlayerId, out var proj) ? proj : 0;
-                    var projection = seasonProjection > 0 ? WeightedWeeklyProjection(seasonProjection / _season.Games, projectedPoints, currentWeek - 1) : projectedPoints;
+                    var projection = seasonProjection > 0 ? WeightedWeeklyProjection(seasonProjection / _season.Games, projectedPoints, currentWeek - 1, tunings) : projectedPoints;
                     var avgError = await GetAverageProjectionError(player.PlayerId);
 
                     projections.Add(new WeekProjection
@@ -179,15 +178,15 @@ namespace Football.Projections.Services
             }
         }
 
-        private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week) 
+        private double WeightedWeeklyProjection(double seasonProjection, double weeklyProjection, int week, WeeklyTunings tunings) 
         {
             if (seasonProjection > 0)
-                return (_weeklyTunings.ProjectionWeight / week) * seasonProjection + (1 - (_weeklyTunings.ProjectionWeight / week)) * weeklyProjection;
+                return (tunings.ProjectionWeight / week) * seasonProjection + (1 - (tunings.ProjectionWeight / week)) * weeklyProjection;
 
             return weeklyProjection;
         } 
 
-        private async Task<List<WeekProjection>> GetWeekOneProjections(Position position)
+        private async Task<List<WeekProjection>> GetWeekOneProjections(Position position, WeeklyTunings tunings)
         {
             List<WeekProjection> weekOneProjections = [];
             if (position == Position.K || position == Position.DST) return weekOneProjections;
@@ -209,7 +208,7 @@ namespace Football.Projections.Services
                     });
                 }
             }
-            return await adjustmentService.AdjustmentEngine(weekOneProjections);
+            return await adjustmentService.AdjustmentEngine(weekOneProjections, tunings);
         }
     }    
 }

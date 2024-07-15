@@ -59,7 +59,7 @@ namespace Football.Projections.Services
                 Position.TE => await CalculateProjections(await TEProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings),
                 _ => throw new NotImplementedException()
             };
-            var adjustedProjections = await adjustmentService.AdjustmentEngine((await RookieSeasonProjections(position)).Union(projections));
+            var adjustedProjections = await adjustmentService.AdjustmentEngine((await RookieSeasonProjections(position)).Union(projections), tunings);
             var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
             cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), formattedProjections);
             return formattedProjections;

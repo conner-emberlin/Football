@@ -6,5 +6,7 @@ namespace Football
     {
         public Task<bool> UploadSeasonTunings(Tunings tunings);
         public Task<Tunings> GetSeasonTunings(int season);
+        public Task<bool> UploadWeeklyTunings(WeeklyTunings tunings);
+        public Task<WeeklyTunings> GetWeeklyTunings(int season, int week);
     }
 }

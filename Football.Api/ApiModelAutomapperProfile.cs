@@ -151,6 +151,7 @@ namespace Football.Api
             CreateMap<ScheduleDetails, ScheduleDetailsModel>();
             CreateMap<FantasyPerformance, FantasyPerformanceModel>();
             CreateMap<Tunings, TuningsModel>().ReverseMap();
+            CreateMap<WeeklyTunings, WeeklyTuningsModel>();
         }
 
     }

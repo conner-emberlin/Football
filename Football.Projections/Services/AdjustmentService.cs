@@ -11,17 +11,15 @@ using Microsoft.Extensions.Caching.Memory;
 namespace Football.Projections.Services
 {
     public class AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, IStatisticsService statisticsService, IFantasyAnalysisService fantasyAnalysisService,
-        IFantasyDataService fantasyDataService, IOptionsMonitor<Season> season, IOptionsMonitor<WeeklyTunings> weeklyTunings, IMemoryCache cache, ISettingsService settingsService) : IAdjustmentService
+        IFantasyDataService fantasyDataService, IOptionsMonitor<Season> season, IMemoryCache cache) : IAdjustmentService
     {
         private readonly Season _season = season.CurrentValue;
-        private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
 
-        public async Task<IEnumerable<SeasonProjection>> AdjustmentEngine(IEnumerable<SeasonProjection> seasonProjections)
+        public async Task<IEnumerable<SeasonProjection>> AdjustmentEngine(IEnumerable<SeasonProjection> seasonProjections, Tunings tunings)
         {
             if (!seasonProjections.Any()) return seasonProjections;
             _ = Enum.TryParse(seasonProjections.First().Position, out Position position);
             var allTeamChanges = await playerService.GetAllTeamChanges(_season.CurrentSeason);
-            var tunings = await settingsService.GetSeasonTunings(seasonProjections.First().Season);
             return position switch
             {
                 Position.QB => await QBSeasonProjectionAdjustments(seasonProjections, allTeamChanges, tunings),
@@ -31,9 +29,9 @@ namespace Football.Projections.Services
                 _ => seasonProjections
             };
         }
-        public async Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections)
+        public async Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections, WeeklyTunings tunings)
         {
-            weekProjections = await MatchupAdjustment(weekProjections);
+            weekProjections = await MatchupAdjustment(weekProjections, tunings);
             weekProjections = await InjuryAdustment(weekProjections);
             return weekProjections;
         }
@@ -277,7 +275,7 @@ namespace Football.Projections.Services
             return weeklyProjections;
         }
 
-        private async Task<List<WeekProjection>> MatchupAdjustment(List<WeekProjection> weekProjections)
+        private async Task<List<WeekProjection>> MatchupAdjustment(List<WeekProjection> weekProjections, WeeklyTunings tunings)
         {
             if (weekProjections.Count == 0) return weekProjections;
 
@@ -301,7 +299,7 @@ namespace Football.Projections.Services
                             if (opponentRank != null)
                             {
                                 var ratio = avgMatchup.AvgPointsAllowed > 0 ? opponentRank.AvgPointsAllowed / avgMatchup.AvgPointsAllowed : 0;
-                                var tamperedRatio = ratio > 1 ? Math.Min(ratio, _weeklyTunings.TamperedMax) : Math.Max(ratio, _weeklyTunings.TamperedMin);
+                                var tamperedRatio = ratio > 1 ? Math.Min(ratio, tunings.TamperedMax) : Math.Max(ratio, tunings.TamperedMin);
                                 w.ProjectedPoints = w.Position != Position.DST.ToString() ? w.ProjectedPoints * (tamperedRatio + 1) / 2 : tamperedRatio * w.ProjectedPoints;
                             }
                         }

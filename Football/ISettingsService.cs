@@ -6,9 +6,10 @@ namespace Football
 {
     public interface ISettingsService
     {
-        public Task<bool> UploadCurrentSeasonTunings();
         public Task<bool> UploadSeasonTunings(Tunings tunings);
         public Task<Tunings> GetSeasonTunings(int season);
+        public Task<bool> UploadWeeklyTunings(WeeklyTunings tunings);
+        public Task<WeeklyTunings> GetWeeklyTunings(int season, int week);
         public int GetProjectionsCount(Position position);
         public double GetBoomSetting(Position position);
         public double GetBustSetting(Position position);

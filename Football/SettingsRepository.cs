@@ -23,6 +23,12 @@ namespace Football
                             )";
             return (await dbConnection.ExecuteAsync(query, tunings)) > 0;
         }
+        public async Task<bool> UploadWeeklyTunings(WeeklyTunings tunings)
+        {
+            var query = $@"INSERT INTO [dbo].WeeklyTunings Season, Week, RecentWeekWeight, ProjectionWeight, TamperedMin, TamperedMax, MinWeekWeighted, RecentWeeks)
+                            VALUES @Season, @Week, @RecentWeekWeight, @ProjectionWeight, @TamperedMin, @TamperedMax, @MinWeekWeighted, @RecentWeeks)";
+            return (await dbConnection.ExecuteAsync(query, tunings)) > 0;
+        }
 
         public async Task<Tunings> GetSeasonTunings(int season)
         {
@@ -30,10 +36,22 @@ namespace Football
             return (await dbConnection.QueryAsync<Tunings>(query, new { season })).First();
         }
 
+        public async Task<WeeklyTunings> GetWeeklyTunings(int season, int week)
+        {
+            var query = $@"SELECT * FROM [dbo].WeeklyTunings WHERE [Season] = @season AND [Week] <= @week
+                        ORDER BY [Week] DESC";
+            return (await dbConnection.QueryAsync<WeeklyTunings>(query, new { season, week })).First();
+        }
+
         private async Task<int> DeleteSeasonTunings(int season)
         {
             var query = $@"DELETE FROM [dbo].Tunings WHERE [Season] = @season";
             return await dbConnection.ExecuteAsync(query, new { season });
+        }
+        private async Task<int> DeleteWeeklyTunings(int season, int week)
+        {
+            var query = $@"DELETE FROM [dbo].WeeklyTunings WHERE [Season] = @season AND [Week] = @week";
+            return await dbConnection.ExecuteAsync(query, new { season, week });
         }
     }
 }

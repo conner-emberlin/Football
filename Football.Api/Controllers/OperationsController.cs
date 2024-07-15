@@ -7,13 +7,14 @@ using Football.Fantasy.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
+using Football.Players.Interfaces;
 
 namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class OperationsController(IUploadWeeklyDataService weeklyDataService, IFantasyDataService fantasyService, IMatchupAnalysisService matchupAnalysisService, 
-        ISettingsService settingsService, IMapper mapper, IOptionsMonitor<Season> season) : ControllerBase
+        ISettingsService settingsService, IMapper mapper, IOptionsMonitor<Season> season,IPlayersService playersService) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -79,10 +80,6 @@ namespace Football.Api.Controllers
             return Ok(count);
         }
 
-        [HttpPost("current-season-tunings")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UploadCurrentSeasonTunings() => Ok(await settingsService.UploadCurrentSeasonTunings());
-
         [HttpPost("season-tunings")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> UploadSeasonTunings([FromBody] TuningsModel tuningsModel)
@@ -99,8 +96,28 @@ namespace Football.Api.Controllers
             var season = seasonParam > 0 ? seasonParam : _season.CurrentSeason;
             return Ok(mapper.Map<TuningsModel>(await settingsService.GetSeasonTunings(season)));
         }
-    }
 
+        [HttpPost("weekly-tunings")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UploadWeeklyTunings([FromBody] WeeklyTuningsModel tuningsModel)
+        {
+            var tunings = mapper.Map<WeeklyTunings>(tuningsModel);
+            tunings.Season = _season.CurrentSeason;
+            tunings.Week = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            return Ok(await settingsService.UploadWeeklyTunings(tunings));
+        }
+
+        [HttpGet("weekly-tunings")]
+        [ProducesResponseType(typeof(WeeklyTuningsModel), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetWeeklyTunings([FromQuery] int seasonParam, [FromQuery] int weekParam)
+        {
+            var season = seasonParam > 0 ? seasonParam : _season.CurrentSeason;
+            var week = weekParam > 0 ? weekParam : await playersService.GetCurrentWeek(season);
+
+            return Ok(mapper.Map<WeeklyTuningsModel>(await settingsService.GetWeeklyTunings(season, week)));
+        }
+    }
+ 
 
 
 
