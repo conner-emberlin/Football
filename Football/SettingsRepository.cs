@@ -26,7 +26,7 @@ namespace Football
         public async Task<bool> UploadWeeklyTunings(WeeklyTunings tunings)
         {
             var query = $@"INSERT INTO [dbo].WeeklyTunings Season, Week, RecentWeekWeight, ProjectionWeight, TamperedMin, TamperedMax, MinWeekWeighted, RecentWeeks)
-                            VALUES @Season, @Week, @RecentWeekWeight, @ProjectionWeight, @TamperedMin, @TamperedMax, @MinWeekWeighted, @RecentWeeks)";
+                            VALUES (@Season, @Week, @RecentWeekWeight, @ProjectionWeight, @TamperedMin, @TamperedMax, @MinWeekWeighted, @RecentWeeks)";
             return (await dbConnection.ExecuteAsync(query, tunings)) > 0;
         }
 
