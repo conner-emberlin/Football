@@ -6,7 +6,6 @@ using Football.Models;
 using Football.Fantasy.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Caching.Memory;
 using Football.Players.Interfaces;
 
 namespace Football.Api.Controllers
@@ -25,18 +24,22 @@ namespace Football.Api.Controllers
         {
             if (season > 0 && week > 0)
             {
+                var ignoreList = await playersService.GetIgnoreList();
                 var count = 0;
-                count += await weeklyDataService.UploadWeeklyQBData(season, week);
-                count += await weeklyDataService.UploadWeeklyRBData(season, week);
-                count += await weeklyDataService.UploadWeeklyWRData(season, week);
-                count += await weeklyDataService.UploadWeeklyTEData(season, week);
+                count += await weeklyDataService.UploadWeeklyQBData(season, week, ignoreList);
+                count += await weeklyDataService.UploadWeeklyRBData(season, week, ignoreList);
+                count += await weeklyDataService.UploadWeeklyWRData(season, week, ignoreList);
+                count += await weeklyDataService.UploadWeeklyTEData(season, week, ignoreList);
                 count += await weeklyDataService.UploadWeeklyKData(season, week);
                 count += await weeklyDataService.UploadWeeklyDSTData(season, week);
+
                 count += await weeklyDataService.UploadWeeklyGameResults(season, week);
+
                 count += await weeklyDataService.UploadWeeklyRosterPercentages(season, week, Position.QB.ToString());
                 count += await weeklyDataService.UploadWeeklyRosterPercentages(season, week, Position.RB.ToString());
                 count += await weeklyDataService.UploadWeeklyRosterPercentages(season, week, Position.WR.ToString());
                 count += await weeklyDataService.UploadWeeklyRosterPercentages(season, week, Position.TE.ToString());
+
                 count += await weeklyDataService.UploadWeeklySnapCounts(season, week, Position.QB.ToString());
                 count += await weeklyDataService.UploadWeeklySnapCounts(season, week, Position.RB.ToString());
                 count += await weeklyDataService.UploadWeeklySnapCounts(season, week, Position.WR.ToString());

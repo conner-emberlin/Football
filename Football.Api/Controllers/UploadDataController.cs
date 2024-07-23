@@ -1,6 +1,7 @@
 ﻿using Football.Enums;
 using Football.Models;
 using Football.Data.Interfaces;
+using Football.Players.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -9,7 +10,7 @@ namespace Football.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class UploadDataController(IUploadWeeklyDataService weeklyDataService, IUploadSeasonDataService seasonDataService,
-        IScraperService scraperService, IOptionsMonitor<Season> season) : ControllerBase
+        IScraperService scraperService, IPlayersService playersService, IOptionsMonitor<Season> season) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -20,12 +21,13 @@ namespace Football.Api.Controllers
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
+                var ignoreList = await playersService.GetIgnoreList();
                 return positionEnum switch
                 {
-                    Position.QB => Ok(await weeklyDataService.UploadWeeklyQBData(season, week)),
-                    Position.RB => Ok(await weeklyDataService.UploadWeeklyRBData(season, week)),
-                    Position.WR => Ok(await weeklyDataService.UploadWeeklyWRData(season, week)),
-                    Position.TE => Ok(await weeklyDataService.UploadWeeklyTEData(season, week)),
+                    Position.QB => Ok(await weeklyDataService.UploadWeeklyQBData(season, week, ignoreList)),
+                    Position.RB => Ok(await weeklyDataService.UploadWeeklyRBData(season, week, ignoreList)),
+                    Position.WR => Ok(await weeklyDataService.UploadWeeklyWRData(season, week, ignoreList)),
+                    Position.TE => Ok(await weeklyDataService.UploadWeeklyTEData(season, week, ignoreList)),
                     Position.DST => Ok(await weeklyDataService.UploadWeeklyDSTData(season, week)),
                     Position.K => Ok(await weeklyDataService.UploadWeeklyKData(season, week)),
                     _ => BadRequest()

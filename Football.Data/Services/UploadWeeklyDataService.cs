@@ -15,11 +15,10 @@ namespace Football.Data.Services
     {
         private readonly WeeklyScraping _scraping = scraping.CurrentValue;
 
-        public async Task<int> UploadWeeklyQBData(int season, int week)
+        public async Task<int> UploadWeeklyQBData(int season, int week, List<int> ignoreList)
         {
             logger.Information("Uploading QB Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.QB.ToString(), season.ToString(), week.ToString());
-            var ignoreList = await playerService.GetIgnoreList();
             var qbs = (await playerService.GetPlayersByPosition(Position.QB)).Select(p => p.PlayerId);
             var players = (await WeeklyDataQB(scraperService.ParseFantasyProsQBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week))
                             .Where(p => !ignoreList.Contains(p.PlayerId) && qbs.Contains(p.PlayerId));
@@ -27,11 +26,10 @@ namespace Football.Data.Services
             logger.Information("QB upload complete. {0} records added", added);
             return added;
         }
-        public async Task<int> UploadWeeklyRBData(int season, int week)
+        public async Task<int> UploadWeeklyRBData(int season, int week, List<int> ignoreList)
         {
             logger.Information("Uploadeding RB Data for week {0", week);
             var url = FantasyProsURLFormatter(Position.RB.ToString(), season.ToString(), week.ToString());
-            var ignoreList = await playerService.GetIgnoreList();
             var rbs = (await playerService.GetPlayersByPosition(Position.RB)).Select(p => p.PlayerId);
             var players = (await WeeklyDataRB(scraperService.ParseFantasyProsRBData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week))
                             .Where(p => !ignoreList.Contains(p.PlayerId) && rbs.Contains(p.PlayerId));
@@ -39,11 +37,10 @@ namespace Football.Data.Services
             logger.Information("RB upload complete. {0} records added", added);
             return added;
         }
-        public async Task<int> UploadWeeklyWRData(int season, int week)
+        public async Task<int> UploadWeeklyWRData(int season, int week, List<int> ignoreList)
         {
             logger.Information("Uploading WR Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.WR.ToString(), season.ToString(), week.ToString());
-            var ignoreList = await playerService.GetIgnoreList();
             var wrs = (await playerService.GetPlayersByPosition(Position.WR)).Select(p => p.PlayerId);
             var players = (await WeeklyDataWR(scraperService.ParseFantasyProsWRData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week))
                             .Where(p => !ignoreList.Contains(p.PlayerId) && wrs.Contains(p.PlayerId));
@@ -51,11 +48,10 @@ namespace Football.Data.Services
             logger.Information("WR upload complete. {0} records added", added);
             return added;
         }
-        public async Task<int> UploadWeeklyTEData(int season, int week)
+        public async Task<int> UploadWeeklyTEData(int season, int week, List<int> ignoreList)
         {
             logger.Information("Uploading TE Data for week {0}", week);
             var url = FantasyProsURLFormatter(Position.TE.ToString(), season.ToString(), week.ToString());
-            var ignoreList = await playerService.GetIgnoreList();
             var tes = (await playerService.GetPlayersByPosition(Position.TE)).Select(p => p.PlayerId);
             var players = (await WeeklyDataTE(scraperService.ParseFantasyProsTEData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath)), season, week))
                             .Where(p => !ignoreList.Contains(p.PlayerId) && tes.Contains(p.PlayerId));
