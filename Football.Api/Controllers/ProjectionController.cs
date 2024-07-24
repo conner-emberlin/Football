@@ -43,7 +43,7 @@ namespace Football.Api.Controllers
             if (positionEnum == Position.FLEX) return Ok(model);
             else
             {
-                var activeSeason = await playersService.GetCurrentWeek(_season.CurrentSeason) <= _season.Weeks;
+                var activeSeason = await playersService.GetCurrentWeek(_season.CurrentSeason) <= await playersService.GetCurrentSeasonWeeks();
                 if (activeSeason) return Ok(model.OrderByDescending(m => m.ProjectedPoints).ToList());
                 else
                 {
@@ -100,7 +100,7 @@ namespace Football.Api.Controllers
 
             List<WeekProjectionModel> models = [];
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            if (currentWeek > _season.Weeks)
+            if (currentWeek > await playersService.GetCurrentSeasonWeeks())
                 return Ok(models);
 
             if (positionEnum == Position.FLEX)

@@ -17,7 +17,7 @@ namespace Football.Fantasy.Services
         {
             if (week == 1)
             {
-                var weekOneRankings = await GetPositionalMatchupRankingsFromSQL(position, _season.CurrentSeason - 1, _season.Weeks + 1);
+                var weekOneRankings = await GetPositionalMatchupRankingsFromSQL(position, _season.CurrentSeason - 1, await playersService.GetWeeksBySeason(_season.CurrentSeason - 1) + 1);
                 var seasonGames = await playersService.GetGamesBySeason(_season.CurrentSeason - 1);
 
                 foreach (var w in weekOneRankings)
@@ -36,7 +36,7 @@ namespace Football.Fantasy.Services
         {
             var team = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            if (team != null && currentWeek < _season.Weeks)
+            if (team != null && currentWeek < await playersService.GetCurrentSeasonWeeks())
             {           
                 var opponentId = (await playersService.GetTeamGames(team.TeamId)).First(g => g.Week == currentWeek).OpposingTeamId;
                 if (opponentId > 0)
