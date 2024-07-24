@@ -81,7 +81,8 @@ namespace Football.Data.Services
         public async Task<int> UploadScheduleDetails(int season)
         {
             List<ScheduleDetails> schedule = [];
-            for (int i = 1; i <= _season.Games + 1; i++)
+            var seasonGames = await playerService.GetGamesBySeason(season);
+            for (int i = 1; i <= seasonGames + 1; i++)
                 schedule.AddRange(await ScheduleDetails(await scraperService.ScrapeGameScores(i, false), season));
             return await uploadSeasonDataRepository.UploadScheduleDetails(schedule); ;
         }

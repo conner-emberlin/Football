@@ -18,12 +18,14 @@ namespace Football.Fantasy.Services
             if (week == 1)
             {
                 var weekOneRankings = await GetPositionalMatchupRankingsFromSQL(position, _season.CurrentSeason - 1, _season.Weeks + 1);
+                var seasonGames = await playersService.GetGamesBySeason(_season.CurrentSeason - 1);
+
                 foreach (var w in weekOneRankings)
                 {
                     w.Season = _season.CurrentSeason;
                     w.Week = week;
                     w.GamesPlayed = 0;
-                    w.AvgPointsAllowed = w.PointsAllowed/_season.Games;
+                    w.AvgPointsAllowed = w.PointsAllowed / seasonGames;
                 }
                 return await matchupAnalysisRepository.PostMatchupRankings(weekOneRankings);
             }

@@ -109,9 +109,9 @@ namespace Football.Tests
             _mockPlayersService.Setup(ps => ps.GetPlayerSuspensions(_season.CurrentSeason)).ReturnsAsync([]);
             InjuryConcerns injury = new() { PlayerId = _playerId, Season = _season.CurrentSeason, Games = 5 };
             _mockPlayersService.Setup(ps => ps.GetPlayerInjuries(_season.CurrentSeason)).ReturnsAsync([injury]);
-            var expectedPoints = seasonProjection.ProjectedPoints - (double)(seasonProjection.ProjectedPoints / _season.Games * 5);
+            var expectedPoints = seasonProjection.ProjectedPoints - (double)(seasonProjection.ProjectedPoints / 17 * 5);
 
-            var actual = await _sut.AdjustmentEngine(projections);
+            var actual = await _sut.AdjustmentEngine(projections, new Tunings { }, 17);
             var observed = actual.FirstOrDefault();
 
             Assert.NotNull(observed);
@@ -126,7 +126,7 @@ namespace Football.Tests
             Suspensions suspension = new() { Season = _season.CurrentSeason, PlayerId = _playerId, Length = 5 };
             _mockPlayersService.Setup(ps => ps.GetPlayerSuspensions(_season.CurrentSeason)).ReturnsAsync([suspension]);
             _mockPlayersService.Setup(ps => ps.GetPlayerInjuries(_season.CurrentSeason)).ReturnsAsync([]);
-            var expectedPoints = seasonProjection.ProjectedPoints - (double)(seasonProjection.ProjectedPoints / _season.Games * 5);
+            var expectedPoints = seasonProjection.ProjectedPoints - (double)(seasonProjection.ProjectedPoints / 17 * 5);
 
             var actual = await _sut.AdjustmentEngine(projections);
             var observed = actual.FirstOrDefault();

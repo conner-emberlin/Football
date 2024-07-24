@@ -33,7 +33,7 @@ namespace Football.Tests
         public ProjectionAnalysisServiceShould()
         {
             _mock = new AutoMocker();
-            _season = new Season() { CurrentSeason = 2023, Games = 17, Weeks = 18 };
+            _season = new Season() { CurrentSeason = 2023};
             _starters = new Starters() { QBStarters = 24, RBStarters = 24, WRStarters = 24, TEStarters = 12 };
 
             _mockSeasonProjectionService = _mock.GetMock<IProjectionService<SeasonProjection>>();

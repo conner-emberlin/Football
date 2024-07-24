@@ -37,7 +37,7 @@ namespace Football.Tests
             _mockSeason = _mock.GetMock<IOptionsMonitor<Season>>();
 
             _teamMap = new() { PlayerId = _playerId, Team = _team, TeamDescription = "Description", TeamId = _teamId };
-            _season = new Season() { CurrentSeason = 2023, Games = 17, Weeks = 18 };
+            _season = new Season() { CurrentSeason = 2023 };
             _mockSeason.Setup(s => s.CurrentValue).Returns(_season);
 
             _mockPlayersService.Setup(ps => ps.GetCurrentWeek(_season.CurrentSeason)).ReturnsAsync(1);

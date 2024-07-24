@@ -7,7 +7,6 @@ using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using Microsoft.Extensions.Options;
-using Football.Players.Services;
 using Football.Players.Models;
 
 namespace Football.Projections.Services
@@ -201,6 +200,7 @@ namespace Football.Projections.Services
             var count = projectionErrors.Count;
             if (count > 0)
             {
+                var seasonGames = season > 0 ? await playersService.GetGamesBySeason(season) : await playersService.GetCurrentSeasonGames();
                 var totalError = projectionErrors.Sum(p => Math.Abs(p.TotalFantasy - p.SeasonFantasyProjection));
                 var sumOfSquares = projectionErrors.Sum(p => Math.Pow(p.TotalFantasy - p.SeasonFantasyProjection, 2));
                 var observedPoints = projectionErrors.Select(p => p.TotalFantasy);
@@ -212,7 +212,7 @@ namespace Football.Projections.Services
                     MSE = count > 0 ? Math.Round(sumOfSquares / count, 3) : 0,
                     RSquared = totalSumOfSquares > 0 ? 1 - (sumOfSquares / totalSumOfSquares) : 0,
                     AvgError = count > 0 ? Math.Round(totalError / count) : 0,
-                    AvgErrorPerGame = count > 0 ? Math.Round(totalError / count / _season.Games, 2) : 0,
+                    AvgErrorPerGame = count > 0 ? Math.Round(totalError / count / seasonGames, 2) : 0,
                     ProjectionCount = count
                 };
             }

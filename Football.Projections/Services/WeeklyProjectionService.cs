@@ -43,16 +43,18 @@ namespace Football.Projections.Services
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             var tunings = await settingsService.GetWeeklyTunings(_season.CurrentSeason, currentWeek);
-            if (currentWeek == 1) return await GetWeekOneProjections(position, tunings);
+            var seasonGames = await playersService.GetCurrentSeasonGames();
+
+            if (currentWeek == 1) return await GetWeekOneProjections(position, tunings, seasonGames);
 
             var projections = position switch
             {
-                Position.QB => await CalculateProjections(await QBProjectionModel(), position, currentWeek, tunings),
-                Position.RB => await CalculateProjections(await RBProjectionModel(), position, currentWeek, tunings),
-                Position.WR => await CalculateProjections(await WRProjectionModel(), position, currentWeek, tunings),
-                Position.TE => await CalculateProjections(await TEProjectionModel(), position, currentWeek, tunings),
-                Position.DST => await CalculateProjections(await DSTProjectionModel(), position, currentWeek, tunings),
-                Position.K => await CalculateProjections(await KProjectionModel(), position, currentWeek, tunings),
+                Position.QB => await CalculateProjections(await QBProjectionModel(), position, currentWeek, tunings, seasonGames),
+                Position.RB => await CalculateProjections(await RBProjectionModel(), position, currentWeek, tunings, seasonGames),
+                Position.WR => await CalculateProjections(await WRProjectionModel(), position, currentWeek, tunings, seasonGames),
+                Position.TE => await CalculateProjections(await TEProjectionModel(), position, currentWeek, tunings, seasonGames),
+                Position.DST => await CalculateProjections(await DSTProjectionModel(), position, currentWeek, tunings, seasonGames),
+                Position.K => await CalculateProjections(await KProjectionModel(), position, currentWeek, tunings, seasonGames),
                 _ => throw new NotImplementedException()
             };
 
@@ -80,7 +82,7 @@ namespace Football.Projections.Services
             return coefficients;
         }
 
-        private async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, Position position, int currentWeek, WeeklyTunings tunings)
+        private async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, Position position, int currentWeek, WeeklyTunings tunings, int seasonGames)
         {
             List<WeekProjection> projections = [];
             var coefficients = await CalculateCoefficients(model, position);
@@ -95,7 +97,7 @@ namespace Football.Projections.Services
                 if (projectedPoints > 0)
                 {
                     var seasonProjection = seasonProjections.TryGetValue(player.PlayerId, out var proj) ? proj : 0;
-                    var projection = seasonProjection > 0 ? WeightedWeeklyProjection(seasonProjection / _season.Games, projectedPoints, currentWeek - 1, tunings) : projectedPoints;
+                    var projection = seasonProjection > 0 ? WeightedWeeklyProjection(seasonProjection / seasonGames, projectedPoints, currentWeek - 1, tunings) : projectedPoints;
                     var avgError = await GetAverageProjectionError(player.PlayerId);
 
                     projections.Add(new WeekProjection
@@ -180,7 +182,7 @@ namespace Football.Projections.Services
             return weeklyProjection;
         } 
 
-        private async Task<List<WeekProjection>> GetWeekOneProjections(Position position, WeeklyTunings tunings)
+        private async Task<List<WeekProjection>> GetWeekOneProjections(Position position, WeeklyTunings tunings, int seasonGames)
         {
             List<WeekProjection> weekOneProjections = [];
             if (position == Position.K || position == Position.DST) return weekOneProjections;
@@ -198,7 +200,7 @@ namespace Football.Projections.Services
                         Position = position.ToString(),
                         Season = _season.CurrentSeason,
                         Week = 1,
-                        ProjectedPoints = seasonProjection / _season.Games
+                        ProjectedPoints = seasonProjection / seasonGames
                     });
                 }
             }

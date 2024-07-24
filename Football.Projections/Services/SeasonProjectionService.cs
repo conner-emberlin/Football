@@ -54,7 +54,7 @@ namespace Football.Projections.Services
                 Position.TE => await CalculateProjections(await TEProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings, seasonGames),
                 _ => throw new NotImplementedException()
             };
-            var adjustedProjections = await adjustmentService.AdjustmentEngine((await RookieSeasonProjections(position)).Union(projections), tunings);
+            var adjustedProjections = await adjustmentService.AdjustmentEngine((await RookieSeasonProjections(position, seasonGames)).Union(projections), tunings, seasonGames);
             var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
             cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), formattedProjections);
             return formattedProjections;
@@ -166,13 +166,13 @@ namespace Football.Projections.Services
             }
         }
 
-        private async Task<List<SeasonProjection>> RookieSeasonProjections(Position position)
+        private async Task<List<SeasonProjection>> RookieSeasonProjections(Position position, int seasonGames)
         {
             List<SeasonProjection> rookieProjections = [];
             var historicalRookies = await playersService.GetHistoricalRookies(_season.CurrentSeason, position.ToString());
             if (historicalRookies.Count > 0)
             {
-                var coeff = await HistoricalRookieRegression(historicalRookies);
+                var coeff = await HistoricalRookieRegression(historicalRookies, seasonGames);
                 var currentRookies = await playersService.GetCurrentRookies(_season.CurrentSeason, position.ToString());
 
                 foreach (var cr in currentRookies)
@@ -192,13 +192,13 @@ namespace Football.Projections.Services
             return rookieProjections;
         }
 
-        private async Task<Vector<double>> HistoricalRookieRegression(List<Rookie> historicalRookies)
+        private async Task<Vector<double>> HistoricalRookieRegression(List<Rookie> historicalRookies, int seasonGames)
         {
             List<SeasonFantasy> rookieSeasons = [];
             foreach (var rookie in historicalRookies)
             {
                 var rookieFantasy = (await fantasyService.GetSeasonFantasy(rookie.PlayerId)).First(rf => rf.Season == rookie.RookieSeason);
-                rookieFantasy.FantasyPoints = (rookieFantasy.FantasyPoints / rookieFantasy.Games) * _season.Games;
+                rookieFantasy.FantasyPoints = (rookieFantasy.FantasyPoints / rookieFantasy.Games) * seasonGames;
                 rookieSeasons.Add(rookieFantasy);
             }
             return MultipleRegression.NormalEquations(matrixCalculator.RegressorMatrix(historicalRookies), matrixCalculator.DependentVector(rookieSeasons, Model.FantasyPoints));
