@@ -379,7 +379,7 @@ namespace Football.Players.Repository
         public async Task<SeasonInfo> GetSeasonInfo(int season)
         {
             var query = $@"SELECT * FROM SeasonInfo 
-                            WHERE Season <= season 
+                            WHERE Season <= @season 
                             ORDER BY Season DESC";
             return (await dbConnection.QueryAsync<SeasonInfo>(query, new { season })).First();
         }
