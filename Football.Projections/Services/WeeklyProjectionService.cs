@@ -39,12 +39,6 @@ namespace Football.Projections.Services
             projections = projectionRepository.GetWeeklyProjectionsFromSQL(position, week);
             return projections.Any();
         }
-        public bool GetProjectionsFromCache(Position position, out IEnumerable<WeekProjection> cachedValues)
-        {
-            if (cache.TryGetValue(position.ToString() + Cache.WeeklyProjections.ToString(), out cachedValues!))
-                return cachedValues.Any();
-            return false;
-        }
         public async Task<IEnumerable<WeekProjection>> GetProjections(Position position)
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);

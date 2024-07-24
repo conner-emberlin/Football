@@ -12,7 +12,7 @@ namespace Football.Projections.Services
         private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
         private readonly Season _season = season.CurrentValue;
 
-        public SeasonDataQB CalculateStatProjection(List<SeasonDataQB> seasons, double gamesPlayedInjured, Tunings tunings)
+        public SeasonDataQB CalculateStatProjection(List<SeasonDataQB> seasons, double gamesPlayedInjured, Tunings tunings, int seasonGames)
         {
             var secondYearLeap = true;
 
@@ -46,18 +46,18 @@ namespace Football.Projections.Services
             {
                 if (s.Season == _season.CurrentSeason - 1) s.Games -= gamesPlayedInjured;
 
-                if (s.Games < _season.Games)
+                if (s.Games < seasonGames)
                 {
-                    s.Completions += (s.Completions / s.Games) * (_season.Games - s.Games);
-                    s.Attempts += (s.Attempts / s.Games) * (_season.Games - s.Games);
-                    s.Yards += (s.Yards / s.Games) * (_season.Games - s.Games);
-                    s.TD += (s.TD / s.Games) * (_season.Games - s.Games);
-                    s.Int += (s.Int / s.Games) * (_season.Games - s.Games);
-                    s.Sacks += (s.Sacks / s.Games) * (_season.Games - s.Games);
-                    s.RushingAttempts += (s.RushingAttempts / s.Games) * (_season.Games - s.Games);
-                    s.RushingYards += (s.RushingYards / s.Games) * (_season.Games - s.Games);
-                    s.RushingTD += (s.RushingTD / s.Games) * (_season.Games - s.Games);
-                    s.Fumbles += (s.Fumbles / s.Games) * (_season.Games - s.Games);
+                    s.Completions += (s.Completions / s.Games) * (seasonGames - s.Games);
+                    s.Attempts += (s.Attempts / s.Games) * (seasonGames - s.Games);
+                    s.Yards += (s.Yards / s.Games) * (seasonGames - s.Games);
+                    s.TD += (s.TD / s.Games) * (seasonGames - s.Games);
+                    s.Int += (s.Int / s.Games) * (seasonGames - s.Games);
+                    s.Sacks += (s.Sacks / s.Games) * (seasonGames - s.Games);
+                    s.RushingAttempts += (s.RushingAttempts / s.Games) * (seasonGames - s.Games);
+                    s.RushingYards += (s.RushingYards / s.Games) * (seasonGames - s.Games);
+                    s.RushingTD += (s.RushingTD / s.Games) * (seasonGames - s.Games);
+                    s.Fumbles += (s.Fumbles / s.Games) * (seasonGames - s.Games);
                 }
 
                 avgComp += s.Season == recentSeason ? recentWeight * s.Completions : previousWeight * s.Completions;
@@ -76,7 +76,7 @@ namespace Football.Projections.Services
                 PlayerId = seasons.First().PlayerId,
                 Name = seasons.First().Name,
                 Season = _season.CurrentSeason,
-                Games = _season.Games,
+                Games = seasonGames,
                 Completions = avgComp,
                 Attempts = avgAtt,
                 Yards = avgYd,
@@ -90,7 +90,7 @@ namespace Football.Projections.Services
             };
         }
 
-        public SeasonDataRB CalculateStatProjection(List<SeasonDataRB> seasons, double gamesPlayedInjured, Tunings tunings)
+        public SeasonDataRB CalculateStatProjection(List<SeasonDataRB> seasons, double gamesPlayedInjured, Tunings tunings, int seasonGames)
         {
             var secondYearLeap = true;
 
@@ -123,16 +123,16 @@ namespace Football.Projections.Services
             {
                 if (s.Season == _season.CurrentSeason - 1) s.Games -= gamesPlayedInjured;
 
-                if (s.Games < _season.Games)
+                if (s.Games < seasonGames)
                 {
-                    s.RushingAtt += (s.RushingAtt / s.Games) * (_season.Games - s.Games);
-                    s.RushingYds += (s.RushingYds / s.Games) * (_season.Games - s.Games);
-                    s.RushingTD += (s.RushingTD / s.Games) * (_season.Games - s.Games);
-                    s.Receptions += (s.Receptions / s.Games) * (_season.Games - s.Games);
-                    s.Targets += (s.Targets / s.Games) * (_season.Games - s.Games);
-                    s.Yards += (s.Yards / s.Games) * (_season.Games - s.Games);
-                    s.ReceivingTD += (s.ReceivingTD / s.Games) * (_season.Games - s.Games);
-                    s.Fumbles += (s.Fumbles / s.Games) * (_season.Games - s.Games);
+                    s.RushingAtt += (s.RushingAtt / s.Games) * (seasonGames - s.Games);
+                    s.RushingYds += (s.RushingYds / s.Games) * (seasonGames - s.Games);
+                    s.RushingTD += (s.RushingTD / s.Games) * (seasonGames - s.Games);
+                    s.Receptions += (s.Receptions / s.Games) * (seasonGames - s.Games);
+                    s.Targets += (s.Targets / s.Games) * (seasonGames - s.Games);
+                    s.Yards += (s.Yards / s.Games) * (seasonGames - s.Games);
+                    s.ReceivingTD += (s.ReceivingTD / s.Games) * (seasonGames - s.Games);
+                    s.Fumbles += (s.Fumbles / s.Games) * (seasonGames - s.Games);
                 }
                 avgRAtt += s.Season == recentSeason ? recentWeight * s.RushingAtt : previousWeight * s.RushingAtt;
                 avgRYd += s.Season == recentSeason ? recentWeight * s.RushingYds : previousWeight * s.RushingYds;
@@ -148,7 +148,7 @@ namespace Football.Projections.Services
                 PlayerId = seasons.First().PlayerId,
                 Name = seasons.First().Name,
                 Season = _season.CurrentSeason,
-                Games = _season.Games,
+                Games = seasonGames,
                 RushingAtt = avgRAtt,
                 RushingYds = avgRYd,
                 RushingTD = avgRTD,
@@ -159,7 +159,7 @@ namespace Football.Projections.Services
                 Fumbles = avgFum
             };
         }
-        public SeasonDataWR CalculateStatProjection(List<SeasonDataWR> seasons, double gamesPlayedInjured, Tunings tunings)
+        public SeasonDataWR CalculateStatProjection(List<SeasonDataWR> seasons, double gamesPlayedInjured, Tunings tunings, int seasonGames)
         {
             if (seasons.Count == 0) return new SeasonDataWR();
 
@@ -183,16 +183,16 @@ namespace Football.Projections.Services
             {
                 if (s.Season == _season.CurrentSeason - 1) s.Games -= gamesPlayedInjured;
 
-                if (s.Games < _season.Games)
+                if (s.Games < seasonGames)
                 {
-                    s.Receptions += (s.Receptions / s.Games) * (_season.Games - s.Games);
-                    s.Targets += (s.Targets / s.Games) * (_season.Games - s.Games);
-                    s.Yards += (s.Yards / s.Games) * (_season.Games - s.Games);
-                    s.TD += (s.TD / s.Games) * (_season.Games - s.Games);
-                    s.RushingAtt += (s.RushingAtt / s.Games) * (_season.Games - s.Games);
-                    s.RushingYds += (s.RushingYds / s.Games) * (_season.Games - s.Games);
-                    s.RushingTD += (s.RushingTD / s.Games) * (_season.Games - s.Games);
-                    s.Fumbles += (s.Fumbles / s.Games) * (_season.Games - s.Games);
+                    s.Receptions += (s.Receptions / s.Games) * (seasonGames - s.Games);
+                    s.Targets += (s.Targets / s.Games) * (seasonGames - s.Games);
+                    s.Yards += (s.Yards / s.Games) * (seasonGames - s.Games);
+                    s.TD += (s.TD / s.Games) * (seasonGames - s.Games);
+                    s.RushingAtt += (s.RushingAtt / s.Games) * (seasonGames - s.Games);
+                    s.RushingYds += (s.RushingYds / s.Games) * (seasonGames - s.Games);
+                    s.RushingTD += (s.RushingTD / s.Games) * (seasonGames - s.Games);
+                    s.Fumbles += (s.Fumbles / s.Games) * (seasonGames - s.Games);
                 }
                 avgRAtt += s.Season == recentSeason ? recentWeight * s.RushingAtt : previousWeight * s.RushingAtt;
                 avgRYd += s.Season == recentSeason ? recentWeight * s.RushingYds : previousWeight * s.RushingYds;
@@ -208,7 +208,7 @@ namespace Football.Projections.Services
                 PlayerId = seasons.First().PlayerId,
                 Name = seasons.First().Name,
                 Season = _season.CurrentSeason,
-                Games = _season.Games,
+                Games = seasonGames,
                 Receptions = avgRec,
                 Targets = avgTgt,
                 Yards = avgYds,
@@ -220,7 +220,7 @@ namespace Football.Projections.Services
                 Fumbles = avgFum
             };
         }
-        public SeasonDataTE CalculateStatProjection(List<SeasonDataTE> seasons, double gamesPlayedInjured, Tunings tunings)
+        public SeasonDataTE CalculateStatProjection(List<SeasonDataTE> seasons, double gamesPlayedInjured, Tunings tunings, int seasonGames)
         {
             var secondYearLeap = true;
 
@@ -252,16 +252,16 @@ namespace Football.Projections.Services
             {
                 if (s.Season == _season.CurrentSeason - 1) s.Games -= gamesPlayedInjured;
 
-                if (s.Games < _season.Games)
+                if (s.Games < seasonGames)
                 {
-                    s.Receptions += (s.Receptions / s.Games) * (_season.Games - s.Games);
-                    s.Targets += (s.Targets / s.Games) * (_season.Games - s.Games);
-                    s.Yards += (s.Yards / s.Games) * (_season.Games - s.Games);
-                    s.TD += (s.TD / s.Games) * (_season.Games - s.Games);
-                    s.RushingAtt += (s.RushingAtt / s.Games) * (_season.Games - s.Games);
-                    s.RushingYds += (s.RushingYds / s.Games) * (_season.Games - s.Games);
-                    s.RushingTD += (s.RushingTD / s.Games) * (_season.Games - s.Games);
-                    s.Fumbles += (s.Fumbles / s.Games) * (_season.Games - s.Games);
+                    s.Receptions += (s.Receptions / s.Games) * (seasonGames - s.Games);
+                    s.Targets += (s.Targets / s.Games) * (seasonGames - s.Games);
+                    s.Yards += (s.Yards / s.Games) * (seasonGames - s.Games);
+                    s.TD += (s.TD / s.Games) * (seasonGames - s.Games);
+                    s.RushingAtt += (s.RushingAtt / s.Games) * (seasonGames - s.Games);
+                    s.RushingYds += (s.RushingYds / s.Games) * (seasonGames - s.Games);
+                    s.RushingTD += (s.RushingTD / s.Games) * (seasonGames - s.Games);
+                    s.Fumbles += (s.Fumbles / s.Games) * (seasonGames - s.Games);
                 }
                 avgRAtt += s.Season == recentSeason ? recentWeight * s.RushingAtt : previousWeight * s.RushingAtt;
                 avgRYd += s.Season == recentSeason ? recentWeight * s.RushingYds : previousWeight * s.RushingYds;
@@ -277,7 +277,7 @@ namespace Football.Projections.Services
                 PlayerId = seasons.First().PlayerId,
                 Name = seasons.First().Name,
                 Season = _season.CurrentSeason,
-                Games = _season.Games,
+                Games = seasonGames,
                 Receptions = avgRec,
                 Targets = avgTgt,
                 Yards = avgYds,
