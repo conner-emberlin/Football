@@ -209,7 +209,10 @@ namespace Football.Players.Services
             var playerMap = (await GetSleeperPlayerMap(sleeperPlayers)).Where(s => !existingMaps.Any(e => e.PlayerId == s.PlayerId)).ToList();
             return await playersRepository.UploadSleeperPlayerMap(playerMap);
         }
-        
+        public async Task<int> GetGamesBySeason(int season) => (await playersRepository.GetSeasonInfo(season)).Games;
+        public async Task<int> GetWeeksBySeason(int season) => (await playersRepository.GetSeasonInfo(season)).Weeks;
+        public async Task<int> GetCurrentSeasonGames() => await GetGamesBySeason(_season.CurrentSeason);
+        public async Task<int> GetCurrentSeasonWeeks() => await GetWeeksBySeason(_season.CurrentSeason);
 
         private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMap(List<SleeperPlayer> sleeperPlayers)
         {

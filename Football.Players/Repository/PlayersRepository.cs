@@ -375,5 +375,13 @@ namespace Football.Players.Repository
                             AND p.Active = 1";
             return await dbConnection.QueryAsync<TeamChange>(query, new { currentSeason, previousSeason });
         }
+
+        public async Task<SeasonInfo> GetSeasonInfo(int season)
+        {
+            var query = $@"SELECT * FROM SeasonInfo 
+                            WHERE Season <= season 
+                            ORDER BY Season DESC";
+            return (await dbConnection.QueryAsync<SeasonInfo>(query, new { season })).First();
+        }
     }
 }
