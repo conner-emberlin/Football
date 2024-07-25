@@ -7,9 +7,8 @@ using Serilog;
 
 namespace Football.Projections.Services
 {
-    public class StatProjectionCalculator(IOptionsMonitor<WeeklyTunings> weeklyTunings, IOptionsMonitor<Season> season, ILogger logger) : IStatProjectionCalculator
+    public class StatProjectionCalculator(IOptionsMonitor<Season> season, ILogger logger) : IStatProjectionCalculator
     {
-        private readonly WeeklyTunings _weeklyTunings = weeklyTunings.CurrentValue;
         private readonly Season _season = season.CurrentValue;
 
         public SeasonDataQB CalculateStatProjection(List<SeasonDataQB> seasons, double gamesPlayedInjured, Tunings tunings, int seasonGames)
@@ -290,15 +289,15 @@ namespace Football.Projections.Services
             };
         }
        
-        public WeeklyDataQB WeightedWeeklyAverage(List<WeeklyDataQB> weeks, int currentWeek)
+        public WeeklyDataQB WeightedWeeklyAverage(List<WeeklyDataQB> weeks, int currentWeek, WeeklyTunings weeklyTunings)
         {
             if (weeks.Count == 0) return new WeeklyDataQB();
 
-            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
-            var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
+            var olderWeekWeight = (1 - weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataQB weightedAverage = new()
             {
                 PlayerId = weeks.First().PlayerId,
@@ -308,29 +307,29 @@ namespace Football.Projections.Services
 
             foreach (var w in weeks)
             {
-                weightedAverage.Completions += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Completions : olderWeekWeight * w.Completions;
-                weightedAverage.Attempts += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Attempts : olderWeekWeight * w.Attempts;
-                weightedAverage.Yards += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Yards : olderWeekWeight * w.Yards;
-                weightedAverage.TD += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.TD : olderWeekWeight * w.TD;
-                weightedAverage.Int += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Int : olderWeekWeight * w.Int;
-                weightedAverage.Sacks += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Sacks : olderWeekWeight * w.Sacks;
-                weightedAverage.RushingAttempts += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingAttempts : olderWeekWeight * w.RushingAttempts;
-                weightedAverage.RushingYards += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingYards : olderWeekWeight * w.RushingYards;
-                weightedAverage.RushingTD += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingTD : olderWeekWeight * w.RushingTD;
-                weightedAverage.Fumbles += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Fumbles : olderWeekWeight * w.Fumbles;
+                weightedAverage.Completions += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Completions : olderWeekWeight * w.Completions;
+                weightedAverage.Attempts += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Attempts : olderWeekWeight * w.Attempts;
+                weightedAverage.Yards += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Yards : olderWeekWeight * w.Yards;
+                weightedAverage.TD += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.TD : olderWeekWeight * w.TD;
+                weightedAverage.Int += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Int : olderWeekWeight * w.Int;
+                weightedAverage.Sacks += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Sacks : olderWeekWeight * w.Sacks;
+                weightedAverage.RushingAttempts += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingAttempts : olderWeekWeight * w.RushingAttempts;
+                weightedAverage.RushingYards += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingYards : olderWeekWeight * w.RushingYards;
+                weightedAverage.RushingTD += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingTD : olderWeekWeight * w.RushingTD;
+                weightedAverage.Fumbles += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Fumbles : olderWeekWeight * w.Fumbles;
             }
             return weightedAverage;
         }
 
-        public WeeklyDataRB WeightedWeeklyAverage(List<WeeklyDataRB> weeks, int currentWeek)
+        public WeeklyDataRB WeightedWeeklyAverage(List<WeeklyDataRB> weeks, int currentWeek, WeeklyTunings weeklyTunings)
         {
             if (weeks.Count == 0) return new WeeklyDataRB();
 
-            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
-            var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
+            var olderWeekWeight = (1 - weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataRB weightedAverage = new()
             {
                 PlayerId = weeks.First().PlayerId,
@@ -340,27 +339,27 @@ namespace Football.Projections.Services
 
             foreach (var w in weeks)
             {
-                weightedAverage.RushingAtt += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingAtt : olderWeekWeight * w.RushingAtt;
-                weightedAverage.RushingYds += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingYds : olderWeekWeight * w.RushingYds;
-                weightedAverage.RushingTD += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingTD : olderWeekWeight * w.RushingTD;
-                weightedAverage.Receptions += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Receptions : olderWeekWeight * w.Receptions;
-                weightedAverage.Targets += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Targets : olderWeekWeight * w.Targets;
-                weightedAverage.Yards += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Yards : olderWeekWeight * w.Yards;
-                weightedAverage.ReceivingTD += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.ReceivingTD : olderWeekWeight * w.ReceivingTD;
-                weightedAverage.Fumbles += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Fumbles : olderWeekWeight * w.Fumbles;
+                weightedAverage.RushingAtt += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingAtt : olderWeekWeight * w.RushingAtt;
+                weightedAverage.RushingYds += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingYds : olderWeekWeight * w.RushingYds;
+                weightedAverage.RushingTD += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingTD : olderWeekWeight * w.RushingTD;
+                weightedAverage.Receptions += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Receptions : olderWeekWeight * w.Receptions;
+                weightedAverage.Targets += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Targets : olderWeekWeight * w.Targets;
+                weightedAverage.Yards += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Yards : olderWeekWeight * w.Yards;
+                weightedAverage.ReceivingTD += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.ReceivingTD : olderWeekWeight * w.ReceivingTD;
+                weightedAverage.Fumbles += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Fumbles : olderWeekWeight * w.Fumbles;
             }
             return weightedAverage;
         }
 
-        public WeeklyDataWR WeightedWeeklyAverage(List<WeeklyDataWR> weeks, int currentWeek)
+        public WeeklyDataWR WeightedWeeklyAverage(List<WeeklyDataWR> weeks, int currentWeek, WeeklyTunings weeklyTunings)
         {
             if (weeks.Count == 0) return new WeeklyDataWR();
 
-            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
-            var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
+            var olderWeekWeight = (1 - weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataWR weightedAverage = new()
             {
                 PlayerId = weeks.First().PlayerId,
@@ -370,27 +369,27 @@ namespace Football.Projections.Services
 
             foreach (var w in weeks)
             {
-                weightedAverage.Receptions += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Receptions : olderWeekWeight * w.Receptions;
-                weightedAverage.Targets += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Targets : olderWeekWeight * w.Targets;
-                weightedAverage.Yards += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Yards : olderWeekWeight * w.Yards;
-                weightedAverage.TD += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.TD : olderWeekWeight * w.TD;
-                weightedAverage.RushingAtt += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingAtt : olderWeekWeight * w.RushingAtt;
-                weightedAverage.RushingYds += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingYds : olderWeekWeight * w.RushingYds;
-                weightedAverage.RushingTD += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingTD : olderWeekWeight * w.RushingTD;
-                weightedAverage.Fumbles += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Fumbles : olderWeekWeight * w.Fumbles;
+                weightedAverage.Receptions += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Receptions : olderWeekWeight * w.Receptions;
+                weightedAverage.Targets += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Targets : olderWeekWeight * w.Targets;
+                weightedAverage.Yards += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Yards : olderWeekWeight * w.Yards;
+                weightedAverage.TD += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.TD : olderWeekWeight * w.TD;
+                weightedAverage.RushingAtt += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingAtt : olderWeekWeight * w.RushingAtt;
+                weightedAverage.RushingYds += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingYds : olderWeekWeight * w.RushingYds;
+                weightedAverage.RushingTD += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingTD : olderWeekWeight * w.RushingTD;
+                weightedAverage.Fumbles += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Fumbles : olderWeekWeight * w.Fumbles;
             }
             return weightedAverage;
         }
 
-        public WeeklyDataTE WeightedWeeklyAverage(List<WeeklyDataTE> weeks, int currentWeek)
+        public WeeklyDataTE WeightedWeeklyAverage(List<WeeklyDataTE> weeks, int currentWeek, WeeklyTunings weeklyTunings)
         {
             if (weeks.Count == 0) return new WeeklyDataTE();
 
-            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
-            var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
+            var olderWeekWeight = (1 - weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataTE weightedAverage = new()
             {
                 PlayerId = weeks.First().PlayerId,
@@ -400,27 +399,27 @@ namespace Football.Projections.Services
 
             foreach (var w in weeks)
             {
-                weightedAverage.Receptions += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Receptions : olderWeekWeight * w.Receptions;
-                weightedAverage.Targets += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Targets : olderWeekWeight * w.Targets;
-                weightedAverage.Yards += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Yards : olderWeekWeight * w.Yards;
-                weightedAverage.TD += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.TD : olderWeekWeight * w.TD;
-                weightedAverage.RushingAtt += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingAtt : olderWeekWeight * w.RushingAtt;
-                weightedAverage.RushingYds += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingYds : olderWeekWeight * w.RushingYds;
-                weightedAverage.RushingTD += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.RushingTD : olderWeekWeight * w.RushingTD;
-                weightedAverage.Fumbles += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Fumbles : olderWeekWeight * w.Fumbles;
+                weightedAverage.Receptions += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Receptions : olderWeekWeight * w.Receptions;
+                weightedAverage.Targets += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Targets : olderWeekWeight * w.Targets;
+                weightedAverage.Yards += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Yards : olderWeekWeight * w.Yards;
+                weightedAverage.TD += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.TD : olderWeekWeight * w.TD;
+                weightedAverage.RushingAtt += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingAtt : olderWeekWeight * w.RushingAtt;
+                weightedAverage.RushingYds += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingYds : olderWeekWeight * w.RushingYds;
+                weightedAverage.RushingTD += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.RushingTD : olderWeekWeight * w.RushingTD;
+                weightedAverage.Fumbles += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Fumbles : olderWeekWeight * w.Fumbles;
             }
             return weightedAverage;
         }
 
-        public WeeklyDataDST WeightedWeeklyAverage(List<WeeklyDataDST> weeks, int currentWeek)
+        public WeeklyDataDST WeightedWeeklyAverage(List<WeeklyDataDST> weeks, int currentWeek, WeeklyTunings weeklyTunings)
         {
             if (weeks.Count == 0) return new WeeklyDataDST();
 
-            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
-            var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
+            var olderWeekWeight = (1 - weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataDST weightedAverage = new()
             {
                 PlayerId = weeks.First().PlayerId,
@@ -430,26 +429,26 @@ namespace Football.Projections.Services
 
             foreach (var w in weeks)
             {
-                weightedAverage.Sacks += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Sacks : olderWeekWeight * w.Sacks;
-                weightedAverage.Ints += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Ints : olderWeekWeight * w.Ints;
-                weightedAverage.FumblesRecovered += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.FumblesRecovered : olderWeekWeight * w.FumblesRecovered;
-                weightedAverage.ForcedFumbles += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.ForcedFumbles : olderWeekWeight * w.ForcedFumbles;
-                weightedAverage.DefensiveTD += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.DefensiveTD : olderWeekWeight * w.DefensiveTD;
-                weightedAverage.Safties += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Safties : olderWeekWeight * w.Safties;
-                weightedAverage.SpecialTD += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.SpecialTD : olderWeekWeight * w.SpecialTD;
+                weightedAverage.Sacks += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Sacks : olderWeekWeight * w.Sacks;
+                weightedAverage.Ints += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Ints : olderWeekWeight * w.Ints;
+                weightedAverage.FumblesRecovered += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.FumblesRecovered : olderWeekWeight * w.FumblesRecovered;
+                weightedAverage.ForcedFumbles += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.ForcedFumbles : olderWeekWeight * w.ForcedFumbles;
+                weightedAverage.DefensiveTD += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.DefensiveTD : olderWeekWeight * w.DefensiveTD;
+                weightedAverage.Safties += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Safties : olderWeekWeight * w.Safties;
+                weightedAverage.SpecialTD += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.SpecialTD : olderWeekWeight * w.SpecialTD;
             }
             return weightedAverage;
         }
 
-        public WeeklyDataK WeightedWeeklyAverage(List<WeeklyDataK> weeks, int currentWeek)
+        public WeeklyDataK WeightedWeeklyAverage(List<WeeklyDataK> weeks, int currentWeek, WeeklyTunings weeklyTunings)
         {
             if (weeks.Count == 0) return new WeeklyDataK();
 
-            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
-            var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
+            var olderWeekWeight = (1 - weeklyTunings.RecentWeekWeight) / olderWeekCount;
             WeeklyDataK weightedAverage = new()
             {
                 PlayerId = weeks.First().PlayerId,
@@ -459,28 +458,28 @@ namespace Football.Projections.Services
 
             foreach (var w in weeks)
             {
-                weightedAverage.FieldGoals += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.FieldGoals : olderWeekWeight * w.FieldGoals;
-                weightedAverage.FieldGoalAttempts += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.FieldGoalAttempts : olderWeekWeight * w.FieldGoalAttempts;
-                weightedAverage.OneNineteen += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.OneNineteen : olderWeekWeight * w.OneNineteen;
-                weightedAverage.TwentyTwentyNine += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.TwentyTwentyNine : olderWeekWeight * w.TwentyTwentyNine;
-                weightedAverage.ThirtyThirtyNine += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.ThirtyThirtyNine : olderWeekWeight * w.ThirtyThirtyNine;
-                weightedAverage.FourtyFourtyNine += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.FourtyFourtyNine : olderWeekWeight * w.FourtyFourtyNine;
-                weightedAverage.Fifty += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Fifty : olderWeekWeight * w.Fifty;
-                weightedAverage.ExtraPoints += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.ExtraPoints : olderWeekWeight * w.ExtraPoints;
-                weightedAverage.ExtraPointAttempts += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.ExtraPointAttempts : olderWeekWeight * w.ExtraPointAttempts;
+                weightedAverage.FieldGoals += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.FieldGoals : olderWeekWeight * w.FieldGoals;
+                weightedAverage.FieldGoalAttempts += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.FieldGoalAttempts : olderWeekWeight * w.FieldGoalAttempts;
+                weightedAverage.OneNineteen += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.OneNineteen : olderWeekWeight * w.OneNineteen;
+                weightedAverage.TwentyTwentyNine += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.TwentyTwentyNine : olderWeekWeight * w.TwentyTwentyNine;
+                weightedAverage.ThirtyThirtyNine += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.ThirtyThirtyNine : olderWeekWeight * w.ThirtyThirtyNine;
+                weightedAverage.FourtyFourtyNine += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.FourtyFourtyNine : olderWeekWeight * w.FourtyFourtyNine;
+                weightedAverage.Fifty += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Fifty : olderWeekWeight * w.Fifty;
+                weightedAverage.ExtraPoints += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.ExtraPoints : olderWeekWeight * w.ExtraPoints;
+                weightedAverage.ExtraPointAttempts += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.ExtraPointAttempts : olderWeekWeight * w.ExtraPointAttempts;
             }
             return weightedAverage;
         }
 
-        public SnapCount WeightedWeeklyAverage(List<SnapCount> weeks, int currentWeek)
+        public SnapCount WeightedWeeklyAverage(List<SnapCount> weeks, int currentWeek, WeeklyTunings weeklyTunings)
         {
             if (weeks.Count == 0) return new SnapCount();
 
-            if (weeks.Count < _weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
+            if (weeks.Count < weeklyTunings.MinWeekWeighted) return CalculateWeeklyAverage(weeks, currentWeek);
 
-            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(_weeklyTunings.RecentWeeks);
+            var recentWeeks = weeks.Select(w => w.Week).OrderByDescending(w => w).Take(weeklyTunings.RecentWeeks);
             var olderWeekCount = weeks.Count(w => !recentWeeks.Contains(w.Week));
-            var olderWeekWeight = (1 - _weeklyTunings.RecentWeekWeight) / olderWeekCount;
+            var olderWeekWeight = (1 - weeklyTunings.RecentWeekWeight) / olderWeekCount;
             SnapCount weightedAverage = new()
             {
                 PlayerId = weeks.First().PlayerId,
@@ -492,7 +491,7 @@ namespace Football.Projections.Services
 
             foreach (var w in weeks)
             {
-                weightedAverage.Snaps += recentWeeks.Contains(w.Week) ? _weeklyTunings.RecentWeekWeight * w.Snaps : olderWeekWeight * w.Snaps;
+                weightedAverage.Snaps += recentWeeks.Contains(w.Week) ? weeklyTunings.RecentWeekWeight * w.Snaps : olderWeekWeight * w.Snaps;
             }
             return weightedAverage;
         }

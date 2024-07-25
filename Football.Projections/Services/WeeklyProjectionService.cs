@@ -91,7 +91,7 @@ namespace Football.Projections.Services
 
             foreach (var player in players)
             {
-                var weightedVector = await GetWeightedAverageVector(player, currentWeek);
+                var weightedVector = await GetWeightedAverageVector(player, currentWeek, tunings);
                 var projectedPoints = weightedVector * coefficients;
 
                 if (projectedPoints > 0)
@@ -142,33 +142,33 @@ namespace Football.Projections.Services
         private async Task<List<TEModelWeek>> TEProjectionModel() => mapper.Map<List<TEModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataTE>(Position.TE));
         private async Task<List<KModelWeek>> KProjectionModel() => mapper.Map<List<KModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataK>(Position.K));
         private async Task<List<DSTModelWeek>> DSTProjectionModel() => mapper.Map<List<DSTModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataDST>(Position.TE));
-        private async Task<Vector<double>> GetWeightedAverageVector(Player player, int currentWeek)
+        private async Task<Vector<double>> GetWeightedAverageVector(Player player, int currentWeek, WeeklyTunings tunings)
         {
             _ = Enum.TryParse(player.Position, out Position position);
 
             switch (position)
             {
                 case Position.QB:
-                    var modelQB = mapper.Map<QBModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId), currentWeek));
-                    modelQB.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek)).Snaps;
+                    var modelQB = mapper.Map<QBModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, player.PlayerId), currentWeek, tunings));
+                    modelQB.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek, tunings)).Snaps;
                     return matrixCalculator.TransformModel(modelQB);
                 case Position.RB:
-                    var modelRB = mapper.Map<RBModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, player.PlayerId), currentWeek));
-                    modelRB.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek)).Snaps;
+                    var modelRB = mapper.Map<RBModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataRB>(Position.RB, player.PlayerId), currentWeek, tunings));
+                    modelRB.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek, tunings)).Snaps;
                     return matrixCalculator.TransformModel(modelRB);
                 case Position.WR:
-                    var modelWR = mapper.Map<WRModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, player.PlayerId), currentWeek));
-                    modelWR.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek)).Snaps;
+                    var modelWR = mapper.Map<WRModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataWR>(Position.WR, player.PlayerId), currentWeek, tunings));
+                    modelWR.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek, tunings)).Snaps;
                     return matrixCalculator.TransformModel(modelWR);
                 case Position.TE:
-                    var modelTE = mapper.Map<TEModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, player.PlayerId), currentWeek));
-                    modelTE.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek)).Snaps;
+                    var modelTE = mapper.Map<TEModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataTE>(Position.TE, player.PlayerId), currentWeek, tunings));
+                    modelTE.SnapsPerGame = (statCalculator.WeightedWeeklyAverage(await statisticsService.GetSnapCounts(player.PlayerId), currentWeek, tunings)).Snaps;
                     return matrixCalculator.TransformModel(modelTE);
                 case Position.K:
-                    var modelK = mapper.Map<KModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataK>(Position.K, player.PlayerId), currentWeek));
+                    var modelK = mapper.Map<KModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataK>(Position.K, player.PlayerId), currentWeek, tunings));
                     return matrixCalculator.TransformModel(modelK);
                 case Position.DST:
-                    var modelDST = mapper.Map<DSTModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataDST>(Position.DST, player.PlayerId), currentWeek));
+                    var modelDST = mapper.Map<DSTModelWeek>(statCalculator.WeightedWeeklyAverage(await statisticsService.GetWeeklyData<WeeklyDataDST>(Position.DST, player.PlayerId), currentWeek, tunings));
                     return matrixCalculator.TransformModel(modelDST);
                 default: return Vector<double>.Build.Dense(0);
             }
