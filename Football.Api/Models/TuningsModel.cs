@@ -32,5 +32,6 @@
         public double RB1MinPoints { get; set; }
         public double RBPromotionMinYardsPerCarry { get; set; }
         public double RBPromotionFactor { get; set; }
+        public int MinGamesForMissedAverage { get; set; }
     }
 }
