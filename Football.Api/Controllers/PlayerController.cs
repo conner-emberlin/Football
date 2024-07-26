@@ -191,5 +191,9 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await playersService.UploadSleeperPlayerMap());
 
+        [HttpGet("avgerage-games-missed/{playerId}")]
+        [ProducesResponseType(typeof(List<double>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAvgerageGamesMissed(int playerId) => Ok(await statisticsService.GetAverageGamesMissed(playerId));
+
     }
 }

@@ -112,6 +112,14 @@ namespace Football.Players.Repository
             var query = $@"SELECT COUNT(*) + 1 FROM [dbo].[{GetSeasonTable(position)}] WHERE [PlayerId] = @playerId";
             return (await dbConnection.QueryAsync<double>(query, new { playerId })).First();
         }
+
+        public async Task<IEnumerable<(int Season, double Games)>> GetGamesPerSeason(int playerId, Position position)
+        {
+            var query = $@"SELECT s.Season, s.Games FROM [dbo].[{GetSeasonTable(position)}] s
+                            WHERE s.PlayerId = @playerId
+                                AND s.Games > 6";
+            return await dbConnection.QueryAsync<(int, double)>(query, new { playerId });
+        }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(Position position) => string.Format("Season{0}Data", position.ToString());
         private static string GetSeasonQueryWhere(bool isPlayer) => isPlayer ? "[PlayerId] = @queryParam" : "[Season] = @queryParam";

@@ -17,6 +17,7 @@ namespace Football.Players.Interfaces
         public Task<List<T>> GetSeasonDataByTeamIdAndPosition<T>(int teamId, Position position, int season);
         public Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection);
         public Task<double> GetYearsExperience(int playerId, Position position);
+        public Task<IEnumerable<(int Season, double Games)>> GetGamesPerSeason(int playerId, Position position);
 
     }
 }
