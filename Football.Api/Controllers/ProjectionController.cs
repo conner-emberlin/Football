@@ -12,7 +12,7 @@ namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProjectionController(IPlayersService playersService,
+    public class ProjectionController(IPlayersService playersService, IStatisticsService statisticsService,
         IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season,
         IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, IMapper mapper) : ControllerBase
     {
@@ -40,6 +40,15 @@ namespace Football.Api.Controllers
 
             var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
             model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
+
+            var currentSeasonGames = await playersService.GetCurrentSeasonGames();
+            foreach (var m in model)
+            {              
+                var avgGamesMissed = await statisticsService.GetAverageGamesMissed(m.PlayerId);                
+                m.AvgerageGamesMissed = avgGamesMissed;
+                m.AdjustedProjectedPoints = m.ProjectedPoints - (m.ProjectedPoints/currentSeasonGames) * avgGamesMissed;
+            }
+
             if (positionEnum == Position.FLEX) return Ok(model);
             else
             {

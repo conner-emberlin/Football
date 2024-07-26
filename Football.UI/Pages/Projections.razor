@@ -53,10 +53,11 @@
                 <tr>
                     <th>Rank</th>
                     <th>Name</th>
-                    <th>Position</th>
                     <th>Team</th>
                     <th>Total Points</th>
                     <th>PPG</th>
+                    <th>Games</th>
+                    <th>AdjustedPoints</th>
                     @if (players.Any(p => p.SeasonProjectionError != null))
                     {
                         <th>ActualTotal</th>
@@ -80,10 +81,11 @@
             <tr>
             <td>@format.Rank(players, p)</td>
             <td><a class = "page-links" href="Players/@p.PlayerId"> @p.Name</a></td>
-            <td>@p.Position</td>
             <td><img src="@logoPhotoPath" width="30" height="30"></td>
             <td>@Math.Round((double)p.ProjectedPoints,2)</td>
             <td>@Math.Round((double)p.ProjectedPoints/17,2)</td>
+            <td>@Math.Round(17 - (double)p.AvgerageGamesMissed)</td>
+            <td>@Math.Round((double)p.AdjustedProjectedPoints, 2)</td>
              @if (sa != null)
              {
                 <td>@Math.Round(sa.TotalFantasy, 2)</td>
@@ -140,6 +142,7 @@
     public async Task HandleDelete(int playerId, int season)
     {
         loading = true;
+        shouldRender = true;
         recordDeleted = await requests.DeleteSeasonProjectionRequest(playerId, season);
         await HandleInput();
         loading = false;
@@ -149,6 +152,7 @@
     public async Task HandleUpload()
     {
         loading = true;
+        shouldRender = true;
         count = await requests.PostSeasonProjectionRequest(PositionEnum);
         loading= false;
         shouldRender = true;

@@ -62,6 +62,7 @@ namespace Football.Players.Services
 
         public async Task<double> GetAverageGamesMissed(int playerId)
         {
+            
             var player = await playersService.GetPlayer(playerId);
             _ = Enum.TryParse(player.Position, out Position position);
             var gamesPerSeason = await statisticsRepository.GetGamesPerSeason(playerId, position);

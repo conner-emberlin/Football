@@ -11,8 +11,7 @@ namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IDistanceService distanceService,
-        IOptionsMonitor<Season> season, IAdvancedStatisticsService advancedStatisticsService, IMapper mapper) : ControllerBase
+    public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season, IAdvancedStatisticsService advancedStatisticsService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -190,10 +189,6 @@ namespace Football.Api.Controllers
         [HttpPost("sleeper-map")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await playersService.UploadSleeperPlayerMap());
-
-        [HttpGet("avgerage-games-missed/{playerId}")]
-        [ProducesResponseType(typeof(List<double>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAvgerageGamesMissed(int playerId) => Ok(await statisticsService.GetAverageGamesMissed(playerId));
 
     }
 }

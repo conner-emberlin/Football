@@ -117,7 +117,7 @@ namespace Football.Players.Repository
         {
             var query = $@"SELECT s.Season, s.Games FROM [dbo].[{GetSeasonTable(position)}] s
                             WHERE s.PlayerId = @playerId
-                                AND s.Games > 6";
+                                AND s.Games > 9";
             return await dbConnection.QueryAsync<(int, double)>(query, new { playerId });
         }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
