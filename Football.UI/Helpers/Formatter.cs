@@ -36,6 +36,11 @@ namespace Football.UI.Helpers
                   : "color:green";
         }
 
+        public string AdpDiffColor(double diff)
+        {
+            return diff < 0 ? "color:red" : "color:green";
+        }
+
         public string GetDiffColor(double diff)
         {
             diff *= -1;

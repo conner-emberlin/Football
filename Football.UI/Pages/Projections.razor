@@ -18,10 +18,17 @@
 }
 </div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
+<tr>
+    <td>
 <button class="button-22" role="button" @onclick="HandleInput"> 
     Submit
+</button>
+    </td>
+    <td>&nbsp</td>
+    <button class="button-22" role="button" @onclick="HandleRefresh">
+        ADP
     </button>
-
+</tr>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 
 @if(loading)
@@ -47,6 +54,7 @@
         <text>Record deleted.</text>
     }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
+    @if (!loading){
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
@@ -74,6 +82,10 @@
                         <th>TotalError</th>
                         <th>PPGError</th>
                     }
+                    else
+                    {
+                        <th>ADP</th>
+                    }
                     @if (players.Any(p => p.CanDelete))
                     {
                         <th></th>                        
@@ -86,11 +98,13 @@
         {  
              var logoPhotoPath = p.Team != string.Empty ? "https://localhost:7176/Logos/" + p.Team + ".png" : "https://localhost:7176/Logos/nfl.png";
              var sa = p.SeasonProjectionError;
+             var showRank = !sort.IsSortedAscending;
+             var rank = @format.Rank(players, p);
 
             <tr>
-            @if(!sort.IsSortedAscending)
+            @if(showRank)
             {
-                <td>@format.Rank(players, p)</td>
+                <td>@rank</td>
             }
             <td><a class = "page-links" href="Players/@p.PlayerId"> @p.Name</a></td>
             <td><img src="@logoPhotoPath" width="30" height="30"></td>
@@ -103,7 +117,23 @@
                 <td>@Math.Round(sa.TotalFantasy, 2)</td>
                 <td>@Math.Round(sa.TotalFantasy / sa.WeeksPlayed, 2)</td>
                 <td>@Math.Round(sa.TotalFantasy - sa.SeasonFantasyProjection, 2)</td>
-                <td>@Math.Round((sa.SeasonFantasyProjection / 17) - (sa.TotalFantasy / sa.WeeksPlayed), 2)</td>
+                            <td>@Math.Round((sa.SeasonFantasyProjection / 17) - (sa.TotalFantasy / sa.WeeksPlayed), 2)</td>
+             }
+             else {
+                    if (Position == "Flex")
+                    {
+                      <td>@p.OverallADP</td>
+                    }
+                    else
+                    {
+                      <td>@p.PositionalADP 
+                      @if(showRank)
+                      {
+                         var diff = @Math.Round(p.PositionalADP - rank);
+                         <b><text style="@format.AdpDiffColor(diff)"> (@diff.ToString())</text></b>
+                      }
+                      </td>
+                    }
              }
              @if (p.CanDelete)
              {
@@ -116,6 +146,7 @@
         </tbody>
     </table>
     </div>
+    }
 }
 @code {
     private string Position { get; set; } = "Quarterback";
@@ -168,6 +199,15 @@
         shouldRender = true;
         count = await requests.PostSeasonProjectionRequest(PositionEnum);
         loading= false;
+        shouldRender = true;
+    }
+
+    private async Task HandleRefresh()
+    {
+        loading = true;
+        shouldRender = true;
+        await HandleInput();
+        loading = false;
         shouldRender = true;
     }
 
