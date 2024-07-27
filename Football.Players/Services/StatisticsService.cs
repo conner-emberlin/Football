@@ -57,15 +57,15 @@ namespace Football.Players.Services
                 }
                 return filteredData;
             }
-            else return weeklyData;
+            return weeklyData;
         }
 
         public async Task<double> GetAverageGamesMissed(int playerId)
         {
-            
+            var minGames = (await settingsService.GetSeasonTunings(_season.CurrentSeason)).MinGamesForMissedAverage;
             var player = await playersService.GetPlayer(playerId);
             _ = Enum.TryParse(player.Position, out Position position);
-            var gamesPerSeason = await statisticsRepository.GetGamesPerSeason(playerId, position);
+            var gamesPerSeason = await statisticsRepository.GetGamesPerSeason(playerId, position, minGames);
 
             var diff = 0.0;
 

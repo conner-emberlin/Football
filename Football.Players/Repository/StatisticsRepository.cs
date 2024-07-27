@@ -113,12 +113,12 @@ namespace Football.Players.Repository
             return (await dbConnection.QueryAsync<double>(query, new { playerId })).First();
         }
 
-        public async Task<IEnumerable<(int Season, double Games)>> GetGamesPerSeason(int playerId, Position position)
+        public async Task<IEnumerable<(int Season, double Games)>> GetGamesPerSeason(int playerId, Position position, int minGames)
         {
             var query = $@"SELECT s.Season, s.Games FROM [dbo].[{GetSeasonTable(position)}] s
                             WHERE s.PlayerId = @playerId
-                                AND s.Games > 9";
-            return await dbConnection.QueryAsync<(int, double)>(query, new { playerId });
+                                AND s.Games > @minGames";
+            return await dbConnection.QueryAsync<(int, double)>(query, new { playerId, minGames });
         }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(Position position) => string.Format("Season{0}Data", position.ToString());
