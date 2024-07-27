@@ -11,6 +11,8 @@
         public string Team { get; set; } = "";
         public double AvgerageGamesMissed { get; set; }
         public double AdjustedProjectedPoints { get; set; }
+        public double PositionalADP { get; set; }
+        public double OverallADP { get; set; }
         public SeasonProjectionErrorModel? SeasonProjectionError { get; set; }
     }
 }

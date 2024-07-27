@@ -49,7 +49,18 @@ namespace Football.Api.Controllers
                 m.AdjustedProjectedPoints = m.ProjectedPoints - (m.ProjectedPoints/currentSeasonGames) * avgGamesMissed;
             }
 
+            var adpDictionary = (await statisticsService.GetAdpByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(a => a.PlayerId);
+            foreach (var m in model)
+            {
+                if(adpDictionary.TryGetValue(m.PlayerId, out var adp))
+                {
+                    m.PositionalADP = adp.PositionADP;
+                    m.OverallADP = adp.OverallADP;
+                }
+            }
+
             if (positionEnum == Position.FLEX) return Ok(model);
+
             else
             {
                 var activeSeason = await playersService.GetCurrentWeek(_season.CurrentSeason) <= await playersService.GetCurrentSeasonWeeks();
