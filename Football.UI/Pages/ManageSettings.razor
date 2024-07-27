@@ -439,7 +439,7 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
         shouldRender = true;
     }
 
-    public async Task SetSetting(ChangeEventArgs args)
+    public void SetSetting(ChangeEventArgs args)
     {
         Setting = args.Value.ToString();
         tuningsUpdated = false;

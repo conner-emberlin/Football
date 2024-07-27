@@ -12,7 +12,7 @@ namespace Football.Fantasy.Services
 {
     public class FantasyDataService(IFantasyDataRepository fantasyData, IFantasyCalculator calculator,
         IStatisticsService statistics, IPlayersService playersService,
-        IMemoryCache cache, IOptionsMonitor<Season> season, ISettingsService settingsService, ILogger logger) : IFantasyDataService
+        IMemoryCache cache, IOptionsMonitor<Season> season, ILogger logger) : IFantasyDataService
     {
         private readonly Season _season = season.CurrentValue;
 

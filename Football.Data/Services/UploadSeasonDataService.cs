@@ -11,7 +11,7 @@ using AutoMapper;
 namespace Football.Data.Services
 {
     public class UploadSeasonDataService(IScraperService scraperService, IUploadSeasonDataRepository uploadSeasonDataRepository,
-         ILogger logger, IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playerService, IMapper mapper, IOptionsMonitor<Season> season) : IUploadSeasonDataService
+         IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playerService, IMapper mapper, IOptionsMonitor<Season> season) : IUploadSeasonDataService
     {
         private readonly WeeklyScraping _scraping = scraping.CurrentValue;
         private readonly Season _season = season.CurrentValue;

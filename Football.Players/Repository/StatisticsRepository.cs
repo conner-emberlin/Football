@@ -120,6 +120,12 @@ namespace Football.Players.Repository
                                 AND s.Games > @minGames";
             return await dbConnection.QueryAsync<(int, double)>(query, new { playerId, minGames });
         }
+
+        public async Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, string position)
+        {
+            var query = $@"SELECT * FROM [dbo].ADP WHERE [Season] = @season AND [Position] = @position";
+            return await dbConnection.QueryAsync<SeasonADP>(query, new { season, position });
+        }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(Position position) => string.Format("Season{0}Data", position.ToString());
         private static string GetSeasonQueryWhere(bool isPlayer) => isPlayer ? "[PlayerId] = @queryParam" : "[Season] = @queryParam";

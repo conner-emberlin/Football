@@ -7,7 +7,7 @@ using Serilog;
 
 namespace Football.Projections.Services
 {
-    public class StatProjectionCalculator(IOptionsMonitor<Season> season, ILogger logger) : IStatProjectionCalculator
+    public class StatProjectionCalculator(IOptionsMonitor<Season> season) : IStatProjectionCalculator
     {
         private readonly Season _season = season.CurrentValue;
 
