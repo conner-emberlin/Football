@@ -51,13 +51,22 @@
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
                 <tr>
-                    <th>Rank</th>
+                    @if (!sort.IsSortedAscending)
+                    {
+                        <th>Rank</th>
+                    }                    
                     <th>Name</th>
                     <th>Team</th>
-                    <th>Total Points</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("ProjectedPoints"))">Total Points</span>
+                        <span class="oi @(sort.GetSortStyle("ProjectedPoints"))"></span>
+                    </th>
                     <th>PPG</th>
                     <th>Games</th>
-                    <th>AdjustedPoints</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("AdjustedProjectedPoints"))">Adjusted Total</span>
+                        <span class="oi @(sort.GetSortStyle("AdjustedProjectedPoints"))"></span>
+                    </th>
                     @if (players.Any(p => p.SeasonProjectionError != null))
                     {
                         <th>ActualTotal</th>
@@ -79,7 +88,10 @@
              var sa = p.SeasonProjectionError;
 
             <tr>
-            <td>@format.Rank(players, p)</td>
+            @if(!sort.IsSortedAscending)
+            {
+                <td>@format.Rank(players, p)</td>
+            }
             <td><a class = "page-links" href="Players/@p.PlayerId"> @p.Name</a></td>
             <td><img src="@logoPhotoPath" width="30" height="30"></td>
             <td>@Math.Round((double)p.ProjectedPoints,2)</td>
@@ -106,8 +118,8 @@
     </div>
 }
 @code {
-    public string Position { get; set; } = "Quarterback";
-    public string PositionEnum { get; set; } = "1";
+    private string Position { get; set; } = "Quarterback";
+    private string PositionEnum { get; set; } = "1";
 
     private List<SeasonProjectionModel>? players = new();
 
@@ -118,17 +130,18 @@
     private bool recordDeleted = false;
 
     private Formatter format = new();
+    private TableSort sort = new();
 
     protected override bool ShouldRender() => shouldRender;
 
-    public void SetPosition(ChangeEventArgs args)
+    private void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
         recordDeleted = false;
         players?.Clear();
     }
 
-    public async Task HandleInput()
+    private async Task HandleInput()
     {
         loading = true;
         shouldRender = true;
@@ -139,7 +152,7 @@
         shouldRender = true;
     }
 
-    public async Task HandleDelete(int playerId, int season)
+    private async Task HandleDelete(int playerId, int season)
     {
         loading = true;
         shouldRender = true;
@@ -149,7 +162,7 @@
         shouldRender = true;
     }
 
-    public async Task HandleUpload()
+    private async Task HandleUpload()
     {
         loading = true;
         shouldRender = true;
@@ -157,5 +170,7 @@
         loading= false;
         shouldRender = true;
     }
+
+    private void SetTable(string columnName) => players = sort.SortTable<SeasonProjectionModel>(players, columnName);
 }
 

@@ -2,7 +2,7 @@
 {
     public class TableSort
     {
-        private bool IsSortedAscending { get; set; }
+        public bool IsSortedAscending { get; set; }
         private string CurrentSortColumn { get; set; } = "";
         public List<T> SortTable<T>(List<T> table, string columnName)
         {
