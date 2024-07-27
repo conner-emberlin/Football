@@ -21,7 +21,12 @@ namespace Football.Players.Services
         public async Task<List<T>> GetSeasonDataByTeamIdAndPosition<T>(int teamId, Position position, int season) => await statisticsRepository.GetSeasonDataByTeamIdAndPosition<T>(teamId, position, season);
         public async Task<double> GetYearsExperience(int playerId, Position position) => await statisticsRepository.GetYearsExperience(playerId, position);
         public async Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection) => await statisticsRepository.GetCurrentStartersThatMissedGamesLastSeason(currentSeason, previousSeason, maxGames, avgProjection);
-        public async Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, Position position) => await statisticsRepository.GetAdpByPosition(season, position.ToString());
+        public async Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, Position position) 
+        {
+            if (position == Position.FLEX) return await statisticsRepository.GetAdpByPosition(season);
+
+            return await statisticsRepository.GetAdpByPosition(season, position.ToString());
+        } 
         public async Task<List<TeamRecord>> GetTeamRecords(int season)
         {
             var gameResults = await GetGameResults(season);

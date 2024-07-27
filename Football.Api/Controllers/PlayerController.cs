@@ -190,5 +190,8 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await playersService.UploadSleeperPlayerMap());
 
+        [HttpGet("adp/{position}")]
+        [ProducesResponseType(typeof(List<TrendingPlayer>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetTrendingPlayers(Position position) => Ok(await statisticsService.GetAdpByPosition(_season.CurrentSeason, position));
     }
 }
