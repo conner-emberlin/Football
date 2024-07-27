@@ -417,7 +417,7 @@ namespace Football.Data.Services
                 var url = string.Format("{0}{1}.php", "https://www.fantasypros.com/nfl/adp/", position.Trim().ToLower());
                 var xpath = "//*[@id=\"data\"]/tbody";
                 var data = ScrapeData(url, xpath);
-                var colCount = position.Trim().Equals("qb", StringComparison.CurrentCultureIgnoreCase) ? 9 : 7;
+                var colCount = position.Trim().Equals("qb", StringComparison.CurrentCultureIgnoreCase) ? 9 : 4;
                 List<FantasyProsADP> adp = [];
                 for (int i = 0; i < data.Length - colCount; i += colCount)
                 {
