@@ -13,7 +13,7 @@ namespace Football.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class OperationsController(IUploadWeeklyDataService weeklyDataService, IFantasyDataService fantasyService, IMatchupAnalysisService matchupAnalysisService, 
-        ISettingsService settingsService, IMapper mapper, IOptionsMonitor<Season> season,IPlayersService playersService) : ControllerBase
+        ISettingsService settingsService, IMapper mapper, IOptionsMonitor<Season> season, IPlayersService playersService, IStatisticsService statisticsService, IUploadSeasonDataService seasonDataService) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -119,6 +119,29 @@ namespace Football.Api.Controllers
 
             return Ok(mapper.Map<WeeklyTuningsModel>(await settingsService.GetWeeklyTunings(season, week)));
         }
+
+        [HttpPut("refresh-adp/{position}")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> RefreshAdp(string position)
+        {
+            if (!Enum.TryParse(position, out Position pos)) return BadRequest();
+
+            _ = await statisticsService.DeleteAdpByPosition(_season.CurrentSeason, pos); 
+
+            if (pos == Position.FLEX)
+            {
+                var total = await seasonDataService.UploadADP(_season.CurrentSeason, Position.QB.ToString())
+                          + await seasonDataService.UploadADP(_season.CurrentSeason, Position.RB.ToString())
+                          + await seasonDataService.UploadADP(_season.CurrentSeason, Position.WR.ToString())
+                          + await seasonDataService.UploadADP(_season.CurrentSeason, Position.TE.ToString());
+                return Ok(total);
+            }
+            return Ok(await seasonDataService.UploadADP(_season.CurrentSeason, position));
+            
+        }
+
     }
  
 

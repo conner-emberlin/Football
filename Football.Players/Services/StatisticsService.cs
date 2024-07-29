@@ -27,6 +27,13 @@ namespace Football.Players.Services
 
             return await statisticsRepository.GetAdpByPosition(season, position.ToString());
         } 
+
+        public async Task<bool> DeleteAdpByPosition(int season, Position position)
+        {
+            if (position == Position.FLEX) return await statisticsRepository.DeleteAdpByPosition(season);
+
+            return await statisticsRepository.DeleteAdpByPosition(season, position.ToString());
+        }
         public async Task<List<TeamRecord>> GetTeamRecords(int season)
         {
             var gameResults = await GetGameResults(season);

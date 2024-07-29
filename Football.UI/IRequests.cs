@@ -29,5 +29,6 @@ namespace Football.UI
         public Task<bool> PostSeasonTuningsRequest(TuningsModel model);
         public Task<WeeklyTuningsModel?> GetWeeklyTuningsRequest();
         public Task<bool> PostWeeklyTuningsRequest(WeeklyTuningsModel model);
+        public Task<int> PutSeasonAdpRequest(string position);
     }
 }

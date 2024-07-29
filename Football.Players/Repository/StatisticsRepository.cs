@@ -127,6 +127,12 @@ namespace Football.Players.Repository
             if (!string.IsNullOrEmpty(position)) query += " AND [Position] = @position";
             return await dbConnection.QueryAsync<SeasonADP>(query, new { season, position });
         }
+        public async Task<bool> DeleteAdpByPosition(int season, string position = "")
+        {
+            var query = $@"DELETE FROM [dbo].ADP WHERE [Season] = @season";
+            if (!string.IsNullOrEmpty(position)) query += " AND [Position] = @position";
+            return await dbConnection.ExecuteAsync(query, new {season, position}) > 0;
+        }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(Position position) => string.Format("Season{0}Data", position.ToString());
         private static string GetSeasonQueryWhere(bool isPlayer) => isPlayer ? "[PlayerId] = @queryParam" : "[Season] = @queryParam";

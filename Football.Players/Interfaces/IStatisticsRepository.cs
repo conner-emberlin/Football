@@ -19,6 +19,7 @@ namespace Football.Players.Interfaces
         public Task<double> GetYearsExperience(int playerId, Position position);
         public Task<IEnumerable<(int Season, double Games)>> GetGamesPerSeason(int playerId, Position position, int minGames);
         public Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, string position = "");
+        public Task<bool> DeleteAdpByPosition(int season, string position = "");
 
     }
 }

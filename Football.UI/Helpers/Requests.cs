@@ -36,6 +36,7 @@ namespace Football.UI.Helpers
         public async Task<bool> PostSeasonTuningsRequest(TuningsModel tunings) => await Post<bool, TuningsModel>("https://localhost:7028/api/operations/season-tunings", tunings);
         public async Task<WeeklyTuningsModel?> GetWeeklyTuningsRequest() => await Get<WeeklyTuningsModel>("https://localhost:7028/api/operations/weekly-tunings");
         public async Task<bool> PostWeeklyTuningsRequest(WeeklyTuningsModel tunings) => await Post<bool, WeeklyTuningsModel>("https://localhost:7028/api/operations/weekly-tunings", tunings);
+        public async Task<int> PutSeasonAdpRequest(string position) => await Put<int>("https://localhost:7028/api/operations/refresh-adp/" + position);
         public async Task<List<SeasonFantasyModel>?> GetSeasonTotalsRequest(string season = "")
         {
             var path = "https://localhost:7028/api/Fantasy/season-totals";
@@ -64,6 +65,19 @@ namespace Football.UI.Helpers
         private async Task<T?> Delete<T>(string path)
         {
             var request = new HttpRequestMessage(HttpMethod.Delete, path);
+            request.Headers.Add("Accept", "application/json");
+            var response = await _httpClient.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                return await JsonSerializer.DeserializeAsync<T>(responseStream, _options);
+            }
+            return default;
+        }
+
+        private async Task<T?> Put<T>(string path)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Put, path);
             request.Headers.Add("Accept", "application/json");
             var response = await _httpClient.SendAsync(request);
             if (response.IsSuccessStatusCode)

@@ -26,9 +26,10 @@
     </td>
     <td>&nbsp</td>
     <button class="button-22" role="button" @onclick="HandleRefresh">
-        ADP
+        Update ADP
     </button>
 </tr>
+
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 
 @if(loading)
@@ -38,12 +39,13 @@
 
 @if(players != null && players.Count > 0)
 {
-    @if (!players.Any(p => p.CanDelete))
+    @if (!players.Any(p => p.CanDelete) && PositionEnum != "FLEX")
     {
     <button class="button-22" role = "button" @onclick="HandleUpload">
         Upload
     </button>
     }
+
     @if(count > 0)
     {
         <p>@count records added </p>
@@ -159,6 +161,7 @@
     private bool loading { get; set; }
     public bool seasonOver { get; set; } = false;
     private bool recordDeleted = false;
+    private int adpRefreshed { get; set; }
 
     private Formatter format = new();
     private TableSort sort = new();
@@ -169,6 +172,7 @@
     {
         Position = args.Value.ToString();
         recordDeleted = false;
+        adpRefreshed = 0;
         players?.Clear();
     }
 
@@ -177,6 +181,7 @@
         loading = true;
         shouldRender = true;
         players?.Clear();
+        adpRefreshed = 0;
         PositionEnum = format.SetPosition(Position);
         players = await requests.GetSeasonProjectionsRequest(PositionEnum);
         loading = false;
@@ -206,7 +211,7 @@
     {
         loading = true;
         shouldRender = true;
-        await HandleInput();
+        adpRefreshed = await requests.PutSeasonAdpRequest(PositionEnum);
         loading = false;
         shouldRender = true;
     }

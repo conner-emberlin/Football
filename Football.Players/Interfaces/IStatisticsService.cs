@@ -21,6 +21,6 @@ namespace Football.Players.Interfaces
         public Task<double> GetYearsExperience(int playerId, Position position);
         public Task<double> GetAverageGamesMissed(int playerId);
         public Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, Position position);
-
+        public Task<bool> DeleteAdpByPosition(int season, Position position);
     }
 }
