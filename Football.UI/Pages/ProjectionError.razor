@@ -59,9 +59,9 @@
     [Parameter]
     public string week { get; set; } = "";
 
-    public List<WeeklyProjectionErrorModel>? projectionErrors = [];
+    private List<WeeklyProjectionErrorModel>? projectionErrors = [];
 
-    public bool loading { get; set; } = false;
+    private bool loading { get; set; } = false;
     private bool shouldRender;
     
     private TableSort tableSort = new();
@@ -69,7 +69,7 @@
     protected override bool ShouldRender() => shouldRender;
     protected override async Task OnInitializedAsync() => await HandleInput();
 
-    public async Task HandleInput()
+    private async Task HandleInput()
     {
         loading = true;
         projectionErrors?.Clear();

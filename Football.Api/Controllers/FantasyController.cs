@@ -149,11 +149,11 @@ namespace Football.Api.Controllers
         }
 
         [HttpGet("waiver-wire")]
-        [ProducesResponseType(typeof(List<WaiverWireCandidate>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<WaiverWireCandidateModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetWaiverWireCandidates() 
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            return Ok(await waiverWireService.GetWaiverWireCandidates(_season.CurrentSeason, currentWeek));
+            return Ok(mapper.Map<List<WaiverWireCandidateModel>>(await waiverWireService.GetWaiverWireCandidates(_season.CurrentSeason, currentWeek)));
         }
 
         [HttpGet("weekly-boom-busts/{playerId}")]

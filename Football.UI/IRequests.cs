@@ -30,5 +30,13 @@ namespace Football.UI
         public Task<WeeklyTuningsModel?> GetWeeklyTuningsRequest();
         public Task<bool> PostWeeklyTuningsRequest(WeeklyTuningsModel model);
         public Task<int> PutSeasonAdpRequest(string position);
+        public Task<PlayerDataModel?> GetPlayerDataRequest(int playerId);
+        public Task<List<TrendingPlayerModel>?> GetTrendingPlayersRequest();
+        public Task<List<SimplePlayerModel>?> GetSimplePlayersRequest(bool activeOnly = false);
+        public Task<List<StartOrSitModel>?> PostStartOrSitRequest(List<int> playerIds);
+        public Task<List<WaiverWireCandidateModel>?> GetWaiverWireCandidatesRequest();
+        public Task<List<WeekProjectionModel>?> GetWeekProjectionsRequest(string position);
+        public Task<bool> DeleteWeekProjectionRequest(int playerId, int season, int week);
+        public Task<int> PostWeekProjectionRequest(string position);
     }
 }

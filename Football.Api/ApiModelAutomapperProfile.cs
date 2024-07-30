@@ -152,6 +152,16 @@ namespace Football.Api
             CreateMap<FantasyPerformance, FantasyPerformanceModel>();
             CreateMap<Tunings, TuningsModel>().ReverseMap();
             CreateMap<WeeklyTunings, WeeklyTuningsModel>().ReverseMap();
+            CreateMap<Schedule, ScheduleModel>();
+            CreateMap<Player, PlayerDataModel>();
+            CreateMap<TrendingPlayer, TrendingPlayerModel>()
+                .ForMember(t => t.Name, o => o.MapFrom(t => t.Player.Name))
+                .ForMember(t => t.Position, o => o.MapFrom(t => t.Player.Position))
+                .ForMember(t => t.Team, o => o.MapFrom(t => t.PlayerTeam != null ? t.PlayerTeam.Team : string.Empty));
+            CreateMap<WaiverWireCandidate, WaiverWireCandidateModel>()
+                .ForMember(w => w.Name, o => o.MapFrom(w => w.Player.Name))
+                .ForMember(w => w.Position, o => o.MapFrom(w => w.Player.Position))
+                .ForMember(w => w.Team, o => o.MapFrom(w => w.PlayerTeam != null ? w.PlayerTeam.Team : string.Empty));
         }
 
     }

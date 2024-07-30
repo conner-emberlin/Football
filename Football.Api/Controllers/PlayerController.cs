@@ -6,12 +6,13 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using AutoMapper;
+using Football.Fantasy.Interfaces;
 
 namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season, IAdvancedStatisticsService advancedStatisticsService, IMapper mapper) : ControllerBase
+    public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season, IAdvancedStatisticsService advancedStatisticsService, IMapper mapper, IFantasyDataService fantasyDataService) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -27,6 +28,60 @@ namespace Football.Api.Controllers
                                 : allPlayers;
 
             return Ok(filteredPlayers.OrderBy(p => p.Name));
+        }
+
+        [HttpGet("{playerId}")]
+        [ProducesResponseType(typeof(PlayerDataModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetPlayer(int playerId)
+        {
+            
+            var player = await playersService.GetPlayer(playerId);
+            if (player == null) return NotFound();
+            var playerModel = mapper.Map<PlayerDataModel>(player);
+            _ = Enum.TryParse(player.Position, out Position position);
+
+            var playerTeam = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+            if (playerTeam != null) 
+            {
+                playerModel.Team = playerTeam.Team;
+                playerModel.Schedule = mapper.Map<List<ScheduleModel>>(await playersService.GetUpcomingGames(playerId));
+
+            }
+
+            playerModel.WeeklyData = position switch
+            {
+                Position.QB => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataQB>(position, playerId)),
+                Position.WR => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataWR>(position, playerId)),
+                Position.RB => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataRB>(position, playerId)),
+                Position.TE => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataTE>(position, playerId)),
+                Position.DST => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataDST>(position, playerId)),
+                Position.K => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataK>(position, playerId)),
+                _ => throw new NotImplementedException()
+            };
+
+            playerModel.SeasonData = position switch
+            {
+                Position.QB => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataQB>(position, playerId, true)),
+                Position.WR => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataWR>(position, playerId, true)),
+                Position.RB => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataRB>(position, playerId, true)),
+                Position.TE => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataTE>(position, playerId, true)),
+                Position.DST => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataDST>(position, playerId, true)),
+                _ => throw new NotImplementedException()
+            };
+
+            playerModel.SeasonFantasy = mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetSeasonFantasy(playerId));
+            playerModel.WeeklyFantasy = mapper.Map<List<WeeklyFantasyModel>>(await fantasyDataService.GetWeeklyFantasy(playerId));
+
+            if (playerModel.WeeklyFantasy.Count > 0) 
+            {
+                var currentTotals = await fantasyDataService.GetCurrentFantasyTotals(playerId);
+                playerModel.RunningFantasyTotal = currentTotals.First(c => c.PlayerId == playerId).FantasyPoints;
+                playerModel.OverallRank = currentTotals.Select(p => p.PlayerId).ToList().IndexOf(playerId);
+                playerModel.PositionRank = currentTotals.Where(c => c.Position == player.Position).Select(p => p.PlayerId).ToList().IndexOf(playerId);
+            }
+           
+            return Ok(playerModel);
         }
 
         [HttpPost("add")]
@@ -183,11 +238,12 @@ namespace Football.Api.Controllers
         }
 
         [HttpGet("trending-players")]
-        [ProducesResponseType(typeof(List<TrendingPlayer>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetTrendingPlayers() => Ok(await playersService.GetTrendingPlayers());
+        [ProducesResponseType(typeof(List<TrendingPlayerModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetTrendingPlayers() => Ok(mapper.Map<List<TrendingPlayerModel>>(await playersService.GetTrendingPlayers()));
 
         [HttpPost("sleeper-map")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await playersService.UploadSleeperPlayerMap());
+
     }
 }

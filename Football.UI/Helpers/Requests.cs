@@ -37,6 +37,19 @@ namespace Football.UI.Helpers
         public async Task<WeeklyTuningsModel?> GetWeeklyTuningsRequest() => await Get<WeeklyTuningsModel>("https://localhost:7028/api/operations/weekly-tunings");
         public async Task<bool> PostWeeklyTuningsRequest(WeeklyTuningsModel tunings) => await Post<bool, WeeklyTuningsModel>("https://localhost:7028/api/operations/weekly-tunings", tunings);
         public async Task<int> PutSeasonAdpRequest(string position) => await Put<int>("https://localhost:7028/api/operations/refresh-adp/" + position);
+        public async Task<PlayerDataModel?> GetPlayerDataRequest(int playerId) => await Get<PlayerDataModel?>("https://localhost:7028/api/player/" + playerId.ToString());
+        public async Task<List<TrendingPlayerModel>?> GetTrendingPlayersRequest() => await Get<List<TrendingPlayerModel>?>("https://localhost:7028/api/player/trending-players");
+        public async Task<List<StartOrSitModel>?> PostStartOrSitRequest(List<int> playerIds) => await Post<List<StartOrSitModel>?, List<int>>("https://localhost:7028/api/fantasy/start-or-sit", playerIds);
+        public async Task<List<WaiverWireCandidateModel>?> GetWaiverWireCandidatesRequest() => await Get<List<WaiverWireCandidateModel>?>("https://localhost:7028/api/Fantasy/waiver-wire");
+        public async Task<List<WeekProjectionModel>?> GetWeekProjectionsRequest(string position) => await Get<List<WeekProjectionModel>?>("https://localhost:7028/api/Projection/weekly/" + position);
+        public async Task<bool> DeleteWeekProjectionRequest(int playerId, int season, int week) => await Delete<bool>(string.Format("{0}/{1}/{2}/{3}", "https://localhost:7028/api/Projection/weekly", playerId, season, week));
+        public async Task<int> PostWeekProjectionRequest(string position) => await PostWithoutBody<int>("https://localhost:7028/api/Projection/weekly/" + position);
+        public async Task<List<SimplePlayerModel>?> GetSimplePlayersRequest(bool activeOnly = false) 
+        {
+            var path = "https://localhost:7028/api/player/data/players";
+            if (activeOnly) path += string.Format("?active=1");
+            return await Get<List<SimplePlayerModel>?>(path);
+        } 
         public async Task<List<SeasonFantasyModel>?> GetSeasonTotalsRequest(string season = "")
         {
             var path = "https://localhost:7028/api/Fantasy/season-totals";

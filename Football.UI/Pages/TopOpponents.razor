@@ -32,9 +32,11 @@ else
                          XValue="e => e.Week"
                          YValue="e=> (decimal)e.FantasyPoints" />
     </ApexChart>
+
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <hr style="width:100%;text-align:left;margin-left:0">
     <div style="height:10px;font-size:1px;">&nbsp;</div>
+
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
             <thead>
@@ -69,10 +71,6 @@ else
         </table>
     </div>
 }
-else if (youTried && badRequestError)
-{
-    <text>Something Went Wrong.</text>
-}
 
 @code {
     [Parameter]
@@ -80,20 +78,15 @@ else if (youTried && badRequestError)
     [Parameter]
     public string position { get; set; } = "";
 
-    public List<WeeklyFantasyWithTeam>? opponents = new();
-    public TeamMap team = new();
-
-    public bool badRequestError = false;
-    public bool youTried = false;
     private bool shouldRender;
     private bool loading = false;
 
-    public Formatter form = new();
+    private List<WeeklyFantasyWithTeam>? opponents = new();
+    private TeamMap team = new();
+
+    private Formatter form = new();
 
     protected override bool ShouldRender() => shouldRender;
-
-    public string GetHeader() => string.Format("{0} - Top {1} Opponents", team.TeamDescription, position);
-    private string DiffColor(double diff) => diff >= 0 ? "color:green" : "color:red";
 
     protected override async Task OnInitializedAsync()
     {
@@ -174,6 +167,9 @@ else if (youTried && badRequestError)
         }
         return 0;
     }
+
+    private string GetHeader() => string.Format("{0} - Top {1} Opponents", team.TeamDescription, position);
+    private string DiffColor(double diff) => diff >= 0 ? "color:green" : "color:red";
 
     public class WeeklyFantasyWithTeam : WeeklyFantasy
     {

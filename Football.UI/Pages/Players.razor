@@ -1,16 +1,11 @@
 ﻿@page "/Players/{id?}"
 <PageTitle>Players</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Fantasy.Models;
-@using Football.Players.Models;
 @using Football.Api.Models;
 @using Football.UI.Helpers;
-
-@inject IHttpClientFactory ClientFactory
+@inject IRequests requests;
 @inject NavigationManager NavigationManager
 
-@if (!badRequestError && players.Any())
+@if (players.Any())
 {
     <div class="autocomplete w-25">
         <input @bind=selectedPlayer @oninput=HandleInput class="form-control filter" placeholder="Player Name..."/>
@@ -34,10 +29,6 @@
         }
     </div>
 }
-else if (youTried && badRequestError)
-{
-    <p>Bad Request</p>
-}
 
 @if (loading)
 {
@@ -57,7 +48,7 @@ else if (!loading && !playerSelected)
         Injuries
     </button>
 }
-@if(!playerSelected && showTrending && trendingPlayers.Any())
+@if(!playerSelected && showTrending && trendingPlayers != null)
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -75,14 +66,14 @@ else if (!loading && !playerSelected)
             <tbody>
                 @foreach (var t in trendingPlayers)
                 {
-                    var logoPhotoPath = t.PlayerTeam != null ?
-                    "https://localhost:7176/Logos/" + t.PlayerTeam!.Team + ".png"
+                    var logoPhotoPath = t.Team != string.Empty ?
+                    "https://localhost:7176/Logos/" + t.Team + ".png"
                     : "https://localhost:7176/Logos/nfl.png";
 
                     <tr>
-                        <td>@t.Player.Name</td>
+                        <td>@t.Name</td>
                         <td><img src="@logoPhotoPath" width="30" height="30"></td>
-                        <td><b style="color:@form.PositionColor(t.Player.Position)">@t.Player.Position</b></td>
+                        <td><b style="color:@form.PositionColor(t.Position)">@t.Position</b></td>
                         <td>@t.Adds</td>
                     </tr>
                 }
@@ -93,31 +84,28 @@ else if (!loading && !playerSelected)
 
 } 
 <div style="height:10px;font-size:1px;">&nbsp;</div>
-@if(playerSelected && playerId > 0)
+@if(playerSelected && playerId > 0 && playerData != null)
 {
     var photoPath = "https://localhost:7176/PlayerPhotos/" + playerId + ".png";
     <div>
         <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/PlayerPhotos/gen.png'">
     </div>
     <div>
-       <b>@playerName</b> 
+       <b>@playerData.Name</b> 
     </div>
-    @if(!string.IsNullOrEmpty(team?.Team))
+    @if(!string.IsNullOrEmpty(playerData.Team))
     {
-        <div><b>@team.Team</b> <b>&#x2022;</b>  <b style="color:@form.PositionColor(@playerPosition)">@playerPosition</b> </div>
+        <div><b>@playerData.Team</b> <b>&#x2022;</b>  <b style="color:@form.PositionColor(@playerData.Position)">@playerData.Position</b> </div>
     }
     else
     {
-        <div><b>@playerPosition</b> </div>
+        <div><b>@playerData.Position</b> </div>
     }
-    @if (runningTotal != null)
-    {
-        <div> <b style="color:@form.PositionColor(playerPosition)">@playerPosition</b> #@positionRank <b>&#x2022;</b> #@rank Overall <b>&#x2022;</b> Fpts: @runningTotal.FantasyPoints </div>
-    }
-    @if (schedule.Any())
+    <div> <b style="color:@form.PositionColor(playerData.Position)">@playerData.Position</b> #@playerData.PositionRank <b>&#x2022;</b> #@playerData.OverallRank Overall <b>&#x2022;</b> Fpts: @playerData.RunningFantasyTotal </div>
+    @if (playerData.Schedule.Any())
     {
         <div class="parent">
-            @foreach (var s in schedule)
+            @foreach (var s in playerData.Schedule.Take(10))
             {
                 var logoPhotoPath = "https://localhost:7176/Logos/" + s.OpposingTeam + ".png";
                 <div class="child">
@@ -128,9 +116,9 @@ else if (!loading && !playerSelected)
         </div>
     }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
-    @if(playerPosition == "QB")
+    @if(playerData.Position == "QB")
     {
-        @if (weeklyData.Any())
+        @if (playerData.WeeklyData.Any())
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -152,7 +140,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in weeklyData)
+                        @foreach (var stat in playerData.WeeklyData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -167,59 +155,59 @@ else if (!loading && !playerSelected)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
                             </tr>
                         }
                         <tr>
                             <td><b>Total</b></td>
                             <td>-</td>
-                            <td>@weeklyData.Sum(w => w.Completions)</td>
-                            <td>@weeklyData.Sum(w => w.Attempts)</td>
-                            <td>@weeklyData.Sum(w => w.PassingYards)</td>
-                            <td>@weeklyData.Sum(w => w.PassingTouchdowns)</td>
-                            <td>@weeklyData.Sum(w => w.Interceptions)</td>
-                            <td>@weeklyData.Sum(w => w.Sacks)</td>
-                            <td>@weeklyData.Sum(w => w.RushingAttempts)</td>
-                            <td>@weeklyData.Sum(w => w.RushingYards)</td>
-                            <td>@weeklyData.Sum(w => w.RushingTouchdowns)</td>
-                            <td>@weeklyData.Sum(w => w.Fumbles)</td>
-                            <td>@Math.Round(weeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Completions)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Attempts)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.PassingYards)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.PassingTouchdowns)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Interceptions)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Sacks)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingAttempts)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingYards)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingTouchdowns)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Fumbles)</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
                         </tr>
                         <tr>
                             <td><b>Avg</b></td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Completions))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Attempts) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.PassingYards) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.PassingTouchdowns) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Interceptions))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Sacks))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingAttempts))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingYards))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingTouchdowns))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Fumbles))</td>
-                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Completions))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Attempts) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.PassingYards) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.PassingTouchdowns) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Interceptions))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Sacks))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingAttempts))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles))</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
                         </tr>
                         <tr>
                             <td><b>Pace</b></td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Completions)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Attempts)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.PassingYards)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.PassingTouchdowns)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Interceptions)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Sacks)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingAttempts)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingYards)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingTouchdowns)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Fumbles)*17)</td>
-                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Completions)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Attempts)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.PassingYards)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.PassingTouchdowns)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Interceptions)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Sacks)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingAttempts)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         }
-        @if (seasonData.Any())
+        @if (playerData.SeasonData.Any())
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -242,7 +230,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in seasonData)
+                        @foreach (var stat in playerData.SeasonData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -257,8 +245,8 @@ else if (!loading && !playerSelected)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
-                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
+                                <td>@Math.Round(playerData.SeasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(playerData.SeasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
                             </tr>
                         }
 
@@ -268,9 +256,9 @@ else if (!loading && !playerSelected)
         }
     }
 
-    else if(playerPosition == "RB")
+    else if(playerData.Position == "RB")
     {
-        @if (weeklyData.Any())
+        @if (playerData.WeeklyData.Any())
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -290,7 +278,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in weeklyData)
+                        @foreach (var stat in playerData.WeeklyData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -303,53 +291,53 @@ else if (!loading && !playerSelected)
                                 <td>@stat.ReceivingYards</td>
                                 <td>@stat.ReceivingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
                             </tr>
                         }
                         <tr>
                             <td><b>Total</b></td>
                             <td>-</td>
-                            <td>@weeklyData.Sum(w => w.RushingAttempts)</td>
-                            <td>@weeklyData.Sum(w => w.RushingYards)</td>
-                            <td>@weeklyData.Sum(w => w.RushingTouchdowns)</td>
-                            <td>@weeklyData.Sum(w => w.Receptions)</td>
-                            <td>@weeklyData.Sum(w => w.Targets)</td>
-                            <td>@weeklyData.Sum(w => w.ReceivingYards)</td>
-                            <td>@weeklyData.Sum(w => w.ReceivingTouchdowns)</td>
-                            <td>@weeklyData.Sum(w => w.Fumbles)</td>
-                            <td>@Math.Round(weeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingAttempts)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingYards)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingTouchdowns)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Receptions)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Targets)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.ReceivingYards)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.ReceivingTouchdowns)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Fumbles)</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
                         </tr>
                         <tr>
                             <td><b>Avg</b></td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingAttempts) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingYards) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingTouchdowns) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Receptions))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Targets) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingYards) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingTouchdowns))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Fumbles) )</td>
-                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingAttempts) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Receptions))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Targets) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingYards) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingTouchdowns))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles) )</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
                         </tr>
                         <tr>
                             <td><b>Pace</b></td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingAttempts)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingYards)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingTouchdowns)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Receptions)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Targets)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingYards)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingTouchdowns)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Fumbles)*17)</td>
-                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingAttempts)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Receptions)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Targets)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingYards)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingTouchdowns)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
                         </tr>
                     </tbody>
                 </table>
             </div>             
         }
-        @if (seasonData.Any())
+        @if (playerData.SeasonData.Any())
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -370,7 +358,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in seasonData)
+                        @foreach (var stat in playerData.SeasonData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -383,8 +371,8 @@ else if (!loading && !playerSelected)
                                 <td>@stat.ReceivingYards</td>
                                 <td>@stat.ReceivingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
-                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
+                                <td>@Math.Round(playerData.SeasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(playerData.SeasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
                             </tr>
                         }
                     </tbody>
@@ -393,9 +381,9 @@ else if (!loading && !playerSelected)
         }
     }
 
-    else if(playerPosition == "WR")
+    else if(playerData.Position == "WR")
     {
-        @if (weeklyData.Any())
+        @if (playerData.WeeklyData.Any())
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -416,7 +404,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in weeklyData)
+                        @foreach (var stat in playerData.WeeklyData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -430,56 +418,56 @@ else if (!loading && !playerSelected)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
+                                <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
                             </tr>
                         }
                         <tr>
                             <td><b>Total</b></td>
                             <td>-</td>
-                            <td>@weeklyData.Sum(w => w.Receptions)</td>
-                            <td>@weeklyData.Sum(w => w.Targets)</td>
-                            <td>@weeklyData.Sum(w => w.ReceivingYards)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Receptions)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Targets)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.ReceivingYards)</td>
                             <td>-</td>
-                            <td>@weeklyData.Sum(w => w.ReceivingTouchdowns)</td>
-                            <td>@weeklyData.Sum(w => w.RushingAttempts)</td>
-                            <td>@weeklyData.Sum(w => w.RushingYards)</td>
-                            <td>@weeklyData.Sum(w => w.RushingTouchdowns)</td>
-                            <td>@weeklyData.Sum(w => w.Fumbles)</td>
-                            <td>@Math.Round(weeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.ReceivingTouchdowns)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingAttempts)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingYards)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingTouchdowns)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Fumbles)</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
                         </tr>
                         <tr>
                             <td><b>Avg</b></td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Receptions) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Targets))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingYards) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Receptions) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Targets))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingYards) )</td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingTouchdowns) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingAttempts) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingYards))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingTouchdowns) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Fumbles) )</td>
-                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingTouchdowns) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingAttempts) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles) )</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
                         </tr>
                         <tr>
                             <td><b>Pace</b></td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Receptions)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Targets)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingYards)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Receptions)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Targets)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingYards)*17)</td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingTouchdowns)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingAttempts)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingYards)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingTouchdowns)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Fumbles)*17)</td>
-                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingTouchdowns)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingAttempts)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         }
-        @if (seasonData.Any())
+        @if (playerData.SeasonData.Any())
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -501,7 +489,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in seasonData)
+                        @foreach (var stat in playerData.SeasonData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -515,8 +503,8 @@ else if (!loading && !playerSelected)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
-                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
+                                <td>@Math.Round(playerData.SeasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(playerData.SeasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
                             </tr>
                         }
                     </tbody>
@@ -525,9 +513,9 @@ else if (!loading && !playerSelected)
         }
     }
 
-    else if(playerPosition == "TE")
+    else if(playerData.Position == "TE")
     {
-        @if (weeklyData.Any())
+        @if (playerData.WeeklyData.Any())
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -548,7 +536,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in weeklyData)
+                        @foreach (var stat in playerData.WeeklyData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -562,56 +550,56 @@ else if (!loading && !playerSelected)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
+                                <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
                             </tr>
                         }
                         <tr>
                             <td><b>Total</b></td>
                             <td>-</td>
-                            <td>@weeklyData.Sum(w => w.Receptions)</td>
-                            <td>@weeklyData.Sum(w => w.Targets)</td>
-                            <td>@weeklyData.Sum(w => w.ReceivingYards)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Receptions)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Targets)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.ReceivingYards)</td>
                             <td>-</td>
-                            <td>@weeklyData.Sum(w => w.ReceivingTouchdowns)</td>
-                            <td>@weeklyData.Sum(w => w.RushingAttempts)</td>
-                            <td>@weeklyData.Sum(w => w.RushingYards)</td>
-                            <td>@weeklyData.Sum(w => w.RushingTouchdowns)</td>
-                            <td>@weeklyData.Sum(w => w.Fumbles)</td>
-                            <td>@Math.Round(weeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.ReceivingTouchdowns)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingAttempts)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingYards)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.RushingTouchdowns)</td>
+                            <td>@playerData.WeeklyData.Sum(w => w.Fumbles)</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
                         </tr>
                         <tr>
                             <td><b>Avg</b></td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Receptions) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Targets))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingYards))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Receptions) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Targets))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingYards))</td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingTouchdowns) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingAttempts) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingYards) )</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingTouchdowns))</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Fumbles) )</td>
-                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingTouchdowns) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingAttempts) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards) )</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns))</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles) )</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
                         </tr>
                         <tr>
                             <td><b>Pace</b></td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Receptions)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Targets)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingYards)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Receptions)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Targets)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingYards)*17)</td>
                             <td>-</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.ReceivingTouchdowns)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingAttempts)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingYards)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.RushingTouchdowns)*17)</td>
-                            <td>@Math.Round(weeklyData.Average(w => w.Fumbles)*17)</td>
-                            <td>@Math.Round(weeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingTouchdowns)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingAttempts)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles)*17)</td>
+                            <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         }
-        @if (seasonData.Any())
+        @if (playerData.SeasonData.Any())
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -633,7 +621,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in seasonData)
+                        @foreach (var stat in playerData.SeasonData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -647,8 +635,8 @@ else if (!loading && !playerSelected)
                                 <td>@stat.RushingYards</td>
                                 <td>@stat.RushingTouchdowns</td>
                                 <td>@stat.Fumbles</td>
-                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
-                                <td>@Math.Round(seasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
+                                <td>@Math.Round(playerData.SeasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(playerData.SeasonFantasy.Where(s => s.Season == stat.Season).First().FantasyPointsPerGame, 2)</td>
                             </tr>
                         }
                     </tbody>
@@ -656,9 +644,9 @@ else if (!loading && !playerSelected)
         </div>
         }
     }
-    else if (playerPosition == "DST")
+    else if (playerData.Position == "DST")
     {
-        @if (weeklyData.Any())
+        @if (playerData.WeeklyData.Any())
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -677,7 +665,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in weeklyData)
+                        @foreach (var stat in playerData.WeeklyData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -689,14 +677,14 @@ else if (!loading && !playerSelected)
                                 <td>@stat.DefensiveTouchdowns</td>
                                 <td>@stat.DefensiveSafties</td>
                                 <td>@stat.SpecialTeamsTouchdowns</td>
-                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
+                                <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
         }
-        @if (seasonData.Any())
+        @if (playerData.SeasonData.Any())
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -714,7 +702,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in seasonData)
+                        @foreach (var stat in playerData.SeasonData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -733,9 +721,9 @@ else if (!loading && !playerSelected)
             </div>
         }
     }
-    else if(playerPosition == "K")
+    else if(playerData.Position == "K")
     {
-        @if (weeklyData.Count > 0)
+        @if (playerData.WeeklyData.Count > 0)
         {
             <div class="table_container">
                 <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -756,7 +744,7 @@ else if (!loading && !playerSelected)
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var stat in weeklyData)
+                        @foreach (var stat in playerData.WeeklyData)
                         {
                             <tr>
                                 <td>@stat.Season</td>
@@ -770,7 +758,7 @@ else if (!loading && !playerSelected)
                                 <td>@stat.Fifty</td>
                                 <td>@stat.ExtraPoints</td>
                                 <td>@stat.ExtraPointAttempts</td>
-                                <td>@Math.Round(weeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
+                                <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
                             </tr>
                         }
                     </tbody>
@@ -784,77 +772,37 @@ else if (!loading && !playerSelected)
     [Parameter]
     public string id { get; set; } = "";
 
-    JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
     private bool shouldRender;
-    protected override bool ShouldRender() => shouldRender;
-    private bool badRequestError = false;
-    private bool youTried = false;
-
+    private bool loading { get; set; }
     private bool playerSelected = false;
-    public List<Player>? players { get; set; } = new();
+    private string selectedPlayer { get; set; } = "";
+    private int playerId { get; set; }
+    private bool showTrending { get; set; } = false;
 
-    public List<Player>? filteredPlayers { get; set; }
-    public string selectedPlayer { get; set; } = "";
+    private List<SimplePlayerModel>? players { get; set; } = new();
+    private List<SimplePlayerModel>? filteredPlayers { get; set; }     
+    private PlayerDataModel? playerData = new();   
+    private List<TrendingPlayerModel>? trendingPlayers { get; set; } = new();
 
-    public string? playerName { get; set; }
-    public int playerId { get; set; }
-    public string playerPosition { get; set; } = "";
+    private Formatter form = new();
 
-    List<SeasonDataModel> seasonData { get; set; } = new();
-    List<WeeklyDataModel> weeklyData { get; set; } = new();
-    List<SeasonFantasyModel>? seasonFantasy {get; set;} = new();  
-    List<WeeklyFantasy>? weeklyFantasy { get; set; } = new();
-    SeasonFantasy? runningTotal { get; set; } = new();
-
-
-    public int rank { get; set; }
-    public int positionRank { get; set; }
-
-    public PlayerTeam? team = new();
-
-    public List<Schedule> schedule { get; set; } = new();
-
-    public bool showTrending { get; set; } = false;
-    public List<TrendingPlayer>? trendingPlayers { get; set; } = new();
-
-    public bool loading { get; set; }
-
-    public Formatter form = new();
+    protected override bool ShouldRender() => shouldRender;
 
     protected override async Task OnInitializedAsync()
     {
         loading = true;
         shouldRender = true;
-
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
+        players = (await requests.GetSimplePlayersRequest()).OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
+        if (!String.IsNullOrEmpty(id))
         {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            players = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
-            players = players.OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
-            badRequestError = false;
-            youTried = true;
-
-            if(!String.IsNullOrEmpty(id))
-            {
-                SelectPlayer(int.Parse(id));
-                id = "";
-            }
-            else
-            {
-                showTrending = true;
-                await GetTrendingPlayers();
-
-            }
+            SelectPlayer(int.Parse(id));
+            id = "";
         }
         else
         {
-            badRequestError = true;
-            youTried = true;
+            showTrending = true;
+            trendingPlayers = await requests.GetTrendingPlayersRequest();
         }
         loading = false;
         shouldRender = true;
@@ -862,14 +810,8 @@ else if (!loading && !playerSelected)
     private void HandleInput(ChangeEventArgs e)
     {
         var filter = e.Value?.ToString();
-        if(filter?.Length > 2)
-        {
-            filteredPlayers = players.Where(p => p.Name.ToLower().Contains(filter.ToLower())).ToList();
-        }
-        else 
-        {
-            filteredPlayers = null;
-        }
+        if (filter?.Length > 2) filteredPlayers = players.Where(p => p.Name.ToLower().Contains(filter.ToLower())).ToList();
+        else filteredPlayers = null;
     }
 
     private async void SelectPlayer(int pid)
@@ -879,145 +821,15 @@ else if (!loading && !playerSelected)
         playerSelected = false;
         selectedPlayer = "";
         playerId = pid;
-        playerPosition = players.Where(p => p.PlayerId == pid).First().Position;
-        playerName = players.Where(p => p.PlayerId == pid).First().Name;
 
-        seasonData.Clear();
-        weeklyData.Clear();
-
-        await GetWeeklyData();
-        await GetSeasonData();
-        await GetFantasySeasonData();
-        await GetFantasyWeeklyData();
-        await GetPlayerTeam();
-        await GetUpcomingGames();
-        await GetRunningFantasyTotals();
+        playerData = await requests.GetPlayerDataRequest(playerId);
 
         playerSelected = true;
-        selectedPlayer = playerName;
+        selectedPlayer = playerData != null ? playerData.Name : string.Empty;
         filteredPlayers = null;
         loading = false;
 
         StateHasChanged();
-
     }
-
-    #region API Requests
-    private async Task GetSeasonData()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/season-data/" + playerId.ToString());
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            seasonData = (await JsonSerializer.DeserializeAsync<List<SeasonDataModel>>(responseStream, options)).OrderByDescending(s => s.Season).ToList();
-        }
-    }
-    private async Task GetWeeklyData()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/weekly-data/" + playerId.ToString());
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            weeklyData = (await JsonSerializer.DeserializeAsync<List<WeeklyDataModel>>(responseStream, options)).OrderBy(d => d.Week).ToList();
-        }
-    }
-
-    private async Task GetFantasySeasonData()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/season-fantasy/" + playerId.ToString());
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            seasonFantasy = await JsonSerializer.DeserializeAsync<List<SeasonFantasyModel>>(responseStream, options);
-        }
-    }
-
-    private async Task GetFantasyWeeklyData()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/data/weekly/" + playerId.ToString());
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            weeklyFantasy = await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options);
-            if (seasonFantasy.Any())
-            {
-                foreach (var s in seasonFantasy)
-                {
-                    s.FantasyPoints = Math.Round(s.FantasyPoints, 2);
-                }
-            }
-        }
-    }
-
-    private async Task GetPlayerTeam()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/team/" + playerId.ToString());
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NoContent)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            team = await JsonSerializer.DeserializeAsync<PlayerTeam>(responseStream, options);
-        }
-    }
-
-    private async Task GetUpcomingGames()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/schedule/" + playerId.ToString());
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            schedule = (await JsonSerializer.DeserializeAsync<List<Schedule>>(responseStream, options)).Take(5).ToList();
-        }
-    }
-
-    private async Task GetRunningFantasyTotals()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/season-totals");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            var list = await JsonSerializer.DeserializeAsync<List<SeasonFantasy>>(responseStream, options);
-            runningTotal = list.Where(l => l.PlayerId == playerId).FirstOrDefault();
-            rank = list.Select(l => l.PlayerId).ToList().IndexOf(playerId) + 1;
-            positionRank = list.Where(l => l.Position == playerPosition).Select(l => l.PlayerId).ToList().IndexOf(playerId) + 1;
-        }
-    }
-
-    private async Task GetTrendingPlayers()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/player/trending-players");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            trendingPlayers = await JsonSerializer.DeserializeAsync<List<TrendingPlayer>>(responseStream, options);
-        }
-    }
-
-
-    #endregion
-
 }
 

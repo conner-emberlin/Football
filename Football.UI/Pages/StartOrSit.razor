@@ -1,26 +1,21 @@
 ﻿@page "/StartOrSit"
 <PageTitle>Start Or Sit</PageTitle>
-
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using System.Text;
-@using Football.Players.Models;
 @using Football.Api.Models;
 @using Football.UI.Helpers;
-@inject IHttpClientFactory ClientFactory
+@inject IRequests requests;
 
 <h4>Start or Sit Assistant</h4>
 
-<EditForm model="this" OnSubmit="PlayerSearch">
-    <TextBoxName @bind-Value="this.Name1" />
-    <TextBoxName @bind-Value="this.Name2" />
-    <TextBoxName @bind-Value="this.Name3" />
+<EditForm model="this" OnSubmit="HandleInput">
+    <TextBoxName @bind-Value="this.name1" />
+    <TextBoxName @bind-Value="this.name2" />
+    <TextBoxName @bind-Value="this.name3" />
     <button class="button-22" type="submit">Search</button>
 </EditForm>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 @if (showSubmit)
 {
-    <button class="button-22" type="submit" @onclick="Get">Submit</button>
+    <button class="button-22" type="submit" @onclick="HandleSubmit">Submit</button>
 }
 
 @if (loading)
@@ -28,7 +23,7 @@
     <div class="spinner"></div>
 }
 <div style="height:10px;font-size:1px;">&nbsp;</div>
-@if (StartOrSits.Any()  && !loading){
+@if (StartOrSits != null && StartOrSits.Any()  && !loading){
 
     <div class="table_container">
         <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
@@ -158,126 +153,84 @@
     </div>
 }
 
-else if (badRequestError){
-<text>Unexpected error. Please try again.</text>
-}
-
 @code {
-    public List<Player>? AllPlayers { get; set; } = new();
 
-    public bool badRequestError;
-    public bool youTried;
-
-    public string? Name1 { get; set; } = "";
-    public string? Name2 { get; set; } = "";
-    public string? Name3 { get; set; } = "";
-
-    public Player? Player1 { get; set; } = new();
-    public Player? Player2 { get; set; } = new();
-    public Player? Player3 { get; set; } = new();
-
-
-    public List<Player> Players { get; set; } = new();
-
-    public bool loading { get; set; } = false;
+    private bool loading { get; set; } = false;
     private bool showSubmit = false;
     private bool shouldRender;
 
-    public List<StartOrSitModel>? StartOrSits { get; set; } = new();
+    private string? name1 { get; set; } = "";
+    private string? name2 { get; set; } = "";
+    private string? name3 { get; set; } = "";
+
+    private List<SimplePlayerModel>? allPlayers { get; set; } = new();
+    private SimplePlayerModel? player1 { get; set; } = new();
+    private SimplePlayerModel? player2 { get; set; } = new();
+    private SimplePlayerModel? player3 { get; set; } = new();
+    private List<SimplePlayerModel> players { get; set; } = new();
+    private List<StartOrSitModel>? StartOrSits { get; set; } = new();
 
     private Formatter formatter = new();
 
     protected override bool ShouldRender() => shouldRender;
 
-    protected override async Task OnInitializedAsync()
-    {
-        AllPlayers = await GetAllPlayers();
-    }
+    protected override async Task OnInitializedAsync() => allPlayers = await requests.GetSimplePlayersRequest(true);
 
-    private void PlayerSearch()
+    private void HandleInput()
     {
         showSubmit = false;
-        Players.Clear();
+        players.Clear();
         if (StartOrSits.Any()) StartOrSits.Clear();
-        if (AllPlayers != null) SetPlayers();
-        if (Players.Any()) showSubmit = true;
+        if (allPlayers != null) SetPlayers();
+        if (players.Any()) showSubmit = true;
         shouldRender = true;
 
-    }
-
-    private async Task Get()
-    {
-        loading = true;
-        badRequestError = false;
-        showSubmit = false;
-
-        var ids = Players.Select(p => p.PlayerId).ToList();
-        var json = JsonSerializer.Serialize(ids);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var client = ClientFactory.CreateClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/fantasy/start-or-sit") {Content = content};
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = response.Content.ReadAsStream();
-            StartOrSits = JsonSerializer.Deserialize<List<StartOrSitModel>>(responseStream, options);
-        }
-        loading = false;
-        shouldRender = true;
     }
 
     private void SetPlayers()
     {
-        if (AllPlayers.Any())
+        if (allPlayers.Any())
         {
-            if (!string.IsNullOrEmpty(Name1))
+            if (!string.IsNullOrEmpty(name1))
             {
-                Player1 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name1.ToLower().Trim()));
-                if (Player1 != null)
+                player1 = allPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(name1.ToLower().Trim()));
+                if (player1 != null)
                 {
-                    Players.Add(Player1);
-                    Name1 = Player1.Name;
+                    players.Add(player1);
+                    name1 = player1.Name;
                 }
-                else Name1 = string.Empty;
+                else name1 = string.Empty;
             }
-            if (!string.IsNullOrEmpty(Name2))
+            if (!string.IsNullOrEmpty(name2))
             {
-                Player2 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name2.ToLower().Trim()));
-                if (Player2 != null)
+                player2 = allPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(name2.ToLower().Trim()));
+                if (player2 != null)
                 {
-                    Players.Add(Player2);
-                    Name2 = Player2.Name;
+                    players.Add(player2);
+                    name2 = player2.Name;
                 }
-                else Name2 = string.Empty;
+                else name2 = string.Empty;
             }
-            if (!string.IsNullOrEmpty(Name3))
+            if (!string.IsNullOrEmpty(name3))
             {
-                Player3 = AllPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(Name3.ToLower().Trim()));
-                if (Player3 != null)
+                player3 = allPlayers.FirstOrDefault(p => p.Name.ToLower().Contains(name3.ToLower().Trim()));
+                if (player3 != null)
                 {
-                    Players.Add(Player3);
-                    Name3 = Player3.Name;
+                    players.Add(player3);
+                    name3 = player3.Name;
                 }
-                else Name3 = string.Empty;
+                else name3 = string.Empty;
             }
             shouldRender = true;
         }
     }
 
-    private async Task<List<Player>?> GetAllPlayers()
+    private async Task HandleSubmit()
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players?active=1");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
-        }
-        return null;
+        loading = true;
+        showSubmit = false;
+        StartOrSits = await requests.PostStartOrSitRequest(players.Select(p => p.PlayerId).ToList());
+        loading = false;
+        shouldRender = true;
     }
-
 }
