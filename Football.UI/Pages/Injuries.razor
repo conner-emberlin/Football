@@ -188,7 +188,7 @@ else if (injuryEdits.Any() && !badRequestError)
     private bool adding = false;
 
     public List<PlayerInjury> injuries = new();
-    public List<InjuryEdit> injuryEdits = new();
+    private List<InjuryEdit> injuryEdits = new();
     public InSeasonInjury newInjury { get; set; } = new();
 
     public List<Player> allPlayers = new();
@@ -370,7 +370,7 @@ else if (injuryEdits.Any() && !badRequestError)
         else injuryAdded = 0;
     }
 
-    public class InjuryEdit : PlayerInjury
+    private class InjuryEdit : PlayerInjury
     {
         public bool IsEditing { get; set; }
     }

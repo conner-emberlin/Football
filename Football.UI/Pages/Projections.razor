@@ -206,6 +206,7 @@
         loading = true;
         shouldRender = true;
         count = await requests.PostSeasonProjectionRequest(PositionEnum);
+        await HandleInput();
         loading= false;
         shouldRender = true;
     }
@@ -215,6 +216,7 @@
         loading = true;
         shouldRender = true;
         adpRefreshed = await requests.PutSeasonAdpRequest(PositionEnum);
+        await HandleInput();
         loading = false;
         shouldRender = true;
     }

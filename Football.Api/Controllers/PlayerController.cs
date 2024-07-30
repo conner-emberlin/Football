@@ -12,7 +12,7 @@ namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season, IAdvancedStatisticsService advancedStatisticsService, IMapper mapper, IFantasyDataService fantasyDataService) : ControllerBase
+    public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season, IMapper mapper, IFantasyDataService fantasyDataService) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
