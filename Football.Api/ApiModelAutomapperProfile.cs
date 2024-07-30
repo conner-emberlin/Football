@@ -162,6 +162,7 @@ namespace Football.Api
                 .ForMember(w => w.Name, o => o.MapFrom(w => w.Player.Name))
                 .ForMember(w => w.Position, o => o.MapFrom(w => w.Player.Position))
                 .ForMember(w => w.Team, o => o.MapFrom(w => w.PlayerTeam != null ? w.PlayerTeam.Team : string.Empty));
+            CreateMap<Player, SimplePlayerModel>();
         }
 
     }

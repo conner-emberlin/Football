@@ -17,7 +17,7 @@ namespace Football.Api.Controllers
         private readonly Season _season = season.CurrentValue;
 
         [HttpGet("data/players")]
-        [ProducesResponseType(typeof(List<Player>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<SimplePlayerModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllPlayers([FromQuery] int active, [FromQuery] string position = "") 
         {
             var allPlayers = await playersService.GetAllPlayers();
@@ -27,7 +27,7 @@ namespace Football.Api.Controllers
                                 : position != string.Empty && active != 1 ? allPlayers.Where(p => p.Position == position)
                                 : allPlayers;
 
-            return Ok(filteredPlayers.OrderBy(p => p.Name));
+            return Ok(mapper.Map<List<SimplePlayerModel>>(filteredPlayers.OrderBy(p => p.Name)));
         }
 
         [HttpGet("{playerId}")]
@@ -86,75 +86,7 @@ namespace Football.Api.Controllers
 
         [HttpPost("add")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        public async Task<IActionResult> CreatePlayer([FromBody] Player player) => Ok(await playersService.CreatePlayer(player.Name, player.Active, player.Position));
-
-        [HttpGet("weekly-data/{playerId}")]
-        [ProducesResponseType(typeof(List<WeeklyDataModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyData(int playerId)
-        {
-            var player = await playersService.GetPlayer(playerId);
-            if (player == null) return NotFound();
-            if (!Enum.TryParse(player.Position, out Position position)) return BadRequest();
-            List<WeeklyDataModel> models = [];
-
-            models = position switch
-            {
-                Position.QB => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataQB>(position, playerId)),
-                Position.WR => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataWR>(position, playerId)),
-                Position.RB => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataRB>(position, playerId)),
-                Position.TE => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataTE>(position, playerId)),
-                Position.DST => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataDST>(position, playerId)),
-                Position.K => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyData<WeeklyDataK>(position, playerId)),
-                _ => models
-            };
-
-            return Ok(models);
-        }
-
-        [HttpGet("season-data/{playerId}")]
-        [ProducesResponseType(typeof(List<SeasonDataModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetSeasonData(int playerId)
-        {
-            var player = await playersService.GetPlayer(playerId);
-            if (player == null) return NotFound();
-            if (!Enum.TryParse(player.Position, out Position position)) return BadRequest();
-            List<SeasonDataModel> models = [];
-
-            models = position switch
-            {
-                Position.QB => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataQB>(position, playerId, true)),
-                Position.WR => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataWR>(position, playerId, true)),
-                Position.RB => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataRB>(position, playerId, true)),
-                Position.TE => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataTE>(position, playerId, true)),
-                Position.DST => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataDST>(position, playerId, true)),
-                _ => models
-            };
-
-            return Ok(models);
-        }
-
-
-        [HttpGet("team/{playerId}")]
-        [ProducesResponseType(typeof(PlayerTeam), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetPlayerTeam(int playerId) => playerId > 0 ? Ok(await playersService.GetPlayerTeam(_season.CurrentSeason, playerId)) : BadRequest();
-
-        [HttpGet("schedule/{playerId}")]
-        [ProducesResponseType(typeof(List<Schedule>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetUpcomingGames(int playerId) => playerId > 0 ? Ok(await playersService.GetUpcomingGames(playerId)) : BadRequest();
-
-        [HttpGet("schedule/weekly")]
-        [ProducesResponseType(typeof(List<Schedule>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetGames() => Ok(await playersService.GetGames(_season.CurrentSeason, await playersService.GetCurrentWeek(_season.CurrentSeason)));
-
-        [HttpGet("current-week")]
-        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetCurrentWeek() => Ok(await playersService.GetCurrentWeek(_season.CurrentSeason));
+        public async Task<IActionResult> CreatePlayer([FromBody] SimplePlayerModel player) => Ok(await playersService.CreatePlayer(player.Name, player.Active, player.Position));
 
         [HttpPost("injury")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
@@ -168,13 +100,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateInjury([FromBody] InSeasonInjury injury) => Ok(await playersService.UpdateInjury(injury));
 
+
         [HttpPost("team-change/in-season")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         public async Task<IActionResult> PostInSeasonTeamChange([FromBody] InSeasonTeamChange teamChange) => Ok(await playersService.PostInSeasonTeamChange(teamChange));
-
-        [HttpGet("advanced-stats/qb")]
-        [ProducesResponseType(typeof(List<AdvancedQBStatistics>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAdvancedQBStatistics() => Ok(await advancedStatisticsService.GetAdvancedQBStatistics());
 
         [HttpGet("snap-counts/{playerId}")]
         [ProducesResponseType(typeof(List<SnapCount>), StatusCodes.Status200OK)]
@@ -240,10 +169,6 @@ namespace Football.Api.Controllers
         [HttpGet("trending-players")]
         [ProducesResponseType(typeof(List<TrendingPlayerModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetTrendingPlayers() => Ok(mapper.Map<List<TrendingPlayerModel>>(await playersService.GetTrendingPlayers()));
-
-        [HttpPost("sleeper-map")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await playersService.UploadSleeperPlayerMap());
 
     }
 }
