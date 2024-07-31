@@ -26,4 +26,12 @@
     <ProjectReference Include="..\Football\Football.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Fantasy\" />
+    <Folder Include="Models\Operations\" />
+    <Folder Include="Models\Teams\" />
+    <Folder Include="Models\Projection\" />
+    <Folder Include="Models\Players\" />
+  </ItemGroup>
+
 </Project>

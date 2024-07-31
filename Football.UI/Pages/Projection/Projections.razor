@@ -27,9 +27,20 @@
     @if (players != null && players.Count > 0)
     {
         <td>&nbsp</td>
+        <td>
         <button class="button-22" role="button" @onclick="HandleRefresh">
         Update ADP
-    </button>
+            </button>
+        </td>
+        @if (!players.Any(p => p.CanDelete) && PositionEnum != "FLEX")
+        {
+            <td>&nbsp</td>
+            <td>
+            <button class="button-22" role="button" @onclick="HandleUpload">
+                Upload Projections
+            </button>
+            </td>
+        }
     }
 </tr>
 
@@ -42,13 +53,6 @@
 
 @if(players != null && players.Count > 0)
 {
-    @if (!players.Any(p => p.CanDelete) && PositionEnum != "FLEX")
-    {
-    <button class="button-22" role = "button" @onclick="HandleUpload">
-        Upload
-    </button>
-    }
-
     @if(count > 0)
     {
         <p>@count records added </p>

@@ -106,10 +106,11 @@
     public bool loading { get; set; } = false;
     public bool badRequestError { get; set; } = false;
     private bool shouldRender;
-    protected override bool ShouldRender() => shouldRender;
 
-    public TableSort tableSort = new();
-    public Formatter format = new();
+    private TableSort tableSort = new();
+    private Formatter format = new();
+
+    protected override bool ShouldRender() => shouldRender;
 
     private void SetPosition(ChangeEventArgs args)
     {
