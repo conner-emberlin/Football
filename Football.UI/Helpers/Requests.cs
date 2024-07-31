@@ -1,4 +1,8 @@
-﻿using Football.Api.Models;
+﻿using Football.Api.Models.Fantasy;
+using Football.Api.Models.Operations;
+using Football.Api.Models.Players;
+using Football.Api.Models.Projection;
+using Football.Api.Models.Teams;
 using Football.Enums;
 using System.Text;
 using System.Text.Json;

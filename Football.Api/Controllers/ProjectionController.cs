@@ -5,8 +5,8 @@ using Football.Projections.Interfaces;
 using Football.Projections.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Football.Api.Models;
 using AutoMapper;
+using Football.Api.Models.Projection;
 
 namespace Football.Api.Controllers
 {

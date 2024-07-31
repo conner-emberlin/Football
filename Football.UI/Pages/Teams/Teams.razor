@@ -1,7 +1,8 @@
 ﻿@page "/Teams/{id?}"
 <PageTitle>Teams</PageTitle>
 @using Football.UI.Helpers;
-@using Football.Api.Models;
+@using Football.Api.Models.Teams;
+@using Football.Api.Models.Fantasy;
 @inject IRequests requests;
 
 @if (!badRequestError && teams.Any())

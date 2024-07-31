@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Football.Models;
 using Football.Enums;
-using Football.Api.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using AutoMapper;
 using Football.Fantasy.Interfaces;
+using Football.Api.Models.Players;
+using Football.Api.Models.Fantasy;
 
 namespace Football.Api.Controllers
 {

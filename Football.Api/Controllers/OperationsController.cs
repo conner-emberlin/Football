@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Football.Api.Models;
 using Football.Data.Interfaces;
 using Football.Enums;
 using Football.Models;
@@ -7,6 +6,7 @@ using Football.Fantasy.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Football.Players.Interfaces;
+using Football.Api.Models.Operations;
 
 namespace Football.Api.Controllers
 {

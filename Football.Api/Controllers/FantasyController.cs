@@ -4,9 +4,9 @@ using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Football.Api.Models;
 using Football.Players.Interfaces;
 using AutoMapper;
+using Football.Api.Models.Fantasy;
 
 namespace Football.Api.Controllers
 {
