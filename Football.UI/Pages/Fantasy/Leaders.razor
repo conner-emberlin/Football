@@ -21,7 +21,7 @@
 @if (currentLeaders != null && (!youTried || showAll) && !loading)
 {
     <div class="table_container">
-        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+        <table class="base_table">
             <thead>
                 <tr>                 
                     <th></th>  
@@ -51,7 +51,7 @@
 else if(youTried && filterRunning && filteredLeaders != null && filteredLeaders.Any() && !loading)
 {
     <div class="table_container">
-        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+        <table class="base_table">
             <thead>
                 <tr>
                     <th></th>    
@@ -81,7 +81,7 @@ else if(youTried && filterRunning && filteredLeaders != null && filteredLeaders.
 else if(youTried && filterWeekly && weeklyResults != null && weeklyResults.Any() && !loading)
 {
         <div class="table_container">
-        <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+        <table class="base_table">
         <thead>
             <tr>
                 <th></th>

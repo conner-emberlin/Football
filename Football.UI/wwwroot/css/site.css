@@ -138,7 +138,7 @@ a, .btn-link {
         content: "An error has occurred."
     }
 
-table.boostrap4_table_head_dark_striped_rounded_with_shadow {
+table.base_table {
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
@@ -152,7 +152,7 @@ table.boostrap4_table_head_dark_striped_rounded_with_shadow {
     border-radius: 10px;
 }
 
-    table.boostrap4_table_head_dark_striped_rounded_with_shadow thead th {
+    table.base_table thead th {
         font-size: 1rem;
         line-height: 1.5;
         border-collapse: collapse;
@@ -166,37 +166,37 @@ table.boostrap4_table_head_dark_striped_rounded_with_shadow {
         border-color: #32383e;
     }
 
-table.boostrap4_table_head_dark_striped_rounded_with_shadow td {
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: #212529;
-    text-align: left;
-    border-collapse: collapse;
-    box-sizing: border-box;
-    padding: .75rem;
-    vertical-align: top;
-}
+    table.base_table td {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #212529;
+        text-align: left;
+        border-collapse: collapse;
+        box-sizing: border-box;
+        padding: .75rem;
+        vertical-align: top;
+    }
 
-table.boostrap4_table_head_dark_striped_rounded_with_shadow tbody tr:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, .05);
-}
+    table.base_table tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, .05);
+    }
 
-table.boostrap4_table_head_dark_striped_rounded_with_shadow th:first-of-type {
-    border-top-left-radius: 10px;
-}
+    table.base_table th:first-of-type {
+        border-top-left-radius: 10px;
+    }
 
-table.boostrap4_table_head_dark_striped_rounded_with_shadow th:last-of-type {
-    border-top-right-radius: 10px;
-}
+    table.base_table th:last-of-type {
+        border-top-right-radius: 10px;
+    }
 
-table.boostrap4_table_head_dark_striped_rounded_with_shadow tr:last-of-type td:first-of-type {
-    border-bottom-left-radius: 10px;
-}
+    table.base_table tr:last-of-type td:first-of-type {
+        border-bottom-left-radius: 10px;
+    }
 
-table.boostrap4_table_head_dark_striped_rounded_with_shadow tr:last-of-type td:last-of-type {
-    border-bottom-right-radius: 10px;
-}
+    table.base_table tr:last-of-type td:last-of-type {
+        border-bottom-right-radius: 10px;
+    }
 
 
 input[type="radio"] {

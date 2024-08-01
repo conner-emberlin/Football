@@ -56,7 +56,7 @@
 
         <div class="table_container">
 
-            <table class="boostrap4_table_head_dark_striped_rounded_with_shadow">
+            <table class="base_table">
                 <thead>
                     <tr>
                         <th></th>
@@ -100,11 +100,14 @@
                         <td><a class="page-links" href="@PlayerPage(dstTeam.PlayerId)">@dstTeam.Name</a>: @dstTeam.FantasyPoints</td>
                         <td><a class="page-links" href="@PlayerPage(dstOpp.PlayerId)">@dstOpp.Name</a>: @dstOpp.FantasyPoints</td>
                     </tr>
+                    
                     @if (kTeam != null && kOpp != null)
                     {
-                    <td><b style="color:@form.PositionColor("K")">K</b></td>
-                    <td><a class="page-links" href="@PlayerPage(kTeam.PlayerId)">@kTeam.Name</a>: @kTeam.FantasyPoints</td>
-                    <td><a class="page-links" href="@PlayerPage(kOpp.PlayerId)">@kOpp.Name</a>: @kOpp.FantasyPoints</td>
+                    <tr>
+                        <td><b style="color:@form.PositionColor("K")">K</b></td>
+                        <td><a class="page-links" href="@PlayerPage(kTeam.PlayerId)">@kTeam.Name</a>: @kTeam.FantasyPoints</td>
+                        <td><a class="page-links" href="@PlayerPage(kOpp.PlayerId)">@kOpp.Name</a>: @kOpp.FantasyPoints</td>
+                    </tr>
                     }
                 </tbody>                                          
             </table>
