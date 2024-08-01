@@ -3,7 +3,8 @@
 @using Football.Enums;
 @using Football.UI.Helpers;
 @using Football.Api.Models.Fantasy;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IFantasyService fantasyService;
 
 <h4>Market Share</h4>
 
@@ -118,7 +119,7 @@
         loading = true;
         marketShare?.Clear();
         shouldRender = true;
-        marketShare = await requests.GetMarketShareRequest(positionEnum.ToString());
+        marketShare = await fantasyService.GetMarketShareRequest(positionEnum.ToString());
         loading = false;
         shouldRender = true;
     }

@@ -1,6 +1,7 @@
 ﻿@page "/ManageSettings"
 @using Football.Api.Models.Operations;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IOperationsService operationsService;
 <PageTitle>Settings</PageTitle>
 
 
@@ -399,8 +400,8 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
     private async Task HandleSeasonTuningsUpdate()
     {
         loading = true;
-        tuningsUpdated = await requests.PostSeasonTuningsRequest(tunings);
-        tunings = await requests.GetSeasonTuningsRequest();
+        tuningsUpdated = await operationsService.PostSeasonTuningsRequest(tunings);
+        tunings = await operationsService.GetSeasonTuningsRequest();
         loading= false;
         shouldRender = true;
     }
@@ -409,8 +410,8 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
     {
         
         loading = true;
-        weeklyTuningsUpdated = await requests.PostSeasonTuningsRequest(tunings);
-        weeklyTunings = await requests.GetWeeklyTuningsRequest();
+        weeklyTuningsUpdated = await operationsService.PostSeasonTuningsRequest(tunings);
+        weeklyTunings = await operationsService.GetWeeklyTuningsRequest();
         loading = false;
         shouldRender = true;
 
@@ -426,12 +427,12 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
         }
         else if(Setting == "Season Tunings")
         {
-            tunings = await requests.GetSeasonTuningsRequest();
+            tunings = await operationsService.GetSeasonTuningsRequest();
             seasonTuningsSetting = true;
         }
         else if (Setting == "Weekly Tunings")
         {
-            weeklyTunings = await requests.GetWeeklyTuningsRequest();
+            weeklyTunings = await operationsService.GetWeeklyTuningsRequest();
             weeklyTuningsSetting = true;          
         }
 

@@ -1,6 +1,7 @@
 ﻿@using Football.UI.Helpers;
 @using Football.Api.Models.Fantasy;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IFantasyService fantasyService;
 @page "/Leaders/"
 
 <h4>Fantasy Leaders</h4>
@@ -129,7 +130,7 @@ else if(youTried && filterWeekly && weeklyResults != null && weeklyResults.Any()
     protected override async Task OnInitializedAsync()
     {
         loading = true;
-        currentLeaders = await requests.GetSeasonTotalsRequest();
+        currentLeaders = await fantasyService.GetSeasonTotalsRequest();
         loading = false;
         shouldRender = true;
     }
@@ -145,18 +146,18 @@ else if(youTried && filterWeekly && weeklyResults != null && weeklyResults.Any()
         if (!string.IsNullOrEmpty(week))
         {
             filterWeekly = true;
-            weeklyResults = (await requests.GetWeeklyFantasyRequest(week, season)).OrderByDescending(p => p.FantasyPoints).ToList();
+            weeklyResults = (await fantasyService.GetWeeklyFantasyRequest(week, season)).OrderByDescending(p => p.FantasyPoints).ToList();
             weeklyResults = !string.IsNullOrEmpty(position) ? weeklyResults.Where(w => w.Position.ToLower() == position.Trim().ToLower()).ToList() : weeklyResults;
         }
         else if(string.IsNullOrEmpty(week) && !string.IsNullOrEmpty(position))
         {
             filterRunning = true;
-            currentLeaders = await requests.GetSeasonTotalsRequest(season);
+            currentLeaders = await fantasyService.GetSeasonTotalsRequest(season);
             filteredLeaders = currentLeaders.Where(c => c.Position.ToLower() == position.ToLower()).ToList();
         }
         else
         {
-            currentLeaders = (await requests.GetSeasonTotalsRequest(season)).OrderByDescending(s => s.FantasyPoints).ToList();
+            currentLeaders = (await fantasyService.GetSeasonTotalsRequest(season)).OrderByDescending(s => s.FantasyPoints).ToList();
             showAll = true;
         }
 

@@ -3,7 +3,8 @@
 @using Football.Enums;
 @using Football.UI.Helpers;
 @using Football.Api.Models.Fantasy;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IFantasyService fantasyService;
 
 <h4>Snap Count Analysis</h4>
 
@@ -117,7 +118,7 @@
         loading = true;
         if (snapCounts != null) snapCounts.Clear();
         shouldRender = true;
-        snapCounts = (await requests.SnapCountAnalysisRequest(positionEnum.ToString())).OrderByDescending(s => s.TotalSnaps).ToList();
+        snapCounts = (await fantasyService.SnapCountAnalysisRequest(positionEnum.ToString())).OrderByDescending(s => s.TotalSnaps).ToList();
         loading = false;
         shouldRender = true;
     }

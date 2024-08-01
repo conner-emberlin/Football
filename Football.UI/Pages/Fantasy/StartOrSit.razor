@@ -3,7 +3,9 @@
 @using Football.UI.Helpers;
 @using Football.Api.Models.Fantasy;
 @using Football.Api.Models.Players;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IFantasyService fantasyService;
+@inject IPlayersService playersService;
 
 <h4>Start or Sit Assistant</h4>
 
@@ -175,7 +177,7 @@
 
     protected override bool ShouldRender() => shouldRender;
 
-    protected override async Task OnInitializedAsync() => allPlayers = await requests.GetSimplePlayersRequest(true);
+    protected override async Task OnInitializedAsync() => allPlayers = await playersService.GetSimplePlayersRequest(true);
 
     private void HandleInput()
     {
@@ -230,7 +232,7 @@
     {
         loading = true;
         showSubmit = false;
-        StartOrSits = await requests.PostStartOrSitRequest(players.Select(p => p.PlayerId).ToList());
+        StartOrSits = await fantasyService.PostStartOrSitRequest(players.Select(p => p.PlayerId).ToList());
         loading = false;
         shouldRender = true;
     }

@@ -1,5 +1,6 @@
 ﻿@using Football.Api.Models.Players;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IPlayersService playersService;
 @page "/AddRookie/"
 
 @if (loading)
@@ -87,7 +88,7 @@ else
     {
         adding = false;
         loading = true;
-        rookieAdded = await requests.CreateRookieRequest(player);
+        rookieAdded = await playersService.CreateRookieRequest(player);
         loading = false;
     }
 

@@ -3,7 +3,8 @@
 @using Football.UI.Helpers;
 @using Football.Api.Models.Teams;
 @using Football.Api.Models.Fantasy;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject ITeamsService teamsService;
 
 @if (!badRequestError && teams.Any())
 {
@@ -274,9 +275,9 @@ else if (badRequestError)
     {
         loading = true;
         shouldRender = true;
-        teams = await requests.GetAllTeamsRequest();
-        teamRecords = await requests.GetTeamRecordsRequest();
-        gameResults = await requests.GetGameResultsRequest();  
+        teams = await teamsService.GetAllTeamsRequest();
+        teamRecords = await teamsService.GetTeamRecordsRequest();
+        gameResults = await teamsService.GetGameResultsRequest();  
 
         if (!String.IsNullOrEmpty(id))
         {
@@ -286,7 +287,7 @@ else if (badRequestError)
         else
         {
             showSchedule = true;
-            scheduleDetails = await requests.GetScheduleDetailsRequest();
+            scheduleDetails = await teamsService.GetScheduleDetailsRequest();
         }
         loading = false;
         shouldRender = true;
@@ -309,7 +310,7 @@ else if (badRequestError)
         teamGameResults = gameResults.Where(g => g.WinnerId == tid || g.LoserId == tid).OrderBy(g => g.Week).ToList();
         teamRecord = teamRecords.FirstOrDefault(t => t.TeamId == tid);
 
-        SetFantasyPerformances(await requests.GetFantasyPerformancesRequest(tid));
+        SetFantasyPerformances(await teamsService.GetFantasyPerformancesRequest(tid));
 
         selectedTeam = teamChosen.TeamDescription;
         teamSelected = true;

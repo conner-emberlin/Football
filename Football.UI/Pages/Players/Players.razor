@@ -2,7 +2,8 @@
 <PageTitle>Players</PageTitle>
 @using Football.UI.Helpers;
 @using Football.Api.Models.Players;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IPlayersService playersService;
 @inject NavigationManager NavigationManager
 
 @if (players.Any())
@@ -800,7 +801,7 @@ else if (!loading && !playerSelected)
     {
         loading = true;
         shouldRender = true;
-        players = (await requests.GetSimplePlayersRequest()).OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
+        players = (await playersService.GetSimplePlayersRequest()).OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
         if (!String.IsNullOrEmpty(id))
         {
             SelectPlayer(int.Parse(id));
@@ -809,7 +810,7 @@ else if (!loading && !playerSelected)
         else
         {
             showTrending = true;
-            trendingPlayers = await requests.GetTrendingPlayersRequest();
+            trendingPlayers = await playersService.GetTrendingPlayersRequest();
         }
         loading = false;
         shouldRender = true;
@@ -829,7 +830,7 @@ else if (!loading && !playerSelected)
         selectedPlayer = "";
         playerId = pid;
 
-        playerData = await requests.GetPlayerDataRequest(playerId);
+        playerData = await playersService.GetPlayerDataRequest(playerId);
 
         playerSelected = true;
         selectedPlayer = playerData != null ? playerData.Name : string.Empty;

@@ -1,6 +1,7 @@
 ﻿@using Football.UI.Helpers;
 @using Football.Api.Models.Fantasy;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IFantasyService fantasyService;
 @page "/WaiverWire/"
 
 @if (loading)
@@ -60,7 +61,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         loading = true;
-        candidates = (await requests.GetWaiverWireCandidatesRequest()).OrderByDescending(c => c.RosteredPercentage).ToList();
+        candidates = (await fantasyService.GetWaiverWireCandidatesRequest()).OrderByDescending(c => c.RosteredPercentage).ToList();
         loading = false;
         shouldRender = true;
     }

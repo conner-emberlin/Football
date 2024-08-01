@@ -3,7 +3,8 @@
 @using Football.Enums;
 @using Football.UI.Helpers;
 @using Football.Api.Models.Fantasy;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IFantasyService fantasyService;
 
 <h4>Matchup Rankings</h4>
 
@@ -94,7 +95,7 @@
         loading = true;
         Rankings?.Clear();
         shouldRender = true;
-        Rankings = await requests.GetMatchupRankingsRequest(positionEnum.ToString());
+        Rankings = await fantasyService.GetMatchupRankingsRequest(positionEnum.ToString());
         loading = false;
         shouldRender = true;
     }

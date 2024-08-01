@@ -3,7 +3,8 @@
 @using Football.Enums;
 @using Football.UI.Helpers;
 @using Football.Api.Models.Projection;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IProjectionService projectionService;
 
 <h4>@GetHeader()</h4>
 
@@ -74,7 +75,7 @@
         loading = true;
         projectionErrors?.Clear();
         shouldRender = true;
-        projectionErrors = await requests.GetWeeklyProjectionErrorRequest(position, week);
+        projectionErrors = await projectionService.GetWeeklyProjectionErrorRequest(position, week);
         loading = false;
         shouldRender = true;
     }

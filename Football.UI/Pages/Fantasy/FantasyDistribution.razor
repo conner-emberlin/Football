@@ -3,8 +3,8 @@
 @using Football.Enums;
 @using Football.UI.Helpers;
 @using Football.Api.Models.Fantasy;
-@inject IRequests requests;
-
+@using Football.UI.Interfaces;
+@inject IFantasyService fantasyService;
 <h4>Fantasy Distribution</h4>
 
 <div>
@@ -151,7 +151,7 @@
         loading = true;
         fantasyShare?.Clear();
         shouldRender = true;
-        fantasyShare = await requests.GetFantasyPercentageRequest(positionEnum.ToString());
+        fantasyShare = await fantasyService.GetFantasyPercentageRequest(positionEnum.ToString());
         loading = false;
         shouldRender = true;
     }

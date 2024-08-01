@@ -2,7 +2,8 @@
 <PageTitle>Weekly Projections</PageTitle>
 @using Football.UI.Helpers;
 @using Football.Api.Models.Projection;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IProjectionService projectionService;
 
 <h4>Weekly Projections</h4>
 <div>
@@ -115,7 +116,7 @@ else if (players != null && players.Count > 0)
         shouldRender = true;
         players?.Clear();
         PositionEnum = format.SetPosition(Position);
-        players = (await requests.GetWeekProjectionsRequest(PositionEnum)).OrderByDescending(p => p.ProjectedPoints).Where(p => p.ProjectedPoints > 0).ToList();
+        players = (await projectionService.GetWeekProjectionsRequest(PositionEnum)).OrderByDescending(p => p.ProjectedPoints).Where(p => p.ProjectedPoints > 0).ToList();
         loading = false;
         shouldRender = true;
     }
@@ -124,7 +125,7 @@ else if (players != null && players.Count > 0)
     {
         loading = true;
         shouldRender = true;
-        count = await requests.PostWeekProjectionRequest(PositionEnum);
+        count = await projectionService.PostWeekProjectionRequest(PositionEnum);
         loading = false;
         shouldRender = true;
     }
@@ -132,7 +133,7 @@ else if (players != null && players.Count > 0)
     public async Task HandleDelete(int playerId, int season, int week)
     {
         loading = true;
-        recordDeleted = await requests.DeleteWeekProjectionRequest(playerId, season, week);
+        recordDeleted = await projectionService.DeleteWeekProjectionRequest(playerId, season, week);
         await HandleSubmit();
         shouldRender = true;
     }

@@ -2,7 +2,9 @@
 <PageTitle>Season Projections</PageTitle>
 @using Football.UI.Helpers;
 @using Football.Api.Models.Projection;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IOperationsService operationsService;
+@inject IProjectionService projectionService;
 
 <h4>Season Projections</h4>
 <div>
@@ -190,7 +192,7 @@
         players?.Clear();
         adpRefreshed = 0;
         PositionEnum = format.SetPosition(Position);
-        players = await requests.GetSeasonProjectionsRequest(PositionEnum);
+        players = await projectionService.GetSeasonProjectionsRequest(PositionEnum);
         loading = false;
         shouldRender = true;
     }
@@ -199,7 +201,7 @@
     {
         loading = true;
         shouldRender = true;
-        recordDeleted = await requests.DeleteSeasonProjectionRequest(playerId, season);
+        recordDeleted = await projectionService.DeleteSeasonProjectionRequest(playerId, season);
         await HandleInput();
         loading = false;
         shouldRender = true;
@@ -209,7 +211,7 @@
     {
         loading = true;
         shouldRender = true;
-        count = await requests.PostSeasonProjectionRequest(PositionEnum);
+        count = await projectionService.PostSeasonProjectionRequest(PositionEnum);
         await HandleInput();
         loading= false;
         shouldRender = true;
@@ -219,7 +221,7 @@
     {
         loading = true;
         shouldRender = true;
-        adpRefreshed = await requests.PutSeasonAdpRequest(PositionEnum);
+        adpRefreshed = await operationsService.PutSeasonAdpRequest(PositionEnum);
         await HandleInput();
         loading = false;
         shouldRender = true;

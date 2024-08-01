@@ -1,6 +1,7 @@
 ﻿@using Football.UI.Helpers;
 @using Football.Api.Models.Fantasy;
-@inject IRequests requests;
+@using Football.UI.Interfaces;
+@inject IFantasyService fantasyService;
 
 @page "/TargetShare"
 <PageTitle>Target Share</PageTitle>
@@ -76,7 +77,7 @@
     {
         loading = true;
         shouldRender = true;
-        targetShare = await requests.GetTargetShareRequest();
+        targetShare = await fantasyService.GetTargetShareRequest();
         loading = false;
         shouldRender = true;
     }
