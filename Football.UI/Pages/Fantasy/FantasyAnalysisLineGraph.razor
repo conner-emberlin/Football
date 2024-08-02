@@ -1,10 +1,10 @@
 ﻿@page "/fantasy-graph/{id}"
 <PageTitle>Fantasy Trends</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Fantasy.Models;
+
+@using Football.UI.Interfaces;
+@using Football.Api.Models.Fantasy;
 @using ApexCharts;
-@inject IHttpClientFactory ClientFactory
+@inject IFantasyService fantasyService;
 
 @if (loading)
 {
@@ -21,9 +21,9 @@ else
 
 @if (fantasy.Any())
 {
-    <ApexChart TItem="WeeklyFantasy"
+    <ApexChart TItem="WeeklyFantasyModel"
     Height="400">
-        <ApexPointSeries TItem="WeeklyFantasy"
+        <ApexPointSeries TItem="WeeklyFantasyModel"
         Items="fantasy"
         Name="Fantasy Pts"
         SeriesType="SeriesType.Line"
@@ -38,38 +38,28 @@ else
 
     private bool loading { get; set; } = false;
     private bool shouldRender;
-    public bool youTried = false;
+    private bool youTried = false;
+
+    private List<WeeklyFantasyModel>? fantasy = new();
+    private string name { get; set; } = "";
+
     protected override bool ShouldRender() => shouldRender;
-
-    public List<WeeklyFantasy>? fantasy = new();
-    public string name { get; set; } = "";
-
 
     protected override async Task OnInitializedAsync()
     {
         loading = true;
         shouldRender = true;
         youTried = true;
-
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/data/weekly/" + id);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
+        fantasy = await fantasyService.GetWeeklyFantasyByPlayerRequest(id);
+        if (fantasy.Any())
         {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            fantasy = await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options);
-            if (fantasy.Any())
-            {
-                fantasy = fantasy.OrderBy(f => f.Week).ToList();
-                name = fantasy.Select(f => f.Name).First();
-            }
+            fantasy = fantasy.OrderBy(f => f.Week).ToList();
+            name = fantasy.Select(f => f.Name).First();
         }
 
         loading = false;
         shouldRender = true;
     }
 
-    public string Title() => "Fantasy Trends for " + name;
+    private string Title() => "Fantasy Trends for " + name;
 }

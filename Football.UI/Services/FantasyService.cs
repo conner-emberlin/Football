@@ -13,6 +13,7 @@ namespace Football.UI.Services
         public async Task<List<MarketShareModel>?> GetMarketShareRequest(string position) => await requests.Get<List<MarketShareModel>?>("/fantasy/marketshare/" + position);
         public async Task<List<StartOrSitModel>?> PostStartOrSitRequest(List<int> playerIds) => await requests.Post<List<StartOrSitModel>?, List<int>>("/fantasy/start-or-sit", playerIds);
         public async Task<List<WaiverWireCandidateModel>?> GetWaiverWireCandidatesRequest() => await requests.Get<List<WaiverWireCandidateModel>?>("/fantasy/waiver-wire");
+        public async Task<List<WeeklyFantasyModel>?> GetWeeklyFantasyByPlayerRequest(string id) => await requests.Get<List<WeeklyFantasyModel>?>("/fantasy/data/weekly/" + id);
 
         public async Task<List<SeasonFantasyModel>?> GetSeasonTotalsRequest(string season = "")
         {

@@ -14,5 +14,6 @@ namespace Football.UI.Interfaces
         public Task<List<MarketShareModel>?> GetMarketShareRequest(string position);        
         public Task<List<StartOrSitModel>?> PostStartOrSitRequest(List<int> playerIds);
         public Task<List<WaiverWireCandidateModel>?> GetWaiverWireCandidatesRequest();
+        public Task<List<WeeklyFantasyModel>?> GetWeeklyFantasyByPlayerRequest(string playerId);
     }
 }

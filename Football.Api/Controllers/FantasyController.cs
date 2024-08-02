@@ -43,9 +43,9 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetSeasonFantasy(int playerId) => playerId > 0 ? Ok(mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetSeasonFantasy(playerId))) : BadRequest();
 
         [HttpGet("data/weekly/{playerId}")]
-        [ProducesResponseType(typeof(List<WeeklyFantasy>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<WeeklyFantasyModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyFantasy(int playerId) => playerId > 0 ? Ok(await fantasyDataService.GetWeeklyFantasy(playerId)) : BadRequest();
+        public async Task<IActionResult> GetWeeklyFantasy(int playerId) => playerId > 0 ? Ok(mapper.Map<List<WeeklyFantasyModel>>(await fantasyDataService.GetWeeklyFantasy(playerId))) : BadRequest();
 
         [HttpGet("data/weekly/leaders/{week}")]
         [ProducesResponseType(typeof(List<WeeklyFantasyModel>), StatusCodes.Status200OK)]
