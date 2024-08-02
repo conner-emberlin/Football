@@ -1,8 +1,9 @@
 ﻿@page "/FantasyDistribution"
 <PageTitle>Market Share</PageTitle>
 @using Football.UI.Helpers;
-@using Football.Api.Models.Fantasy;
 @using Football.UI.Interfaces;
+@using Football.Api.Models.Fantasy;
+
 @inject IFantasyService fantasyService;
 <h4>Fantasy Distribution</h4>
 
@@ -128,7 +129,7 @@
 
 @code {
     public string Position { get; set; } = "Quarterback";
-    public string positionEnum { get; set; } = "";
+    public string positionEnum { get; set; } = "QB";
 
     public List<FantasyPercentageModel>? fantasyShare = new();
 

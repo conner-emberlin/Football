@@ -1,10 +1,12 @@
 ﻿@page "/dist-graph/{position}/{id}"
 <PageTitle>Fantasy Distribution</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Fantasy.Models;
+
+@using Football.UI.Interfaces;
+@using Football.Api.Models.Fantasy;
+
 @using ApexCharts;
-@inject IHttpClientFactory ClientFactory
+
+@inject IFantasyService fantasyService;
 
 
 @if (loading)
@@ -19,7 +21,7 @@ else{
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 
-@if (playerPercentage != null && youTried && !badRequestError && distributions.Any())
+@if (playerPercentage != null && youTried && distributions.Any())
 {
     <ApexChart TItem="Distribution"
                Height="500">
@@ -35,12 +37,6 @@ else{
 
 }
 
-else if((youTried && badRequestError) || (youTried && playerPercentage == null))
-{
-    <text>Something went wrong.</text>
-}
-
-
 @code {
 
     [Parameter]
@@ -48,19 +44,16 @@ else if((youTried && badRequestError) || (youTried && playerPercentage == null))
     [Parameter]
     public string position { get; set; } = "";
 
-    public string name { get; set; } = "";
+    private string name { get; set; } = "";
 
-    public List<Football.Fantasy.Models.FantasyPercentage>? fantasyPercentages = new();
-    public Football.Fantasy.Models.FantasyPercentage? playerPercentage = new();
-    public List<Distribution> distributions = new();
+    private List<FantasyPercentageModel>? fantasyPercentages = new();
+    private FantasyPercentageModel? playerPercentage = new();
+    private List<Distribution> distributions = new();
 
-    public bool loading { get; set; } = false;
-    public bool badRequestError { get; set; } = false;
+    private bool loading { get; set; } = false;
+    private bool youTried = false;
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
-
-    public bool youTried = false;
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,49 +61,35 @@ else if((youTried && badRequestError) || (youTried && playerPercentage == null))
         shouldRender = true;
         youTried = true;
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/shares/" + position);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
+        fantasyPercentages = await fantasyService.GetFantasyPercentageRequest(position);
+        playerPercentage = fantasyPercentages != null ? fantasyPercentages.FirstOrDefault(f => f.PlayerId == int.Parse(id)) : null;
+        if (playerPercentage != null)
         {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            fantasyPercentages = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Models.FantasyPercentage>>(responseStream, options);
-            playerPercentage = fantasyPercentages.FirstOrDefault(f => f.PlayerId == int.Parse(id));
+            name = playerPercentage.Name;
 
-            if (playerPercentage != null)
+            if (playerPercentage.Position == "QB")
             {
-                name = playerPercentage.Name;
-
-                if (playerPercentage.Position == "QB")
-                {
-                    distributions.Add(new Distribution { Label = "PassYd%", Value = (decimal)(100 * playerPercentage.PassYDShare) });
-                    distributions.Add(new Distribution { Label = "PassTD%", Value = (decimal)(100 * playerPercentage.PassTDShare) });
-                    distributions.Add(new Distribution { Label = "RushYd%", Value = (decimal)(100 * playerPercentage.RushYDShare) });
-                    distributions.Add(new Distribution { Label = "RushTD%", Value = (decimal)(100 * playerPercentage.RushTDShare) });
-                }
-                else
-                {
-                    distributions.Add(new Distribution { Label = "RushYd%", Value = (decimal)(100 * playerPercentage.RushYDShare) });
-                    distributions.Add(new Distribution { Label = "RushTD%", Value = (decimal)(100 * playerPercentage.RushTDShare) });
-                    distributions.Add(new Distribution { Label = "Rec%", Value = (decimal)(100 * playerPercentage.RecShare) });
-                    distributions.Add(new Distribution { Label = "RecYd%", Value = (decimal)(100 * playerPercentage.RecYDShare) });
-                    distributions.Add(new Distribution { Label = "RecTD%", Value = (decimal)(100 * playerPercentage.RecTDShare) });
-
-                }
+                distributions.Add(new Distribution { Label = "PassYd%", Value = (decimal)(100 * playerPercentage.PassYDShare) });
+                distributions.Add(new Distribution { Label = "PassTD%", Value = (decimal)(100 * playerPercentage.PassTDShare) });
+                distributions.Add(new Distribution { Label = "RushYd%", Value = (decimal)(100 * playerPercentage.RushYDShare) });
+                distributions.Add(new Distribution { Label = "RushTD%", Value = (decimal)(100 * playerPercentage.RushTDShare) });
             }
-            badRequestError = false;
+            else
+            {
+                distributions.Add(new Distribution { Label = "RushYd%", Value = (decimal)(100 * playerPercentage.RushYDShare) });
+                distributions.Add(new Distribution { Label = "RushTD%", Value = (decimal)(100 * playerPercentage.RushTDShare) });
+                distributions.Add(new Distribution { Label = "Rec%", Value = (decimal)(100 * playerPercentage.RecShare) });
+                distributions.Add(new Distribution { Label = "RecYd%", Value = (decimal)(100 * playerPercentage.RecYDShare) });
+                distributions.Add(new Distribution { Label = "RecTD%", Value = (decimal)(100 * playerPercentage.RecTDShare) });
+
+            }
         }
-        else
-        {
-            badRequestError = true;
-        }
+
         loading = false;
         shouldRender = true;
     }
 
-    public class Distribution
+    private class Distribution
     {
         public string Label { get; set; } = "";
         public decimal Value { get; set; } 
