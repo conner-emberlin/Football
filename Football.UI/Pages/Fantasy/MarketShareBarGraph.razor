@@ -1,11 +1,11 @@
 ﻿@page "/share-graph/{position}/{id}"
 <PageTitle>Market Shares</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Fantasy.Models;
-@using ApexCharts;
-@inject IHttpClientFactory ClientFactory
 
+@using Football.UI.Interfaces;
+@using Football.Api.Models.Fantasy;
+@using ApexCharts;
+
+@inject IFantasyService fantasyService;
 
 @if (loading)
 {
@@ -49,19 +49,18 @@ else if ((youTried && badRequestError) || (youTried && playerShare == null))
     [Parameter]
     public string position { get; set; } = "";
 
-    public string name { get; set; } = "";
+    private string name { get; set; } = "";
 
-    public List<Football.Fantasy.Models.MarketShare>? allShares = new();
-    public Football.Fantasy.Models.MarketShare? playerShare = new();
-    public List<Share> shares = new();
+    private List<MarketShareModel>? allShares = new();
+    private MarketShareModel? playerShare = new();
+    private List<Share> shares = new();
 
-    public bool loading { get; set; } = false;
-    public bool badRequestError { get; set; } = false;
+    private bool loading { get; set; } = false;
+    private bool badRequestError { get; set; } = false;
     private bool shouldRender;
+    private bool youTried = false;
+
     protected override bool ShouldRender() => shouldRender;
-
-    public bool youTried = false;
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -69,33 +68,18 @@ else if ((youTried && badRequestError) || (youTried && playerShare == null))
         shouldRender = true;
         youTried = true;
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Fantasy/marketshare/" + position);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
+        allShares = await fantasyService.GetMarketShareRequest(position);
+        playerShare = allShares != null ? allShares.FirstOrDefault(f => f.PlayerId == int.Parse(id)) : null;
+        if (playerShare != null)
         {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            allShares = await JsonSerializer.DeserializeAsync<List<Football.Fantasy.Models.MarketShare>>(responseStream, options);
-            playerShare = allShares.FirstOrDefault(f => f.Player.PlayerId == int.Parse(id));
-
-            if (playerShare != null)
-            {
-                name = playerShare.Player.Name;
-                shares.Add(new Share { Label = playerShare.Player.Position + "Fantasy%", Value = (decimal)(100 * playerShare.FantasyShare) });
-                shares.Add(new Share { Label = "RushAtt%", Value = (decimal)(100 * playerShare.RushAttShare) });
-                shares.Add(new Share { Label = "RushYd%", Value = (decimal)(100 * playerShare.RushYdShare) });
-                shares.Add(new Share { Label = "Target%", Value = (decimal)(100 * playerShare.TargetShare) });
-                shares.Add(new Share { Label = "Rec%", Value = (decimal)(100 * playerShare.ReceptionShare) });
-                shares.Add(new Share { Label = "RecYd%", Value = (decimal)(100 * playerShare.RecYdShare) });
-                shares.Add(new Share { Label = "RecTD%", Value = (decimal)(100 * playerShare.RecTDShare) });
-            }
-            badRequestError = false;
-        }
-        else
-        {
-            badRequestError = true;
+            name = playerShare.Name;
+            shares.Add(new Share { Label = playerShare.Position + "Fantasy%", Value = (decimal)(100 * playerShare.FantasyShare) });
+            shares.Add(new Share { Label = "RushAtt%", Value = (decimal)(100 * playerShare.RushAttShare) });
+            shares.Add(new Share { Label = "RushYd%", Value = (decimal)(100 * playerShare.RushYdShare) });
+            shares.Add(new Share { Label = "Target%", Value = (decimal)(100 * playerShare.TargetShare) });
+            shares.Add(new Share { Label = "Rec%", Value = (decimal)(100 * playerShare.ReceptionShare) });
+            shares.Add(new Share { Label = "RecYd%", Value = (decimal)(100 * playerShare.RecYdShare) });
+            shares.Add(new Share { Label = "RecTD%", Value = (decimal)(100 * playerShare.RecTDShare) });
         }
         loading = false;
         shouldRender = true;
