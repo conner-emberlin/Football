@@ -107,8 +107,8 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> PostInSeasonTeamChange([FromBody] InSeasonTeamChange teamChange) => Ok(await playersService.PostInSeasonTeamChange(teamChange));
 
         [HttpGet("snap-counts/{playerId}")]
-        [ProducesResponseType(typeof(List<SnapCount>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetSnapCounts([FromRoute] int playerId) => Ok(await statisticsService.GetSnapCounts(playerId));
+        [ProducesResponseType(typeof(List<SnapCountModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSnapCounts([FromRoute] int playerId) => Ok(mapper.Map<List<SnapCountModel>>(await statisticsService.GetSnapCounts(playerId)));
 
         [HttpPost("inactivate")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]

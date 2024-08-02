@@ -8,5 +8,6 @@ namespace Football.UI.Interfaces
         public Task<PlayerDataModel?> GetPlayerDataRequest(int playerId);
         public Task<List<TrendingPlayerModel>?> GetTrendingPlayersRequest();
         public Task<List<SimplePlayerModel>?> GetSimplePlayersRequest(bool activeOnly = false);
+        public Task<List<SnapCountModel>?> GetSnapCountsRequest(string id);
     }
 }

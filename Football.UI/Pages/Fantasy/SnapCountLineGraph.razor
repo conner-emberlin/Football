@@ -1,9 +1,11 @@
 ﻿@page "/snaps-graph/{id}"
 <PageTitle>Snap Trends</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Players.Models;
+
+@using Football.UI.Interfaces;
+@using Football.Api.Models.Players;
 @using ApexCharts;
+
+@inject IPlayersService playersService;
 @inject IHttpClientFactory ClientFactory
 
 @if (loading)
@@ -23,7 +25,7 @@ else
 {
     <ApexChart TItem="SnapCount"
                Height="400">
-        <ApexPointSeries TItem="SnapCount"
+        <ApexPointSeries TItem="SnapCountModel"
                          Items="snaps"
                          Name="Snaps"
                          SeriesType="SeriesType.Line"
@@ -37,13 +39,13 @@ else
     public string id { get; set; } = "";
 
     private bool loading { get; set; } = false;
-    public bool badRequestError { get; set; } = false;
+
     private bool shouldRender;
-    public bool youTried = false;
+    private bool youTried = false;
     protected override bool ShouldRender() => shouldRender;
 
-    public List<SnapCount>? snaps = [];
-    public string name { get; set; } = "";
+    private List<SnapCountModel>? snaps = [];
+    private string name { get; set; } = "";
 
 
     protected override async Task OnInitializedAsync()
@@ -51,23 +53,12 @@ else
         loading = true;
         shouldRender = true;
         youTried = true;
-
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/player/snap-counts/" + id);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
+        snaps = await playersService.GetSnapCountsRequest(id);
+        if (snaps != null && snaps.Any())
         {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            snaps = await JsonSerializer.DeserializeAsync<List<SnapCount>>(responseStream, options);
-            if (snaps.Any())
-            {
-                snaps = snaps.OrderBy(f => f.Week).ToList();
-                name = snaps.Select(f => f.Name).First();
-            }
+            snaps = snaps.OrderBy(f => f.Week).ToList();
+            name = snaps.Select(f => f.Name).First();
         }
-        else badRequestError = true;
 
         loading = false;
         shouldRender = true;
