@@ -168,6 +168,8 @@ namespace Football.Api
                 .ForMember(w => w.Team, o => o.MapFrom(w => w.PlayerTeam != null ? w.PlayerTeam.Team : string.Empty));
             CreateMap<Player, SimplePlayerModel>();
             CreateMap<SnapCount, SnapCountModel>();
+            CreateMap<MatchupProjections, MatchupProjectionsModel>()
+                .ForMember(m => m.TeamProjections, o => o.Ignore());
         }
 
     }

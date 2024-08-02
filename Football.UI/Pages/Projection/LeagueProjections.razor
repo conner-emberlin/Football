@@ -1,14 +1,14 @@
-﻿@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Players.Models;
-@using Football.Projections.Models;
+﻿
 @using Football.UI.Helpers;
-@inject IHttpClientFactory ClientFactory
+@using Football.UI.Interfaces;
+@using Football.Api.Models.Projection;
+
+@inject IProjectionService projectionService;
 @page "/LeagueProjections/"
 
 
 <h4>Fantasy League Projections</h4>
-<EditForm model="this" OnSubmit="Get">
+<EditForm model="this" OnSubmit="HandleInput">
 <TextBoxTeamName @bind-TeamName ="this.teamName"/>
 <button class="button-22" type="submit">Submit</button>
 </EditForm>
@@ -95,52 +95,35 @@
 
 
 }
-else if(youTried && badRequestError)
-{
-    <text>Unable to find team. Try again.</text>
-}
 
 
 @code {
-    public bool loading { get; set; } 
-    public bool badRequestError = false;
-    public bool youTried = false;
+    private bool loading { get; set; } 
+    private bool youTried = false;
     private bool shouldRender;
+
+
+    private string teamName { get; set; } = "";
+    private List<MatchupProjectionsModel>? projections = new();
+    private MatchupProjectionsModel userProjections { get; set; } = new();
+    private MatchupProjectionsModel opponentProjections { get; set; } = new();
+
+    private Formatter form = new();
+
     protected override bool ShouldRender() => shouldRender;
 
-    public string teamName { get; set; } = "";
-    public List<MatchupProjections>? projections = new();
-    public MatchupProjections userProjections { get; set; } = new();
-    public MatchupProjections opponentProjections { get; set; } = new();
-
-    public Formatter form = new();
-
-    public async Task Get()
+    private async Task HandleInput()
     {
         loading = true;
         shouldRender = true;
-        projections.Clear();
-        badRequestError = false;
+        projections?.Clear();
         youTried = true;
-
-        var url = string.Format("{0}/{1}/matchup", "https://localhost:7028/api/projection/sleeper-projections", teamName);
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
+        projections = await projectionService.GetMatchupProjectionsRequest(teamName);
+        if (projections != null && projections.Any())
         {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            projections = await JsonSerializer.DeserializeAsync<List<MatchupProjections>>(responseStream, options);
-            if (projections != null && projections.Any())
-            {
-                userProjections = projections.First(p => p.TeamName.ToLower().Trim() == teamName.ToLower().Trim());
-                opponentProjections = projections.First(p => p.TeamName.ToLower().Trim() != teamName.ToLower().Trim());
-            }
-            else badRequestError = true;
+            userProjections = projections.First(p => p.TeamName.ToLower().Trim() == teamName.ToLower().Trim());
+            opponentProjections = projections.First(p => p.TeamName.ToLower().Trim() != teamName.ToLower().Trim());
         }
-        else { badRequestError = true; }
 
         loading = false;
         shouldRender = true;

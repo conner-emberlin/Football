@@ -13,5 +13,6 @@ namespace Football.UI.Services
         public async Task<List<WeekProjectionModel>?> GetWeekProjectionsRequest(string position) => await requests.Get<List<WeekProjectionModel>?>("/projection/weekly/" + position);
         public async Task<bool> DeleteWeekProjectionRequest(int playerId, int season, int week) => await requests.Delete<bool>(string.Format("{0}/{1}/{2}/{3}", "/projection/weekly", playerId, season, week));
         public async Task<int> PostWeekProjectionRequest(string position) => await requests.PostWithoutBody<int>("/projection/weekly/" + position);
+        public async Task<List<MatchupProjectionsModel>?> GetMatchupProjectionsRequest(string teamName) => await requests.Get<List<MatchupProjectionsModel>?>(string.Format("{0}/{1}/matchup", "/projection/sleeper-projections", teamName));
     }
 }

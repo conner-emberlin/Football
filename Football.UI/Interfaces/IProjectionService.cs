@@ -13,5 +13,6 @@ namespace Football.UI.Interfaces
         public Task<List<WeekProjectionModel>?> GetWeekProjectionsRequest(string position);
         public Task<bool> DeleteWeekProjectionRequest(int playerId, int season, int week);
         public Task<int> PostWeekProjectionRequest(string position);
+        public Task<List<MatchupProjectionsModel>?> GetMatchupProjectionsRequest(string teamName);
     }
 }

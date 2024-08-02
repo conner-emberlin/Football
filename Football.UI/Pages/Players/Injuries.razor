@@ -1,7 +1,6 @@
 ﻿@using System.Text.Json
 @using System.Text.Json.Serialization
-@using Football.Data.Models;
-@using Football.Fantasy.Models;
+
 @using Football.Players.Models;
 @using Football.UI.Helpers;
 @using System.Text;
@@ -172,12 +171,6 @@ else if (injuryEdits.Any() && !badRequestError)
         </table>
     </div>
 }
-
-@if (badRequestError)
-{
-    <text>Something Went Wrong. Please Try Again.</text>
-}
-
 
 @code {
 

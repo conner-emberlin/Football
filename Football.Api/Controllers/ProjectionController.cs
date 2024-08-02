@@ -194,12 +194,19 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetSleeperLeagueProjections([FromRoute] string username) => Ok(await analysisService.GetSleeperLeagueProjections(username));
 
         [HttpGet("sleeper-projections/{username}/matchup")]
-        [ProducesResponseType(typeof(List<MatchupProjections>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<MatchupProjectionsModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetMatchupProjections([FromRoute] string username)
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            return Ok(await analysisService.GetMatchupProjections(username, currentWeek));
+            var matchupProjections = await analysisService.GetMatchupProjections(username, currentWeek);
+            var matchupProjectionsModel = mapper.Map<List<MatchupProjectionsModel>>(matchupProjections);
+            foreach (var m in matchupProjectionsModel)
+            {
+                var proj = matchupProjections.First(p => p.TeamName == m.TeamName);
+                m.TeamProjections = mapper.Map<List<WeekProjectionModel>>(proj.TeamProjections);
+            }
+            return Ok(matchupProjectionsModel);
         }
 
         [HttpDelete("weekly/{playerId}/{season}/{week}")]
