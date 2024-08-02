@@ -1,6 +1,6 @@
 ﻿@page "/MatchupRankings"
 <PageTitle>Matchup Rankings</PageTitle>
-@using Football.Enums;
+
 @using Football.UI.Helpers;
 @using Football.Api.Models.Fantasy;
 @using Football.UI.Interfaces;
@@ -73,7 +73,7 @@
 
 @code {
     public string Position { get; set; } = "Quarterback";
-    public Position positionEnum { get; set; }
+    public string positionEnum { get; set; } = "QB";
     public List<MatchupRankingModel>? Rankings = new();
 
     public bool loading { get; set; } = false;
@@ -95,7 +95,7 @@
         loading = true;
         Rankings?.Clear();
         shouldRender = true;
-        Rankings = await fantasyService.GetMatchupRankingsRequest(positionEnum.ToString());
+        Rankings = await fantasyService.GetMatchupRankingsRequest(positionEnum);
         loading = false;
         shouldRender = true;
     }

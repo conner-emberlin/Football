@@ -1,6 +1,6 @@
 ﻿@page "/snapcountanalysis"
 <PageTitle>Snap Count Analysis</PageTitle>
-@using Football.Enums;
+
 @using Football.UI.Helpers;
 @using Football.Api.Models.Fantasy;
 @using Football.UI.Interfaces;
@@ -94,7 +94,7 @@
 
 @code {
     public string Position { get; set; } = "Quarterback";
-    public Position positionEnum { get; set; } = Enums.Position.QB;
+    public string positionEnum { get; set; } = "QB";
     public List<SnapCountAnalysisModel>? snapCounts = new();
 
     public bool loading { get; set; } = false;
@@ -118,7 +118,7 @@
         loading = true;
         if (snapCounts != null) snapCounts.Clear();
         shouldRender = true;
-        snapCounts = (await fantasyService.SnapCountAnalysisRequest(positionEnum.ToString())).OrderByDescending(s => s.TotalSnaps).ToList();
+        snapCounts = (await fantasyService.SnapCountAnalysisRequest(positionEnum)).OrderByDescending(s => s.TotalSnaps).ToList();
         loading = false;
         shouldRender = true;
     }

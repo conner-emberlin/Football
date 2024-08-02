@@ -1,5 +1,4 @@
 ﻿using Football.Api.Models.Fantasy;
-using Football.Enums;
 using Football.UI.Interfaces;
 
 namespace Football.UI.Services
@@ -7,7 +6,7 @@ namespace Football.UI.Services
     public class FantasyService(IRequests requests) : IFantasyService
     {
         public async Task<List<SnapCountAnalysisModel>?> SnapCountAnalysisRequest(string position) => await requests.Get<List<SnapCountAnalysisModel>?>("/fantasy/snap-analysis/" + position);
-        public async Task<List<FantasyAnalysisModel>?> GetFantasyAnalysesRequest(Position position) => await requests.Get<List<FantasyAnalysisModel>?>("/fantasy/fantasy-analysis/" + position.ToString());
+        public async Task<List<FantasyAnalysisModel>?> GetFantasyAnalysesRequest(string position) => await requests.Get<List<FantasyAnalysisModel>?>("/fantasy/fantasy-analysis/" + position.ToString());
         public async Task<List<TargetShareModel>?> GetTargetShareRequest() => await requests.Get<List<TargetShareModel>?>("/fantasy/targetshares");
         public async Task<List<MatchupRankingModel>?> GetMatchupRankingsRequest(string position) => await requests.Get<List<MatchupRankingModel>?>("/fantasy/matchup-rankings/" + position);
         public async Task<List<FantasyPercentageModel>?> GetFantasyPercentageRequest(string position) => await requests.Get<List<FantasyPercentageModel>?>("/fantasy/shares/" + position);

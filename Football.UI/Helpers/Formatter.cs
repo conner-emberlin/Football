@@ -1,6 +1,4 @@
-﻿using Football.Enums;
-using Microsoft.AspNetCore.Components;
-using Newtonsoft.Json.Linq;
+﻿using Microsoft.AspNetCore.Components;
 using System.Globalization;
 
 namespace Football.UI.Helpers
@@ -60,21 +58,21 @@ namespace Football.UI.Helpers
             return list;
         }
 
-        public Position SetPosition(ChangeEventArgs? args)
+        public string SetPosition(ChangeEventArgs? args)
         {
-            if (args == null) return Position.QB;
-            if (args.Value == null) return Position.QB;
+            if (args == null) return "QB";
+            if (args.Value == null) return "QB";
 
             else return args.Value.ToString() switch
             {
-                "Quarterback" => Enums.Position.QB,
-                "Runningback" => Enums.Position.RB,
-                "Wide Receiver" => Enums.Position.WR,
-                "Tight End" => Enums.Position.TE,
-                "DST" => Enums.Position.DST,
-                "Kicker" => Enums.Position.K,
-                "Flex" => Enums.Position.FLEX,
-                _ => Enums.Position.QB
+                "Quarterback" => "QB",
+                "Runningback" => "RB",
+                "Wide Receiver" => "WR",
+                "Tight End" => "TE",
+                "DST" => "DST",
+                "Kicker" => "K",
+                "Flex" => "FLEX",
+                _ => "QB"
             };
         }
 
