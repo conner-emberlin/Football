@@ -2,9 +2,14 @@
 <PageTitle>Fantasy Trends</PageTitle>
 @using System.Text.Json
 @using System.Text.Json.Serialization
+@using Football.UI.Interfaces;
+@using Football.Api.Models.Projection;
+
 @using Football.Projections.Models;
 @using Football.UI.Helpers;
 @using ApexCharts;
+
+@inject IProjectionService projectionService;
 @inject IHttpClientFactory ClientFactory
 
 @if (loading)
@@ -58,14 +63,14 @@ else
 
     <ApexChart TItem="WeeklyProjectionError"
                Height="400">
-        <ApexPointSeries TItem="WeeklyProjectionError"
+        <ApexPointSeries TItem="WeeklyProjectionErrorModel"
                          Items="error"
                          Name="Projected"
                          SeriesType="SeriesType.Line"
                          XValue="e => e.Week"
                          YValue="e=> (decimal)Math.Round(e.ProjectedPoints,2)" />
 
-        <ApexPointSeries TItem="WeeklyProjectionError"
+        <ApexPointSeries TItem="WeeklyProjectionErrorModel"
                          Items="error"
                          Name="Actual"
                          SeriesType="SeriesType.Line"
@@ -118,68 +123,37 @@ else
     public string id { get; set; } = "";
 
     private bool loading { get; set; } = false;
-    public bool badRequestError { get; set; } = false;
     private bool shouldRender;
-    public bool youTried = false;
+    private bool youTried = false;
+
+
+    private List<WeeklyProjectionErrorModel>? error = [];
+    private WeeklyProjectionAnalysisModel? analysis { get; set; }
+
+    private string name { get; set; } = "";
+
+    private TableSort tableSort = new();
+
     protected override bool ShouldRender() => shouldRender;
-
-    public List<WeeklyProjectionError>? error = [];
-    public WeeklyProjectionAnalysis? analysis { get; set; }
-
-    public string name { get; set; } = "";
-
-    TableSort tableSort = new();
 
     protected override async Task OnInitializedAsync()
     {
         loading = true;
         shouldRender = true;
         youTried = true;
-        await GetWeeklyError();
-        await GetWeeklyAnalysis();
+        error = await projectionService.GetWeeklyProjectionErrorRequest(id);
+        if (error?.Count > 0)
+        {
+            error = error.OrderBy(f => f.Week).ToList();
+            name = error.Select(f => f.Name).First();
+        }
+        analysis = await projectionService.GetWeeklyProjectionAnalysisRequest(id);
         loading = false;
         shouldRender = true;
     }
 
-    public string Title() => "Projection Trends for " + name;
+    private string Title() => "Projection Trends for " + name;
 
-    private void SetTable(string columnName)
-    {
-        error = tableSort.SortTable<WeeklyProjectionError>(error, columnName);
-    }
+    private void SetTable(string columnName) => error = tableSort.SortTable<WeeklyProjectionErrorModel>(error, columnName);
 
-    private async Task GetWeeklyError()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/weekly-error/" + id);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            error = await JsonSerializer.DeserializeAsync<List<WeeklyProjectionError>>(responseStream, options);
-            if (error.Count > 0)
-            {
-                error = error.OrderBy(f => f.Week).ToList();
-                name = error.Select(f => f.Name).First();
-            }
-        }
-        else badRequestError = true;
-    }
-
-    private async Task GetWeeklyAnalysis()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Projection/weekly-analysis/player/" + id);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            analysis = await JsonSerializer.DeserializeAsync<WeeklyProjectionAnalysis>(responseStream, options);
-        }
-        else badRequestError = true;
-    }
 }

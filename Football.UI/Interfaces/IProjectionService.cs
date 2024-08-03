@@ -1,4 +1,5 @@
 ﻿using Football.Api.Models.Projection;
+using MathNet.Numerics.RootFinding;
 
 namespace Football.UI.Interfaces
 {
@@ -10,6 +11,8 @@ namespace Football.UI.Interfaces
         public Task<bool> DeleteSeasonProjectionRequest(int playerId, int season);
         public Task<int> PostSeasonProjectionRequest(string position);
         public Task<List<WeeklyProjectionErrorModel>?> GetWeeklyProjectionErrorRequest(string position, string week);
+        public Task<List<WeeklyProjectionErrorModel>?> GetWeeklyProjectionErrorRequest(string id);
+        public Task<WeeklyProjectionAnalysisModel?> GetWeeklyProjectionAnalysisRequest(string id);
         public Task<List<WeekProjectionModel>?> GetWeekProjectionsRequest(string position);
         public Task<bool> DeleteWeekProjectionRequest(int playerId, int season, int week);
         public Task<int> PostWeekProjectionRequest(string position);

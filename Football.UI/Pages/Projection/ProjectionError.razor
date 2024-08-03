@@ -1,9 +1,10 @@
 ﻿@page "/ProjectionError/{position}/{week}"
 <PageTitle>Projection Error</PageTitle>
-@using Football.Enums;
+
 @using Football.UI.Helpers;
-@using Football.Api.Models.Projection;
 @using Football.UI.Interfaces;
+@using Football.Api.Models.Projection;
+
 @inject IProjectionService projectionService;
 
 <h4>@GetHeader()</h4>
