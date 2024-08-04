@@ -1,0 +1,346 @@
+﻿@page "/Teams/{id?}"
+<PageTitle>Teams</PageTitle>
+@using Football.Client.Helpers;
+@using Football.Client.Interfaces;
+@using Football.Client.Shared;
+@using Football.Shared.Models.Teams;
+@using Football.Shared.Models.Fantasy;
+
+@inject ITeamsService teamsService;
+
+@if (!badRequestError && teams.Any())
+{
+    <div class="autocomplete w-25">
+        <input @bind=selectedTeam @oninput=HandleInput class="form-control filter" placeholder="Team..." />
+        @if (filteredTeams is not null)
+        {
+            <ul class="options">
+                @if (filteredTeams.Any())
+                {
+                    @foreach (var t in filteredTeams)
+                    {
+                        <li class="option" @onclick=@(_ => SelectTeam(t.TeamId))>
+                            <span class="option-text">@t.TeamDescription</span>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="disabled option">No results</li>
+                }
+            </ul>
+        }
+    </div>
+}
+else if (badRequestError)
+{
+    <p>Bad Request</p>
+}
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="spinner"></div>
+}
+
+@if (!teamSelected && showSchedule && scheduleDetails.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+    <h5>@ScheduleHeader()</h5>
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Match</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in scheduleDetails)
+                {
+                    if (s.HomeTeamId > 0 && s.AwayTeamId > 0)
+                    {
+                        var homeTeam = GetTeamName(s.HomeTeamId);
+                        var awayTeam = GetTeamName(s.AwayTeamId);
+
+                        var match = homeTeam + " vs " + awayTeam;
+                        var date = s.Day + " " + form.ConvertDate(s.Date) + " " + s.Time;
+
+                        <tr>
+                            <td>@match</td>
+                            <td>@date</td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (teamSelected && teamChosen != null)
+{
+    var photoPath = "https://localhost:7176/Logos/" + teamChosen.Team + ".png";
+    <div>
+        <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/Logos/BYE.png'">
+    </div>
+    <div>
+        <b>@teamChosen.TeamDescription</b>
+    </div>
+    @if(teamRecord != null)
+    {
+        <p>Record: @teamRecord.Wins - @teamRecord.Losses</p>
+    }
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <h5>Team Leaders</h5>
+
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>Name</th>
+                    <th>Total Fantasy</th>
+                    <th>Average Fantasy</th>
+                    <th>StdDev</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (qbPerformance != null)
+                {
+                    <tr>
+                        <td><b style="color:@form.PositionColor("QB")">QB</b></td>
+                        <td><a class="page-links" href="Players/@qbPerformance.PlayerId"> @qbPerformance.Name</a></td>
+                        <td>@Math.Round(qbPerformance.TotalFantasy, 2)</td>
+                        <td>@Math.Round(qbPerformance.AvgFantasy, 2)</td>
+                        <td>@Math.Round(qbPerformance.StdDev, 2)</td>
+                    </tr>
+                }
+                @if (rbPerformance.Any())
+                {
+                    @foreach (var rb in rbPerformance)
+                    {
+                        <tr>
+                            <td><b style="color:@form.PositionColor("RB")">RB</b></td>
+                            <td><a class="page-links" href="Players/@rb.PlayerId"> @rb.Name</a></td>
+                            <td>@Math.Round(rb.TotalFantasy, 2)</td>
+                            <td>@Math.Round(rb.AvgFantasy, 2)</td>
+                            <td>@Math.Round(rb.StdDev, 2)</td>
+                        </tr>
+                    }
+                }
+                @if (wrPerformance.Any())
+                {
+                    @foreach (var wr in wrPerformance)
+                    {
+                        <tr>
+                            <td><b style="color:@form.PositionColor("WR")">WR</b></td>
+                            <td><a class="page-links" href="Players/@wr.PlayerId"> @wr.Name</a></td>
+                            <td>@Math.Round(wr.TotalFantasy, 2)</td>
+                            <td>@Math.Round(wr.AvgFantasy, 2)</td>
+                            <td>@Math.Round(wr.StdDev, 2)</td>
+                        </tr>
+                    }
+                }
+                @if (tePerformance != null)
+                {
+                    <tr>
+                        <td><b style="color:@form.PositionColor("TE")">TE</b></td>
+                        <td><a class="page-links" href="Players/@tePerformance.PlayerId"> @tePerformance.Name</a></td>
+                        <td>@Math.Round(tePerformance.TotalFantasy, 2)</td>
+                        <td>@Math.Round(tePerformance.AvgFantasy, 2)</td>
+                        <td>@Math.Round(tePerformance.StdDev, 2)</td>
+                    </tr>
+                }
+                @if (dstPerformance != null)
+                {
+                    <tr>
+                        <td><b style="color:@form.PositionColor("DST")">DST</b></td>
+                        <td><a class="page-links" href="Players/@dstPerformance.PlayerId"> @dstPerformance.Name</a></td>
+                        <td>@Math.Round(dstPerformance.TotalFantasy, 2)</td>
+                        <td>@Math.Round(dstPerformance.AvgFantasy, 2)</td>
+                        <td>@Math.Round(dstPerformance.StdDev, 2)</td>
+                    </tr>
+                }
+                @if (kPerformance != null)
+                {
+                    <tr>
+                        <td><b style="color:@form.PositionColor("K")">K</b></td>
+                        <td><a class="page-links" href="Players/@kPerformance.PlayerId"> @kPerformance.Name</a></td>
+                        <td>@Math.Round(kPerformance.TotalFantasy, 2)</td>
+                        <td>@Math.Round(kPerformance.AvgFantasy, 2)</td>
+                        <td>@Math.Round(kPerformance.StdDev, 2)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <h5>Game Results</h5>
+    @if (teamGameResults.Any())
+    {
+        <div class="table_container">
+            <table class="base_table">
+                <thead>
+                    <tr>
+                        <th>Week</th>
+                        <th>Winner</th>
+                        <th>Loser</th>
+                        <th>WPts</th>
+                        <th>LPts</th>
+                        <th>WYds</th>
+                        <th>LYds</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var gr in teamGameResults)
+                    {
+
+                        <tr>
+                            <td>@gr.Week</td>
+                            @if(gr.Winner == teamChosen.TeamDescription)
+                            {
+                                <td><b><text style="color:green">@gr.Winner</text></b></td>
+                            }
+                            else
+                            {
+                                <td>@gr.Winner</td>
+                            }
+                            @if (gr.Loser == teamChosen.TeamDescription)
+                            {
+                                <td><b><text style="color:red">@gr.Loser</text></b></td>
+                            }
+                            else
+                            {
+                                <td>@gr.Loser</td>
+                            }
+                            <td>@gr.WinnerPoints</td>
+                            <td>@gr.LoserPoints</td>
+                            <td>@gr.WinnerYards</td>
+                            <td>@gr.LoserYards</td>
+                            <td>
+                                <a href="@GetTeamFantasyLink(gr.WinnerId, gr.LoserId, gr.Week)"> <i class="oi oi-magnifying-glass" /></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+}
+
+@code {
+
+    [Parameter]
+    public string id { get; set; } = "";
+
+    public bool loading { get; set; }
+    private bool shouldRender;
+    public bool badRequestError { get; set; } = false;
+    public bool youTried { get; set; } = false;
+
+    public List<TeamMapModel>? teams = new();
+    public List<TeamMapModel>? filteredTeams { get; set; }
+    public bool teamSelected { get; set; } = false;
+    public string selectedTeam { get; set; } = "";
+    public TeamMapModel teamChosen = new();
+
+    public List<GameResultModel>? gameResults = new();
+    public List<GameResultModel>? teamGameResults = new();
+    public List<TeamRecordModel>? teamRecords = new();
+    public TeamRecordModel? teamRecord = new();
+
+    public bool showSchedule { get; set; } = false;
+    public List<ScheduleDetailsModel>? scheduleDetails = new();
+
+    public FantasyPerformanceModel? qbPerformance = new();
+    public List<FantasyPerformanceModel>? rbPerformance = new();
+    public List<FantasyPerformanceModel>? wrPerformance = new();
+    public FantasyPerformanceModel? tePerformance = new();
+    public FantasyPerformanceModel? dstPerformance = new();
+    public FantasyPerformanceModel? kPerformance = new();
+
+    public Formatter form = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        shouldRender = true;
+        teams = await teamsService.GetAllTeamsRequest();
+        teamRecords = await teamsService.GetTeamRecordsRequest();
+        gameResults = await teamsService.GetGameResultsRequest();  
+
+        if (!String.IsNullOrEmpty(id))
+        {
+            SelectTeam(int.Parse(id));
+            id = "";
+        }
+        else
+        {
+            showSchedule = true;
+            scheduleDetails = await teamsService.GetScheduleDetailsRequest();
+        }
+        loading = false;
+        shouldRender = true;
+    }
+
+    private void HandleInput(ChangeEventArgs e)
+    {
+        var filter = e.Value?.ToString();
+        if (filter?.Length > 1) filteredTeams = teams.Where(t => t.TeamDescription.ToLower().Contains(filter.ToLower())).ToList();
+        else filteredTeams = null;
+    }
+
+    private async void SelectTeam(int tid)
+    {
+        selectedTeam = "";
+        teamSelected = false;
+        showSchedule = false;
+
+        teamChosen = teams.First(t => t.TeamId == tid);
+        teamGameResults = gameResults.Where(g => g.WinnerId == tid || g.LoserId == tid).OrderBy(g => g.Week).ToList();
+        teamRecord = teamRecords.FirstOrDefault(t => t.TeamId == tid);
+
+        SetFantasyPerformances(await teamsService.GetFantasyPerformancesRequest(tid));
+
+        selectedTeam = teamChosen.TeamDescription;
+        teamSelected = true;
+        filteredTeams = null;
+        StateHasChanged();
+    }
+
+    private string ScheduleHeader() => scheduleDetails != null ? "Week " + scheduleDetails.First().Week + " Schedule" : "Schedule";
+
+    private string GetTeamName(int teamId) => teams != null ? teams.First(t => t.TeamId == teamId).TeamDescription : string.Empty;
+
+    private string GetTeamFantasyLink(int teamId, int opponentId, int week)
+    {
+        var team = (teams.First(t => t.TeamId == teamId)).Team;
+        var opponent = (teams.First(t => t.TeamId == opponentId)).Team;
+        return string.Format("{0}/{1}/{2}/{3}", "/team-fantasy", team, opponent, week.ToString());
+    }
+
+    private void SetFantasyPerformances(List<FantasyPerformanceModel>? allPerformances)
+    {
+        if (allPerformances != null)
+        {
+            qbPerformance = allPerformances.Where(p => p.Position == "QB").OrderByDescending(p => p.TotalFantasy).FirstOrDefault();
+            rbPerformance = allPerformances.Where(p => p.Position == "RB").OrderByDescending(p => p.TotalFantasy).Take(2).ToList();
+            wrPerformance = allPerformances.Where(p => p.Position == "WR").OrderByDescending(p => p.TotalFantasy).Take(3).ToList();
+            tePerformance = allPerformances.Where(p => p.Position == "TE").OrderByDescending(p => p.TotalFantasy).FirstOrDefault();
+            dstPerformance = allPerformances.Where(p => p.Position == "DST").FirstOrDefault();
+            kPerformance = allPerformances.Where(p => p.Position == "K").FirstOrDefault();
+        }
+    }
+}

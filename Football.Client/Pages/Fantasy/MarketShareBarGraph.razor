@@ -1,0 +1,97 @@
+﻿@page "/share-graph/{position}/{id}"
+<PageTitle>Market Shares</PageTitle>
+
+@using Football.Client.Interfaces;
+@using Football.Shared.Models.Fantasy;
+@using ApexCharts;
+
+@inject IFantasyService fantasyService;
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+else
+{
+    <h4>@Title()</h4>
+}
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (playerShare != null && youTried && !badRequestError && shares.Any())
+{
+    <ApexChart TItem="Share"
+               Height="500">
+
+        <ApexPointSeries TItem="Share"
+                         Items="shares"
+                         Name="Share"
+                         SeriesType="SeriesType.Bar"
+                         XValue="@(e => e.Label)"
+                         YAggregate="@(e => Math.Round(e.Sum(e => e.Value)))"
+                         />
+    </ApexChart>
+
+}
+
+else if ((youTried && badRequestError) || (youTried && playerShare == null))
+{
+    <text>Something went wrong.</text>
+}
+
+
+@code {
+
+    [Parameter]
+    public string id { get; set; } = "";
+    [Parameter]
+    public string position { get; set; } = "";
+
+    private string name { get; set; } = "";
+
+    private List<MarketShareModel>? allShares = new();
+    private MarketShareModel? playerShare = new();
+    private List<Share> shares = new();
+
+    private bool loading { get; set; } = false;
+    private bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+    private bool youTried = false;
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        shouldRender = true;
+        youTried = true;
+
+        allShares = await fantasyService.GetMarketShareRequest(position);
+        playerShare = allShares != null ? allShares.FirstOrDefault(f => f.PlayerId == int.Parse(id)) : null;
+        if (playerShare != null)
+        {
+            name = playerShare.Name;
+            shares.Add(new Share { Label = playerShare.Position + "Fantasy%", Value = (decimal)(100 * playerShare.FantasyShare) });
+            shares.Add(new Share { Label = "RushAtt%", Value = (decimal)(100 * playerShare.RushAttShare) });
+            shares.Add(new Share { Label = "RushYd%", Value = (decimal)(100 * playerShare.RushYdShare) });
+            shares.Add(new Share { Label = "Target%", Value = (decimal)(100 * playerShare.TargetShare) });
+            shares.Add(new Share { Label = "Rec%", Value = (decimal)(100 * playerShare.ReceptionShare) });
+            shares.Add(new Share { Label = "RecYd%", Value = (decimal)(100 * playerShare.RecYdShare) });
+            shares.Add(new Share { Label = "RecTD%", Value = (decimal)(100 * playerShare.RecTDShare) });
+        }
+        loading = false;
+        shouldRender = true;
+    }
+
+    public class Share
+    {
+        public string Label { get; set; } = "";
+        public decimal Value { get; set; }
+    }
+
+    private string Title() => "Market Shares for " + name;
+
+}
+

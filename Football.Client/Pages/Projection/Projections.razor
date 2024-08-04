@@ -1,0 +1,234 @@
+﻿@page "/Projections"
+<PageTitle>Season Projections</PageTitle>
+
+@using Football.Client.Helpers;
+@using Football.Client.Interfaces;
+@using Football.Shared.Models.Projection;
+
+@inject IOperationsService operationsService;
+@inject IProjectionService projectionService;
+
+<h4>Season Projections</h4>
+<div>
+@foreach(var position in format.Positions(includeFlex: true, includeDST: false, includeK: false))
+{
+    
+        <input type="radio" name="players" id=" @position" value="@position" 
+            @onchange= "SetPosition" 
+            checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase))
+        />
+        <label for="@position ">@position</label>
+    
+}
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<tr>
+    <td>
+<button class="button-22" role="button" @onclick="HandleInput"> 
+    Submit
+</button>
+    </td>
+    @if (players != null && players.Count > 0)
+    {
+        <td>&nbsp</td>
+        <td>
+        <button class="button-22" role="button" @onclick="HandleRefresh">
+        Update ADP
+            </button>
+        </td>
+        @if (!players.Any(p => p.CanDelete) && PositionEnum != "FLEX")
+        {
+            <td>&nbsp</td>
+            <td>
+            <button class="button-22" role="button" @onclick="HandleUpload">
+                Upload Projections
+            </button>
+            </td>
+        }
+    }
+</tr>
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if(loading)
+{   
+    <div class="spinner"></div>
+}
+
+@if(players != null && players.Count > 0)
+{
+    @if(count > 0)
+    {
+        <p>@count records added </p>
+        count = 0;
+    }
+    @if (recordDeleted)
+    {
+        <text>Record deleted.</text>
+    }
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    @if (!loading){
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    @if (!sort.IsSortedAscending)
+                    {
+                        <th>Rank</th>
+                    }                    
+                    <th>Name</th>
+                    <th>Team</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("ProjectedPoints"))">Total Points</span>
+                        <span class="oi @(sort.GetSortStyle("ProjectedPoints"))"></span>
+                    </th>
+                    <th>PPG</th>
+                    <th>Games</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("AdjustedProjectedPoints"))">Adjusted Total</span>
+                        <span class="oi @(sort.GetSortStyle("AdjustedProjectedPoints"))"></span>
+                    </th>
+                    @if (players.Any(p => p.SeasonProjectionError != null))
+                    {
+                        <th>ActualTotal</th>
+                        <th>ActualPPG</th>
+                        <th>TotalError</th>
+                        <th>PPGError</th>
+                    }
+                    else
+                    {
+                        <th>ADP</th>
+                    }
+                    @if (players.Any(p => p.CanDelete))
+                    {
+                        <th></th>                        
+                    }
+
+                </tr>
+        </thead>
+        <tbody>
+        @foreach (var p in players)
+        {  
+             var logoPhotoPath = p.Team != string.Empty ? "https://localhost:7176/Logos/" + p.Team + ".png" : "https://localhost:7176/Logos/nfl.png";
+             var sa = p.SeasonProjectionError;
+             var showRank = !sort.IsSortedAscending;
+             var rank = @format.Rank(players, p);
+
+            <tr>
+            @if(showRank)
+            {
+                <td>@rank</td>
+            }
+            <td><a class = "page-links" href="Players/@p.PlayerId"> @p.Name</a></td>
+            <td><img src="@logoPhotoPath" width="30" height="30"></td>
+            <td>@Math.Round((double)p.ProjectedPoints,2)</td>
+            <td>@Math.Round((double)p.ProjectedPoints/17,2)</td>
+            <td>@Math.Round(17 - (double)p.AvgerageGamesMissed)</td>
+            <td>@Math.Round((double)p.AdjustedProjectedPoints, 2)</td>
+             @if (sa != null)
+             {
+                <td>@Math.Round(sa.TotalFantasy, 2)</td>
+                <td>@Math.Round(sa.TotalFantasy / sa.WeeksPlayed, 2)</td>
+                <td>@Math.Round(sa.TotalFantasy - sa.SeasonFantasyProjection, 2)</td>
+                            <td>@Math.Round((sa.SeasonFantasyProjection / 17) - (sa.TotalFantasy / sa.WeeksPlayed), 2)</td>
+             }
+             else {
+                    if (Position == "Flex")
+                    {
+                      <td>@p.OverallADP</td>
+                    }
+                    else
+                    {
+                      <td>@p.PositionalADP 
+                      @if(showRank)
+                      {
+                         var diff = @Math.Round(p.PositionalADP - rank);
+                         <b><text style="@format.AdpDiffColor(diff)"> (@diff.ToString())</text></b>
+                      }
+                      </td>
+                    }
+             }
+             @if (p.CanDelete)
+             {
+                <td>
+                <button type="button" style="color:red" class="btn btn-link" @onclick="() => HandleDelete(p.PlayerId, p.Season)"> <i sytle="color:red" class="oi oi-x" /></button>
+                </td>
+             }
+            </tr>
+        }
+        </tbody>
+    </table>
+    </div>
+    }
+}
+@code {
+    private string Position { get; set; } = "Quarterback";
+    private string PositionEnum { get; set; } = "1";
+
+    private List<SeasonProjectionModel>? players = new();
+
+    private bool shouldRender;
+    private int count = 0;
+    private bool loading { get; set; }
+    public bool seasonOver { get; set; } = false;
+    private bool recordDeleted = false;
+    private int adpRefreshed { get; set; }
+
+    private Formatter format = new();
+    private TableSort sort = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    private void SetPosition(ChangeEventArgs args)
+    {
+        Position = args.Value.ToString();
+        recordDeleted = false;
+        adpRefreshed = 0;
+        players?.Clear();
+    }
+
+    private async Task HandleInput()
+    {
+        loading = true;
+        shouldRender = true;
+        players?.Clear();
+        adpRefreshed = 0;
+        PositionEnum = format.SetPosition(Position);
+        players = await projectionService.GetSeasonProjectionsRequest(PositionEnum);
+        loading = false;
+        shouldRender = true;
+    }
+
+    private async Task HandleDelete(int playerId, int season)
+    {
+        loading = true;
+        shouldRender = true;
+        recordDeleted = await projectionService.DeleteSeasonProjectionRequest(playerId, season);
+        await HandleInput();
+        loading = false;
+        shouldRender = true;
+    }
+
+    private async Task HandleUpload()
+    {
+        loading = true;
+        shouldRender = true;
+        count = await projectionService.PostSeasonProjectionRequest(PositionEnum);
+        await HandleInput();
+        loading= false;
+        shouldRender = true;
+    }
+
+    private async Task HandleRefresh()
+    {
+        loading = true;
+        shouldRender = true;
+        adpRefreshed = await operationsService.PutSeasonAdpRequest(PositionEnum);
+        await HandleInput();
+        loading = false;
+        shouldRender = true;
+    }
+
+    private void SetTable(string columnName) => players = sort.SortTable<SeasonProjectionModel>(players, columnName);
+}
+

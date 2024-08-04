@@ -1,0 +1,126 @@
+﻿@page "/snapcountanalysis"
+<PageTitle>Snap Count Analysis</PageTitle>
+
+@using Football.Client.Helpers;
+@using Football.Client.Interfaces;
+@using Football.Shared.Models.Fantasy;
+
+@inject IFantasyService fantasyService;
+
+<h4>Snap Count Analysis</h4>
+
+<div>
+    @foreach (var position in format.Positions())
+    {
+
+        <input type="radio" name="players" id=" @position" value="@position"
+               @onchange="SetPosition"
+               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+        <label for="@position ">@position</label>
+
+    }
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="HandleInput">
+    Submit
+</button>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+@if (snapCounts.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <div class="table_container">
+            <table class="base_table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("TotalSnaps"))">Total</span>
+                            <span class="oi @(tableSort.GetSortStyle("TotalSnaps"))"></span>
+                        </th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("SnapsPerGame"))">Avg</span>
+                            <span class="oi @(tableSort.GetSortStyle("SnapsPerGame"))"></span>
+                        </th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("FantasyPointsPerSnap"))">Fpts/Snap</span>
+                            <span class="oi @(tableSort.GetSortStyle("FantasyPointsPerSnap"))"></span>
+                        </th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("RushAttsPerSnap"))">Rush/Snap</span>
+                            <span class="oi @(tableSort.GetSortStyle("RushAttsPerSnap"))"></span>
+                        </th>
+                    @if (snapCounts.First().Position != "QB")
+                    {
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("TargetsPerSnap"))">Tgts/Snap</span>
+                            <span class="oi @(tableSort.GetSortStyle("TargetsPerSnap"))"></span>
+                        </th>
+                    }
+                    <th>
+                            <span class="sort-link" onclick="@(() => SetTable("Utilization"))">Util%</span>
+                            <span class="oi @(tableSort.GetSortStyle("Utilization"))"></span>
+                        </th>
+                        <th> </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in snapCounts)
+                    {
+                        <tr>
+                            <td>
+                                <a class="page-links" href="Players/@s.PlayerId"> @s.Name</a> &nbsp;
+                            </td>
+                            <td>@Math.Round(s.TotalSnaps)</td>
+                            <td>@Math.Round(s.SnapsPerGame, 2)</td>
+                            <td>@Math.Round(s.FantasyPointsPerSnap, 2)</td>
+                            <td>@Math.Round(s.RushAttsPerSnap, 2)</td>
+                        @if (s.Position != "QB")
+                        {
+                            <td>@Math.Round(s.TargetsPerSnap, 2)</td>
+                        }
+                        <td>@Math.Round(s.Utilization * 100)</td>
+                            <td><a href="/snaps-graph/@s.PlayerId"> <i class="oi oi-graph" /></a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+}
+
+@code {
+    public string Position { get; set; } = "Quarterback";
+    public string positionEnum { get; set; } = "QB";
+    public List<SnapCountAnalysisModel>? snapCounts = new();
+
+    public bool loading { get; set; } = false;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    public TableSort tableSort = new();
+    public Formatter format = new();
+
+    private void SetPosition(ChangeEventArgs args)
+    {
+        if (snapCounts != null) snapCounts.Clear();
+        tableSort = new();
+        positionEnum = format.SetPosition(args);
+    }
+
+    private void SetTable(string columnName) => snapCounts = tableSort.SortTable<SnapCountAnalysisModel>(snapCounts, columnName);
+
+    private async Task HandleInput()
+    {
+        loading = true;
+        if (snapCounts != null) snapCounts.Clear();
+        shouldRender = true;
+        snapCounts = (await fantasyService.SnapCountAnalysisRequest(positionEnum)).OrderByDescending(s => s.TotalSnaps).ToList();
+        loading = false;
+        shouldRender = true;
+    }
+}

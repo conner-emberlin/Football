@@ -28,7 +28,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "_myAllowSpecificOrigins",
                       policy =>
                       {
-                          policy.WithOrigins("https://localhost:7176/");
+                          policy.AllowAnyHeader().AllowCredentials().AllowAnyMethod().WithOrigins("https://localhost:7176/", "https://localhost:7237", "http://localhost:8804", "http://localhost:5144").SetIsOriginAllowed((host) => true);
                       });
 });
 
@@ -111,6 +111,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

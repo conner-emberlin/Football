@@ -1,0 +1,98 @@
+﻿@page "/AddRookie/"
+
+@using Football.Shared.Models.Players;
+@using Football.Client.Shared;
+@using Football.Client.Interfaces;
+
+@inject IPlayersService playersService;
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+else{
+<div class="table_container">
+    <table class="base_table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Active</th>
+                <th>TeamDrafted</th>
+                <th>RookieSeason</th>
+                <th>DraftPosition</th>
+                <th>Age</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <input type="text" class="form-control" placeholder="Name" @bind="@player.Name" />
+                </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Position" @bind="@player.Position" />
+                </td>
+                    <td>
+                        <input type="text" class="form-control" placeholder="Position" @bind="@player.Active" />
+                    </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Team Drafted" @bind="@player.TeamDrafted" />
+                </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Rookie Season" @bind="@player.RookieSeason" />
+                </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Draft Position" @bind="@player.DraftPick" />
+                </td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Age Declared" @bind="@player.DeclareAge" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-link" @onclick="() => CancellAdd()">
+                        <i class="oi oi-circle-x" />
+                    </button>
+                    <button type="button" class="btn btn-link" @onclick="() => HandleInput()">
+                        <i class="oi oi-circle-check" />
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+}
+@if (rookieAdded)
+{
+    <text>Rookie added.</text>
+}
+else
+{
+    <text>Something went wrong.</text>
+}
+
+@code {
+
+    private bool shouldRender;
+    private bool loading = false;
+
+    private bool adding = false;
+    private bool rookieAdded { get; set; }
+    private RookiePlayerModel player = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    private void CancellAdd()
+    {
+        adding = false;
+        shouldRender = true;
+        player = new RookiePlayerModel();
+    }
+
+    private async Task HandleInput()
+    {
+        adding = false;
+        loading = true;
+        rookieAdded = await playersService.CreateRookieRequest(player);
+        loading = false;
+    }
+
+}

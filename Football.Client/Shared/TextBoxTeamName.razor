@@ -1,0 +1,23 @@
+﻿@if (!string.IsNullOrWhiteSpace(Label))
+{
+    <label for="@Id">
+        @Label
+    </label>
+}
+<div class="input-group mb-3 ">
+    <input type="text" class="form-control" placeholder="Team Name..." id="@Id" value="@TeamName" @onchange="this.OnChange" spellcheck="false">
+</div>
+
+@code {
+    [Parameter] public String TeamName { get; set; } = " ";
+    [Parameter] public EventCallback<string> TeamNameChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+
+    private void OnChange(ChangeEventArgs e)
+    {
+        TeamNameChanged.InvokeAsync(e.Value.ToString());
+    }
+}
+

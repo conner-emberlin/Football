@@ -1,0 +1,122 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Football.ui</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="players">
+                <span class="oi oi-person" aria-hidden="true"></span> Players
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="teams">
+                <span class="oi oi-people" aria-hidden="true"></span> Teams
+            </NavLink>
+        </div>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <div class="nav-item px-3">
+            <b>&nbsp; &nbsp; PROJECTIONS</b>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="projections">
+                <span class="oi oi-eye" aria-hidden="true"></span> Season Projections
+            </NavLink>
+        </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="weeklyprojections">
+                    <span class="oi oi-calendar" aria-hidden="true"></span> Weekly Projections
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="leagueprojections">
+                    <span class="oi oi-clipboard" aria-hidden="true"></span> League Projections
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="modelanalysis">
+                    <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Model Analysis
+                </NavLink>
+            </div>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <div class="nav-item px-3">
+            <b>&nbsp; &nbsp; FANTASY</b>
+        </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="leaders">
+                    <span class="oi oi-badge" aria-hidden="true"></span> Leaders
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="fantasyanalysis">
+                    <span class="oi oi-pulse" aria-hidden="true"></span> Analysis
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="fantasydistribution">
+                    <span class="oi oi-beaker" aria-hidden="true"></span> Point Distribution
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="startorsit">
+                    <span class="oi oi-check" aria-hidden="true"></span> Start or Sit
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="matchuprankings">
+                <span class="oi oi-project" aria-hidden="true"></span> Matchup Rankings
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="marketshare">
+                <span class="oi oi-pie-chart" aria-hidden="true"></span> Market Share
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="targetshare">
+                <span class="oi oi-target" aria-hidden="true"></span> Target Share
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="snapcountanalysis">
+                <span class="oi oi-bolt" aria-hidden="true"></span> Snap Counts
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="waiverwire">
+                <span class="oi oi-plus" aria-hidden="true"></span> Waiver Wire
+            </NavLink>
+        </div>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <div class="nav-item px-3">
+            <b>&nbsp; &nbsp; OPERATIONS</b>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="managesettings">
+                <span class="oi oi-cog" aria-hidden="true"></span> Settings
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

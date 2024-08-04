@@ -1,0 +1,130 @@
+﻿@page "/MarketShare"
+<PageTitle>Market Share</PageTitle>
+
+@using Football.Client.Helpers;
+@using Football.Client.Interfaces;
+@using Football.Shared.Models.Fantasy;
+
+@inject IFantasyService fantasyService;
+
+<h4>Market Share</h4>
+
+<div>
+    @foreach (var position in format.Positions(includeQB: false))
+    {
+
+        <input type="radio" name="players" id=" @position" value="@position"
+        @onchange="SetPosition"
+               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+        <label for="@position ">@position</label>
+
+    }
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="HandleInput">
+    Submit
+</button>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+@if (marketShare?.Any() == true)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Team</th>   
+                    <th>@positionEnum.ToString()Fantasy%</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RushAttShare"))">RushAtt%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RushAttShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RushYdShare"))">RushYd%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RushYdShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RushTdShare"))">RushTd%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RushTdShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("TargetShare"))">Target%</span>
+                        <span class="oi @(tableSort.GetSortStyle("TargetShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("ReceptionShare"))">Rec%</span>
+                        <span class="oi @(tableSort.GetSortStyle("ReceptionShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RecYdShare"))">RecYd%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RecYdShare"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("RecTDShare"))">RecTd%</span>
+                        <span class="oi @(tableSort.GetSortStyle("RecTDShare"))"></span>
+                    </th>
+                    <th> </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i <= marketShare.Count; i++)
+                {
+                    <tr>
+                        <td><a class="page-links" href="Players/@marketShare.ElementAt(i-1).PlayerId"> @marketShare.ElementAt(i-1).Name</a>
+                        
+                        </td>
+                        <td>@marketShare.ElementAt(i-1).Team</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).FantasyShare * 100, 1) </td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).RushAttShare *100,1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).RushYdShare *100,1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).RushTDShare *100,1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).TargetShare * 100, 1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).ReceptionShare * 100, 1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).RecYdShare * 100, 1)</td>
+                        <td>@Math.Round(marketShare.ElementAt(i-1).RecTDShare * 100, 1)</td>
+                        <td><a href="share-graph/@marketShare.ElementAt(i-1).Position/@marketShare.ElementAt(i-1).PlayerId"> <i class="oi oi-bar-chart" /></a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+
+    public string Position { get; set; } = "Runningback";
+    public string positionEnum { get; set; } = "RB";
+    public List<MarketShareModel>? marketShare = new();
+
+    public bool loading { get; set; } = false;
+    private bool shouldRender;
+
+    public TableSort tableSort = new();
+    public Formatter format = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    public void SetPosition(ChangeEventArgs args)
+    {
+        marketShare?.Clear();
+        positionEnum = format.SetPosition(args);
+    }
+    public async Task HandleInput()
+    {
+        loading = true;
+        marketShare?.Clear();
+        shouldRender = true;
+        marketShare = await fantasyService.GetMarketShareRequest(positionEnum);
+        loading = false;
+        shouldRender = true;
+    }
+
+    private void SetTable(string columnName) => marketShare = tableSort.SortTable<MarketShareModel>(marketShare, columnName);
+
+}

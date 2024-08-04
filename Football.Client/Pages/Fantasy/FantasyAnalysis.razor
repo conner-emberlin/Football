@@ -1,0 +1,136 @@
+﻿@page "/FantasyAnalysis"
+<PageTitle>Fantasy Analysis</PageTitle>
+
+@using Football.Client.Helpers;
+@using Football.Client.Interfaces;
+@using Football.Shared.Models.Fantasy;
+
+@inject IFantasyService fantasyService;
+
+<h4>Fantasy Analysis</h4>
+
+<div>
+    @foreach (var position in format.Positions())
+    {
+
+        <input type="radio" name="players" id=" @position" value="@position"
+        @onchange="SetPosition"
+               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+        <label for="@position ">@position</label>
+
+    }
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="HandleInput">
+    Submit
+</button>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+@if (FantasyAnalyses != null && FantasyAnalyses.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("AvgFantasy"))">AvgFantasy</span>
+                        <span class="oi @(tableSort.GetSortStyle("AvgFantasy"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("TotalFantasy"))">Total Fantasy</span>
+                        <span class="oi @(tableSort.GetSortStyle("TotalFantasy"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("MinFantasy"))">MinFantasy</span>
+                        <span class="oi @(tableSort.GetSortStyle("MinFantasy"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("MaxFantasy"))">MaxFantasy</span>
+                        <span class="oi @(tableSort.GetSortStyle("MaxFantasy"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("Variance"))">Variance</span>
+                        <span class="oi @(tableSort.GetSortStyle("Variance"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("StdDev"))">StdDev</span>
+                        <span class="oi @(tableSort.GetSortStyle("StdDev"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("BoomPercentage"))">Boom%</span>
+                        <span class="oi @(tableSort.GetSortStyle("BoomPercentage"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("BustPercentage"))">Bust%</span>
+                        <span class="oi @(tableSort.GetSortStyle("BustPercentage"))"></span>
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i <= FantasyAnalyses.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <a class="page-links" href="Players/@FantasyAnalyses.ElementAt(i-1).PlayerId"> @FantasyAnalyses.ElementAt(i-1).Name</a>                            
+                        </td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i-1).AvgFantasy,2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).TotalFantasy, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).MinFantasy, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).MaxFantasy, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).Variance, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).StdDev, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).BoomPercentage, 2)</td>
+                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).BustPercentage, 2)</td>
+                        <td>
+                            <a href="error-graph/@FantasyAnalyses.ElementAt(i-1).PlayerId"> <i class="oi oi-graph" /></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+@code {
+    public string Position { get; set; } = "Quarterback";
+    public string positionEnum { get; set; } = "";
+    public List<FantasyAnalysisModel>? FantasyAnalyses = new();
+
+    public bool loading { get; set; } = false;
+    public bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+
+    private TableSort tableSort = new();
+    private Formatter format = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    private void SetPosition(ChangeEventArgs args)
+    {
+        FantasyAnalyses?.Clear();
+        tableSort = new();
+        positionEnum = format.SetPosition(args);
+    }
+
+    private async Task HandleInput()
+    {
+        loading = true;
+        FantasyAnalyses?.Clear();
+        shouldRender = true;
+        FantasyAnalyses = (await fantasyService.GetFantasyAnalysesRequest(positionEnum))?.Where(f => f.AvgFantasy >= 5).ToList(); ;
+        loading = false;
+        shouldRender = true;
+    }
+
+    private void SetTable(string columnName) => FantasyAnalyses = tableSort.SortTable<FantasyAnalysisModel>(FantasyAnalyses, columnName);
+
+}

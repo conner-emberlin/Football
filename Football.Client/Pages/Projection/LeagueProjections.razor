@@ -1,0 +1,132 @@
+﻿
+@using Football.Client.Helpers;
+@using Football.Client.Interfaces;
+@using Football.Client.Shared;
+@using Football.Shared.Models.Projection;
+
+@inject IProjectionService projectionService;
+@page "/LeagueProjections/"
+
+
+<h4>Fantasy League Projections</h4>
+<EditForm model="this" OnSubmit="HandleInput">
+<TextBoxTeamName @bind-TeamName ="this.teamName"/>
+<button class="button-22" type="submit">Submit</button>
+</EditForm>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+@if(youTried && projections.Any())
+{
+    <h5>@userProjections.LeagueName</h5>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>@userProjections.TeamName</th>
+                    <th>@opponentProjections.TeamName</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 1; i <= Math.Min(userProjections.TeamProjections.Count, opponentProjections.TeamProjections.Count); i++)
+                {
+                    var uPos = userProjections.TeamProjections.ElementAt(i - 1).Position;
+                    var oPos = opponentProjections.TeamProjections.ElementAt(i - 1).Position;
+                    <tr>
+                        <td>
+                            <b style="color:@form.PositionColor(uPos)">@uPos</b>
+                            &nbsp;
+                            <a class="page-links" href="Players/@userProjections.TeamProjections.ElementAt(i-1).PlayerId">@userProjections.TeamProjections.ElementAt(i-1).Name</a>
+                            : @Math.Round(userProjections.TeamProjections.ElementAt(i-1).ProjectedPoints, 2)
+                        </td>
+                        <td>
+                            <b style="color:@form.PositionColor(oPos)">@oPos</b>
+                            &nbsp;
+                            <a class="page-links" href="Players/@opponentProjections.TeamProjections.ElementAt(i-1).PlayerId">@opponentProjections.TeamProjections.ElementAt(i-1).Name</a>
+                            : @Math.Round(opponentProjections.TeamProjections.ElementAt(i-1).ProjectedPoints,2)
+                        </td>
+                    </tr>
+                }
+                @if (userProjections.TeamProjections.Count > opponentProjections.TeamProjections.Count)
+                {
+                    for(int i = opponentProjections.TeamProjections.Count; i < userProjections.TeamProjections.Count; i++)
+                    {
+                        var pos = userProjections.TeamProjections.ElementAt(i).Position;
+                        <tr>
+                            <td>
+                                <b style="color:@form.PositionColor(pos)">@pos</b>
+                                &nbsp;
+                                <a class="page-links" href="Players/@userProjections.TeamProjections.ElementAt(i).PlayerId">@userProjections.TeamProjections.ElementAt(i).Name</a>
+                                : @Math.Round(userProjections.TeamProjections.ElementAt(i).ProjectedPoints,2)
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                    }
+                }
+                else if(userProjections.TeamProjections.Count < opponentProjections.TeamProjections.Count)
+                {
+                    for (int i = userProjections.TeamProjections.Count; i < opponentProjections.TeamProjections.Count; i++)
+                    {
+                        var pos = opponentProjections.TeamProjections.ElementAt(i).Position;
+                        <tr>
+                            <td>
+                            </td>
+                            <td>
+                                <b style="color:@form.PositionColor(pos)">@pos</b>
+                                &nbsp;
+                                <a class="page-links" href="Players/@opponentProjections.TeamProjections.ElementAt(i).PlayerId">@opponentProjections.TeamProjections.ElementAt(i).Name</a>
+                                : @Math.Round(opponentProjections.TeamProjections.ElementAt(i).ProjectedPoints,2)
+                            </td>
+                            
+                        </tr>
+                    }
+
+                }
+                <tr>
+                    <td><b>Total: </b>@Math.Round(userProjections.TeamProjections.Sum(t => t.ProjectedPoints), 2)</td>
+                    <td><b>Total: </b>@Math.Round(opponentProjections.TeamProjections.Sum(t => t.ProjectedPoints),2)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+}
+
+
+@code {
+    private bool loading { get; set; } 
+    private bool youTried = false;
+    private bool shouldRender;
+
+
+    private string teamName { get; set; } = "";
+    private List<MatchupProjectionsModel>? projections = new();
+    private MatchupProjectionsModel userProjections { get; set; } = new();
+    private MatchupProjectionsModel opponentProjections { get; set; } = new();
+
+    private Formatter form = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    private async Task HandleInput()
+    {
+        loading = true;
+        shouldRender = true;
+        projections?.Clear();
+        youTried = true;
+        projections = await projectionService.GetMatchupProjectionsRequest(teamName);
+        if (projections != null && projections.Any())
+        {
+            userProjections = projections.First(p => p.TeamName.ToLower().Trim() == teamName.ToLower().Trim());
+            opponentProjections = projections.First(p => p.TeamName.ToLower().Trim() != teamName.ToLower().Trim());
+        }
+
+        loading = false;
+        shouldRender = true;
+    }
+}
