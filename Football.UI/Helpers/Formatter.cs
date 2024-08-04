@@ -47,11 +47,12 @@ namespace Football.UI.Helpers
                   : "color:red";
         }
 
-        public List<string> Positions(bool includeFlex = false, bool includeQB = true, bool includeDST = true, bool includeK = true)
+        public List<string> Positions(bool includeFlex = false, bool includeQB = true, bool includeDST = true, bool includeK = true, bool includeRookies = false)
         {
             var list = new List<string> { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker" };
 
             if (includeFlex) list.Add("Flex");
+            if (includeRookies) list.Add("Rookies");
             if (!includeQB) list.Remove("Quarterback");
             if (!includeDST) list.Remove("DST");
             if (!includeK) list.Remove("Kicker");

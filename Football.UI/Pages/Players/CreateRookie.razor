@@ -1,7 +1,9 @@
-﻿@using Football.Api.Models.Players;
+﻿@page "/AddRookie/"
+
+@using Football.Api.Models.Players;
 @using Football.UI.Interfaces;
+
 @inject IPlayersService playersService;
-@page "/AddRookie/"
 
 @if (loading)
 {
@@ -72,8 +74,8 @@ else
     private bool loading = false;
 
     private bool adding = false;
-    public bool rookieAdded { get; set; }
-    public RookiePlayerModel player = new();
+    private bool rookieAdded { get; set; }
+    private RookiePlayerModel player = new();
 
     protected override bool ShouldRender() => shouldRender;
 

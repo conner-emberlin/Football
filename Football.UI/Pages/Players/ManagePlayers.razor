@@ -1,15 +1,15 @@
 ﻿@page "/ManagePlayers"
 <PageTitle>Manage Players</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using System.Text;
-@using Football.Players.Models;
+
+@using Football.UI.Helpers;
+@using Football.UI.Interfaces;
 @using Football.Api.Models.Players;
-@inject IHttpClientFactory ClientFactory
+
+@inject IPlayersService playerService;
 
 <h4>Manage Players</h4>
 <div>
-    @foreach (var position in Positions)
+    @foreach (var position in form.Positions(includeRookies: true))
     {
 
         <input type="radio" name="players" id=" @position" value="@position"
@@ -176,33 +176,32 @@ else if (rookies.Any())
     </div>
 }
 @code {
-    private bool shouldRender;
-    protected override bool ShouldRender() => shouldRender;
+    private bool shouldRender;  
     private bool badRequestError;
-
-    private List<Player>? players = new();
-    private List<string> Positions = new() { "Quarterback", "Runningback", "Wide Receiver", "Tight End", "DST", "Kicker", "Rookies" };
-    public string Position { get; set; } = "Quarterback";
-    public string PositionEnum { get; set; } = "1";
     private bool loading { get; set; }
-    int count = 0;
-    List<int> inactivePlayers = [];
+    private int count = 0;
     int playersUpdated { get; set; }
+
+    private List<SimplePlayerModel>? players = new();
+    public string Position { get; set; } = "Quarterback";
+    public string PositionEnum { get; set; } = "QB";
+    List<int> inactivePlayers = [];   
 
     bool addRookie { get; set; } = false;
     bool rookieAdded { get; set; } = false;
     bool youTriedToAddRookie { get; set; } = false;
-
     List<RookiePlayerModel>? rookies = [];
     RookiePlayerModel newRookie = new();
+
+    private Formatter form = new();
+
+    protected override bool ShouldRender() => shouldRender;
 
     public void SetPosition(ChangeEventArgs args)
     {
         Position = args.Value.ToString();
-        if (players != null)
-            players.Clear();
-        if (rookies != null)
-            rookies.Clear();
+        players?.Clear();
+        rookies?.Clear();
         inactivePlayers.Clear();
         playersUpdated = 0;
         addRookie = false;
@@ -210,54 +209,17 @@ else if (rookies.Any())
         youTriedToAddRookie = false;
     }
 
-    public async Task GetPlayers()
+    private async Task GetPlayers()
     {
         loading = true;
         shouldRender = true;
-
-        if (players != null)
-            players.Clear();
+        players?.Clear();            
         inactivePlayers.Clear();
 
         if (Position.ToLower() != "rookies")
         {
-            switch (Position.ToLower())
-            {
-                case "quarterback":
-                    PositionEnum = "QB";
-                    break;
-                case "runningback":
-                    PositionEnum = "RB";
-                    break;
-                case "wide receiver":
-                    PositionEnum = "WR";
-                    break;
-                case "tight end":
-                    PositionEnum = "TE";
-                    break;
-                case "dst":
-                    PositionEnum = "DST";
-                    break;
-                case "kicker":
-                    PositionEnum = "K";
-                    break;
-                default: PositionEnum = "QB"; break;
-            }
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/data/players?active=1&position=" + @PositionEnum);
-            request.Headers.Add("Accept", "application/json");
-            var client = ClientFactory.CreateClient();
-            var response = await client.SendAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                using var responseStream = await response.Content.ReadAsStreamAsync();
-                players = await JsonSerializer.DeserializeAsync<List<Player>>(responseStream, options);
-                badRequestError = false;
-            }
-            else
-            {
-                badRequestError = true;
-            }
+            PositionEnum = form.SetPosition(Position);
+            players = await playerService.GetSimplePlayersRequest(activeOnly: true, position: PositionEnum);
             loading = false;
             shouldRender = true;
         }
@@ -273,89 +235,36 @@ else if (rookies.Any())
     {
         loading = true;
         playersUpdated = 0;
-        if (inactivePlayers.Any())
-        {
-            var json = JsonSerializer.Serialize(inactivePlayers);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var client = ClientFactory.CreateClient();
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/player/inactivate") { Content = content };
-            var response = await client.SendAsync(request);
-            if (response.IsSuccessStatusCode)
-            {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                using var responseStream = response.Content.ReadAsStream();
-                playersUpdated = JsonSerializer.Deserialize<int>(responseStream, options);
-            }
-            else
-            {
-                badRequestError = true;
-            }
-        }
-        else badRequestError = true;
+        playersUpdated = await playerService.InactivatePlayersRequest(inactivePlayers);
         loading = false;
-        if (players != null)
-        {
-            players.Clear();
-            await GetPlayers();
-        }
-
+        players?.Clear();
+        await GetPlayers();
         shouldRender = true;
     }
 
-    public async Task GetRookies()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Player/rookies/all");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            rookies = await JsonSerializer.DeserializeAsync<List<RookiePlayerModel>>(responseStream, options);
-            badRequestError = false;
-        }
-        else
-        {
-            badRequestError = true;
-        }
-    }
+    private async Task GetRookies() => rookies = await playerService.GetAllRookiesRequest();
 
-    public void CheckboxClicked(int playerId)
-    {
-        if (inactivePlayers.Contains(playerId)) 
-            inactivePlayers.Remove(playerId);
-        else 
-            inactivePlayers.Add(playerId);
-    }
-
-    private void AddRookie() { 
-
-        addRookie = !addRookie;
-        newRookie = new();
-    }
     private async Task AddRookie(RookiePlayerModel newRookie)
     {
         addRookie = false;
         youTriedToAddRookie = true;
-        var json = JsonSerializer.Serialize(newRookie);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var client = ClientFactory.CreateClient();
-        var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7028/api/Player/add-rookie")
-            {
-                Content = content
-            };
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = response.Content.ReadAsStream();
-            rookieAdded = await JsonSerializer.DeserializeAsync<bool>(responseStream, options);
-            newRookie = new RookiePlayerModel { };
-            await GetPlayers();
-        }
-        else rookieAdded = false;
+        rookieAdded = await playerService.CreateRookieRequest(newRookie);
+        newRookie = new RookiePlayerModel { };
+        await GetPlayers();
     }
+
+    private void CheckboxClicked(int playerId)
+    {
+        if (inactivePlayers.Contains(playerId)) inactivePlayers.Remove(playerId);
+        else inactivePlayers.Add(playerId);
+    }
+
+    private void AddRookie()
+    {
+        addRookie = !addRookie;
+        newRookie = new();
+    }
+
     private void CancelRookieAdd()
     {
         addRookie = false;
