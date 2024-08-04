@@ -11,5 +11,8 @@ namespace Football.UI.Interfaces
         public Task<List<SnapCountModel>?> GetSnapCountsRequest(string id);
         public Task<List<RookiePlayerModel>?> GetAllRookiesRequest();
         public Task<int> InactivatePlayersRequest(List<int> playerIds);
+        public Task<int> PostInSeasonInjuryRequest(InSeasonInjuryModel injury);
+        public Task<List<PlayerInjuryModel>?> GetAllInSeasonInjuriesRequest();
+        public Task<bool> UpdateInSeasonInjuryRequst(InSeasonInjuryModel injury);
     }
 }

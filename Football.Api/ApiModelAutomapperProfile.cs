@@ -174,6 +174,10 @@ namespace Football.Api
                 .ForMember(w => w.Team, o => o.Ignore())
                 .ForMember(w => w.AverageFantasy, o => o.Ignore())
                 .ForMember(w => w.TopOpponentTeamDescription, o => o.Ignore());
+            CreateMap<PlayerInjury, PlayerInjuryModel>()
+                .ForMember(p => p.Name, o => o.MapFrom(p => p.Player.Name))
+                .ForMember(p => p.Position, o => o.MapFrom(p => p.Player.Position));
+            CreateMap<InSeasonInjury, InSeasonInjuryModel>().ReverseMap();
         }
 
     }

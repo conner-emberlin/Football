@@ -91,15 +91,15 @@ namespace Football.Api.Controllers
 
         [HttpPost("injury")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        public async Task<IActionResult> PostInSeasonInjury([FromBody] InSeasonInjury injury) => Ok(await playersService.PostInSeasonInjury(injury));
+        public async Task<IActionResult> PostInSeasonInjury([FromBody] InSeasonInjuryModel injury) => Ok(await playersService.PostInSeasonInjury(mapper.Map<InSeasonInjury>(injury)));
 
         [HttpGet("player-injuries")]
-        [ProducesResponseType(typeof(List<PlayerInjury>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetPlayerInjuries() => Ok(await playersService.GetPlayerInjuries());
+        [ProducesResponseType(typeof(List<PlayerInjuryModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPlayerInjuries() => Ok(mapper.Map<List<PlayerInjuryModel>>(await playersService.GetPlayerInjuries()));
 
         [HttpPut("update-injury")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdateInjury([FromBody] InSeasonInjury injury) => Ok(await playersService.UpdateInjury(injury));
+        public async Task<IActionResult> UpdateInjury([FromBody] InSeasonInjuryModel injury) => Ok(await playersService.UpdateInjury(mapper.Map<InSeasonInjury>(injury)));
 
 
         [HttpPost("team-change/in-season")]
