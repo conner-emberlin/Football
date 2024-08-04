@@ -1,13 +1,11 @@
 ﻿@page "/team-fantasy/{team}/{opponent}/{week}"
 
-@using Football.Fantasy.Models;
 @using Football.UI.Helpers;
-@using System.Text.Json
-@using System.Text.Json.Serialization
+@using Football.UI.Interfaces;
+@using Football.Api.Models.Fantasy;
 @using ApexCharts;
 
-@inject IHttpClientFactory ClientFactory;
-
+@inject ITeamsService teamService;
 
 <h5>@GetHeader()</h5>
 
@@ -144,58 +142,41 @@
     [Parameter]
     public string week { get; set; } = "";
 
-    public bool loading { get; set; }
-    public bool shouldRender { get; set; }
-    public bool badRequestError { get; set; }
+    private bool loading { get; set; }
+    private bool shouldRender { get; set; }
+    private bool badRequestError { get; set; }
 
-    public List<WeeklyFantasy>? teamFantasy = [];
-    public List<WeeklyFantasy>? opponentFantasy = [];
+    private List<WeeklyFantasyModel>? teamFantasy = [];
+    private List<WeeklyFantasyModel>? opponentFantasy = [];
 
-    public List<BarGraphComp> graph = [];
+    private List<BarGraphComp> graph = [];
 
-    public Formatter form = new();
+    private Formatter form = new();
 
     protected override bool ShouldRender() => shouldRender;
 
     protected override async Task OnInitializedAsync()
     {
         loading = true;
-        teamFantasy = await GetTeamFantasy(team, week);
-        opponentFantasy = await GetTeamFantasy(opponent, week);
+
+        teamFantasy = await teamService.GetTeamWeeklyFantasyRequest(team, week);
+        opponentFantasy = await teamService.GetTeamWeeklyFantasyRequest(opponent, week);
+        if (teamFantasy != null) teamFantasy.ForEach(t => t.FantasyPoints = Math.Round(t.FantasyPoints, 2));
+        if (opponentFantasy != null) opponentFantasy.ForEach(t => t.FantasyPoints = Math.Round(t.FantasyPoints, 2));
+
         loading = false;
         shouldRender = true;
-    }
-
-    private async Task<List<WeeklyFantasy>?> GetTeamFantasy(string team, string week)
-    {
-        var url = string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Team/weekly-fantasy", team, week);
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            var temp = await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options);
-            if (temp is not null)
-            {
-                temp.ForEach(t => t.FantasyPoints = Math.Round(t.FantasyPoints, 2));
-            }
-            return temp;
-        }
-        else return null;
     }
 
     private string GetHeader() => team + " vs " + opponent + " Fantasy Results";
 
     private string PlayerPage(int playerId) => "Players/" + playerId.ToString();
 
-    public class BarGraphComp
+    private class BarGraphComp
     {
         public string Label { get; set; } = "";
-        public WeeklyFantasy TeamBar { get; set; } = new();
-        public WeeklyFantasy OppBar { get; set; } = new();
+        public WeeklyFantasyModel TeamBar { get; set; } = new();
+        public WeeklyFantasyModel OppBar { get; set; } = new();
     }
 
 }

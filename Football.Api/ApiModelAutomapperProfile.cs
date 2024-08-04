@@ -170,6 +170,9 @@ namespace Football.Api
             CreateMap<SnapCount, SnapCountModel>();
             CreateMap<MatchupProjections, MatchupProjectionsModel>()
                 .ForMember(m => m.TeamProjections, o => o.Ignore());
+            CreateMap<WeeklyFantasy, TopOpponentsModel>()
+                .ForMember(w => w.Team, o => o.Ignore())
+                .ForMember(w => w.AverageFantasy, o => o.Ignore());
         }
 
     }

@@ -10,5 +10,6 @@ namespace Football.UI.Interfaces
         public Task<List<GameResultModel>?> GetGameResultsRequest();
         public Task<List<TeamRecordModel>?> GetTeamRecordsRequest();
         public Task<List<ScheduleDetailsModel>?> GetScheduleDetailsRequest();
+        public Task<List<WeeklyFantasyModel>?> GetTeamWeeklyFantasyRequest(string team, string week);
     }
 }

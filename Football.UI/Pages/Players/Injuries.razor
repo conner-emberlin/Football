@@ -1,11 +1,16 @@
-﻿@using System.Text.Json
-@using System.Text.Json.Serialization
+﻿@page "/Injuries"
 
-@using Football.Players.Models;
-@using Football.UI.Helpers;
+@using System.Text.Json
+@using System.Text.Json.Serialization
 @using System.Text;
+@using Football.Players.Models;
+
+@using Football.UI.Helpers;
+@using Football.UI.Interfaces;
+@using Football.Api.Models.Players;
+
 @inject IHttpClientFactory ClientFactory
-@page "/Injuries"
+@inject IPlayersService playersService;
 
 <h4>Injury Management</h4>
 
@@ -360,7 +365,7 @@ else if (injuryEdits.Any() && !badRequestError)
             injuryAdded = await JsonSerializer.DeserializeAsync<int>(responseStream, options);
             await GetInjuryEdits();
         }
-        else injuryAdded = 0;
+
     }
 
     private class InjuryEdit : PlayerInjury

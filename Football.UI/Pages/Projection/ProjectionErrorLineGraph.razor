@@ -1,16 +1,12 @@
 ﻿@page "/error-graph/{id}"
 <PageTitle>Fantasy Trends</PageTitle>
-@using System.Text.Json
-@using System.Text.Json.Serialization
+
+@using Football.UI.Helpers;
 @using Football.UI.Interfaces;
 @using Football.Api.Models.Projection;
-
-@using Football.Projections.Models;
-@using Football.UI.Helpers;
 @using ApexCharts;
 
 @inject IProjectionService projectionService;
-@inject IHttpClientFactory ClientFactory
 
 @if (loading)
 {

@@ -1,12 +1,13 @@
-﻿using Football.Models;
+﻿using Football.Api.Models.Fantasy;
+using Football.Models;
 using Football.Enums;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Football.Players.Interfaces;
 using AutoMapper;
-using Football.Api.Models.Fantasy;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+
 
 namespace Football.Api.Controllers
 {
@@ -108,9 +109,28 @@ namespace Football.Api.Controllers
         }
 
         [HttpGet("top-opponents/{teamId}/{position}")]
-        [ProducesResponseType(typeof(List<WeeklyFantasy>), 200)]
+        [ProducesResponseType(typeof(List<TopOpponentsModel>), 200)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetTopOpponents(int teamId, string position) => Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum) ? Ok(await matchupAnalysisService.GetTopOpponents(positionEnum, teamId)) : BadRequest();
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetTopOpponents(int teamId, string position) 
+        {
+            if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
+
+            var teamMap = await playersService.GetTeam(teamId);
+            if (teamMap == null) return NotFound();
+
+            var models = mapper.Map<List<TopOpponentsModel>>(await matchupAnalysisService.GetTopOpponents(positionEnum, teamId));
+            var playerTeamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
+            foreach (var m in models)
+            {
+                m.TopOpponentTeamDescription = teamMap.TeamDescription;
+                m.Team = playerTeamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty;
+                var allWeeklyFantasy = await fantasyDataService.GetWeeklyFantasy(m.PlayerId);
+                m.AverageFantasy = allWeeklyFantasy.Average(a => a.FantasyPoints);
+            }
+            return Ok(models);
+
+        } 
 
         [HttpGet("team-totals")]
         [ProducesResponseType(typeof(List<TeamTotals>), StatusCodes.Status200OK)]

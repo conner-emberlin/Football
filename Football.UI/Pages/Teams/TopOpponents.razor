@@ -1,14 +1,12 @@
 ﻿@page "/top-opponents/{teamId}/{position}"
 <PageTitle>Top Opponents</PageTitle>
 
-@using System.Text.Json
-@using System.Text.Json.Serialization
-@using Football.Data.Models;
-@using Football.Fantasy.Models;
-@using Football.Players.Models;
 @using Football.UI.Helpers;
+@using Football.UI.Interfaces;
+@using Football.Api.Models.Fantasy;
 @using ApexCharts;
-@inject IHttpClientFactory ClientFactory
+
+@inject IFantasyService fantasyService;
 
 
 @if (loading)
@@ -23,9 +21,9 @@ else
 
 @if (opponents.Any())
 {
-    <ApexChart TItem="WeeklyFantasyWithTeam"
+    <ApexChart TItem="TopOpponentsModel"
                Height="400">
-        <ApexPointSeries TItem="WeeklyFantasyWithTeam"
+        <ApexPointSeries TItem="TopOpponentsModel"
                          Items="opponents"
                          Name="Fantasy Pts"
                          SeriesType="SeriesType.Line"
@@ -52,8 +50,8 @@ else
             <tbody>
                 @foreach (var op in opponents)
                 {
-                    var logoPhotoPath = op.Team != null ?
-                    "https://localhost:7176/Logos/" + op.Team!.Team + ".png"
+                    var logoPhotoPath = op.Team != string.Empty ?
+                    "https://localhost:7176/Logos/" + op.Team + ".png"
                     : "https://localhost:7176/Logos/nfl.png";
 
                     var diff = @Math.Round(op.FantasyPoints - op.AverageFantasy, 2);
@@ -81,8 +79,9 @@ else
     private bool shouldRender;
     private bool loading = false;
 
-    private List<WeeklyFantasyWithTeam>? opponents = new();
-    private TeamMap team = new();
+    private string team { get; set; } = "";
+    private List<TopOpponentsModel>? opponents = new();
+
 
     private Formatter form = new();
 
@@ -90,91 +89,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        loading = true;
-        await GetTeamMap();
-        await GetTopOpponents();
+        loading = true;       
+        opponents = await fantasyService.GetTopOpponentsRequest(teamId, position);
+        if (opponents.Any()) team = opponents.First().TopOpponentTeamDescription;
         loading = false;
         shouldRender = true;
     }
 
-    public async Task GetTopOpponents()
-    {
-        var url = string.Format("{0}/{1}/{2}", "https://localhost:7028/api/Fantasy/top-opponents", teamId, position);
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            opponents = await JsonSerializer.DeserializeAsync<List<WeeklyFantasyWithTeam>>(responseStream, options);
-            if (opponents.Any())
-            {
-                foreach (var o in opponents)
-                {
-                    o.Team = await GetPlayerTeam(o.PlayerId);
-                    o.AverageFantasy = await GetAverageFantasy(o.PlayerId);
-                }
-            }
-        }
-    }
-
-    public async Task GetTeamMap()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7028/api/Team/all");
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            var allTeams = await JsonSerializer.DeserializeAsync<List<TeamMap>>(responseStream, options);
-            team = allTeams.First(a => a.TeamId.ToString() == teamId);
-        }
-    }
-
-    public async Task<PlayerTeam?> GetPlayerTeam(int playerId)
-    {
-        var url = string.Format("{0}/{1}", "https://localhost:7028/api/Player/team", playerId);
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            return await JsonSerializer.DeserializeAsync<PlayerTeam>(responseStream, options);
-        }
-        return null;
-    }
-
-    public async Task<double> GetAverageFantasy(int playerId)
-    {
-        var url = string.Format("{0}/{1}", "https://localhost:7028/api/Fantasy/data/weekly", playerId);
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
-        {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            using var responseStream = await response.Content.ReadAsStreamAsync();
-            var allFantasy = await JsonSerializer.DeserializeAsync<List<WeeklyFantasy>>(responseStream, options);
-            return allFantasy != null && allFantasy.Count > 0 ? allFantasy.Average(a => a.FantasyPoints) : 0;
-        }
-        return 0;
-    }
-
-    private string GetHeader() => string.Format("{0} - Top {1} Opponents", team.TeamDescription, position);
+    private string GetHeader() => string.Format("{0} - Top {1} Opponents", team, position);
     private string DiffColor(double diff) => diff >= 0 ? "color:green" : "color:red";
-
-    public class WeeklyFantasyWithTeam : WeeklyFantasy
-    {
-        public PlayerTeam? Team { get; set; }
-        public double AverageFantasy { get; set; }
-    }
 }
 

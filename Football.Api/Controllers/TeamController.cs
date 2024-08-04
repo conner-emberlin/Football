@@ -24,11 +24,7 @@ namespace Football.Api.Controllers
 
         [HttpGet("players/{team}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<Player>>> GetPlayersByTeam(string team) => Ok(await playersService.GetPlayersByTeam(team));
-
-        [HttpGet("location/{teamId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<TeamLocation>> GetTeamLocation(int teamId) => Ok(await playersService.GetTeamLocation(teamId));
+        public async Task<ActionResult<List<PlayerTeam>>> GetPlayersByTeam(string team) => Ok(await playersService.GetPlayersByTeam(team));
 
         [HttpGet("schedule-details/current")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -48,9 +44,9 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetFantasyPerformances([FromRoute] int teamId) => teamId > 0 ? Ok(mapper.Map<List<FantasyPerformanceModel>>(await fantasyAnalysisService.GetFantasyPerformances(teamId))) : BadRequest("Bad Request");
 
         [HttpGet("weekly-fantasy/{team}/{week}")]
-        [ProducesResponseType(typeof(List<WeeklyFantasy>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<WeeklyFantasyModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyTeamFantasy([FromRoute] string team, [FromRoute] int week) => week > 0 ? Ok(await fantasyDataService.GetWeeklyTeamFantasy(team, week)) : BadRequest("Bad Request");
+        public async Task<IActionResult> GetWeeklyTeamFantasy([FromRoute] string team, [FromRoute] int week) => week > 0 ? Ok(mapper.Map<List<WeeklyFantasyModel>>(await fantasyDataService.GetWeeklyTeamFantasy(team, week))) : BadRequest("Bad Request");
 
         [HttpGet("totals/{teamId}")]
         [ProducesResponseType(typeof(List<TeamTotals>), StatusCodes.Status200OK)]
