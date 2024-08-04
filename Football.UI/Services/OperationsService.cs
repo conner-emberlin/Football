@@ -1,4 +1,4 @@
-﻿using Football.Api.Models.Operations;
+﻿using Football.Shared.Models.Operations;
 using Football.UI.Interfaces;
 
 namespace Football.UI.Services

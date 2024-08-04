@@ -2,7 +2,8 @@
 <PageTitle>Snap Trends</PageTitle>
 
 @using Football.UI.Interfaces;
-@using Football.Api.Models.Players;
+@using Football.Shared.Models.Players;
+
 @using ApexCharts;
 
 @inject IPlayersService playersService;
@@ -23,7 +24,7 @@ else
 
 @if (snaps.Any())
 {
-    <ApexChart TItem="SnapCount"
+    <ApexChart TItem="SnapCountModel"
                Height="400">
         <ApexPointSeries TItem="SnapCountModel"
                          Items="snaps"

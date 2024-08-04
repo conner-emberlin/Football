@@ -1,4 +1,4 @@
-﻿using Football.Api.Models.Fantasy;
+﻿using Football.Shared.Models.Fantasy;
 using Football.Models;
 using Football.Enums;
 using Football.Fantasy.Interfaces;

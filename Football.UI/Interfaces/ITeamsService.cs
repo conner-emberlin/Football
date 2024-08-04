@@ -1,5 +1,5 @@
-﻿using Football.Api.Models.Fantasy;
-using Football.Api.Models.Teams;
+﻿using Football.Shared.Models.Fantasy;
+using Football.Shared.Models.Teams;
 
 namespace Football.UI.Interfaces
 {

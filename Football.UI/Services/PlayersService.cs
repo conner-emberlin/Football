@@ -1,4 +1,4 @@
-﻿using Football.Api.Models.Players;
+﻿using Football.Shared.Models.Players;
 using Football.UI.Interfaces;
 
 namespace Football.UI.Services
@@ -11,7 +11,7 @@ namespace Football.UI.Services
         public async Task<List<SnapCountModel>?> GetSnapCountsRequest(string id) => await requests.Get<List<SnapCountModel>?>("/player/snap-counts/" + id);
         public async Task<List<RookiePlayerModel>?> GetAllRookiesRequest() => await requests.Get<List<RookiePlayerModel>?>("/player/rookies/all");
         public async Task<int> InactivatePlayersRequest(List<int> playerIds) => await requests.Post<int, List<int>>("/player/inactivate", playerIds);
-        public async Task<int> PostInSeasonInjuryRequst(InSeasonInjuryModel injury) => await requests.Post<int, InSeasonInjuryModel>("/player/injury", injury);
+        public async Task<int> PostInSeasonInjuryRequest(InSeasonInjuryModel injury) => await requests.Post<int, InSeasonInjuryModel>("/player/injury", injury);
         public async Task<List<PlayerInjuryModel>?> GetAllInSeasonInjuriesRequest() => await requests.Get<List<PlayerInjuryModel>?>("/player/player-injuries");
         public async Task<bool> UpdateInSeasonInjuryRequest(InSeasonInjuryModel injury) => await requests.PutWithBody<bool, InSeasonInjuryModel>("/player/update-injury", injury);
         public async Task<List<SimplePlayerModel>?> GetSimplePlayersRequest(bool activeOnly = false, string position = "")

@@ -2,7 +2,7 @@
 
 @using Football.UI.Helpers;
 @using Football.UI.Interfaces;
-@using Football.Api.Models.Players;
+@using Football.Shared.Models.Players;
 
 @inject IPlayersService playersService;
 
@@ -266,7 +266,7 @@ else if (injuryEdits.Any() && !badRequestError)
             GamesPlayedInjured = injuryEdit.GamesPlayedInjured
         };
 
-        var updated = await playersService.UpdateInSeasonInjuryRequst(inSeasonInjury);
+        var updated = await playersService.UpdateInSeasonInjuryRequest(inSeasonInjury);
         if (updated) await GetInjuryEdits();
         else badRequestError = true;
 

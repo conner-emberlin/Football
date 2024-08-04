@@ -1,5 +1,4 @@
-﻿using Football.Api.Models.Projection;
-using MathNet.Numerics.RootFinding;
+﻿using Football.Shared.Models.Projection;
 
 namespace Football.UI.Interfaces
 {

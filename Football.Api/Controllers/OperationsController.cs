@@ -6,7 +6,7 @@ using Football.Fantasy.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Football.Players.Interfaces;
-using Football.Api.Models.Operations;
+using Football.Shared.Models.Operations;
 
 namespace Football.Api.Controllers
 {

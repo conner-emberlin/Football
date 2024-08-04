@@ -23,7 +23,12 @@
     <ProjectReference Include="..\Football.Data\Football.Data.csproj" />
     <ProjectReference Include="..\Football.Fantasy\Football.Fantasy.csproj" />
     <ProjectReference Include="..\Football.Projections\Football.Projections.csproj" />
+    <ProjectReference Include="..\Football.Shared.Models\Football.Shared.Models.csproj" />
     <ProjectReference Include="..\Football\Football.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>

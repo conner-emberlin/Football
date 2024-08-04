@@ -6,8 +6,8 @@ using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using AutoMapper;
 using Football.Fantasy.Interfaces;
-using Football.Api.Models.Players;
-using Football.Api.Models.Fantasy;
+using Football.Shared.Models.Players;
+using Football.Shared.Models.Fantasy;
 
 namespace Football.Api.Controllers
 {

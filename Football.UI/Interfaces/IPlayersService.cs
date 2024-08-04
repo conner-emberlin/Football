@@ -1,4 +1,4 @@
-﻿using Football.Api.Models.Players;
+﻿using Football.Shared.Models.Players;
 
 namespace Football.UI.Interfaces
 {
@@ -13,6 +13,6 @@ namespace Football.UI.Interfaces
         public Task<int> InactivatePlayersRequest(List<int> playerIds);
         public Task<int> PostInSeasonInjuryRequest(InSeasonInjuryModel injury);
         public Task<List<PlayerInjuryModel>?> GetAllInSeasonInjuriesRequest();
-        public Task<bool> UpdateInSeasonInjuryRequst(InSeasonInjuryModel injury);
+        public Task<bool> UpdateInSeasonInjuryRequest(InSeasonInjuryModel injury);
     }
 }

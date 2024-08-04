@@ -3,7 +3,7 @@
 
 @using Football.UI.Helpers;
 @using Football.UI.Interfaces;
-@using Football.Api.Models.Projection;
+@using Football.Shared.Models.Projection;
 @using ApexCharts;
 
 @inject IProjectionService projectionService;
@@ -57,7 +57,7 @@ else
         <div style="height:10px;font-size:1px;">&nbsp;</div>
     }
 
-    <ApexChart TItem="WeeklyProjectionError"
+    <ApexChart TItem="WeeklyProjectionErrorModel"
                Height="400">
         <ApexPointSeries TItem="WeeklyProjectionErrorModel"
                          Items="error"

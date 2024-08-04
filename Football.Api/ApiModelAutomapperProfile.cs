@@ -4,11 +4,12 @@ using Football.Models;
 using Football.Fantasy.Models;
 using Football.Players.Models;
 using Football.Projections.Models;
-using Football.Api.Models.Fantasy;
-using Football.Api.Models.Players;
-using Football.Api.Models.Operations;
-using Football.Api.Models.Projection;
-using Football.Api.Models.Teams;
+using Football.Shared.Models.Fantasy;
+using Football.Shared.Models.Players;
+using Football.Shared.Models.Operations;
+using Football.Shared.Models.Projection;
+using Football.Shared.Models.Teams;
+
 namespace Football.Api
 {
     public class ApiModelAutomapperProfile : Profile

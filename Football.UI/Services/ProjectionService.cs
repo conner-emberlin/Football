@@ -1,4 +1,4 @@
-﻿using Football.Api.Models.Projection;
+﻿using Football.Shared.Models.Projection;
 using Football.UI.Interfaces;
 namespace Football.UI.Services
 {
