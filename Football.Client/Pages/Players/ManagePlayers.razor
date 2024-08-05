@@ -82,7 +82,7 @@ else if(Position== "Rookies")
                       <input type="text" class="form-control" placeholder="Age" @bind="@newRookie.DeclareAge" />
                     </td>
                     <td>
-                       <button type="button" class="btn btn-link" @onSubmit="() => CancelRookieAdd()">
+                       <button type="button" class="btn btn-link" @onclick="() => CancelRookieAdd()">
                           <i class="oi oi-circle-x" />
                        </button>
                        <button type="button" class="btn btn-link" @onclick="() => AddRookie(newRookie)">
