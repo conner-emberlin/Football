@@ -20,6 +20,6 @@ builder.Services.AddScoped<IProjectionService, ProjectionService>();
 builder.Services.AddScoped<ITeamsService, TeamsService>();
 
 
-
 var app = builder.Build();
+
 await builder.Build().RunAsync();

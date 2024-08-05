@@ -82,9 +82,10 @@ namespace Football.Client.Helpers
 
         public async Task<T?> Post<T, T1>(string path, T1 model)
         {
-            var json = JsonSerializer.Serialize(model);
+            var json = JsonSerializer.Serialize(model);           
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var request = new HttpRequestMessage(HttpMethod.Post, _baseURL + path) { Content = content };
+            request.Headers.Add("Accept", "application/json");
             var response = await _httpClient.SendAsync(request);
             if (response.IsSuccessStatusCode)
             {
