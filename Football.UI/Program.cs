@@ -18,6 +18,7 @@ builder.Services.AddScoped<IOperationsService, OperationsService>();
 builder.Services.AddScoped<IPlayersService, PlayersService>();
 builder.Services.AddScoped<IProjectionService, ProjectionService>();
 builder.Services.AddScoped<ITeamsService, TeamsService>();
+builder.WebHost.UseStaticWebAssets();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -28,6 +29,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 app.UseCors(MyAllowSpecificOrigins);
 app.MapBlazorHub();

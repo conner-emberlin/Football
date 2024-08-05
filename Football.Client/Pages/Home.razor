@@ -3,7 +3,7 @@
 @using System.Text.Json.Serialization
 @using Football.Client.Models;
 
-
+@inject IHttpClientFactory clientFactory;
 <PageTitle>Home</PageTitle>
 <h4>NFL News</h4>
 
@@ -41,10 +41,10 @@
     private List<Article> articles = new();
     protected override async Task OnInitializedAsync()
     {
-        /*loading = true;
-        var request = new HttpRequestMessage(HttpMethod.Get, "http://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limt=25");
+        loading = true;
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limt=25");
         request.Headers.Add("Accept", "application/json");
-        var client = ClientFactory.CreateClient();
+        var client = clientFactory.CreateClient();
         var response = await client.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
@@ -59,7 +59,7 @@
         }
         loading = false;
         shouldRender = true;
-        */
+        
     }
 
 }

@@ -69,8 +69,8 @@ else if (players != null && players.Count > 0)
             <tbody>
                 @foreach (var player in players)
                 {
-                    var logoPhotoPath = player.Team != null ? "https://localhost:7176/Logos/" + player.Team + ".png" : "https://localhost:7176/Logos/nfl.png";
-                    var opponentPhotoPath = !string.IsNullOrEmpty(player.Opponent) ? "https://localhost:7176/Logos/" + player.Opponent + ".png" : "https://localhost:7176/Logos/nfl.png";
+                    var logoPhotoPath = player.Team != null ? "https://localhost:7237/Logos/" + player.Team + ".png" : "https://localhost:7237/Logos/nfl.png";
+                    var opponentPhotoPath = !string.IsNullOrEmpty(player.Opponent) ? "https://localhost:7237/Logos/" + player.Opponent + ".png" : "https://localhost:7237/Logos/nfl.png";
                     <tr>
                         <td>@GetRank(player)</td>
                         <td><a class="page-links" href="Players/@player.PlayerId"> @player.Name</a></td>

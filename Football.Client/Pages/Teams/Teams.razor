@@ -86,9 +86,9 @@ else if (badRequestError)
 
 @if (teamSelected && teamChosen != null)
 {
-    var photoPath = "https://localhost:7176/Logos/" + teamChosen.Team + ".png";
+    var photoPath = "https://localhost:7237/Logos/" + teamChosen.Team + ".png";
     <div>
-        <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/Logos/BYE.png'">
+        <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7237/Logos/BYE.png'">
     </div>
     <div>
         <b>@teamChosen.TeamDescription</b>

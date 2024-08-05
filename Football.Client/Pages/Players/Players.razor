@@ -77,8 +77,8 @@ else if (!loading && !playerSelected)
                 @foreach (var t in trendingPlayers)
                 {
                     var logoPhotoPath = t.Team != string.Empty ?
-                    "https://localhost:7176/Logos/" + t.Team + ".png"
-                    : "https://localhost:7176/Logos/nfl.png";
+                    "https://localhost:7237/Logos/" + t.Team + ".png"
+                    : "https://localhost:7237/Logos/nfl.png";
 
                     <tr>
                         <td>@t.Name</td>
@@ -96,9 +96,9 @@ else if (!loading && !playerSelected)
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 @if(playerSelected && playerId > 0 && playerData != null)
 {
-    var photoPath = "https://localhost:7176/PlayerPhotos/" + playerId + ".png";
+    var photoPath = "https://localhost:7237/PlayerPhotos/" + playerId + ".png";
     <div>
-        <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7176/PlayerPhotos/gen.png'">
+        <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7237/PlayerPhotos/gen.png'">
     </div>
     <div>
        <b>@playerData.Name</b> 
@@ -117,7 +117,7 @@ else if (!loading && !playerSelected)
         <div class="parent">
             @foreach (var s in playerData.Schedule.Take(10))
             {
-                var logoPhotoPath = "https://localhost:7176/Logos/" + s.OpposingTeam + ".png";
+                var logoPhotoPath = "https://localhost:7237/Logos/" + s.OpposingTeam + ".png";
                 <div class="child">
                         <div>Wk @s.Week vs @s.OpposingTeam </div>
                     <div style="text-align: center;">  <img src="@logoPhotoPath" width="30" height="30"></div>

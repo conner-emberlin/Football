@@ -47,7 +47,7 @@
                     @foreach (var sos in StartOrSits)
                     {
                         if(!string.IsNullOrEmpty(sos.Team)){
-                            var imgPath = "https://localhost:7176/Logos/" + sos.Team + ".png";
+                            var imgPath = "https://localhost:7237/Logos/" + sos.Team + ".png";
                             <td><img src="@imgPath" width="30" height="30"></td>
                         }
                         else

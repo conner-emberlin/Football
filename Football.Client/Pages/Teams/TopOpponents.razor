@@ -51,8 +51,8 @@ else
                 @foreach (var op in opponents)
                 {
                     var logoPhotoPath = op.Team != string.Empty ?
-                    "https://localhost:7176/Logos/" + op.Team + ".png"
-                    : "https://localhost:7176/Logos/nfl.png";
+                    "https://localhost:7237/Logos/" + op.Team + ".png"
+                    : "https://localhost:7237/Logos/nfl.png";
 
                     var diff = @Math.Round(op.FantasyPoints - op.AverageFantasy, 2);
 

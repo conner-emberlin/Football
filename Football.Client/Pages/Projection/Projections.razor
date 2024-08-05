@@ -109,7 +109,7 @@
         <tbody>
         @foreach (var p in players)
         {  
-             var logoPhotoPath = p.Team != string.Empty ? "https://localhost:7176/Logos/" + p.Team + ".png" : "https://localhost:7176/Logos/nfl.png";
+             var logoPhotoPath = p.Team != string.Empty ? "https://localhost:7237/Logos/" + p.Team + ".png" : "https://localhost:7237/Logos/nfl.png";
              var sa = p.SeasonProjectionError;
              var showRank = !sort.IsSortedAscending;
              var rank = @format.Rank(players, p);
