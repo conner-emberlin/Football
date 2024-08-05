@@ -23,12 +23,14 @@ using Football.Fantasy.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "_myAllowSpecificOrigins",
+    options.AddPolicy(name: myAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.AllowAnyHeader().AllowCredentials().AllowAnyMethod().WithOrigins("https://localhost:7176/", "https://localhost:7237", "http://localhost:8804", "http://localhost:5144").SetIsOriginAllowed((host) => true);
+                          policy.AllowAnyOrigin();
                       });
 });
 
@@ -110,8 +112,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors(myAllowSpecificOrigins);
 app.UseHttpsRedirection();
-app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
