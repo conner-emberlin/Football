@@ -14,6 +14,7 @@
 <button class="button-22" type="submit">Submit</button>
 </EditForm>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
+
 @if (loading)
 {
     <div class="spinner"></div>
@@ -93,8 +94,10 @@
             </tbody>
         </table>
     </div>
-
-
+}
+else if(youTried && !projections.Any())
+{
+    <text>Team not found. Please try again.</text>
 }
 
 

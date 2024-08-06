@@ -153,14 +153,14 @@
     private List<WeeklyProjectionAnalysisModel>? ProjectionAnalyses = new();
     private List<SeasonProjectionAnalysisModel>? SeasonProjectionAnalyses = new();
 
-    public string? Position { get; set; } = "Quarterback";
-    public string PositionEnum { get; set; } = "1";
+    private string? Position { get; set; } = "Quarterback";
+    private string PositionEnum { get; set; } = "1";
     private bool shouldRender;
     private bool loading { get; set; }
-    int count = 0;
+    private int count = 0;
 
-    public TableSort tableSort = new();
-    public Formatter format = new();
+    private TableSort tableSort = new();
+    private Formatter format = new();
 
     protected override bool ShouldRender() => shouldRender;
 

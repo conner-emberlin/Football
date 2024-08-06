@@ -19,7 +19,7 @@
     }
 </div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
-<button class="button-22" role="button" @onclick="Get">
+<button class="button-22" role="button" @onclick="HandleInput">
     Submit
 </button>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -128,25 +128,27 @@
 }
 
 @code {
-    public string Position { get; set; } = "Quarterback";
-    public string positionEnum { get; set; } = "QB";
+    private string Position { get; set; } = "Quarterback";
+    private string positionEnum { get; set; } = "QB";
 
-    public List<FantasyPercentageModel>? fantasyShare = new();
+    private List<FantasyPercentageModel>? fantasyShare = new();
 
-    public bool loading { get; set; } = false;
+    private bool loading { get; set; } = false;
     private bool shouldRender;
+    
+
+    private TableSort tableSort = new();
+    private Formatter format = new();
+
     protected override bool ShouldRender() => shouldRender;
 
-    public TableSort tableSort = new();
-    public Formatter format = new();
-
-    public void SetPosition(ChangeEventArgs args)
+    private void SetPosition(ChangeEventArgs args)
     {
         fantasyShare?.Clear();
         tableSort = new();
         positionEnum = format.SetPosition(args);
     }
-    public async Task Get()
+    private async Task HandleInput()
     {
         loading = true;
         fantasyShare?.Clear();

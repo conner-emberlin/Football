@@ -833,7 +833,7 @@ else if (!loading && !playerSelected)
         playerId = pid;
 
         playerData = await playersService.GetPlayerDataRequest(playerId);
-
+        if (playerData != null) playerData.SeasonData = playerData.SeasonData.OrderByDescending(s => s.Season).ToList();
         playerSelected = true;
         selectedPlayer = playerData != null ? playerData.Name : string.Empty;
         filteredPlayers = null;

@@ -20,25 +20,30 @@
     }
 </div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
+<tr>
+    <td>
 <button class="button-22" role="button" @onclick="HandleSubmit">
     Submit
 </button>
-
-<div style="height:10px;font-size:1px;">&nbsp;</div>
-
+    </td>
+    @if (players != null && players.Count > 0 && !players.Any(p => p.CanDelete) && PositionEnum != "FLEX")
+    {
+        <td>&nbsp;</td>
+        <td>
+        <button class="button-22" role="button" @onclick="HandleUpload">
+            Upload Projections
+        </button>
+        </td>
+    }
+</tr>
 @if (loading)
 {
     <div class="spinner"></div>
 }
 
-else if (players != null && players.Count > 0)
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@if (players != null && players.Count > 0)
 {
-    @if (!players.First().CanDelete)
-    {
-        <button class="button-22" role="button" @onclick="HandleUpload">
-            Upload
-    </button>
-    }
     @if (count > 0)
     {
         <p>@count records added </p>
@@ -49,7 +54,7 @@ else if (players != null && players.Count > 0)
         <text>Record deleted.</text>
     }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
     <h5>Week @players.First().Week</h5>
     <div class="table_container">
         <table class="base_table">
@@ -128,6 +133,7 @@ else if (players != null && players.Count > 0)
         loading = true;
         shouldRender = true;
         count = await projectionService.PostWeekProjectionRequest(PositionEnum);
+        await HandleSubmit();
         loading = false;
         shouldRender = true;
     }

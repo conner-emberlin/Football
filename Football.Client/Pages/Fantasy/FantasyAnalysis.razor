@@ -101,12 +101,12 @@
 
 
 @code {
-    public string Position { get; set; } = "Quarterback";
-    public string positionEnum { get; set; } = "";
-    public List<FantasyAnalysisModel>? FantasyAnalyses = new();
+    private string Position { get; set; } = "Quarterback";
+    private string positionEnum { get; set; } = "";
+    private List<FantasyAnalysisModel>? FantasyAnalyses = new();
 
-    public bool loading { get; set; } = false;
-    public bool badRequestError { get; set; } = false;
+    private bool loading { get; set; } = false;
+    private bool badRequestError { get; set; } = false;
     private bool shouldRender;
 
     private TableSort tableSort = new();
