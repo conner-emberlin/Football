@@ -1,9 +1,8 @@
-﻿using Football.Shared.Models.Fantasy;
-using Football.Models;
+﻿using Football.Models;
 using Football.Enums;
 using Football.Fantasy.Interfaces;
-using Football.Fantasy.Models;
 using Football.Players.Interfaces;
+using Football.Shared.Models.Fantasy;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -132,10 +131,6 @@ namespace Football.Api.Controllers
 
         } 
 
-        [HttpGet("team-totals")]
-        [ProducesResponseType(typeof(List<TeamTotals>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetTeamTotals() => Ok(await marketShareService.GetTeamTotals());
-
         [HttpGet("marketshare/{position}")]
         [ProducesResponseType(typeof(List<MarketShareModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -175,11 +170,6 @@ namespace Football.Api.Controllers
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             return Ok(mapper.Map<List<WaiverWireCandidateModel>>(await waiverWireService.GetWaiverWireCandidates(_season.CurrentSeason, currentWeek)));
         }
-
-        [HttpGet("weekly-boom-busts/{playerId}")]
-        [ProducesResponseType(typeof(List<BoomBustByWeek>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetBoomBustByWeek([FromRoute] int playerId) => playerId > 0 ? Ok(await fantasyAnalysisService.GetBoomBustsByWeek(playerId)) : BadRequest();
 
         [HttpGet("shares/{position}")]
         [ProducesResponseType(typeof(List<FantasyPercentageModel>), StatusCodes.Status200OK)]

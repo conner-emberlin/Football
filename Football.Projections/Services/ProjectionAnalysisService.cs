@@ -1,5 +1,4 @@
-﻿using Football;
-using Football.Enums;
+﻿using Football.Enums;
 using Football.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;

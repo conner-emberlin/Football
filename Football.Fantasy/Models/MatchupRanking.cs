@@ -1,6 +1,4 @@
-﻿using Football.Players.Models;
-
-namespace Football.Fantasy.Models
+﻿namespace Football.Fantasy.Models
 {
     public class MatchupRanking
     {
