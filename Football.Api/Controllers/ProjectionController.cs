@@ -18,10 +18,10 @@ namespace Football.Api.Controllers
     {
         private readonly Season _season = season.CurrentValue;
 
-        [HttpGet("season/{position}")]
+        [HttpPost("season/{position}")]
         [ProducesResponseType(typeof(List<SeasonProjectionModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetSeasonProjections(string position)
+        public async Task<IActionResult> GetSeasonProjections(string position, [FromBody] List<string> filter)
         {
             if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
 
@@ -36,7 +36,7 @@ namespace Football.Api.Controllers
                 model.ForEach(m => m.CanDelete = true);
             }
             else
-                model = mapper.Map<List<SeasonProjectionModel>>(await seasonProjectionService.GetProjections(positionEnum));
+                model = mapper.Map<List<SeasonProjectionModel>>(await seasonProjectionService.GetProjections(positionEnum, filter));
 
             var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
             model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
@@ -74,7 +74,7 @@ namespace Football.Api.Controllers
             }
         }
 
-        [HttpPost("season/{position}")]
+        [HttpPost("season/upload/{position}")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PostSeasonProjections(string position)
@@ -83,18 +83,6 @@ namespace Football.Api.Controllers
             {
                 var proj = (await seasonProjectionService.GetProjections(positionEnum)).ToList();
                 return Ok(await seasonProjectionService.PostProjections(proj));
-            }
-            return BadRequest();
-        }
-
-        [HttpPost("season-filtered/{position}")]
-        [ProducesResponseType(typeof(IEnumerable<SeasonProjectionModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetSeasonProjectionsWithFilter(string position, [FromBody] List<string> filter)
-        {
-            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
-            {
-                return Ok(mapper.Map<IEnumerable<SeasonProjectionModel>>(await seasonProjectionService.GetProjections(positionEnum, filter)));
             }
             return BadRequest();
         }

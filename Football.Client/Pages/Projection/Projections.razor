@@ -166,6 +166,7 @@
     private string PositionEnum { get; set; } = "1";
 
     private List<SeasonProjectionModel>? players = new();
+    private List<string>? filter = new();
 
     private bool shouldRender;
     private int count = 0;
@@ -185,6 +186,7 @@
         recordDeleted = false;
         adpRefreshed = 0;
         players?.Clear();
+        filter?.Clear();
     }
 
     private async Task HandleInput()
@@ -192,9 +194,11 @@
         loading = true;
         shouldRender = true;
         players?.Clear();
+        filter?.Clear();
         adpRefreshed = 0;
         PositionEnum = format.SetPosition(Position);
-        players = await projectionService.GetSeasonProjectionsRequest(PositionEnum);
+        filter = await projectionService.GetSeasonModelVariablesRequest(PositionEnum);
+        players = await projectionService.GetSeasonProjectionsRequest(PositionEnum, filter);
         loading = false;
         shouldRender = true;
     }

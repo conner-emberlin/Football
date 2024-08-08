@@ -6,7 +6,7 @@ namespace Football.Client.Interfaces
     {
         public Task<List<WeeklyProjectionAnalysisModel>?> GetCurrentSeasonWeeklyAnalysisRequest(string position);
         public Task<List<SeasonProjectionAnalysisModel>?> GetPreviousSeasonsAnalysisRequest(string position);
-        public Task<List<SeasonProjectionModel>?> GetSeasonProjectionsRequest(string position);
+        public Task<List<SeasonProjectionModel>?> GetSeasonProjectionsRequest(string position, List<string> filter);
         public Task<bool> DeleteSeasonProjectionRequest(int playerId, int season);
         public Task<int> PostSeasonProjectionRequest(string position);
         public Task<List<WeeklyProjectionErrorModel>?> GetWeeklyProjectionErrorRequest(string position, string week);
@@ -16,5 +16,6 @@ namespace Football.Client.Interfaces
         public Task<bool> DeleteWeekProjectionRequest(int playerId, int season, int week);
         public Task<int> PostWeekProjectionRequest(string position);
         public Task<List<MatchupProjectionsModel>?> GetMatchupProjectionsRequest(string teamName);
+        public Task<List<string>?> GetSeasonModelVariablesRequest(string position);
     }
 }
