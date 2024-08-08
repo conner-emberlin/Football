@@ -17,7 +17,7 @@ namespace Football
         public double GetPlayerComparison(Position position);
         public int GetReplacementLevel(Position position);
         public double GetValueFromModel<T>(T type, Model model);
-        public List<PropertyInfo> GetPropertiesFromModel<T>();
+        public List<PropertyInfo> GetPropertiesFromModel<T>(List<string>? filter = null);
         public IEnumerable<string> GetPropertyNamesFromModel<T>();
         public bool GetFromCache<T>(Cache cache, out List<T> cachedValues);
         public bool GetFromCache<T>(Position position, Cache cache, out List<T> cachedValues);

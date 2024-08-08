@@ -6,12 +6,12 @@ namespace Football.Projections.Services
 {
     public class MatrixCalculator(ISettingsService settings) : IMatrixCalculator
     {
-        public Matrix<double> RegressorMatrix<T>(List<T> model)
+        public Matrix<double> RegressorMatrix<T>(List<T> model, List<string>? filter = null)
         {
             var rows = new List<Vector<double>>();
             foreach (var m in model)
                 rows.Add(TransformModel(m));
-            return CreateMatrix(rows, model.Count, settings.GetPropertiesFromModel<T>().Count + 1);
+            return CreateMatrix(rows, model.Count, settings.GetPropertiesFromModel<T>(filter).Count + 1);
         }
         public Vector<double> DependentVector<T>(List<T> dependents, Model value)
         {
@@ -21,9 +21,9 @@ namespace Football.Projections.Services
                 vec[i] = Convert.ToDouble(prop.GetValue(dependents[i]));
             return vec;
         }
-        public Vector<double> TransformModel<T>(T modelItem)
+        public Vector<double> TransformModel<T>(T modelItem, List<string>? filter = null)
         {
-            var properties = settings.GetPropertiesFromModel<T>();
+            var properties = settings.GetPropertiesFromModel<T>(filter);
             var vec = Vector<double>.Build.Dense(properties.Count + 1);
             vec[0] = 1;
             var index = 1;

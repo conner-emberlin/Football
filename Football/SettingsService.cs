@@ -4,6 +4,7 @@ using System.Reflection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace Football
 {
@@ -100,9 +101,9 @@ namespace Football
             return prop != null ? Convert.ToDouble(prop.GetValue(model)) : 0;
         }
 
-        public List<PropertyInfo> GetPropertiesFromModel<T>()
+        public List<PropertyInfo> GetPropertiesFromModel<T>(List<string>? filter = null)
         {
-            return typeof(T).GetProperties().Where(p => 
+            var props = typeof(T).GetProperties().Where(p => 
                                                !p.ToString()!.Contains(Model.PlayerId.ToString())
                                             && !p.ToString()!.Contains(Model.Season.ToString())
                                             && !p.ToString()!.Contains(Model.Week.ToString())
@@ -111,6 +112,7 @@ namespace Football
                                             && !p.ToString()!.Contains(Model.Position.ToString())
                                             && !p.ToString()!.Contains(Model.TeamId.ToString())
                                             ).ToList();
+            return filter != null ? props.Where(p => filter.Contains(p.Name)).ToList() : props;
         }
 
         public IEnumerable<string> GetPropertyNamesFromModel<T>()
@@ -123,6 +125,11 @@ namespace Football
         public bool GetFromCache<T>(int id, Cache cache, out T cachedValue) => _cache.TryGetValue(id.ToString() + cache.ToString(), out cachedValue!);
 
         private string ConvertToWords(string str) => Regex.Replace(str, "[a-z][A-Z]", m => $"{m.Value[0]} {char.ToLower(m.Value[1])}");
+        private string PascalCase(string str)
+        {
+            var textInfo = CultureInfo.CurrentCulture.TextInfo;
+            return textInfo.ToTitleCase(str).Replace(" ", "");
+        }
 
     }
 }
