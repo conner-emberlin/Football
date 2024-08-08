@@ -9,48 +9,86 @@
 @inject IProjectionService projectionService;
 
 <h4>Season Projections</h4>
-<div>
-@foreach(var position in format.Positions(includeFlex: true, includeDST: false, includeK: false))
+@if (!settingsLoading)
 {
-    
-        <input type="radio" name="players" id=" @position" value="@position" 
+    <div>
+        @foreach (var position in format.Positions(includeFlex: true, includeDST: false, includeK: false))
+        {
+            <input type="radio" name="players" id=" @position" value="@position" 
             @onchange= "SetPosition" 
             checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase))
-        />
-        <label for="@position ">@position</label>
-    
-}
-</div>
-<div style="height:10px;font-size:1px;">&nbsp;</div>
-<tr>
-    <td>
-<button class="button-22" role="button" @onclick="HandleInput"> 
-    Submit
-</button>
-    </td>
-    @if (players != null && players.Count > 0)
-    {
-        <td>&nbsp</td>
+            />
+            <label for="@position ">@position</label>
+
+        }
+    </div>
+
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <tr>
         <td>
-        <button class="button-22" role="button" @onclick="HandleRefresh">
-        Update ADP
+            <button class="button-22" role="button" @onclick="HandleInput"> 
+                Submit
             </button>
         </td>
-        @if (!players.Any(p => p.CanDelete) && PositionEnum != "FLEX")
+
+
+        @if (players != null && players.Count > 0)
         {
             <td>&nbsp</td>
             <td>
-            <button class="button-22" role="button" @onclick="HandleUpload">
-                Upload Projections
-            </button>
+                <button class="button-22" role="button" @onclick="HandleRefresh">
+                    Update ADP
+                </button>
+            </td>
+            @if (!players.Any(p => p.CanDelete) && PositionEnum != "FLEX")
+            {
+                <td>&nbsp</td>
+                <td>
+                    <button class="button-22" role="button" @onclick="HandleUpload">
+                        Upload Projections
+                    </button>
+                </td>
+            }
+
+        }
+
+        @if (filter != null && filter.Count > 0)
+        {
+
+            <td>
+                <button type="button" class="btn btn-link" @onclick="() => HandleExpand()">
+                    <i class="oi oi-cog" />
+                </button>
             </td>
         }
+    </tr>
+}
+@if (filter != null && expandVariables && !loading)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    @foreach (var v in filter)
+    {
+        bool Checked = true;
+        if (!selectedFilters.Contains(v))
+        {
+            Checked = false;
+        }
+        <tr>
+            <td>@v</td>
+            <td>
+                <input type="checkbox" checked=@Checked
+                       @onchange="eventArgs => { CheckboxClicked(v); }" />
+            </td>
+        </tr>
     }
-</tr>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+}
 
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 
-@if(loading)
+@if(loading || settingsLoading)
 {   
     <div class="spinner"></div>
 }
@@ -163,30 +201,57 @@
 }
 @code {
     private string Position { get; set; } = "Quarterback";
-    private string PositionEnum { get; set; } = "1";
+    private string PositionEnum { get; set; } = "QB";
 
-    private List<SeasonProjectionModel>? players = new();
-    private List<string>? filter = new();
+    private List<SeasonProjectionModel>? players = [];
+    private List<string>? filter = [];
+    private List<string> selectedFilters = [];
 
     private bool shouldRender;
     private int count = 0;
     private bool loading { get; set; }
+    private bool settingsLoading { get; set; }
     public bool seasonOver { get; set; } = false;
     private bool recordDeleted = false;
     private int adpRefreshed { get; set; }
+    private bool expandVariables { get; set; } = false;
 
     private Formatter format = new();
     private TableSort sort = new();
 
     protected override bool ShouldRender() => shouldRender;
 
-    private void SetPosition(ChangeEventArgs args)
+    protected override async Task OnInitializedAsync()
     {
+        settingsLoading = true;        
+        filter = await projectionService.GetSeasonModelVariablesRequest("QB");
+        if (filter != null)
+        {
+            foreach (var f in filter) selectedFilters.Add(f);  
+
+        } 
+        settingsLoading = false;
+        shouldRender = true;
+    }
+
+    private async Task SetPosition(ChangeEventArgs args)
+    {
+        settingsLoading = true;
+        expandVariables = false;
+        shouldRender = true;
         Position = args.Value.ToString();
+        PositionEnum = format.SetPosition(Position);       
+        filter = await projectionService.GetSeasonModelVariablesRequest(PositionEnum);
+        if (filter != null)
+        {
+            foreach (var f in filter) selectedFilters.Add(f);
+
+        }
         recordDeleted = false;
         adpRefreshed = 0;
         players?.Clear();
-        filter?.Clear();
+        settingsLoading = false;
+        shouldRender = true;
     }
 
     private async Task HandleInput()
@@ -194,11 +259,8 @@
         loading = true;
         shouldRender = true;
         players?.Clear();
-        filter?.Clear();
-        adpRefreshed = 0;
-        PositionEnum = format.SetPosition(Position);
-        filter = await projectionService.GetSeasonModelVariablesRequest(PositionEnum);
-        players = await projectionService.GetSeasonProjectionsRequest(PositionEnum, filter);
+        adpRefreshed = 0;               
+        players = await projectionService.GetSeasonProjectionsRequest(PositionEnum, selectedFilters);
         loading = false;
         shouldRender = true;
     }
@@ -232,6 +294,14 @@
         loading = false;
         shouldRender = true;
     }
+
+    private void CheckboxClicked(string filter)
+    {
+        if (selectedFilters.Contains(filter)) selectedFilters.Remove(filter);
+        else selectedFilters.Add(filter);
+    }
+
+    private void HandleExpand() => expandVariables = !expandVariables;
 
     private void SetTable(string columnName) => players = sort.SortTable<SeasonProjectionModel>(players, columnName);
 }
