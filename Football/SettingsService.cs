@@ -112,7 +112,7 @@ namespace Football
                                             && !p.ToString()!.Contains(Model.Position.ToString())
                                             && !p.ToString()!.Contains(Model.TeamId.ToString())
                                             ).ToList();
-            return filter != null ? props.Where(p => filter.Contains(p.Name)).ToList() : props;
+            return filter != null ? props.Where(p => filter.Select(f => PascalCase(f)).Contains(p.Name)).ToList() : props;
         }
 
         public IEnumerable<string> GetPropertyNamesFromModel<T>()
