@@ -3,6 +3,7 @@ using Football.Enums;
 using System.Reflection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Memory;
+using System.Text.RegularExpressions;
 
 namespace Football
 {
@@ -111,9 +112,17 @@ namespace Football
                                             && !p.ToString()!.Contains(Model.TeamId.ToString())
                                             ).ToList();
         }
+
+        public IEnumerable<string> GetPropertyNamesFromModel<T>()
+        {
+            var props = GetPropertiesFromModel<T>();
+            return props.Select(p => ConvertToWords(p.Name));
+        }
         public bool GetFromCache<T>(Cache cache, out List<T> cachedValues) => _cache.TryGetValue(cache.ToString(), out cachedValues!) && cachedValues.Count > 0;
         public bool GetFromCache<T>(Position position, Cache cache, out List<T> cachedValues) => _cache.TryGetValue(position.ToString() + cache.ToString(), out cachedValues!) && cachedValues.Count > 0;
         public bool GetFromCache<T>(int id, Cache cache, out T cachedValue) => _cache.TryGetValue(id.ToString() + cache.ToString(), out cachedValue!);
+
+        private string ConvertToWords(string str) => Regex.Replace(str, "[a-z][A-Z]", m => $"{m.Value[0]} {char.ToLower(m.Value[1])}");
 
     }
 }

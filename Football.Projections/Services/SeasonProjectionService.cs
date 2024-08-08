@@ -75,6 +75,18 @@ namespace Football.Projections.Services
 
             return coefficients;
         }
+
+        public IEnumerable<string> GetModelVariablesByPosition(Position position)
+        {
+            return position switch
+            {
+                Position.QB => settingsService.GetPropertyNamesFromModel<QBModelSeason>(),
+                Position.RB => settingsService.GetPropertyNamesFromModel<RBModelSeason>(),
+                Position.WR => settingsService.GetPropertyNamesFromModel<WRModelSeason>(),
+                Position.TE => settingsService.GetPropertyNamesFromModel<TEModelSeason>(),
+                _ => Enumerable.Empty<string>()
+            };
+        }
         private async Task<IEnumerable<SeasonProjection>> CalculateProjections<T1>(List<T1> model, Position position, Tunings tunings, int seasonGames)
         {
             List<SeasonProjection> projections = [];

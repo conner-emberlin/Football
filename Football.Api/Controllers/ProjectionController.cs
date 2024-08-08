@@ -228,5 +228,16 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAllSeasonProjectionAnalyses([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<SeasonProjectionAnalysisModel>>(await analysisService.GetAllSeasonProjectionAnalyses(posEnum))) : BadRequest();
 
+        [HttpGet("season-model-variables/{position}")]
+        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult GetSeasonModelVariablesByPosition([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(seasonProjectionService.GetModelVariablesByPosition(posEnum)) : BadRequest();
+
+        [HttpGet("weekly-model-variables/{position}")]
+        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public IActionResult GetWeeklyModelVariablesByPosition([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(weekProjectionService.GetModelVariablesByPosition(posEnum)) : BadRequest();
+
+
     }
 }

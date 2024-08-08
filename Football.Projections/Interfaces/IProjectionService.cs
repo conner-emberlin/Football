@@ -11,5 +11,7 @@ namespace Football.Projections.Interfaces
         public Task<IEnumerable<T>> GetProjections(Position position);
         public Task<int> PostProjections(List<T> projections);
         public Task<Vector<double>> GetCoefficients(Position position);
+
+        public IEnumerable<string> GetModelVariablesByPosition(Position position);
     }
 }
