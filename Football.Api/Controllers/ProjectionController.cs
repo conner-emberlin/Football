@@ -87,6 +87,18 @@ namespace Football.Api.Controllers
             return BadRequest();
         }
 
+        [HttpPost("season-filtered/{position}")]
+        [ProducesResponseType(typeof(IEnumerable<SeasonProjectionModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetSeasonProjectionsWithFilter(string position, [FromBody] List<string> filter)
+        {
+            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
+            {
+                return Ok(mapper.Map<IEnumerable<SeasonProjectionModel>>(await seasonProjectionService.GetProjections(positionEnum, filter)));
+            }
+            return BadRequest();
+        }
+
         [HttpGet("season/coefficients/{position}")]
         [ProducesResponseType(typeof(double[]), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -147,6 +159,19 @@ namespace Football.Api.Controllers
             {
                 var proj = (await weekProjectionService.GetProjections(positionEnum)).ToList();
                 return Ok(await weekProjectionService.PostProjections(proj));
+            }
+            return BadRequest();
+        }
+
+        [HttpPost("weekly-filtered/{position}")]
+        [ProducesResponseType(typeof(IEnumerable<WeekProjectionModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> PostWeeklyProjections(string position, [FromBody] List<string> filter)
+        {
+            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
+            {
+                return Ok(mapper.Map<IEnumerable<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum, filter)));
+
             }
             return BadRequest();
         }

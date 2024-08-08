@@ -10,7 +10,7 @@ namespace Football.Projections.Services
         {
             var rows = new List<Vector<double>>();
             foreach (var m in model)
-                rows.Add(TransformModel(m));
+                rows.Add(TransformModel(m, filter));
             return CreateMatrix(rows, model.Count, settings.GetPropertiesFromModel<T>(filter).Count + 1);
         }
         public Vector<double> DependentVector<T>(List<T> dependents, Model value)
