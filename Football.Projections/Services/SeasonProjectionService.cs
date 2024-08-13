@@ -30,10 +30,24 @@ namespace Football.Projections.Services
             return recordDeleted;
         }
         public async Task<IEnumerable<SeasonProjection>?> GetPlayerProjections(int playerId) => await projectionRepository.GetSeasonProjection(playerId);
-        public async Task<int> PostProjections(List<SeasonProjection> projections) 
+        public async Task<int> PostProjections(List<SeasonProjection> projections, List<string> filters) 
         {
-            cache.Remove(projections.First().Position + Cache.SeasonProjections.ToString());
-            return await projectionRepository.PostSeasonProjections(projections);
+            if (projections.Count == 0) return 0;
+
+            var config = new SeasonProjectionConfiguration
+            {
+                Season = projections.First().Season,
+                Position = projections.First().Position,
+                DateCreated = DateTime.Now,
+                Filter = string.Join(", ", [.. filters])
+            };
+
+            if (await projectionRepository.PostSeasonProjectionConfiguration(config))
+            {
+                return await projectionRepository.PostSeasonProjections(projections);
+            }
+
+            return 0;            
         } 
 
         public bool GetProjectionsFromSQL(Position position, int season, out IEnumerable<SeasonProjection> projections)
@@ -87,6 +101,20 @@ namespace Football.Projections.Services
                 _ => Enumerable.Empty<string>()
             };
         }
+
+        public async Task<bool> PostProjectionConfiguration(Position position, string filter)
+        {
+            var config = new SeasonProjectionConfiguration
+            {
+                Season = _season.CurrentSeason,
+                Position = position.ToString(),
+                DateCreated = DateTime.Now,
+                Filter = filter
+            };
+            return await projectionRepository.PostSeasonProjectionConfiguration(config);
+        }
+
+        public async Task<string?> GetCurrentProjectionConfigurationFilter(Position position) => await projectionRepository.GetCurrentSeasonProjectionFilter(position.ToString(), _season.CurrentSeason);
         private async Task<IEnumerable<SeasonProjection>> CalculateProjections<T1>(List<T1> model, Position position, Tunings tunings, int seasonGames, List<string>? filter = null)
         {
             List<SeasonProjection> projections = [];

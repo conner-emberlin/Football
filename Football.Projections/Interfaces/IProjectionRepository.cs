@@ -1,7 +1,6 @@
 ﻿using Football.Enums;
 using Football.Projections.Models;
 
-
 namespace Football.Projections.Interfaces
 {
     public interface IProjectionRepository
@@ -14,5 +13,9 @@ namespace Football.Projections.Interfaces
         public IEnumerable<SeasonProjection> GetSeasonProjectionsFromSQL(Position position, int season);
         public Task<bool> DeleteWeeklyProjection(int playerId, int week, int season);
         public Task<bool> DeleteSeasonProjection(int playerId, int season);
+        public Task<bool> PostSeasonProjectionConfiguration(SeasonProjectionConfiguration config);
+        public Task<bool> PostWeeklyProjectionConfiguration(WeeklyProjectionConfiguration config);
+        public Task<string?> GetCurrentSeasonProjectionFilter(string position, int season);
+        public Task<string?> GetCurrentWeekProjectionFilter(string position, int week, int season);
     }
 }

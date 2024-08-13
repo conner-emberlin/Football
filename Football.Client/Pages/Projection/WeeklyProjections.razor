@@ -132,7 +132,7 @@
     {
         loading = true;
         shouldRender = true;
-        count = await projectionService.PostWeekProjectionRequest(PositionEnum);
+        count = await projectionService.PostWeekProjectionRequest(PositionEnum, ["test"]);
         await HandleSubmit();
         loading = false;
         shouldRender = true;

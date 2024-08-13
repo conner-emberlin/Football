@@ -18,6 +18,7 @@ namespace Football.Api.Controllers
     {
         private readonly Season _season = season.CurrentValue;
 
+
         [HttpPost("season/{position}")]
         [ProducesResponseType(typeof(List<SeasonProjectionModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -77,12 +78,12 @@ namespace Football.Api.Controllers
         [HttpPost("season/upload/{position}")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> PostSeasonProjections(string position)
+        public async Task<IActionResult> PostSeasonProjections(string position, [FromBody] List<string> filter)
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))  
             {
-                var proj = (await seasonProjectionService.GetProjections(positionEnum)).ToList();
-                return Ok(await seasonProjectionService.PostProjections(proj));
+                var proj = (await seasonProjectionService.GetProjections(positionEnum, filter)).ToList();
+                return Ok(await seasonProjectionService.PostProjections(proj, filter));
             }
             return BadRequest();
         }
@@ -95,6 +96,28 @@ namespace Football.Api.Controllers
             if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
 
             return Ok((await seasonProjectionService.GetCoefficients(positionEnum)).ToArray<double>());
+        }
+
+        [HttpGet("season/projections-exist/{position}")]
+        [ProducesResponseType(typeof(SeasonProjectionsExistModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetSeasonProjectionsExist(string position)
+        {
+            if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
+
+            var projectionsExist = seasonProjectionService.GetProjectionsFromSQL(positionEnum, _season.CurrentSeason, out var projections);
+
+            if (projectionsExist)
+            {
+                var filters = (await seasonProjectionService.GetCurrentProjectionConfigurationFilter(positionEnum))?.Split(',').ToList();
+                return Ok(new SeasonProjectionsExistModel
+                {
+                    ProjectionExist = projectionsExist,
+                    Filters = filters ?? []
+                }) ;
+            }
+
+            return Ok(new SeasonProjectionsExistModel { ProjectionExist = false });
         }
 
         [HttpGet("weekly/coefficients/{position}")]
@@ -138,31 +161,19 @@ namespace Football.Api.Controllers
             return Ok(models.OrderByDescending(m => m.ProjectedPoints));
 
         }
-        [HttpPost("weekly/{position}")]
+        [HttpPost("weekly/upload/{position}")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> PostWeeklyProjections(string position)
+        public async Task<IActionResult> PostWeeklyProjections(string position, [FromBody] List<string> filters)
         {
             if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
             {
-                var proj = (await weekProjectionService.GetProjections(positionEnum)).ToList();
-                return Ok(await weekProjectionService.PostProjections(proj));
+                var proj = (await weekProjectionService.GetProjections(positionEnum, filters)).ToList();
+                return Ok(await weekProjectionService.PostProjections(proj, filters));
             }
             return BadRequest();
         }
 
-        [HttpPost("weekly-filtered/{position}")]
-        [ProducesResponseType(typeof(IEnumerable<WeekProjectionModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> PostWeeklyProjections(string position, [FromBody] List<string> filter)
-        {
-            if (Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum))
-            {
-                return Ok(mapper.Map<IEnumerable<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum, filter)));
-
-            }
-            return BadRequest();
-        }
 
         [HttpGet("weekly-analysis/{position}")]
         [ProducesResponseType(typeof(List<WeeklyProjectionAnalysisModel>), StatusCodes.Status200OK)]

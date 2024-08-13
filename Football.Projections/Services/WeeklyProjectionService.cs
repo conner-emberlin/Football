@@ -28,7 +28,7 @@ namespace Football.Projections.Services
             return recordDeleted;
         } 
         public async Task<IEnumerable<WeekProjection>?> GetPlayerProjections(int playerId) => await projectionRepository.GetWeeklyProjection(playerId);
-        public async Task<int> PostProjections(List<WeekProjection> projections) 
+        public async Task<int> PostProjections(List<WeekProjection> projections, List<string> filters) 
         {
             cache.Remove(projections.First().Position + Cache.WeeklyProjections.ToString());
             return await projectionRepository.PostWeeklyProjections(projections); 
@@ -95,7 +95,20 @@ namespace Football.Projections.Services
                 _ => Enumerable.Empty<string>()
             };
         }
-
+        public async Task<bool> PostProjectionConfiguration(Position position, string filter)
+        {
+            var week = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            var config = new WeeklyProjectionConfiguration
+            {
+                Season = _season.CurrentSeason,
+                Week = week,
+                Position = position.ToString(),
+                DateCreated = DateTime.Now,
+                Filter = filter
+            };
+            return await projectionRepository.PostWeeklyProjectionConfiguration(config);
+        }
+        public async Task<string?> GetCurrentProjectionConfigurationFilter(Position position) => await projectionRepository.GetCurrentWeekProjectionFilter(position.ToString(), await playersService.GetCurrentWeek(_season.CurrentSeason), _season.CurrentSeason);
         private async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, Position position, int currentWeek, WeeklyTunings tunings, int seasonGames, List<string>? filter = null)
         {
             List<WeekProjection> projections = [];

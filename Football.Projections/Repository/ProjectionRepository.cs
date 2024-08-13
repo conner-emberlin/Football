@@ -75,5 +75,35 @@ namespace Football.Projections.Repository
             return await dbConnection.ExecuteAsync(query, new { playerId, season }) > 0;
         }
 
+        public async Task<bool> PostSeasonProjectionConfiguration(SeasonProjectionConfiguration config)
+        {
+            var query = $@"INSERT INTO SeasonProjectionConfiguration (Season, Position, DateCreated, Filter)
+                            VALUES (@Season, @Position, @DateCreated, @Filter)";
+            return await dbConnection.ExecuteAsync(query, config) > 0;
+        }
+
+        public async Task<bool> PostWeeklyProjectionConfiguration(WeeklyProjectionConfiguration config)
+        {
+            var query = $@"INSERT INTO WeeklyProjectionConfiguration (Season, Week, Position, DateCreated, Filter)
+                            VALUES (@Season, @Week, @Position, @DateCreated, @Filter)";
+            return await dbConnection.ExecuteAsync(query, config) > 0;
+        }
+
+        public async Task<string?> GetCurrentSeasonProjectionFilter(string position, int season)
+        {
+            var query = $@"SELECT Filter FROM [dbo].SeasonProjectionConfiguration
+                            WHERE [Season] = @season AND [Position] = @position
+                                ORDER BY [DateCreated] DESC";
+            return (await dbConnection.QueryAsync<string>(query, new {season, position})).FirstOrDefault();
+        }
+
+        public async Task<string?> GetCurrentWeekProjectionFilter(string position, int week, int season)
+        {
+            var query = $@"SELECT Filter FROM [dbo].WeeklyProjectionConfiguration
+                            WHERE [Season] = @season AND [Week] = @week AND [Position] = @position
+                            ORDER BY DateCread DESC";
+            return (await dbConnection.QueryAsync<string>(query, new { season, week, position })).FirstOrDefault();
+        }
+
     }
 }

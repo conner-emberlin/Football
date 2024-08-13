@@ -14,5 +14,6 @@
         public double PositionalADP { get; set; }
         public double OverallADP { get; set; }
         public SeasonProjectionErrorModel? SeasonProjectionError { get; set; }
+        public List<string>? Filters { get; set; }
     }
 }
