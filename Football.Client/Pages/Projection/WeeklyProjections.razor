@@ -8,6 +8,7 @@
 @inject IProjectionService projectionService;
 
 <h4>Weekly Projections</h4>
+@if (!settingsLoading){
 <div>
     @foreach (var position in format.Positions(includeFlex: true))
     {
@@ -35,8 +36,53 @@
         </button>
         </td>
     }
+    @if ((filter != null && filter.Count > 0 && projectionsExist != null && !projectionsExist.ProjectionExist)
+    || (projectionsExist != null && projectionsExist.ProjectionExist && projectionsExist.Filters != null))
+    {
+
+        <td>
+            <button type="button" class="btn btn-link" @onclick="() => HandleExpand()">
+                <i class="oi oi-cog" />
+            </button>
+        </td>
+    }
 </tr>
-@if (loading)
+}
+@if (expandVariables && projectionsExist != null && projectionsExist.ProjectionExist && projectionsExist.Filters != null)
+{
+    <ul>
+        @foreach (var f in projectionsExist.Filters)
+        {
+            <li>@f</li>
+        }
+    </ul>
+
+}
+
+@if (filter != null && expandVariables && !loading && projectionsExist != null && !projectionsExist.ProjectionExist)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    @foreach (var v in filter)
+    {
+        bool Checked = true;
+        if (!selectedFilters.Contains(v))
+        {
+            Checked = false;
+        }
+        <tr>
+            <td>@v</td>
+            <td>
+                <input type="checkbox" checked=@Checked
+                       @onchange="eventArgs => { CheckboxClicked(v); }" />
+            </td>
+        </tr>
+    }
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+}
+
+@if (loading || settingsLoading)
 {
     <div class="spinner"></div>
 }
@@ -101,20 +147,55 @@
     protected override bool ShouldRender() => shouldRender;
     private bool badRequestError;
     private List<WeekProjectionModel>? players = new();
+    private List<string>? filter = [];
+    private List<string> selectedFilters = [];
+    private WeeklyProjectionsExistModel? projectionsExist { get; set; }
 
     private string Position { get; set; } = "Quarterback";
     private string PositionEnum { get; set; } = "1";
     private bool loading { get; set; }
     private int count = 0;
     private bool recordDeleted = false;
+    private bool settingsLoading { get; set; }
+    private bool expandVariables { get; set; } = false;
 
     private Formatter format = new();
 
-    private void SetPosition(ChangeEventArgs args)
+    protected override async Task OnInitializedAsync()
     {
+        settingsLoading = true;
+        filter = await projectionService.GetWeeklyModelVariablesRequest("QB");
+        if (filter != null)
+        {
+            foreach (var f in filter) selectedFilters.Add(f);
+
+        }
+        projectionsExist = await projectionService.GetWeeklyProjectionsExistRequest("QB");
+        settingsLoading = false;
+        shouldRender = true;
+    }
+
+    private async Task SetPosition(ChangeEventArgs args)
+    {
+        expandVariables = false;
         Position = args.Value.ToString();
+        PositionEnum = format.SetPosition(Position);
+        projectionsExist = null;
         recordDeleted = false;
+        filter = await projectionService.GetWeeklyModelVariablesRequest(PositionEnum);
+        selectedFilters = [];
+        projectionsExist = await projectionService.GetWeeklyProjectionsExistRequest(PositionEnum);
+        if (projectionsExist != null && projectionsExist.Filters.Count > 0)
+        {
+            foreach (var p in projectionsExist.Filters) selectedFilters.Add(p);
+        }
+        else if (filter != null)
+        {
+            foreach (var f in filter) selectedFilters.Add(f);
+
+        }
         players?.Clear();
+        shouldRender = true;
     }
 
     private async Task HandleSubmit()
@@ -123,7 +204,7 @@
         shouldRender = true;
         players?.Clear();
         PositionEnum = format.SetPosition(Position);
-        players = (await projectionService.GetWeekProjectionsRequest(PositionEnum, [])).OrderByDescending(p => p.ProjectedPoints).Where(p => p.ProjectedPoints > 0).ToList();
+        players = (await projectionService.GetWeekProjectionsRequest(PositionEnum, selectedFilters)).OrderByDescending(p => p.ProjectedPoints).Where(p => p.ProjectedPoints > 0).ToList();
         loading = false;
         shouldRender = true;
     }
@@ -132,7 +213,8 @@
     {
         loading = true;
         shouldRender = true;
-        count = await projectionService.PostWeekProjectionRequest(PositionEnum, ["test"]);
+        count = await projectionService.PostWeekProjectionRequest(PositionEnum, selectedFilters);
+        projectionsExist = await projectionService.GetWeeklyProjectionsExistRequest(PositionEnum);
         await HandleSubmit();
         loading = false;
         shouldRender = true;
@@ -145,6 +227,14 @@
         await HandleSubmit();
         shouldRender = true;
     }
+
+    private void CheckboxClicked(string filter)
+    {
+        if (selectedFilters.Contains(filter)) selectedFilters.Remove(filter);
+        else selectedFilters.Add(filter);
+    }
+
+    private void HandleExpand() => expandVariables = !expandVariables;
 
     private string GetHeader() => players.Any() ? "Week " + players.First().Week + " Projections" : string.Empty;
     private int GetRank(WeekProjectionModel projection) => players != null ? players.IndexOf(projection) + 1 : 0;

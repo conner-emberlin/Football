@@ -101,7 +101,7 @@ namespace Football.Projections.Repository
         {
             var query = $@"SELECT Filter FROM [dbo].WeeklyProjectionConfiguration
                             WHERE [Season] = @season AND [Week] = @week AND [Position] = @position
-                            ORDER BY DateCread DESC";
+                            ORDER BY DateCreated DESC";
             return (await dbConnection.QueryAsync<string>(query, new { season, week, position })).FirstOrDefault();
         }
 

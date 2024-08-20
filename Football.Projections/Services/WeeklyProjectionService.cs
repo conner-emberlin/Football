@@ -30,8 +30,23 @@ namespace Football.Projections.Services
         public async Task<IEnumerable<WeekProjection>?> GetPlayerProjections(int playerId) => await projectionRepository.GetWeeklyProjection(playerId);
         public async Task<int> PostProjections(List<WeekProjection> projections, List<string> filters) 
         {
-            cache.Remove(projections.First().Position + Cache.WeeklyProjections.ToString());
-            return await projectionRepository.PostWeeklyProjections(projections); 
+            if (projections.Count == 0) return 0;
+
+            var config = new WeeklyProjectionConfiguration
+            {
+                Season = projections.First().Season,
+                Week = projections.First().Week,
+                Position = projections.First().Position,
+                DateCreated = DateTime.Now,
+                Filter = string.Join(", ", [.. filters])
+            };
+
+            if (await projectionRepository.PostWeeklyProjectionConfiguration(config))
+            {
+                return await projectionRepository.PostWeeklyProjections(projections);
+            }
+
+            return 0;
         }
 
         public bool GetProjectionsFromSQL(Position position, int week, out IEnumerable<WeekProjection> projections)
@@ -62,7 +77,6 @@ namespace Football.Projections.Services
             {
                 projections = await adjustmentService.AdjustmentEngine(projections.ToList(), tunings);
                 var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
-                cache.Set(position.ToString() + Cache.WeeklyProjections.ToString(), formattedProjections);
                 return formattedProjections;
             }
             return projections;

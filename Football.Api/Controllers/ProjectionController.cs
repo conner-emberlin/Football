@@ -153,10 +153,10 @@ namespace Football.Api.Controllers
             return Ok((await weekProjectionService.GetCoefficients(positionEnum)).ToArray<double>());
         }
 
-        [HttpGet("weekly/{position}")]
+        [HttpPost("weekly/{position}")]
         [ProducesResponseType(typeof(IEnumerable<WeekProjectionModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyProjections(string position)
+        public async Task<IActionResult> GetWeeklyProjections(string position, [FromBody] List<string> filter)
         {
             if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
 
@@ -174,7 +174,7 @@ namespace Football.Api.Controllers
                 models.ForEach(m => m.CanDelete = true);
             }
             else
-                models = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum));
+                models = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum, filter));
 
             var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId);
             var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, currentWeek)).ToDictionary(s => s.TeamId);
