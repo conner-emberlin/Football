@@ -123,7 +123,7 @@
         shouldRender = true;
         players?.Clear();
         PositionEnum = format.SetPosition(Position);
-        players = (await projectionService.GetWeekProjectionsRequest(PositionEnum)).OrderByDescending(p => p.ProjectedPoints).Where(p => p.ProjectedPoints > 0).ToList();
+        players = (await projectionService.GetWeekProjectionsRequest(PositionEnum, [])).OrderByDescending(p => p.ProjectedPoints).Where(p => p.ProjectedPoints > 0).ToList();
         loading = false;
         shouldRender = true;
     }

@@ -257,6 +257,7 @@
         Position = args.Value.ToString();
         PositionEnum = format.SetPosition(Position);       
         filter = await projectionService.GetSeasonModelVariablesRequest(PositionEnum);
+        selectedFilters = [];
         projectionsExist = await projectionService.GetSeasonProjectionsExistRequest(PositionEnum);
         if (projectionsExist != null && projectionsExist.Filters.Count > 0)
         {

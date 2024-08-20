@@ -120,6 +120,29 @@ namespace Football.Api.Controllers
             return Ok(new SeasonProjectionsExistModel { ProjectionExist = false });
         }
 
+        [HttpGet("weekly/projections-exist/{position}")]
+        [ProducesResponseType(typeof(WeeklyProjectionsExistModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetWeeklyProjectionsExist(string position)
+        {
+            if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
+
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            var projectionsExist = weekProjectionService.GetProjectionsFromSQL(positionEnum, currentWeek, out var projections);
+
+            if (projectionsExist)
+            {
+                var filters = (await weekProjectionService.GetCurrentProjectionConfigurationFilter(positionEnum))?.Split(',').ToList();
+                return Ok(new WeeklyProjectionsExistModel
+                {
+                    ProjectionExist = projectionsExist,
+                    Filters = filters ?? []
+                });
+            }
+
+            return Ok(new WeeklyProjectionsExistModel { ProjectionExist = false });
+        }
+
         [HttpGet("weekly/coefficients/{position}")]
         [ProducesResponseType(typeof(double[]), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
