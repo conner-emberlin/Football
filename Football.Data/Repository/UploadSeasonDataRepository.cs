@@ -2,6 +2,7 @@
 using Football.Players.Models;
 using System.Data;
 using Dapper;
+using Football.Projections.Models;
 
 namespace Football.Data.Repository
 {
@@ -65,7 +66,12 @@ namespace Football.Data.Repository
             return await dbConnection.ExecuteAsync(query, adp);
         }
 
-
+        public async Task<int> UploadConsensusProjections(List<ConsensusProjections> projections)
+        {
+            var query = $@"INSERT INTO [dbo].ConsensusProjections (PlayerId, Season, Position, FantasyPoints)
+                        VALUES (@PlayerId, @Season, @Position, @FantasyPoints)";
+            return await dbConnection.ExecuteAsync(query, projections);
+        }
 
 
 

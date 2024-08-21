@@ -221,7 +221,14 @@ namespace Football.Projections.Services
         public async Task<List<SeasonProjectionAnalysis>> GetAllSeasonProjectionAnalyses(Position position)
         {
             List<SeasonProjectionAnalysis> spa = [];
-            foreach (var season in (await playersService.GetSeasons()).Where(s => s < _season.CurrentSeason)) spa.Add(await GetSeasonProjectionAnalysis(position, season));
+            foreach (var season in (await playersService.GetSeasons()).Where(s => s < _season.CurrentSeason)) 
+            { 
+                if (seasonProjection.GetProjectionsFromSQL(position, season, out var projections))
+                {
+                    spa.Add(await GetSeasonProjectionAnalysis(position, season));
+                }
+            
+            }           
             return spa;
         }
 

@@ -7,6 +7,7 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace Football.Data.Services
 {
@@ -26,6 +27,29 @@ namespace Football.Data.Services
             return doc.DocumentNode.SelectNodes(xpath)[0].InnerText.Split(separator, StringSplitOptions.RemoveEmptyEntries);
         }
 
+        public List<FantasyProsConsensusProjections> ParseFantasyProsConsensusProjections(string[] strings, string position)
+        {
+            List<FantasyProsConsensusProjections> projections = [];
+            var len = GetConsensusProjectionsTableLength(position);
+            for (int i = 0; i < strings.Length - len; i+=len)
+            {
+                projections.Add(new FantasyProsConsensusProjections
+                {
+                    Name = FormatName(strings[i]),
+                    FantasyPoints = double.Parse(strings[i + len - 1])
+                });
+            }
+
+            foreach (var p in projections)
+            {
+                if (p.Name.LastIndexOf(' ') > 1)
+                {
+                    p.Name = p.Name[0..p.Name.LastIndexOf(' ')];
+                }
+            }
+
+            return projections;
+        }
         public List<FantasyProsRosterPercent> ParseFantasyProsRosterPercent(string[] strings, string position)
         {
             List<FantasyProsRosterPercent> rosterPercent = [];
@@ -502,6 +526,19 @@ namespace Football.Data.Services
         }
 
         private static int GetPlayerTeamTableLength(string position)
+        {
+            return position.ToUpper() switch
+            {
+                "QB" => 11,
+                "RB" => 9,
+                "WR" => 9,
+                "TE" => 6,
+                "K" => 5,
+                _ => 0
+            };
+        }
+
+        private static int GetConsensusProjectionsTableLength(string position)
         {
             return position.ToUpper() switch
             {

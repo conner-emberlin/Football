@@ -1,4 +1,5 @@
 ﻿using Football.Players.Models;
+using Football.Projections.Models;
 
 namespace Football.Data.Interfaces
 {
@@ -13,5 +14,6 @@ namespace Football.Data.Interfaces
         public Task<int> UploadSchedule(List<Schedule> schedules);
         public Task<int> UploadScheduleDetails(List<ScheduleDetails> scheduleDetails);
         public Task<int> UploadADP(List<SeasonADP> adp);
+        public Task<int> UploadConsensusProjections(List<ConsensusProjections> projections);
     }
 }

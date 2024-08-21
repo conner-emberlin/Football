@@ -4,6 +4,7 @@ using Football.Data.Interfaces;
 using Football.Data.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
+using Football.Projections.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
 using AutoMapper;
@@ -85,6 +86,13 @@ namespace Football.Data.Services
             for (int i = 1; i <= seasonGames + 1; i++)
                 schedule.AddRange(await ScheduleDetails(await scraperService.ScrapeGameScores(i, false), season));
             return await uploadSeasonDataRepository.UploadScheduleDetails(schedule); ;
+        }
+
+        public async Task<int> UploadConsensusProjections(string position)
+        {
+            var url = string.Format("{0}/{1}/{2}", "https://www.fantasypros.com/nfl/projections", position.ToLower(), ".php?week=draft");
+            var proj = await ConsensusProjections(scraperService.ParseFantasyProsConsensusProjections(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position));
+            return await uploadSeasonDataRepository.UploadConsensusProjections(proj);
         }
 
         public async Task<int> UploadADP(int season, string position) => await uploadSeasonDataRepository.UploadADP(await SeasonADP(await scraperService.ScrapeADP(position), season));
@@ -176,6 +184,28 @@ namespace Football.Data.Services
                 }
             }
             return seasonADP;
+        }
+
+        private async Task<List<ConsensusProjections>> ConsensusProjections(List<FantasyProsConsensusProjections> projections)
+        {
+            var season = _season.CurrentSeason;
+            List<ConsensusProjections> consensusProjections = [];
+            foreach (var proj in projections)
+            {
+                var playerId = await playerService.GetPlayerId(proj.Name);
+                if (playerId > 0)
+                {
+                    var player = await playerService.GetPlayer(playerId);
+                    consensusProjections.Add(new ConsensusProjections
+                    {
+                        PlayerId = player.PlayerId,
+                        Position = player.Position,
+                        Season = season,
+                        FantasyPoints = proj.FantasyPoints
+                    });
+                }
+            }
+            return consensusProjections;
         }
 
         private async Task<List<ScheduleDetails>> ScheduleDetails(List<ProFootballReferenceGameScores> schedule, int season)

@@ -104,5 +104,10 @@
         public string Name { get; set; } = "";
         public double Snaps { get; set;}
     }
+    public class FantasyProsConsensusProjections
+    {
+        public string Name { get; set; } = "";
+        public double FantasyPoints { get; set; }
+    }
 
 }

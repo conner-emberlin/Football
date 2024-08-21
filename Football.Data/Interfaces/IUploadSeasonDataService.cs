@@ -10,6 +10,7 @@
        public Task<int> UploadSchedule(int season);
        public Task<int> UploadScheduleDetails(int season);
        public Task<int> UploadADP(int season, string position);
+        public Task<int> UploadConsensusProjections(string position);
     }
 }
 
