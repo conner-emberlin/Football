@@ -9,5 +9,6 @@ namespace Football.Client.Interfaces
         public Task<bool> PostSeasonTuningsRequest(TuningsModel model);
         public Task<WeeklyTuningsModel?> GetWeeklyTuningsRequest();
         public Task<bool> PostWeeklyTuningsRequest(WeeklyTuningsModel model);
+        public Task<int> PutSeasonConsensusProjectionsRequest(string position);
     }
 }

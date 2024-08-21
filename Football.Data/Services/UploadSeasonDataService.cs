@@ -89,7 +89,7 @@ namespace Football.Data.Services
 
         public async Task<int> UploadConsensusProjections(string position)
         {
-            var url = string.Format("{0}/{1}/{2}", "https://www.fantasypros.com/nfl/projections", position.ToLower(), ".php?week=draft");
+            var url = string.Format("{0}/{1}/{2}", "https://www.fantasypros.com/nfl/projections", position.ToLower(), ".php?scoring=PPR&week=draft");
             var proj = await ConsensusProjections(scraperService.ParseFantasyProsConsensusProjections(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position));
             return await uploadSeasonDataRepository.UploadConsensusProjections(proj);
         }
