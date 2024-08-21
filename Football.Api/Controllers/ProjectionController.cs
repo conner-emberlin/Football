@@ -43,20 +43,23 @@ namespace Football.Api.Controllers
             model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
 
             var currentSeasonGames = await playersService.GetCurrentSeasonGames();
-            foreach (var m in model)
-            {              
-                var avgGamesMissed = await statisticsService.GetAverageGamesMissed(m.PlayerId);                
-                m.AvgerageGamesMissed = avgGamesMissed;
-                m.AdjustedProjectedPoints = m.ProjectedPoints - (m.ProjectedPoints/currentSeasonGames) * avgGamesMissed;
-            }
-
             var adpDictionary = (await statisticsService.GetAdpByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(a => a.PlayerId);
+            var consensusProjectionDictionary = (await statisticsService.GetConsensusProjectionsByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(c => c.PlayerId);
             foreach (var m in model)
             {
-                if(adpDictionary.TryGetValue(m.PlayerId, out var adp))
+                var avgGamesMissed = await statisticsService.GetAverageGamesMissed(m.PlayerId);
+                m.AvgerageGamesMissed = avgGamesMissed;
+                m.AdjustedProjectedPoints = m.ProjectedPoints - (m.ProjectedPoints / currentSeasonGames) * avgGamesMissed;
+
+                if (adpDictionary.TryGetValue(m.PlayerId, out var adp))
                 {
                     m.PositionalADP = adp.PositionADP;
                     m.OverallADP = adp.OverallADP;
+                }
+
+                if (consensusProjectionDictionary.TryGetValue(m.PlayerId, out var proj))
+                {
+                    m.ConsensusProjection = proj.FantasyPoints;
                 }
             }
 

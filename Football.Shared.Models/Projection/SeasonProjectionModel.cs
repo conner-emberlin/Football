@@ -13,6 +13,7 @@
         public double AdjustedProjectedPoints { get; set; }
         public double PositionalADP { get; set; }
         public double OverallADP { get; set; }
+        public double ConsensusProjection { get; set; }
         public SeasonProjectionErrorModel? SeasonProjectionError { get; set; }
         public List<string>? Filters { get; set; }
     }
