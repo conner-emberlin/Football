@@ -111,6 +111,7 @@
                     <th>Team</th>
                     <th>Opponent</th>
                     <th>Points</th>
+                    <th>Consensus</th>
                     @if (players.First().CanDelete)
                     {
                         <th></th>
@@ -128,6 +129,7 @@
                         <td><img src="@logoPhotoPath" width="30" height="30"></td>                        
                         <td><img src="@opponentPhotoPath" width="30" height="30"></td>
                         <td>@Math.Round((double)player.ProjectedPoints,2)</td>
+                        <td>@player.ConsensusProjection</td>
                         @if (player.CanDelete)
                         {
                             <td>

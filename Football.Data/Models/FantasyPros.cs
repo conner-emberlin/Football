@@ -110,4 +110,10 @@
         public double FantasyPoints { get; set; }
     }
 
+    public class FantasyProsConsensusWeeklyProjections
+    {
+        public string Name { get; set; } = "";
+        public double FantasyPoints { get; set; }
+    }
+
 }

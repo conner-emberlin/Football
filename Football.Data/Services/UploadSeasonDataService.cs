@@ -93,7 +93,6 @@ namespace Football.Data.Services
             var proj = await ConsensusProjections(scraperService.ParseFantasyProsConsensusProjections(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position));
             return await uploadSeasonDataRepository.UploadConsensusProjections(proj);
         }
-
         public async Task<int> UploadADP(int season, string position) => await uploadSeasonDataRepository.UploadADP(await SeasonADP(await scraperService.ScrapeADP(position), season));
         
         private async Task<List<SeasonDataQB>> SeasonDataQB(List<FantasyProsStringParseQB> players, int season)

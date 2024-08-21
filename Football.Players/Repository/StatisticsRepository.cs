@@ -146,6 +146,19 @@ namespace Football.Players.Repository
             if (!string.IsNullOrEmpty(position)) query += " AND [Position] = @position";
             return await dbConnection.ExecuteAsync(query, new { season, position }) > 0;
         }
+
+        public async Task<IEnumerable<ConsensusWeeklyProjections>> GetConsensusWeeklyProjectionsByPosition(int season, int week, string position = "")
+        {
+            var query = $@"SELECT * FROM [dbo].ConsensusWeeklyProjections WHERE [Season] = @season AND [Week] = @week";
+            if (!string.IsNullOrEmpty(position)) query += " AND [Position] = @position";
+            return await dbConnection.QueryAsync<ConsensusWeeklyProjections>(query, new { season, week, position });
+        }
+        public async Task<bool> DeleteConsensusWeeklyProjectionsByPosition(int season, int week, string position = "")
+        {
+            var query = $@"DELETE FROM [dbo].ConsensusWeeklyProjections WHERE [Season] = @season AND [Week] = @week";
+            if (!string.IsNullOrEmpty(position)) query += " AND [Position] = @position";
+            return await dbConnection.ExecuteAsync(query, new { season, week, position }) > 0;
+        }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(Position position) => string.Format("Season{0}Data", position.ToString());
         private static string GetSeasonQueryWhere(bool isPlayer) => isPlayer ? "[PlayerId] = @queryParam" : "[Season] = @queryParam";

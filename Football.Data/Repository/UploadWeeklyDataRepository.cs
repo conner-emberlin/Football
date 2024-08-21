@@ -81,5 +81,12 @@ namespace Football.Data.Repository
                             VALUES(@Season, @Week, @PlayerId, @Name, @Yardline, @RushingAtt, @RushingYds, @RushingTD, @Receptions, @Targets, @Yards, @ReceivingTD, @Fumbles)";
             return await dbConnection.ExecuteAsync(query, players);
         }
+
+        public async Task<int> UploadConsensusWeeklyProjections(List<ConsensusWeeklyProjections> projections)
+        {
+            var query = $@"INSERT INTO [dbo].ConsensusWeeklyProjections (PlayerId, Season, Week, Position, FantasyPoints)
+                        VALUES (@PlayerId, @Season, @Week, @Position, @FantasyPoints)";
+            return await dbConnection.ExecuteAsync(query, projections);
+        }
     }
 }

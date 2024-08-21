@@ -163,6 +163,30 @@ namespace Football.Api.Controllers
             return Ok(await seasonDataService.UploadConsensusProjections(position));
 
         }
+        [HttpPut("refresh-consensus-weekly-projections/{position}")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> RefreshConsensusWeeklyProjections(string position)
+        {
+            if (!Enum.TryParse(position.ToUpper(), out Position pos)) return BadRequest();
+
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            _ = await statisticsService.DeleteConsensusWeeklyProjectionsByPosition(_season.CurrentSeason, currentWeek, pos);
+
+            if (pos == Position.FLEX)
+            {
+                var total = await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.QB.ToString())
+                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.RB.ToString())
+                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.WR.ToString())
+                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.TE.ToString())
+                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.DST.ToString())
+                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.K.ToString());
+                return Ok(total);
+            }
+            return Ok(await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, position));
+
+        }
 
         [HttpPost("sleeper-map")]
         [ProducesResponseType(StatusCodes.Status200OK)]

@@ -48,6 +48,20 @@ namespace Football.Players.Services
 
             return await statisticsRepository.DeleteConsensusProjectionsByPosition(season, position.ToString());
         }
+
+        public async Task<IEnumerable<ConsensusWeeklyProjections>> GetConsensusWeeklyProjectionsByPosition(int season, int week, Position position)
+        {
+            if (position == Position.FLEX) return await statisticsRepository.GetConsensusWeeklyProjectionsByPosition(season, week);
+
+            return await statisticsRepository.GetConsensusWeeklyProjectionsByPosition(season, week, position.ToString());
+        }
+
+        public async Task<bool> DeleteConsensusWeeklyProjectionsByPosition(int season, int week, Position position)
+        {
+            if (position == Position.FLEX) return await statisticsRepository.DeleteConsensusWeeklyProjectionsByPosition(season, week);
+
+            return await statisticsRepository.DeleteConsensusWeeklyProjectionsByPosition(season, week, position.ToString());
+        }
         public async Task<List<TeamRecord>> GetTeamRecords(int season)
         {
             var gameResults = await GetGameResults(season);

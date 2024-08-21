@@ -23,5 +23,6 @@ namespace Football.Data.Interfaces
         public List<FantasyProsStringParseRB> ParseFantasyProsRedZoneRB(string[] strings);
         public List<FantasyProsStringParseQB> ParseFantasyProsRedZoneQB(string[] strings);
         public List<FantasyProsConsensusProjections> ParseFantasyProsConsensusProjections(string[] strings, string position);
+        public List<FantasyProsConsensusWeeklyProjections> ParseFantasyProsConsensusWeeklyProjections(string[] strings, string position);
     }
 }

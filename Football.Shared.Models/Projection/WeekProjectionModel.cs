@@ -11,6 +11,7 @@
         public bool CanDelete { get; set; }
         public string Team { get; set; } = "";
         public string Opponent { get; set; } = "";
+        public double ConsensusProjection { get; set; }
 
     }
 }

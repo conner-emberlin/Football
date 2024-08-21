@@ -181,8 +181,18 @@ namespace Football.Api.Controllers
 
             var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId);
             var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, currentWeek)).ToDictionary(s => s.TeamId);
-            models.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team.Team : string.Empty);
-            models.ForEach(m => m.Opponent = teamDictionary.TryGetValue(m.PlayerId, out var team) ? scheduleDictionary[team.TeamId].OpposingTeam : string.Empty);
+            var consensusProjectionDictionary = (await statisticsService.GetConsensusWeeklyProjectionsByPosition(_season.CurrentSeason, currentWeek, positionEnum)).ToDictionary(c => c.PlayerId);
+
+            foreach (var m in models)
+            {
+                if (teamDictionary.TryGetValue(m.PlayerId, out var team))
+                {
+                    m.Team = team.Team;
+                    m.Opponent = scheduleDictionary[team.TeamId].OpposingTeam;
+                }
+
+                m.ConsensusProjection = consensusProjectionDictionary.TryGetValue(m.PlayerId, out var cproj) ? cproj.FantasyPoints : 0; 
+            }
 
             return Ok(models.OrderByDescending(m => m.ProjectedPoints));
 

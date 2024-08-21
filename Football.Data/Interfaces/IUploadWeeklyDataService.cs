@@ -12,5 +12,6 @@
         public Task<int> UploadWeeklyRosterPercentages(int season, int week, string position);
         public Task<int> UploadWeeklySnapCounts(int season, int week, string position);
         public Task<int> UploadWeeklyRedZoneRB(int season, int week, int yardline);
+        public Task<int> UploadConsensusWeeklyProjections(int week, string position);
     }
 }

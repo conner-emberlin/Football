@@ -49,6 +49,32 @@ namespace Football.Data.Services
 
             return projections;
         }
+
+        public List<FantasyProsConsensusWeeklyProjections> ParseFantasyProsConsensusWeeklyProjections(string[] strings, string position)
+        {
+            List<FantasyProsConsensusWeeklyProjections> projections = [];
+            var len = GetConsensusProjectionsTableLength(position);
+            for (int i = 0; i < strings.Length - len; i += len)
+            {
+                projections.Add(new FantasyProsConsensusWeeklyProjections
+                {
+                    Name = FormatName(strings[i]),
+                    FantasyPoints = double.Parse(strings[i + len - 1])
+                });
+            }
+            if (!string.Equals(position, "DST", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var p in projections)
+                {
+                    if (p.Name.LastIndexOf(' ') > 1)
+                    {
+                        p.Name = p.Name[0..p.Name.LastIndexOf(' ')];
+                    }
+                }
+            }
+
+            return projections;
+        }
         public List<FantasyProsRosterPercent> ParseFantasyProsRosterPercent(string[] strings, string position)
         {
             List<FantasyProsRosterPercent> rosterPercent = [];
@@ -546,6 +572,7 @@ namespace Football.Data.Services
                 "WR" => 9,
                 "TE" => 6,
                 "K" => 5,
+                "DST" => 10,
                 _ => 0
             };
         }

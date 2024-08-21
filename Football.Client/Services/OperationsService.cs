@@ -11,5 +11,6 @@ namespace Football.Client.Services
         public async Task<bool> PostWeeklyTuningsRequest(WeeklyTuningsModel tunings) => await requests.Post<bool, WeeklyTuningsModel>("/operations/weekly-tunings", tunings);
         public async Task<int> PutSeasonAdpRequest(string position) => await requests.Put<int>("/operations/refresh-adp/" + position);
         public async Task<int> PutSeasonConsensusProjectionsRequest(string position) => await requests.Put<int>("/operations/refresh-consensus-projections/" + position);
+        public async Task<int> PutWeeklyConsensusProjectionsRequest(string position) => await requests.Put<int>("/operations/refresh-consensus-weekly-projections/" + position);
     }
 }

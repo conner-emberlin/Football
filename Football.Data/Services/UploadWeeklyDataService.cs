@@ -7,13 +7,15 @@ using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
 using AutoMapper;
+using Football.Data.Repository;
 
 namespace Football.Data.Services
 {
     public class UploadWeeklyDataService(IScraperService scraperService, IUploadWeeklyDataRepository uploadWeeklyDataRepository,
-        IPlayersService playerService, ILogger logger, IMapper mapper, IOptionsMonitor<WeeklyScraping> scraping) : IUploadWeeklyDataService
+        IPlayersService playerService, ILogger logger, IMapper mapper, IOptionsMonitor<WeeklyScraping> scraping, IOptionsMonitor<Season> season) : IUploadWeeklyDataService
     {
         private readonly WeeklyScraping _scraping = scraping.CurrentValue;
+        private readonly Season _season = season.CurrentValue;
 
         public async Task<int> UploadWeeklyQBData(int season, int week, List<int> ignoreList)
         {
@@ -120,6 +122,12 @@ namespace Football.Data.Services
             var added = await uploadWeeklyDataRepository.UploadWeeklySnapCounts(snapCounts);
             logger.Information("Snap Count upload complete. {0} records added", added);
             return added;
+        }
+        public async Task<int> UploadConsensusWeeklyProjections(int week, string position)
+        {
+            var url = string.Format("{0}/{1}/{2}/{3}", "https://www.fantasypros.com/nfl/projections", position.ToLower(), ".php?scoring=PPR&week=", week);
+            var proj = await ConsensusWeeklyProjections(scraperService.ParseFantasyProsConsensusWeeklyProjections(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position), week);
+            return await uploadWeeklyDataRepository.UploadConsensusWeeklyProjections(proj);
         }
 
         private async Task<List<WeeklyRosterPercent>> WeeklyRosterPercent(List<FantasyProsRosterPercent> rosterPercents, int season, int week)
@@ -334,6 +342,29 @@ namespace Football.Data.Services
                 }
             }
             return snapCounts;
+        }
+
+        private async Task<List<ConsensusWeeklyProjections>> ConsensusWeeklyProjections(List<FantasyProsConsensusWeeklyProjections> projections, int week)
+        {
+            var season = _season.CurrentSeason;
+            List<ConsensusWeeklyProjections> consensusProjections = [];
+            foreach (var proj in projections)
+            {
+                var playerId = await playerService.GetPlayerId(proj.Name);
+                if (playerId > 0)
+                {
+                    var player = await playerService.GetPlayer(playerId);
+                    consensusProjections.Add(new ConsensusWeeklyProjections
+                    {
+                        PlayerId = player.PlayerId,
+                        Position = player.Position,
+                        Season = season,
+                        Week = week,
+                        FantasyPoints = proj.FantasyPoints
+                    });
+                }
+            }
+            return consensusProjections;
         }
         private string FantasyProsURLFormatter(string position, string year, string week) => string.Format("{0}{1}.php?year={2}&week={3}&range=week", _scraping.FantasyProsBaseURL, position.ToLower(), year, week);
         private string RedZoneURL(string position, int season, int week, int yardline) => string.Format("{0}{1}.php?year={2}&week={3}&yardline={4}&range=week", _scraping.RedZoneURL, position.ToLower(), season, week, yardline);

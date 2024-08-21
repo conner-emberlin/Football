@@ -102,6 +102,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadConsensusProjections(string position) => Ok(await seasonDataService.UploadConsensusProjections(position));
 
+        [HttpPost("consensus-weekly-projections/{week}/{position}")]
+        [ProducesResponseType(typeof(int), 200)]
+        [ProducesResponseType(typeof(string), 400)]
+        public async Task<ActionResult<int>> UploadConsensusWeeklyProjections(int week, string position) => Ok(await weeklyDataService.UploadConsensusWeeklyProjections(week, position));
 
         [HttpPost("snaps/{position}/{season}/{week}")]
         [ProducesResponseType(typeof(int), 200)]

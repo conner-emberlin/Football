@@ -22,8 +22,9 @@ namespace Football.Players.Interfaces
         public Task<double> GetAverageGamesMissed(int playerId);
         public Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, Position position);
         public Task<bool> DeleteAdpByPosition(int season, Position position);
-
         public Task<IEnumerable<ConsensusProjections>> GetConsensusProjectionsByPosition(int season, Position position);
         public Task<bool> DeleteConsensusProjectionsByPosition(int season, Position position);
+        public Task<IEnumerable<ConsensusWeeklyProjections>> GetConsensusWeeklyProjectionsByPosition(int season, int week, Position position);
+        public Task<bool> DeleteConsensusWeeklyProjectionsByPosition(int season, int week, Position position);
     }
 }
