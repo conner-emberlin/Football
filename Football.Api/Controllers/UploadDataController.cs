@@ -105,7 +105,7 @@ namespace Football.Api.Controllers
         [HttpPost("consensus-weekly-projections/{week}/{position}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadConsensusWeeklyProjections(int week, string position) => Ok(await weeklyDataService.UploadConsensusWeeklyProjections(week, position));
+        public async Task<ActionResult<int>> UploadConsensusWeeklyProjections(int week, string position) => Ok(await weeklyDataService.UploadConsensusWeeklyProjections(week, position, await playersService.GetIgnoreList()));
 
         [HttpPost("snaps/{position}/{season}/{week}")]
         [ProducesResponseType(typeof(int), 200)]

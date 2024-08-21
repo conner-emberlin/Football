@@ -26,6 +26,7 @@ namespace Football.Api.Controllers
             {
                 var ignoreList = await playersService.GetIgnoreList();
                 var count = 0;
+
                 count += await weeklyDataService.UploadWeeklyQBData(season, week, ignoreList);
                 count += await weeklyDataService.UploadWeeklyRBData(season, week, ignoreList);
                 count += await weeklyDataService.UploadWeeklyWRData(season, week, ignoreList);
@@ -44,6 +45,13 @@ namespace Football.Api.Controllers
                 count += await weeklyDataService.UploadWeeklySnapCounts(season, week, Position.RB.ToString());
                 count += await weeklyDataService.UploadWeeklySnapCounts(season, week, Position.WR.ToString());
                 count += await weeklyDataService.UploadWeeklySnapCounts(season, week, Position.TE.ToString());
+
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.QB.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.RB.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.WR.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.TE.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.DST.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.K.ToString(), ignoreList);
                 return Ok(count);
             }
             return BadRequest();
@@ -172,19 +180,20 @@ namespace Football.Api.Controllers
             if (!Enum.TryParse(position.ToUpper(), out Position pos)) return BadRequest();
 
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            var ignoreList = await playersService.GetIgnoreList();
             _ = await statisticsService.DeleteConsensusWeeklyProjectionsByPosition(_season.CurrentSeason, currentWeek, pos);
 
             if (pos == Position.FLEX)
             {
-                var total = await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.QB.ToString())
-                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.RB.ToString())
-                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.WR.ToString())
-                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.TE.ToString())
-                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.DST.ToString())
-                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.K.ToString());
+                var total = await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.QB.ToString(), ignoreList)
+                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.RB.ToString(), ignoreList)
+                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.WR.ToString(), ignoreList)
+                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.TE.ToString(), ignoreList)
+                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.DST.ToString(), ignoreList)
+                          + await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, Position.K.ToString(), ignoreList);
                 return Ok(total);
             }
-            return Ok(await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, position));
+            return Ok(await weeklyDataService.UploadConsensusWeeklyProjections(currentWeek, position, ignoreList));
 
         }
 

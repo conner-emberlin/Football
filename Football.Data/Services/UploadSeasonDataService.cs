@@ -90,7 +90,7 @@ namespace Football.Data.Services
         public async Task<int> UploadConsensusProjections(string position)
         {
             var url = string.Format("{0}/{1}/{2}", "https://www.fantasypros.com/nfl/projections", position.ToLower(), ".php?scoring=PPR&week=draft");
-            var proj = await ConsensusProjections(scraperService.ParseFantasyProsConsensusProjections(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position));
+            var proj = await ConsensusProjections(scraperService.ParseFantasyProsConsensusProjections(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position), position);
             return await uploadSeasonDataRepository.UploadConsensusProjections(proj);
         }
         public async Task<int> UploadADP(int season, string position) => await uploadSeasonDataRepository.UploadADP(await SeasonADP(await scraperService.ScrapeADP(position), season));
@@ -184,7 +184,7 @@ namespace Football.Data.Services
             return seasonADP;
         }
 
-        private async Task<List<ConsensusProjections>> ConsensusProjections(List<FantasyProsConsensusProjections> projections)
+        private async Task<List<ConsensusProjections>> ConsensusProjections(List<FantasyProsConsensusProjections> projections, string position)
         {
             var season = _season.CurrentSeason;
             List<ConsensusProjections> consensusProjections = [];
@@ -194,13 +194,16 @@ namespace Football.Data.Services
                 if (playerId > 0)
                 {
                     var player = await playerService.GetPlayer(playerId);
-                    consensusProjections.Add(new ConsensusProjections
+                    if (string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase))
                     {
-                        PlayerId = player.PlayerId,
-                        Position = player.Position,
-                        Season = season,
-                        FantasyPoints = proj.FantasyPoints
-                    });
+                        consensusProjections.Add(new ConsensusProjections
+                        {
+                            PlayerId = player.PlayerId,
+                            Position = player.Position,
+                            Season = season,
+                            FantasyPoints = proj.FantasyPoints
+                        });
+                    }
                 }
             }
             return consensusProjections;

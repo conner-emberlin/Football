@@ -7,7 +7,6 @@ using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
 using AutoMapper;
-using Football.Data.Repository;
 
 namespace Football.Data.Services
 {
@@ -123,11 +122,15 @@ namespace Football.Data.Services
             logger.Information("Snap Count upload complete. {0} records added", added);
             return added;
         }
-        public async Task<int> UploadConsensusWeeklyProjections(int week, string position)
+        public async Task<int> UploadConsensusWeeklyProjections(int week, string position, List<int> ignoreList)
         {
+            logger.Information("Uploading week {0} Consensus Projections for position {1}", week, position);
             var url = string.Format("{0}/{1}/{2}/{3}", "https://www.fantasypros.com/nfl/projections", position.ToLower(), ".php?scoring=PPR&week=", week);
-            var proj = await ConsensusWeeklyProjections(scraperService.ParseFantasyProsConsensusWeeklyProjections(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position), week);
-            return await uploadWeeklyDataRepository.UploadConsensusWeeklyProjections(proj);
+            var proj = (await ConsensusWeeklyProjections(scraperService.ParseFantasyProsConsensusWeeklyProjections(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position), week, position))
+                        .Where( p => !ignoreList.Contains(p.PlayerId));
+            var added = await uploadWeeklyDataRepository.UploadConsensusWeeklyProjections(proj);
+            logger.Information("Consensus Projection upload complete. {0} records added", added);
+            return added;
         }
 
         private async Task<List<WeeklyRosterPercent>> WeeklyRosterPercent(List<FantasyProsRosterPercent> rosterPercents, int season, int week)
@@ -344,7 +347,7 @@ namespace Football.Data.Services
             return snapCounts;
         }
 
-        private async Task<List<ConsensusWeeklyProjections>> ConsensusWeeklyProjections(List<FantasyProsConsensusWeeklyProjections> projections, int week)
+        private async Task<List<ConsensusWeeklyProjections>> ConsensusWeeklyProjections(List<FantasyProsConsensusWeeklyProjections> projections, int week, string position)
         {
             var season = _season.CurrentSeason;
             List<ConsensusWeeklyProjections> consensusProjections = [];
@@ -354,14 +357,17 @@ namespace Football.Data.Services
                 if (playerId > 0)
                 {
                     var player = await playerService.GetPlayer(playerId);
-                    consensusProjections.Add(new ConsensusWeeklyProjections
+                    if (string.Equals(player.Position, position, StringComparison.OrdinalIgnoreCase))
                     {
-                        PlayerId = player.PlayerId,
-                        Position = player.Position,
-                        Season = season,
-                        Week = week,
-                        FantasyPoints = proj.FantasyPoints
-                    });
+                        consensusProjections.Add(new ConsensusWeeklyProjections
+                        {
+                            PlayerId = player.PlayerId,
+                            Position = player.Position,
+                            Season = season,
+                            Week = week,
+                            FantasyPoints = proj.FantasyPoints
+                        });
+                    }
                 }
             }
             return consensusProjections;

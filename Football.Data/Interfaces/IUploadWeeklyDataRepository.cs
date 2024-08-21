@@ -14,6 +14,6 @@ namespace Football.Data.Interfaces
         public Task<int> UploadWeeklyRosterPercentages(IEnumerable<WeeklyRosterPercent> rosterPercentages);
         public Task<int> UploadWeeklySnapCounts(List<SnapCount> snapCounts);
         public Task<int> UploadWeeklyRedZoneRB(IEnumerable<WeeklyRedZoneRB> players);
-        public Task<int> UploadConsensusWeeklyProjections(List<ConsensusWeeklyProjections> projections);
+        public Task<int> UploadConsensusWeeklyProjections(IEnumerable<ConsensusWeeklyProjections> projections);
     }
 }

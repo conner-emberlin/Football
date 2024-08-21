@@ -82,7 +82,7 @@ namespace Football.Data.Repository
             return await dbConnection.ExecuteAsync(query, players);
         }
 
-        public async Task<int> UploadConsensusWeeklyProjections(List<ConsensusWeeklyProjections> projections)
+        public async Task<int> UploadConsensusWeeklyProjections(IEnumerable<ConsensusWeeklyProjections> projections)
         {
             var query = $@"INSERT INTO [dbo].ConsensusWeeklyProjections (PlayerId, Season, Week, Position, FantasyPoints)
                         VALUES (@PlayerId, @Season, @Week, @Position, @FantasyPoints)";

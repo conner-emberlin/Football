@@ -6,6 +6,7 @@
 @using Football.Shared.Models.Projection;
 
 @inject IProjectionService projectionService;
+@inject IOperationsService operationsService;
 
 <h4>Weekly Projections</h4>
 @if (!settingsLoading){
@@ -27,7 +28,16 @@
     Submit
 </button>
     </td>
-    @if (players != null && players.Count > 0 && !players.Any(p => p.CanDelete) && PositionEnum != "FLEX")
+        @if (players != null && players.Count > 0)
+        {
+            <td>&nbsp;</td>
+            <td>
+                <button class="button-22" role="button" @onclick="HandleConsensusProjectionsRefresh">
+                    Refresh Consensus
+                </button>
+            </td>
+        }
+        @if (players != null && players.Count > 0 && !players.Any(p => p.CanDelete) && PositionEnum != "FLEX")
     {
         <td>&nbsp;</td>
         <td>
@@ -154,9 +164,10 @@
     private WeeklyProjectionsExistModel? projectionsExist { get; set; }
 
     private string Position { get; set; } = "Quarterback";
-    private string PositionEnum { get; set; } = "1";
+    private string PositionEnum { get; set; } = "QB";
     private bool loading { get; set; }
     private int count = 0;
+    private int consensusProjRefreshed { get; set; }
     private bool recordDeleted = false;
     private bool settingsLoading { get; set; }
     private bool expandVariables { get; set; } = false;
@@ -222,11 +233,21 @@
         shouldRender = true;
     }
 
-    public async Task HandleDelete(int playerId, int season, int week)
+    private async Task HandleDelete(int playerId, int season, int week)
     {
         loading = true;
         recordDeleted = await projectionService.DeleteWeekProjectionRequest(playerId, season, week);
         await HandleSubmit();
+        shouldRender = true;
+    }
+
+    private async Task HandleConsensusProjectionsRefresh()
+    {
+        loading = true;
+        shouldRender = true;
+        consensusProjRefreshed = await operationsService.PutWeeklyConsensusProjectionsRequest(PositionEnum);
+        await HandleSubmit();
+        loading = false;
         shouldRender = true;
     }
 
