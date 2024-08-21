@@ -20,6 +20,8 @@ namespace Football.Players.Interfaces
         public Task<IEnumerable<(int Season, double Games)>> GetGamesPerSeason(int playerId, Position position, int minGames);
         public Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, string position = "");
         public Task<bool> DeleteAdpByPosition(int season, string position = "");
+        public Task<IEnumerable<ConsensusProjections>> GetConsensusProjectionsByPosition(int season, string position = "");
+        public Task<bool> DeleteConsensusProjectionsByPosition(int season, string position = "");
 
     }
 }

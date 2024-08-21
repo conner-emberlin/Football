@@ -126,7 +126,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> RefreshAdp(string position)
         {
-            if (!Enum.TryParse(position, out Position pos)) return BadRequest();
+            if (!Enum.TryParse(position.ToUpper(), out Position pos)) return BadRequest();
 
             _ = await statisticsService.DeleteAdpByPosition(_season.CurrentSeason, pos); 
 
@@ -140,6 +140,28 @@ namespace Football.Api.Controllers
             }
             return Ok(await seasonDataService.UploadADP(_season.CurrentSeason, position));
             
+        }
+
+        [HttpPut("refresh-consensus-projections/{position}")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> RefreshConsensusProjections(string position)
+        {
+            if (!Enum.TryParse(position.ToUpper(), out Position pos)) return BadRequest();
+
+            _ = await statisticsService.DeleteConsensusProjectionsByPosition(_season.CurrentSeason, pos);
+
+            if (pos == Position.FLEX)
+            {
+                var total = await seasonDataService.UploadConsensusProjections(Position.QB.ToString())
+                          + await seasonDataService.UploadConsensusProjections(Position.RB.ToString())
+                          + await seasonDataService.UploadConsensusProjections(Position.WR.ToString())
+                          + await seasonDataService.UploadConsensusProjections(Position.TE.ToString());
+                return Ok(total);
+            }
+            return Ok(await seasonDataService.UploadConsensusProjections(position));
+
         }
 
         [HttpPost("sleeper-map")]
