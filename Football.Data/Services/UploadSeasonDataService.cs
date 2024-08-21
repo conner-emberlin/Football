@@ -4,7 +4,6 @@ using Football.Data.Interfaces;
 using Football.Data.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
-using Football.Projections.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
 using AutoMapper;

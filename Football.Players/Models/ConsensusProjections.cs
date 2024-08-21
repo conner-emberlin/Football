@@ -1,4 +1,4 @@
-﻿namespace Football.Projections.Models
+﻿namespace Football.Players.Models
 {
     public class ConsensusProjections
     {

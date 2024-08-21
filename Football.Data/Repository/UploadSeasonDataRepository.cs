@@ -2,7 +2,6 @@
 using Football.Players.Models;
 using System.Data;
 using Dapper;
-using Football.Projections.Models;
 
 namespace Football.Data.Repository
 {

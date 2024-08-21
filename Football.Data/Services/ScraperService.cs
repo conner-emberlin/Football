@@ -7,7 +7,6 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text.RegularExpressions;
-using System.Globalization;
 
 namespace Football.Data.Services
 {
