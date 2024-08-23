@@ -134,6 +134,10 @@
                         <th>Rank</th>
                     }                    
                     <th>Name</th>
+                    @if (PositionEnum == "FLEX")
+                    {
+                        <th>Position</th>        
+                    }
                     <th>Team</th>
                     <th>
                         <span class="sort-link" onclick="@(() => SetTable("ProjectedPoints"))">Total Points</span>
@@ -178,6 +182,10 @@
                 <td>@rank</td>
             }
             <td><a class = "page-links" href="Players/@p.PlayerId"> @p.Name</a></td>
+            @if (PositionEnum == "FLEX")
+            {
+               <td><b style="color:@format.PositionColor(p.Position)">@p.Position</b></td>
+            }
             <td><img src="@logoPhotoPath" width="30" height="30"></td>
             <td>@Math.Round((double)p.ProjectedPoints,2)</td>
             <td>@Math.Round((double)p.ProjectedPoints/17,2)</td>
@@ -298,6 +306,7 @@
 
     private async Task HandleDelete(int playerId, int season)
     {
+        recordDeleted = false;
         loading = true;
         shouldRender = true;
         recordDeleted = await projectionService.DeleteSeasonProjectionRequest(playerId, season);

@@ -159,11 +159,12 @@ namespace Football.Projections.Services
                             Name = rank.Name,
                             Position = rank.Position,
                             ProjectedPoints = rank.ProjectedPoints,
-                            Vorp = (rank.ProjectedPoints - replacementPointsDictionary[position]) / replacementPointsDictionary[position]
+                            Vorp = (rank.ProjectedPoints - replacementPointsDictionary[position])
                         });
                     }
                 }
-                return flexRankings.OrderByDescending(f => f.Vorp).ToList();
+                var ordered = flexRankings.OrderByDescending(f => f.Vorp).ToList();
+                return ordered;
             }
             return Enumerable.Empty<SeasonFlex>().ToList();           
         }
