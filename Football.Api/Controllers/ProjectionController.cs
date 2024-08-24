@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using AutoMapper;
 using Football.Shared.Models.Projection;
+using CsvHelper;
 
 namespace Football.Api.Controllers
 {
@@ -298,6 +299,31 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult GetWeeklyModelVariablesByPosition([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(weekProjectionService.GetModelVariablesByPosition(posEnum)) : BadRequest();
 
+        [HttpGet("export-season-rankings")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public IActionResult ExportSeasonRankings()
+        {
+            var projections = mapper.Map<List<SeasonFlexExportModel>>(analysisService.SeasonFlexRankings());
+            if (projections != null && projections.Count > 0)
+            {
+                foreach (var projection in projections)
+                {
+                    projection.Rank = projections.IndexOf(projection) + 1;
+                    projection.ProjectedPoints = Math.Round(projection.ProjectedPoints, 2);
+                }
 
+                var memoryStream = new MemoryStream();
+                var file = string.Format("{0}-{1}-{2}-season-rankings", DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Year); ;
+                using var writer = new StreamWriter(memoryStream, leaveOpen: true);
+                using var csv = new CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture);
+                csv.WriteRecords(projections);
+                writer.Flush();
+                memoryStream.Position = 0;
+                return File(memoryStream, "text/csv", file);
+            }
+
+            return NotFound();
+        }
     }
 }
