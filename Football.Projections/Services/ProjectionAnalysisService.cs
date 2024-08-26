@@ -12,11 +12,10 @@ namespace Football.Projections.Services
 {
     public class ProjectionAnalysisService(IFantasyDataService fantasyService,
         IOptionsMonitor<Season> season, IProjectionService<SeasonProjection> seasonProjection,
-        IProjectionService<WeekProjection> weekProjection, IOptionsMonitor<Starters> starters, IPlayersService playersService, IStatisticsService statisticsService,
+        IProjectionService<WeekProjection> weekProjection, IPlayersService playersService, IStatisticsService statisticsService,
         ISettingsService settingsService, ISleeperLeagueService sleeperLeagueService) : IProjectionAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
-        private readonly Starters _starters = starters.CurrentValue;
 
         public async Task<List<WeeklyProjectionError>> GetWeeklyProjectionError(int playerId)
         {
@@ -139,7 +138,7 @@ namespace Football.Projections.Services
             }
             return new();
         }
-        public IEnumerable<SeasonFlex> SeasonFlexRankings()
+        public async Task<IEnumerable<SeasonFlex>> SeasonFlexRankings()
         {
             List<SeasonFlex> flexRankings = [];
             if (seasonProjection.GetProjectionsFromSQL(Position.QB, _season.CurrentSeason, out var qb)
@@ -148,7 +147,7 @@ namespace Football.Projections.Services
                 && seasonProjection.GetProjectionsFromSQL(Position.TE, _season.CurrentSeason, out var te))
             {
                 var rankings = qb.Union(rb).Union(wr).Union(te);
-                var replacementPointsDictionary = GetReplacementPointsDictionary(rankings);
+                var replacementPointsDictionary = GetReplacementPointsDictionary(rankings, await settingsService.GetSeasonTunings(_season.CurrentSeason));
                 foreach (var rank in rankings)
                 {
                     if (Enum.TryParse(rank.Position, out Position position))
@@ -386,14 +385,14 @@ namespace Football.Projections.Services
             }
             return count > 0 ? Math.Round(error / count, 2) : 0;
         }
-        private Dictionary<Position, double> GetReplacementPointsDictionary(IEnumerable<SeasonProjection> rankings)
+        private Dictionary<Position, double> GetReplacementPointsDictionary(IEnumerable<SeasonProjection> rankings, Tunings tunings)
         {
             var rankingsByPosition = rankings.GroupBy(p => p.Position, p => p.ProjectedPoints, (key, p) => new {Position = key, Projections = p.OrderByDescending(p => p)});
             Dictionary<Position, double> replacementPointsDictionary = [];
             foreach (var rank in rankingsByPosition)
             {
                 _ = Enum.TryParse(rank.Position, out Position position);
-                var replacementLevel = settingsService.GetReplacementLevel(position);
+                var replacementLevel = settingsService.GetReplacementLevel(position, tunings);
                 var projectionCount = rank.Projections.Count();
                 var replacementIndex = projectionCount < replacementLevel ? (int)Math.Floor((double)(projectionCount / 2)) : replacementLevel;
                 replacementPointsDictionary.Add(position, rank.Projections.ElementAt(replacementIndex));

@@ -216,6 +216,39 @@
                         <input type="text" class="form-control" @bind="@tunings.ReceivingRBThreshold" />
                     </td>
                 </tr>
+                                <tr>
+                    <td>
+                        ReplacementLevelQB
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.ReplacementLevelQB" />
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        ReplacementLevelRB
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.ReplacementLevelRB" />
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        ReplacementLevelWR
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.ReplacementLevelWR" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        ReplacementLevelTE
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.ReplacementLevelTE" />
+                    </td>
+                </tr>
+
                 <tr>
                     <td>
                          RushingQBThreshold 
@@ -364,6 +397,14 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
                     </td>
                     <td>
                         <input type="text" class="form-control" @bind="@weeklyTunings.RecentWeeks" />
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        ErrorAdjustmentWeek
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@weeklyTunings.ErrorAdjustmentWeek" />
                     </td>
                 </tr>
             </tbody>

@@ -1,5 +1,6 @@
 ﻿
 using Football.Enums;
+using Football.Models;
 using Football.Projections.Models;
 
 namespace Football.Projections.Interfaces
@@ -10,7 +11,7 @@ namespace Football.Projections.Interfaces
         public Task<List<WeeklyProjectionError>> GetWeeklyProjectionError(Position position, int week);
         public Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(Position position, int week);
         public Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(int playerId);
-        public IEnumerable<SeasonFlex> SeasonFlexRankings();
+        public Task<IEnumerable<SeasonFlex>> SeasonFlexRankings();
         public Task<IEnumerable<WeekProjection>> WeeklyFlexRankings();
         public Task<List<SeasonProjectionError>> GetSeasonProjectionError(Position position, int season = 0);
         public Task<SeasonProjectionAnalysis> GetSeasonProjectionAnalysis(Position position, int season = 0);

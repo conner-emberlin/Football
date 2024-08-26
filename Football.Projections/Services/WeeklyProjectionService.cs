@@ -15,11 +15,10 @@ using MathNet.Numerics.LinearAlgebra;
 namespace Football.Projections.Services
 {
     public class WeeklyProjectionService(IFantasyDataService fantasyService, IMemoryCache cache,IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
-    IStatisticsService statisticsService, IOptionsMonitor<Season> season, IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService, IOptionsMonitor<ProjectionLimits> settings, IMapper mapper) : IProjectionService<WeekProjection>
+    IStatisticsService statisticsService, IOptionsMonitor<Season> season, IOptionsMonitor<WeeklyTunings> tunings, IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService, IMapper mapper) : IProjectionService<WeekProjection>
     {
         private readonly Season _season = season.CurrentValue;
-        private readonly ProjectionLimits _settings = settings.CurrentValue;
-
+        private readonly WeeklyTunings _tunings = tunings.CurrentValue;
         public async Task<bool> DeleteProjection(WeekProjection projection) 
         { 
             var recordDeleted = await projectionRepository.DeleteWeeklyProjection(projection.PlayerId, projection.Week, projection.Season);
@@ -76,7 +75,7 @@ namespace Football.Projections.Services
             if (projections.Any())
             {
                 projections = await adjustmentService.AdjustmentEngine(projections.ToList(), tunings);
-                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(settingsService.GetProjectionsCount(position));
+                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints);
                 return formattedProjections;
             }
             return projections;
@@ -168,7 +167,7 @@ namespace Football.Projections.Services
         {
             var weeklyProjections = await GetPlayerProjections(playerId);
             var weeklyFantasy = await fantasyService.GetWeeklyFantasy(playerId);
-            if (weeklyProjections != null && weeklyFantasy.Count > 0 && weeklyProjections.Count() > _settings.ErrorAdjustmentWeek - 1)
+            if (weeklyProjections != null && weeklyFantasy.Count > 0 && weeklyProjections.Count() > _tunings.ErrorAdjustmentWeek - 1)
             {
                 var diffs = weeklyProjections.Join(weeklyFantasy, wp => wp.Week, wf => wf.Week, (wp, wf) => new { WeekProjection = wp, WeeklyFantasy = wf })
                                             .Select(r => r.WeekProjection.ProjectedPoints - r.WeeklyFantasy.FantasyPoints);

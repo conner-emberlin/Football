@@ -7,14 +7,6 @@ namespace Football.Models
         public int CurrentSeason { get; set; }
     }
 
-    public class ReplacementLevels
-    {
-        public int ReplacementLevelQB { get; set; }
-        public int ReplacementLevelRB { get; set; }
-        public int ReplacementLevelWR { get; set; }
-        public int ReplacementLevelTE { get; set; }
-    }
-
     public class FantasyScoring
     {
         public int PointsPerReception { get; set; }
@@ -40,25 +32,6 @@ namespace Football.Models
         public double FGLessThanFourty { get; set; }
         public double FGFourtyFifty { get; set; }
         public double FGGreaterThanFifty { get; set; }
-    }
-
-    public class ProjectionLimits
-    {
-        public int QBProjections { get; set; }
-        public int RBProjections { get; set; }
-        public int WRProjections { get; set; }
-        public int TEProjections { get; set; }
-        public int DSTProjections { get; set; }
-        public int KProjections { get; set; }
-        public int ErrorAdjustmentWeek { get; set; }
-    }
-
-    public class Starters
-    {
-        public int QBStarters { get; set; }
-        public int RBStarters { get; set; }
-        public int WRStarters { get; set; }
-        public int TEStarters { get; set; }
     }
     public class Tunings
     {
@@ -94,6 +67,10 @@ namespace Football.Models
         public double RBPromotionMinYardsPerCarry { get; set; }
         public double RBPromotionFactor { get; set; }
         public int MinGamesForMissedAverage { get; set; }
+        public int ReplacementLevelQB { get; set; }
+        public int ReplacementLevelRB { get; set; }
+        public int ReplacementLevelWR { get; set; }
+        public int ReplacementLevelTE { get; set; }
     }
 
     public class WeeklyTunings
@@ -106,20 +83,9 @@ namespace Football.Models
         public double TamperedMax { get; set; }
         public double MinWeekWeighted { get; set; }
         public int RecentWeeks { get; set; }
+        public int ErrorAdjustmentWeek { get; set; }
     }
 
-    public class MockDraftSettings
-    {
-        public int QBStarters { get; set; }
-        public int RBStarters { get; set; }
-        public int WRStarters { get; set; }
-        public int TEStarters { get; set; }
-        public int QBLimit { get; set; }
-        public int RBLimit { get; set; }
-        public int WRLimit { get; set; }
-        public int TELimit { get; set; }
-        public int BenchSpots { get; set; }
-    }
 
     public class WaiverWireSettings
     {

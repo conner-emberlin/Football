@@ -8,5 +8,6 @@
         public double TamperedMax { get; set; }
         public double MinWeekWeighted { get; set; }
         public int RecentWeeks { get; set; }
+        public int ErrorAdjustmentWeek { get; set; }
     }
 }

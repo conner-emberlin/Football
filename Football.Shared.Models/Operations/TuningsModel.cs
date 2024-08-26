@@ -33,5 +33,10 @@
         public double RBPromotionMinYardsPerCarry { get; set; }
         public double RBPromotionFactor { get; set; }
         public int MinGamesForMissedAverage { get; set; }
+        public int ReplacementLevelQB { get; set; }
+        public int ReplacementLevelRB { get; set; }
+        public int ReplacementLevelWR { get; set; }
+        public int ReplacementLevelTE { get; set; }
+
     }
 }

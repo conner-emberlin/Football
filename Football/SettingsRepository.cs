@@ -14,19 +14,19 @@ namespace Football
                             RBFloor, LeadRBFactor, QBWeight, Weight, SecondYearWRLeap, SecondYearRBLeap, SecondYearQBLeap, SecondYearTELeap, NewQBFloor, NewQBCeiling, SeasonDataTrimmingGames,
                             AverageQBProjection, NewWRMinPoints, NewWRAdjustmentFactor, ExistingWRAdjustmentFactor, NewRBMinPoints, NewRBAdjustmentFactor, ExistingRBAdjustmentFactor, RushingQBThreshold,
                             ReceivingRBThreshold, BackupQBAdjustmentMax, VetQBNewTeamYears, VetQBNewTeamFactor, EliteWRDraftPositionMax, EliteWRRookieTopReceiverFactor, WR1MinPoints, RB1MinPoints,  
-                            RBPromotionMinYardsPerCarry, RBPromotionFactor, NewQBCeilingForRB, MinGamesForMissedAverage )
+                            RBPromotionMinYardsPerCarry, RBPromotionFactor, NewQBCeilingForRB, MinGamesForMissedAverage, ReplacementLevelQB, ReplacementLevelRB, ReplacementLevelWR, ReplacementLevelTE )
                            VALUES (@Season,	
                             @RBFloor, @LeadRBFactor, @QBWeight, @Weight, @SecondYearWRLeap, @SecondYearRBLeap, @SecondYearQBLeap, @SecondYearTELeap, @NewQBFloor, @NewQBCeiling, @SeasonDataTrimmingGames,
                             @AverageQBProjection, @NewWRMinPoints, @NewWRAdjustmentFactor, @ExistingWRAdjustmentFactor, @NewRBMinPoints, @NewRBAdjustmentFactor, @ExistingRBAdjustmentFactor, @RushingQBThreshold,
                             @ReceivingRBThreshold, @BackupQBAdjustmentMax, @VetQBNewTeamYears, @VetQBNewTeamFactor, @EliteWRDraftPositionMax, @EliteWRRookieTopReceiverFactor, @WR1MinPoints, @RB1MinPoints,  
-                            @RBPromotionMinYardsPerCarry, @RBPromotionFactor, @NewQBCeilingForRB, @MinGamesForMissedAverage
+                            @RBPromotionMinYardsPerCarry, @RBPromotionFactor, @NewQBCeilingForRB, @MinGamesForMissedAverage, ReplacementLevelQB, ReplacementLevelRB, ReplacementLevelWR, ReplacementLevelTE
                             )";
             return (await dbConnection.ExecuteAsync(query, tunings)) > 0;
         }
         public async Task<bool> UploadWeeklyTunings(WeeklyTunings tunings)
         {
-            var query = $@"INSERT INTO [dbo].WeeklyTunings Season, Week, RecentWeekWeight, ProjectionWeight, TamperedMin, TamperedMax, MinWeekWeighted, RecentWeeks)
-                            VALUES (@Season, @Week, @RecentWeekWeight, @ProjectionWeight, @TamperedMin, @TamperedMax, @MinWeekWeighted, @RecentWeeks)";
+            var query = $@"INSERT INTO [dbo].WeeklyTunings Season, Week, RecentWeekWeight, ProjectionWeight, TamperedMin, TamperedMax, MinWeekWeighted, RecentWeeks, ErrorAdjustmentWeek)
+                            VALUES (@Season, @Week, @RecentWeekWeight, @ProjectionWeight, @TamperedMin, @TamperedMax, @MinWeekWeighted, @RecentWeeks, @ErrorAdjustmentWeek)";
             return (await dbConnection.ExecuteAsync(query, tunings)) > 0;
         }
 

@@ -10,12 +10,11 @@ namespace Football
         public Task<Tunings> GetSeasonTunings(int season);
         public Task<bool> UploadWeeklyTunings(WeeklyTunings tunings);
         public Task<WeeklyTunings> GetWeeklyTunings(int season, int week);
-        public int GetProjectionsCount(Position position);
         public double GetBoomSetting(Position position);
         public double GetBustSetting(Position position);
         public double GoodWeek(Position position);
         public double GetPlayerComparison(Position position);
-        public int GetReplacementLevel(Position position);
+        public int GetReplacementLevel(Position position, Tunings tunings);
         public double GetValueFromModel<T>(T type, Model model);
         public List<PropertyInfo> GetPropertiesFromModel<T>(List<string>? filter = null);
         public IEnumerable<string> GetPropertyNamesFromModel<T>();

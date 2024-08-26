@@ -30,8 +30,10 @@ namespace Football.Api.Controllers
             List<SeasonProjectionModel> model = [];
 
             if (positionEnum == Position.FLEX)
-                model = mapper.Map<List<SeasonProjectionModel>>(analysisService.SeasonFlexRankings());
-
+            {
+                model = mapper.Map<List<SeasonProjectionModel>>(await analysisService.SeasonFlexRankings());
+            }
+                
             else if (seasonProjectionService.GetProjectionsFromSQL(positionEnum, _season.CurrentSeason, out var projectionsSQL))
             {
                 model = mapper.Map<List<SeasonProjectionModel>>(projectionsSQL);

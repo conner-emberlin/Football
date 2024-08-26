@@ -8,34 +8,18 @@ using System.Globalization;
 
 namespace Football
 {
-    public class SettingsService(ISettingsRepository settingsRepository, IOptionsMonitor<ProjectionLimits> projectionLimits, IOptionsMonitor<BoomBustSettings> boomBust, IOptionsMonitor<WaiverWireSettings> wireSettings,
-         IMemoryCache cache, IOptionsMonitor<StartOrSitSettings> startOrSitSettings, IOptionsMonitor<ReplacementLevels> replacementLevels, IOptionsMonitor<Season> season, IOptionsMonitor<Tunings> tunings) : ISettingsService
+    public class SettingsService(ISettingsRepository settingsRepository, IOptionsMonitor<BoomBustSettings> boomBust, IOptionsMonitor<WaiverWireSettings> wireSettings,
+         IMemoryCache cache, IOptionsMonitor<StartOrSitSettings> startOrSitSettings) : ISettingsService
     {
-        private readonly ProjectionLimits _projectionLimits = projectionLimits.CurrentValue;
         private readonly BoomBustSettings _boomBust = boomBust.CurrentValue;
         private readonly WaiverWireSettings _wireSettings = wireSettings.CurrentValue;
         private readonly StartOrSitSettings _startOrSitSettings = startOrSitSettings.CurrentValue;
-        private readonly ReplacementLevels _replacementLevels = replacementLevels.CurrentValue;
-        private readonly Tunings _tunings = tunings.CurrentValue;
-        private readonly int _currentSeason = season.CurrentValue.CurrentSeason;
         private readonly IMemoryCache _cache = cache;
 
         public async Task<bool> UploadSeasonTunings(Tunings tunings) => await settingsRepository.UploadSeasonTunings(tunings);
         public async Task<Tunings> GetSeasonTunings(int season) => await settingsRepository.GetSeasonTunings(season);
         public async Task<bool> UploadWeeklyTunings(WeeklyTunings tunings) => await settingsRepository.UploadWeeklyTunings(tunings);
         public async Task<WeeklyTunings> GetWeeklyTunings(int season, int week) => await settingsRepository.GetWeeklyTunings(season, week);
-        public int GetProjectionsCount(Position position) => position switch
-        {
-
-            Position.QB => _projectionLimits.QBProjections,
-            Position.RB => _projectionLimits.RBProjections,
-            Position.WR => _projectionLimits.WRProjections,
-            Position.TE => _projectionLimits.TEProjections,
-            Position.DST => _projectionLimits.DSTProjections,
-            Position.K => _projectionLimits.KProjections,
-            _ => 0
-        };
-
         public double GetBoomSetting(Position position) => position switch
         {
             Position.QB => _boomBust.QBBoom,
@@ -83,14 +67,14 @@ namespace Football
             };
         }
 
-        public int GetReplacementLevel(Position position)
+        public int GetReplacementLevel(Position position, Tunings tunings)
         {
             return position switch
             {
-                Position.QB => _replacementLevels.ReplacementLevelQB,
-                Position.RB => _replacementLevels.ReplacementLevelRB,
-                Position.WR => _replacementLevels.ReplacementLevelWR,
-                Position.TE => _replacementLevels.ReplacementLevelTE,
+                Position.QB => tunings.ReplacementLevelQB,
+                Position.RB => tunings.ReplacementLevelRB,
+                Position.WR => tunings.ReplacementLevelWR,
+                Position.TE => tunings.ReplacementLevelTE,
                 _ => 0
             };
         }

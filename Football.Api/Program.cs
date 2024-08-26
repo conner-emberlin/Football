@@ -81,12 +81,8 @@ builder.Services.AddSingleton<Serilog.ILogger>(log);
 builder.Services.AddSingleton<JsonOptions>();
 
 builder.Services.Configure<Season>(builder.Configuration.GetSection("Season"));
-builder.Services.Configure<ReplacementLevels>(builder.Configuration.GetSection("ReplacementLevels"));
 builder.Services.Configure<FantasyScoring>(builder.Configuration.GetSection("FantasyScoring"));
-builder.Services.Configure<ProjectionLimits>(builder.Configuration.GetSection("Projections"));
-builder.Services.Configure<Starters>(builder.Configuration.GetSection("Starters"));
 builder.Services.Configure<WeeklyScraping>(builder.Configuration.GetSection("Scraping"));
-builder.Services.Configure<MockDraftSettings>(builder.Configuration.GetSection("MockDraftSettings"));
 builder.Services.Configure<WaiverWireSettings>(builder.Configuration.GetSection("WaiverWireSettings"));
 builder.Services.Configure<BoomBustSettings>(builder.Configuration.GetSection("BoomBustSettings"));
 builder.Services.Configure<SleeperSettings>(builder.Configuration.GetSection("SleeperSettings"));
