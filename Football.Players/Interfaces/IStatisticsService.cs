@@ -8,6 +8,7 @@ namespace Football.Players.Interfaces
         public Task<List<T>> GetWeeklyData<T>(Position position, int season, int week);
         public Task<List<T>> GetWeeklyData<T>(Position position, int playerId);
         public Task<List<T>> GetWeeklyData<T>(Position position, int playerId, string team);
+        public Task<List<T>> GetWeeklyDataByPlayer<T>(Position position, int playerId, int season);
         public Task<List<T>> GetAllWeeklyDataByPosition<T>(Position position);
         public Task<List<T>> GetAllSeasonDataByPosition<T>(Position position);
         public Task<List<T>> GetSeasonData<T>(Position position, int queryParam, bool isPlayer);

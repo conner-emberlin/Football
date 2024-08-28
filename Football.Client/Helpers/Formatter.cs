@@ -18,6 +18,17 @@ namespace Football.Client.Helpers
                 _ => "#000000"
             };
         }
+
+        public string PositionColorFromGenericString(string position)
+        {
+            if (position.Contains("QB")) return "#ff2a6d";
+            if (position.Contains("RB")) return "#00ceb8";
+            if (position.Contains("WR")) return "#58a7ff";
+            if (position.Contains("TE")) return "#ffae58";
+            if (position.Contains("DST")) return "#7988a1";
+            if (position.Contains("DST")) return "#BD66FF";
+            return "#757575";
+        }
         public int Rank<T>(List<T> list, T item) => list.IndexOf(item) + 1;
 
         public string ConvertDate(string date)

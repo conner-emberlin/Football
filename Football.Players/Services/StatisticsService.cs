@@ -12,6 +12,7 @@ namespace Football.Players.Services
         public async Task<List<T>> GetSeasonData<T>(Position position, int queryParam, bool isPlayer) => await statisticsRepository.GetSeasonData<T>(position, queryParam, isPlayer);
         public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId) => await statisticsRepository.GetWeeklyDataByPlayer<T>(position, playerId, _season.CurrentSeason);
         public async Task<List<T>> GetWeeklyData<T>(Position position, int season, int week) => await statisticsRepository.GetWeeklyData<T>(position, season, week);
+        public async Task<List<T>> GetWeeklyDataByPlayer<T>(Position position, int playerId, int season) => await statisticsRepository.GetWeeklyDataByPlayer<T>(position, playerId, season);
         public async Task<List<T>> GetAllWeeklyDataByPosition<T>(Position position) => await statisticsRepository.GetAllWeeklyDataByPosition<T>(position);
         public async Task<List<T>> GetAllSeasonDataByPosition<T>(Position position) => (await statisticsRepository.GetAllSeasonDataByPosition<T>(position));
         public async Task<List<GameResult>> GetGameResults(int season) => await statisticsRepository.GetGameResults(season);
@@ -81,7 +82,7 @@ namespace Football.Players.Services
 
         public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId, string team)
         {
-            var weeklyData = await statisticsRepository.GetWeeklyDataByPlayer<T>(position, playerId, _season.CurrentSeason);
+            var weeklyData = await GetWeeklyDataByPlayer<T>(position, playerId, _season.CurrentSeason);
             var teamChanges = await playersService.GetInSeasonTeamChanges();
             if (teamChanges.Any(t => t.PlayerId == playerId))
             {

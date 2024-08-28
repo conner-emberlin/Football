@@ -111,7 +111,9 @@ else if (!loading && !playerSelected)
     {
         <div><b>@playerData.Position</b> </div>
     }
-    <div> <b style="color:@form.PositionColor(playerData.Position)">@playerData.Position</b> #@playerData.PositionRank <b>&#x2022;</b> #@playerData.OverallRank Overall <b>&#x2022;</b> Fpts: @playerData.RunningFantasyTotal </div>
+
+    var season = playerData.WeeklyDataFromPastSeason && playerData.WeeklyData.Count > 0 ? string.Format("({0})", playerData.WeeklyData.First().Season) : string.Empty;
+    <div> <b style="color:@form.PositionColor(playerData.Position)">@playerData.Position</b> #@playerData.PositionRank <b>&#x2022;</b> #@playerData.OverallRank Overall <b>&#x2022;</b> Fpts: @playerData.RunningFantasyTotal <b>@season </b></div>
     @if (playerData.Schedule.Any())
     {
         <div class="parent">

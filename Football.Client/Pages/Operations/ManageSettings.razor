@@ -1,6 +1,7 @@
 ﻿@page "/ManageSettings"
 @using Football.Shared.Models.Operations;
 @using Football.Client.Interfaces;
+@using Football.Client.Helpers;
 @inject IOperationsService operationsService;
 <PageTitle>Settings</PageTitle>
 
@@ -46,90 +47,68 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>
-                        AverageQBProjection
-                    </td>
+                    <td><b style="color:@format.PositionColorFromGenericString("AverageQBProjection")"> AverageQBProjection </b></td>
                     <td>
                         <input type="text" class="form-control" @bind="@tunings.AverageQBProjection" />
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                        BackupQBAdjustment
-                    </td>
+                    <td><b style="color:@format.PositionColorFromGenericString("BackupQBAdjustmentMax")"> BackupQBAdjustmentMax </b></td>
                     <td>
                         <input type="text" class="form-control" @bind="@tunings.BackupQBAdjustmentMax" />
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                        EliteWRDraftPositionMax
-                    </td>
+                    <td><b style="color:@format.PositionColorFromGenericString("EliteWRDraftPositionMax")"> EliteWRDraftPositionMax </b></td>
                     <td>
                         <input type="text" class="form-control" @bind="@tunings.EliteWRDraftPositionMax" />
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                        EliteWRTopReceiverFactor
-                    </td>
+                    <td><b style="color:@format.PositionColorFromGenericString("EliteWRRookieTopReceiverFactor")"> EliteWRRookieTopReceiverFactor </b></td>
                     <td>
                         <input type="text" class="form-control" @bind="@tunings.EliteWRRookieTopReceiverFactor" />
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                         ExistingRBAdjustmentFactor 
-                    </td>
+                    <td><b style="color:@format.PositionColorFromGenericString("ExistingRBAdjustmentFactor")"> ExistingRBAdjustmentFactor </b></td>
                     <td>
                         <input type="text" class="form-control"   @bind="@tunings.ExistingRBAdjustmentFactor" />
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                        ExistingWRAdjustmentFactor
-                    </td>
+                    <td><b style="color:@format.PositionColorFromGenericString("ExistingWRAdjustmentFactor")"> ExistingWRAdjustmentFactor </b></td>
                     <td>
                         <input type="text" class="form-control" @bind="@tunings.ExistingWRAdjustmentFactor" />
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                         LeadRBFactor  
-                    </td>
+                    <td><b style="color:@format.PositionColorFromGenericString("LeadRBFactor")"> LeadRBFactor </b></td>
                     <td>
                         <input type="text" class="form-control"   @bind="@tunings.LeadRBFactor" />
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                        MinGamesForMissedAverage
-                    </td>
+                    <td><b style="color:@format.PositionColorFromGenericString("MinGamesForMissedAverage")"> MinGamesForMissedAverage </b></td>
                     <td>
                         <input type="text" class="form-control" @bind="@tunings.MinGamesForMissedAverage" />
                     </td>
                 </tr>
                 
                 <tr>
-                    <td>
-                         NewQBCeiling  
-                    </td>
+                    <td><b style="color:@format.PositionColorFromGenericString("NewQBCeiling")"> NewQBCeiling </b></td>
                     <td>
                         <input type="text" class="form-control"   @bind="@tunings.NewQBCeiling" />
                     </td>
                 </tr>
                                 <tr>
-                    <td>
-                         NewQBCeilingForRB 
-                    </td>                                           
+                    <td><b style="color:@format.PositionColorFromGenericString("NewQBCeilingForRB")"> NewQBCeilingForRB </b></td>
                     <td>
                         <input type="text" class="form-control"   @bind="@tunings.NewQBCeilingForRB" />
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                        NewQBFloor
-                    </td>
+                    <td><b style="color:@format.PositionColorFromGenericString("NewQBFloor")"> NewQBFloor </b></td>
                     <td>
                         <input type="text" class="form-control" @bind="@tunings.NewQBFloor" />
                     </td>
@@ -444,7 +423,10 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
 
     private TuningsModel? tunings { get; set; } = new();
     private WeeklyTuningsModel? weeklyTunings { get; set; } = new();
+    private Formatter format = new();
+
     protected override bool ShouldRender() => shouldRender;
+
 
     private async Task HandleSeasonTuningsUpdate()
     {

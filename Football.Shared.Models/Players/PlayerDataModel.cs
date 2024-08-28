@@ -9,6 +9,7 @@ namespace Football.Shared.Models.Players
         public string Name { get; set; } = "";
         public List<SeasonDataModel> SeasonData { get; set; } = [];
         public List<WeeklyDataModel> WeeklyData { get; set; } = [];
+        public bool WeeklyDataFromPastSeason { get; set; }
         public List<SeasonFantasyModel> SeasonFantasy { get; set; } = [];
         public int OverallRank { get; set; }
         public int PositionRank { get; set; }
