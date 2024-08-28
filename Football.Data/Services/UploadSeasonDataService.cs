@@ -5,7 +5,6 @@ using Football.Data.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
-using Serilog;
 using AutoMapper;
 
 namespace Football.Data.Services
@@ -56,13 +55,14 @@ namespace Football.Data.Services
             List<PlayerTeam> currentTeams = [];
             foreach (var pt in playerTeams)
             {
-                var playerId = await playerService.GetPlayerId(pt.Name);
-                if (playerId > 0)
+                var player = await playerService.GetPlayerByName(pt.Name);
+                if (player != null && string.Equals(position, player.Position, StringComparison.OrdinalIgnoreCase))
                 {
+                    
                     currentTeams.Add(new PlayerTeam
                     {
-                        PlayerId = playerId,
-                        Name = pt.Name,
+                        PlayerId = player.PlayerId,
+                        Name = player.Name,
                         Season = season,
                         Team = pt.Team,
                         TeamId = pt.TeamId
