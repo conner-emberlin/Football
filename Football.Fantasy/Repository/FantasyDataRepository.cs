@@ -44,12 +44,13 @@ namespace Football.Fantasy.Repository
             return (await dbConnection.QueryAsync<WeeklyFantasy>(query, new { season, week })).ToList();
         }
 
-        public async Task<List<WeeklyFantasy>> GetAllWeeklyFantasyByPosition(string position)
+        public async Task<List<WeeklyFantasy>> GetAllWeeklyFantasyByPosition(string position, int season = 0)
         {
             var query = $@"SELECT * FROM [dbo].WeeklyFantasyData 
-                            WHERE [Position] = @position 
-                            ORDER BY [PlayerId], [Season], [Week]";
-            return (await dbConnection.QueryAsync<WeeklyFantasy>(query, new { position})).ToList();
+                            WHERE [Position] = @position";
+            query += season > 0 ? " AND [Season] = @season" : "";
+            query += " ORDER BY [PlayerId], [Season], [Week]";
+            return (await dbConnection.QueryAsync<WeeklyFantasy>(query, new { position, season})).ToList();
         }
         public async Task<List<SeasonFantasy>> GetAllSeasonFantasyByPosition(string position, int minGames)
         {

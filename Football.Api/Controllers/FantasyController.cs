@@ -181,5 +181,19 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetSnapCountAnalysis([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<SnapCountAnalysisModel>>(await snapCountService.GetSnapCountAnalysis(posEnum, _season.CurrentSeason))) : BadRequest();
 
+        [HttpGet("splits/{position}")]
+        [ProducesResponseType(typeof(List<FantasySplitModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetFantasySplits([FromRoute] string position, [FromQuery] int seasonQuery = 0) 
+        {
+            if (!Enum.TryParse(position, out Position pos)) return BadRequest();
+            var season = seasonQuery > 0 ? seasonQuery : _season.CurrentSeason - 1;
+            var splits = mapper.Map<List<FantasySplitModel>>(await fantasyAnalysisService.GetFantasySplits(pos, season));
+            foreach (var split in splits)
+            {
+                split.DownTrend = split.FirstHalfPPG > split.SecondHalfPPG;
+            }
+            return Ok(splits);
+        } 
     }
 }

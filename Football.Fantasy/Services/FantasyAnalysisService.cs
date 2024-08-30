@@ -251,6 +251,29 @@ namespace Football.Fantasy.Services
             return new();
         }
 
+        public async Task<List<FantasySplit>?> GetFantasySplits(Position position, int season)
+        { 
+            List<FantasySplit> splits = [];
+            var seasonGames = await playersService.GetGamesBySeason(season);
+            var midSeason = Math.Round((double)await playersService.GetWeeksBySeason(season) / 2);
+            var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(position, season);
+            var players = weeklyFantasy.Select(w => w.PlayerId).Distinct();
+            foreach (var player in players)
+            {
+                var fantasy = weeklyFantasy.Where(w => w.PlayerId == player);
+                var firstHalf = fantasy.Where(f => f.PlayerId == player && f.Week <= midSeason);
+                var secondHalf = fantasy.Where(f => f.PlayerId == player && f.Week > midSeason);
+
+                splits.Add(new FantasySplit
+                {
+                    PlayerId = player,
+                    Season = season,
+                    FirstHalfPPG = firstHalf.Any() ? firstHalf.Sum(f => f.FantasyPoints) / firstHalf.Count() : 0,
+                    SecondHalfPPG = secondHalf.Any() ? secondHalf.Sum(f => f.FantasyPoints) / secondHalf.Count() : 0
+                });
+            }                        
+            return splits;
+        }
 
         private static List<FantasyPercentage> CleanPercentageAmounts(List<FantasyPercentage> fantasyPercentages)
         {

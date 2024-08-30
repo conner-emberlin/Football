@@ -146,8 +146,10 @@ namespace Football.Fantasy.Services
             return teamFantasy;
         }
         
-        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(Position position)
+        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(Position position, int season = 0)
         {
+            if (season > 0) return await fantasyData.GetAllWeeklyFantasyByPosition(position.ToString(), season);
+
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             List<WeeklyFantasy> weeklyFantasy = [];
             for (int i = 1; i < currentWeek; i++)
