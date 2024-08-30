@@ -8,13 +8,14 @@ using Microsoft.Extensions.Options;
 using AutoMapper;
 using Football.Shared.Models.Projection;
 using CsvHelper;
+using Football.Fantasy.Interfaces;
 
 namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class ProjectionController(IPlayersService playersService, IStatisticsService statisticsService,
-        IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season,
+        IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season, IFantasyAnalysisService fantasyAnalysisService,
         IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
@@ -48,6 +49,7 @@ namespace Football.Api.Controllers
             var currentSeasonGames = await playersService.GetCurrentSeasonGames();
             var adpDictionary = (await statisticsService.GetAdpByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(a => a.PlayerId);
             var consensusProjectionDictionary = (await statisticsService.GetConsensusProjectionsByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(c => c.PlayerId);
+            var splitsDictionary = (await fantasyAnalysisService.GetFantasySplits(positionEnum, _season.CurrentSeason - 1)).ToDictionary(f => f.PlayerId);
             foreach (var m in model)
             {
                 var avgGamesMissed = await statisticsService.GetAverageGamesMissed(m.PlayerId);
@@ -64,6 +66,8 @@ namespace Football.Api.Controllers
                 {
                     m.ConsensusProjection = proj.FantasyPoints;
                 }
+
+                m.PreviousSeasonDownwardTrend = splitsDictionary.TryGetValue(m.PlayerId, out var split) && split.FirstHalfPPG > split.SecondHalfPPG && split.SecondHalfPPG > 0;
             }
 
             if (positionEnum == Position.FLEX) return Ok(model);
