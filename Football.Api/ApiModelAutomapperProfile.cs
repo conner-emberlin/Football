@@ -178,7 +178,6 @@ namespace Football.Api
                 .ForMember(p => p.Name, o => o.MapFrom(p => p.Player.Name))
                 .ForMember(p => p.Position, o => o.MapFrom(p => p.Player.Position));
             CreateMap<InSeasonInjury, InSeasonInjuryModel>().ReverseMap();
-            CreateMap<FantasySplit, FantasySplitModel>();
         }
 
     }

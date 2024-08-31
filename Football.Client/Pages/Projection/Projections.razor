@@ -160,6 +160,7 @@
                     {
                         <th>ADP</th>
                         <th>Consensus</th>
+                        <th>Split</th>
                     }
                     @if (players.Any(p => p.CanDelete))
                     {
@@ -214,6 +215,7 @@
                       </td>
                     }
                     <td>@p.ConsensusProjection</td>
+                    <td>@Math.Round(p.PreviousSeasonSplitDifference, 2)</td>
              }
              @if (p.CanDelete)
              {

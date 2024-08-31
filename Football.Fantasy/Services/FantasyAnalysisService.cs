@@ -260,9 +260,8 @@ namespace Football.Fantasy.Services
             var players = weeklyFantasy.Select(w => w.PlayerId).Distinct();
             foreach (var player in players)
             {
-                var fantasy = weeklyFantasy.Where(w => w.PlayerId == player);
-                var firstHalf = fantasy.Where(f => f.PlayerId == player && f.Week <= midSeason);
-                var secondHalf = fantasy.Where(f => f.PlayerId == player && f.Week > midSeason);
+                var firstHalf = weeklyFantasy.Where(f => f.PlayerId == player && f.Week <= midSeason);
+                var secondHalf = weeklyFantasy.Where(f => f.PlayerId == player && f.Week > midSeason);
 
                 splits.Add(new FantasySplit
                 {

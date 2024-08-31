@@ -14,7 +14,7 @@
         public double PositionalADP { get; set; }
         public double OverallADP { get; set; }
         public double ConsensusProjection { get; set; }
-        public bool PreviousSeasonDownwardTrend { get; set; }
+        public double PreviousSeasonSplitDifference { get; set; }
         public SeasonProjectionErrorModel? SeasonProjectionError { get; set; }
     }
 }

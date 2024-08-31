@@ -67,7 +67,11 @@ namespace Football.Api.Controllers
                     m.ConsensusProjection = proj.FantasyPoints;
                 }
 
-                m.PreviousSeasonDownwardTrend = splitsDictionary.TryGetValue(m.PlayerId, out var split) && split.FirstHalfPPG > split.SecondHalfPPG && split.SecondHalfPPG > 0;
+                if (splitsDictionary.TryGetValue(m.PlayerId, out var split))
+                {
+                    m.PreviousSeasonSplitDifference = split.SecondHalfPPG == 0 || split.FirstHalfPPG == 0 ? 0 : split.SecondHalfPPG - split.FirstHalfPPG;
+                }
+                
             }
 
             if (positionEnum == Position.FLEX) return Ok(model);
