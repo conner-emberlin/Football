@@ -255,13 +255,14 @@ namespace Football.Fantasy.Services
         { 
             List<FantasySplit> splits = [];
             var seasonGames = await playersService.GetGamesBySeason(season);
-            var midSeason = Math.Round((double)await playersService.GetWeeksBySeason(season) / 2);
+            var seasonWeeks = await playersService.GetWeeksBySeason(season);
+            var midSeason = Math.Round((double)seasonWeeks / 2);
             var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(position, season);
             var players = weeklyFantasy.Select(w => w.PlayerId).Distinct();
             foreach (var player in players)
             {
                 var firstHalf = weeklyFantasy.Where(f => f.PlayerId == player && f.Week <= midSeason);
-                var secondHalf = weeklyFantasy.Where(f => f.PlayerId == player && f.Week > midSeason);
+                var secondHalf = weeklyFantasy.Where(f => f.PlayerId == player && f.Week > midSeason && f.Week < seasonWeeks);
 
                 splits.Add(new FantasySplit
                 {

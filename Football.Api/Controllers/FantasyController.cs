@@ -62,12 +62,25 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<SeasonFantasyModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetFantasyTotals([FromQuery] int fantasySeason) 
         {
-            if (fantasySeason > 0 && fantasySeason != _season.CurrentSeason) return Ok(mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetSeasonFantasy(fantasySeason, false)));
+            if (fantasySeason > 0 && fantasySeason != _season.CurrentSeason) 
+            { 
+                var seasonFantasy = mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetSeasonFantasy(fantasySeason, false));
+                foreach (var f in seasonFantasy)
+                {
+                    f.FantasyPointsPerGame = f.Games > 0 ? f.FantasyPoints / f.Games : 0;
+                }
+                return Ok(seasonFantasy);
+            } 
             else
             {
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-                if (currentWeek == 1) return Ok(mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason - 1)));
-                return Ok(mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason)));
+                var currentSeasonFantasy = currentWeek == 1 ? mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason - 1))
+                                                            : mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetCurrentFantasyTotals(_season.CurrentSeason));
+                foreach (var cf in currentSeasonFantasy)
+                {
+                    cf.FantasyPointsPerGame = cf.Games > 0 ? cf.FantasyPoints / cf.Games : 0;
+                }
+                return Ok(currentSeasonFantasy);
             }
             
         } 

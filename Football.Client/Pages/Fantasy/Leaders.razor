@@ -32,6 +32,7 @@
                     <th>Position</th>
                     <th>Games</th>                    
                     <th>Points</th>
+                    <th>PPG</th>
                 </tr>
             </thead>
             <tbody>
@@ -44,6 +45,7 @@
                         <td style="color:@form.PositionColor(leader.Position)"><b>@leader.Position</b></td>
                         <td>@leader.Games</td>                       
                         <td>@Math.Round(leader.FantasyPoints,2)</td>
+                        <td>@Math.Round(leader.FantasyPointsPerGame, 2)</td>
                     </tr>
                 }
             </tbody>
@@ -62,6 +64,7 @@ else if(youTried && filterRunning && filteredLeaders != null && filteredLeaders.
                     <th>Position</th>
                     <th>Games</th>
                     <th>Points</th>
+                    <th>PPG</th>
                 </tr>
             </thead>
             <tbody>
@@ -74,6 +77,7 @@ else if(youTried && filterRunning && filteredLeaders != null && filteredLeaders.
                         <td style="color:@form.PositionColor(leader.Position)"><b>@leader.Position</b></td>
                         <td>@leader.Games</td>
                         <td>@Math.Round(leader.FantasyPoints,2)</td>
+                        <td>@Math.Round(leader.FantasyPointsPerGame, 2)</td>
                     </tr>
                 }
             </tbody>
