@@ -15,6 +15,7 @@
         public double OverallADP { get; set; }
         public double ConsensusProjection { get; set; }
         public double PreviousSeasonSplitDifference { get; set; }
+        public double PreviousSeasonSnapCountSplitDifference { get; set; }
         public SeasonProjectionErrorModel? SeasonProjectionError { get; set; }
     }
 }

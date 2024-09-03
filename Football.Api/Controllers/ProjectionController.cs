@@ -15,7 +15,7 @@ namespace Football.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class ProjectionController(IPlayersService playersService, IStatisticsService statisticsService,
-        IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season, IFantasyAnalysisService fantasyAnalysisService,
+        IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season, IFantasyAnalysisService fantasyAnalysisService, ISnapCountService snapCountService,
         IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
@@ -50,6 +50,8 @@ namespace Football.Api.Controllers
             var adpDictionary = (await statisticsService.GetAdpByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(a => a.PlayerId);
             var consensusProjectionDictionary = (await statisticsService.GetConsensusProjectionsByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(c => c.PlayerId);
             var splitsDictionary = (await fantasyAnalysisService.GetFantasySplits(positionEnum, _season.CurrentSeason - 1)).ToDictionary(f => f.PlayerId);
+            var snapSplitsDictionary = (await snapCountService.GetSnapCountSplits(model.Select(m => m.PlayerId), _season.CurrentSeason - 1)).ToDictionary(s => s.PlayerId);
+
             foreach (var m in model)
             {
                 var avgGamesMissed = await statisticsService.GetAverageGamesMissed(m.PlayerId);
@@ -70,6 +72,11 @@ namespace Football.Api.Controllers
                 if (splitsDictionary.TryGetValue(m.PlayerId, out var split))
                 {
                     m.PreviousSeasonSplitDifference = split.SecondHalfPPG == 0 || split.FirstHalfPPG == 0 ? 0 : split.SecondHalfPPG - split.FirstHalfPPG;
+                }
+
+                if (snapSplitsDictionary.TryGetValue(m.PlayerId, out var snapSplit))
+                {
+                    m.PreviousSeasonSnapCountSplitDifference = snapSplit.SecondHalfSnapsPG == 0 || snapSplit.FirstHalfSnapsPG == 0 ? 0 : snapSplit.SecondHalfSnapsPG - snapSplit.FirstHalfSnapsPG;
                 }
                 
             }

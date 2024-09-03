@@ -20,6 +20,29 @@ namespace Football.Fantasy.Services
             return snapCountAnalyses;
         }
 
+        public async Task<List<SnapCountSplit>> GetSnapCountSplits(IEnumerable<int> playerIds, int season)
+        {
+            List<SnapCountSplit> splits = [];
+            var weeks = await playersService.GetWeeksBySeason(season);
+            var midSeason = Math.Round((double)weeks / 2);
+            var snapCounts = await statisticsService.GetSnapCountsBySeason(playerIds, season);
+            foreach (var p in playerIds)
+            {;
+                var firstHalf = snapCounts.Where(s => s.PlayerId == p && s.Week <= midSeason);
+                var secondHalf = snapCounts.Where(s => s.PlayerId == p && s.Week > midSeason && s.Week < weeks);
+
+                splits.Add(new SnapCountSplit
+                {
+                    PlayerId = p,
+                    Season = season,
+                    FirstHalfSnapsPG = firstHalf.Any() ? firstHalf.Sum(f => f.Snaps) / firstHalf.Count() : 0,
+                    SecondHalfSnapsPG = secondHalf.Any() ? secondHalf.Sum(s => s.Snaps) / secondHalf.Count() : 0
+                });
+            }
+
+            return splits;
+        }
+
         private async Task<SnapCountAnalysis?> GetSnapCountAnalysis(Player player, int season)
         {
             var snapCounts = (await statisticsService.GetSnapCounts(player.PlayerId));
