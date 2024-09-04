@@ -402,6 +402,105 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
     </button>
 }
 
+else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
+{
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Adjustment</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        Injury Adjustment
+                    </td>
+                    <td>
+                        <input type="checkbox" @bind="@seasonAdjustments.InjuryAdjustment" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Suspension Adjustment
+                    </td>
+                    <td>
+                        <input type="checkbox" @bind="@seasonAdjustments.SuspensionAdjustment" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Vet QB on New Team Adjustment
+                    </td>
+                    <td>
+                        <input type="checkbox"  @bind="@seasonAdjustments.VeteranQBonNewTeamAdjustment" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Downward Trending Adjustment
+                    </td>
+                    <td>
+                        <input type="checkbox" @bind="@seasonAdjustments.DownwardTrendingAdjustment" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Shared Backfield Adjustment
+                    </td>
+                    <td>
+                        <input type="checkbox" @bind="@seasonAdjustments.SharedBackfieldAdjustment" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        QB Change Adjustment
+                    </td>
+                    <td>
+                        <input type="checkbox" @bind="@seasonAdjustments.QuarterbackChangeAdjustment" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Lead RB Promotion Adjustment
+                    </td>
+                    <td>
+                        <input type="checkbox"  @bind="@seasonAdjustments.LeadRBPromotionAdjustment" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Elite Rookie WR Adjustment
+                    </td>
+                    <td>
+                        <input type="checkbox"  @bind="@seasonAdjustments.EliteRookieWRTopTargetAdjustment" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Backup QB Adjustment
+                    </td>
+                    <td>
+                        <input type="checkbox"  @bind="@seasonAdjustments.PreviousSeasonBackupQuarterbackAdjustment" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Shared Receiving Adjustment
+                    </td>
+                    <td>
+                        <input type="checkbox"  @bind="@seasonAdjustments.SharedReceivingDutiesAdjustment" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <button class="button-22" role="button" @onclick="HandleSeasonAdjustmentsUpdate">
+        Update
+    </button>
+}
+
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -412,17 +511,23 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
 @code {
     private bool loading { get; set; }
     private bool shouldRender { get; set; }
+
     private bool tuningsUpdated { get; set; } = false;
+    private bool seasonAdjustmentsUpdated { get; set; } = false;
     private bool weeklyTuningsUpdated { get; set; } = false;
+
     private string Setting { get; set; } = "Season Tunings";
 
-    private List<string> settings = ["Season Tunings", "Weekly Tunings"];
-    private bool seasonSetting { get; set; }
+    private List<string> settings = ["Season Tunings", "Season Adjustments", "Weekly Tunings"];
+
     private bool seasonTuningsSetting { get; set; }
+    private bool seasonAdjustmentsSetting { get; set; }
     private bool weeklyTuningsSetting { get; set; }
 
     private TuningsModel? tunings { get; set; } = new();
     private WeeklyTuningsModel? weeklyTunings { get; set; } = new();
+    private SeasonAdjustmentsModel? seasonAdjustments { get; set; } = new();
+
     private Formatter format = new();
 
     protected override bool ShouldRender() => shouldRender;
@@ -437,29 +542,38 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
         shouldRender = true;
     }
 
+    private async Task HandleSeasonAdjustmentsUpdate()
+    {
+        loading = true;
+        seasonAdjustmentsUpdated = await operationsService.PostSeasonAdjustmentsRequest(seasonAdjustments);
+        seasonAdjustments = await operationsService.GetSeasonAdjustmentsRequest();
+        loading = false;
+        shouldRender = true;
+    }
+
     private async Task HandleWeeklyTuningsUpdate()
     {
-        
+
         loading = true;
         weeklyTuningsUpdated = await operationsService.PostSeasonTuningsRequest(tunings);
         weeklyTunings = await operationsService.GetWeeklyTuningsRequest();
         loading = false;
         shouldRender = true;
-
     }
     private async Task HandleInput()
     {
         loading = true;
         shouldRender = true;
 
-        if (Setting == "Season")
-        {
-            seasonSetting = true;
-        }
-        else if(Setting == "Season Tunings")
+        if(Setting == "Season Tunings")
         {
             tunings = await operationsService.GetSeasonTuningsRequest();
             seasonTuningsSetting = true;
+        }
+        else if(Setting == "Season Adjustments")
+        {
+            seasonAdjustments = await operationsService.GetSeasonAdjustmentsRequest();
+            seasonAdjustmentsSetting = true;
         }
         else if (Setting == "Weekly Tunings")
         {
@@ -475,8 +589,9 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
     {
         Setting = args.Value.ToString();
         tuningsUpdated = false;
-        seasonSetting = false;
+        seasonAdjustmentsUpdated = false;
         seasonTuningsSetting = false;
+        seasonAdjustmentsSetting = false;
         weeklyTuningsSetting = false;
     }
 }

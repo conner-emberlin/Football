@@ -108,6 +108,23 @@ namespace Football.Api.Controllers
             return Ok(mapper.Map<TuningsModel>(await settingsService.GetSeasonTunings(season)));
         }
 
+        [HttpPost("season-adjustments")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UploadSeasonAdjustments([FromBody] SeasonAdjustmentsModel seasonAdjustmentsModel)
+        {
+            var seasonAdjustments = mapper.Map<SeasonAdjustments>(seasonAdjustmentsModel);
+            seasonAdjustments.Season = _season.CurrentSeason;
+            return Ok(await settingsService.UploadSeasonAdjustments(seasonAdjustments));
+        }
+
+        [HttpGet("season-adjustments")]
+        [ProducesResponseType(typeof(TuningsModel), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSeasonAdjustments([FromQuery] int seasonParam)
+        {
+            var season = seasonParam > 0 ? seasonParam : _season.CurrentSeason;
+            return Ok(mapper.Map<SeasonAdjustmentsModel>(await settingsService.GetSeasonAdjustments(season)));
+        }
+
         [HttpPost("weekly-tunings")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> UploadWeeklyTunings([FromBody] WeeklyTuningsModel tuningsModel)

@@ -33,6 +33,21 @@ namespace Football.Models
         public double FGFourtyFifty { get; set; }
         public double FGGreaterThanFifty { get; set; }
     }
+
+    public class SeasonAdjustments
+    {
+        public int Season { get; set; }
+        public bool InjuryAdjustment { get; set; }
+        public bool SuspensionAdjustment { get; set; }
+        public bool VeteranQBonNewTeamAdjustment { get; set; }
+        public bool DownwardTrendingAdjustment { get; set; }
+        public bool SharedBackfieldAdjustment { get; set; }
+        public bool QuarterbackChangeAdjustment { get; set; }
+        public bool LeadRBPromotionAdjustment { get; set; }
+        public bool EliteRookieWRTopTargetAdjustment { get; set; }
+        public bool PreviousSeasonBackupQuarterbackAdjustment { get; set; }
+        public bool SharedReceivingDutiesAdjustment { get; set; }
+    }
     public class Tunings
     {
         public int Season { get; set; }

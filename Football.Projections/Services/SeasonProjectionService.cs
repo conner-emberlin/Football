@@ -58,6 +58,8 @@ namespace Football.Projections.Services
         public async Task<IEnumerable<SeasonProjection>> GetProjections(Position position, List<string>? filter = null)
         {
             var tunings = await settingsService.GetSeasonTunings(_season.CurrentSeason);
+            var seasonAdjustments = await settingsService.GetSeasonAdjustments(_season.CurrentSeason);
+
             var seasonGames = await playersService.GetCurrentSeasonGames();
 
             var projections = position switch
@@ -68,7 +70,7 @@ namespace Football.Projections.Services
                 Position.TE => await CalculateProjections(await TEProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings, seasonGames, filter),
                 _ => throw new NotImplementedException()
             };
-            var adjustedProjections = await adjustmentService.AdjustmentEngine((await RookieSeasonProjections(position, seasonGames)).Union(projections), tunings, seasonGames);
+            var adjustedProjections = await adjustmentService.AdjustmentEngine((await RookieSeasonProjections(position, seasonGames)).Union(projections), tunings, seasonGames, seasonAdjustments);
             var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints);
             cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), formattedProjections);
             return formattedProjections;
