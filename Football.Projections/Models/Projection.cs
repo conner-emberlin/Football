@@ -9,6 +9,7 @@ namespace Football.Projections.Models
         public string Name { get; set; } = "";
         public string Position { get; set; } = "";
         public double ProjectedPoints { get; set; }
+        public string? Adjustments { get; set; }
     }
 
     public class SeasonFlex : SeasonProjection

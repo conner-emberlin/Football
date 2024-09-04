@@ -13,8 +13,8 @@ namespace Football.Projections.Repository
         private readonly Season _season = season.CurrentValue;
         public async Task<int> PostSeasonProjections(List<SeasonProjection> projections)
         {
-            var query = $@"INSERT INTO [dbo].SeasonProjections (PlayerId, Season, Name, Position, ProjectedPoints)
-                        VALUES (@PlayerId, @Season, @Name, @Position, @ProjectedPoints)";
+            var query = $@"INSERT INTO [dbo].SeasonProjections (PlayerId, Season, Name, Position, ProjectedPoints, Adjustments)
+                        VALUES (@PlayerId, @Season, @Name, @Position, @ProjectedPoints, @Adjustments)";
 
             return await dbConnection.ExecuteAsync(query, projections);
         }
@@ -28,7 +28,7 @@ namespace Football.Projections.Repository
 
         public async Task<IEnumerable<SeasonProjection>?> GetSeasonProjection(int playerId)
         {
-            var query = $@"SELECT [PlayerId], [Season], [Name], [Position], [ProjectedPoints]
+            var query = $@"SELECT *
                         FROM [dbo].SeasonProjections
                         WHERE [PlayerId] = @playerId";
             return await dbConnection.QueryAsync<SeasonProjection>(query, new { playerId });

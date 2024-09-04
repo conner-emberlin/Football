@@ -36,7 +36,7 @@ namespace Football.Projections.Services
             return weekProjections;
         }
 
-        private async Task<Dictionary<int, double>> InjuryAdjustment(IEnumerable<SeasonProjection> seasonProjections, int seasonGames)
+        private async Task<Dictionary<int, double>> InjuryAdjustment(IEnumerable<SeasonProjection> seasonProjections, int seasonGames, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
             var playerInjuries = (await playerService.GetPlayerInjuries(_season.CurrentSeason)).ToDictionary(i => i.PlayerId, i => i.Games);
@@ -46,12 +46,13 @@ namespace Football.Projections.Services
                 {
                     var diff = - (s.ProjectedPoints / seasonGames) * games;
                     adjustments.Add(s.PlayerId, diff);
+                    adjustmentTracker.Add((s.PlayerId, Adjustment.Injury.ToString()));
                 }
                     
             }
             return adjustments;
         }
-        private async Task<Dictionary<int, double>> SuspensionAdjustment(IEnumerable<SeasonProjection> seasonProjections, int seasonGames)
+        private async Task<Dictionary<int, double>> SuspensionAdjustment(IEnumerable<SeasonProjection> seasonProjections, int seasonGames, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
             var playerSuspensions = (await playerService.GetPlayerSuspensions(_season.CurrentSeason)).ToDictionary(s => s.PlayerId, s => s.Length);
@@ -61,12 +62,13 @@ namespace Football.Projections.Services
                 {
                     var diff = -(s.ProjectedPoints / seasonGames) * length;
                     adjustments.Add(s.PlayerId, diff);
+                    adjustmentTracker.Add((s.PlayerId, Adjustment.Suspension.ToString()));
 
                 } 
             }
             return adjustments;
         }
-        private async Task<Dictionary<int, double>> QuarterbackChangeAdjustment(IEnumerable<SeasonProjection> seasonProjections, Dictionary<int, QuarterbackChange> qbChanges, Tunings tunings)
+        private async Task<Dictionary<int, double>> QuarterbackChangeAdjustment(IEnumerable<SeasonProjection> seasonProjections, Dictionary<int, QuarterbackChange> qbChanges, Tunings tunings, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
             foreach (var s in seasonProjections)
@@ -79,12 +81,13 @@ namespace Football.Projections.Services
                     var currentQbProjection = qbProjections.TryGetValue(changeRecord.CurrentQBId, out var currentPrev) ? currentPrev : tunings.AverageQBProjection;
                     var ratio =  QBProjectionRatio(s.Position, previousQbProjection, currentQbProjection, changeRecord.CurrentQBIsRookie, tunings);
                     adjustments.Add(s.PlayerId, s.ProjectedPoints * (ratio - 1));
+                    adjustmentTracker.Add((s.PlayerId, Adjustment.QuarterbackChange.ToString()));
                 }
             }
             return adjustments;
         }
 
-        private async Task<Dictionary<int, double>> PreviousSeasonBackupQuarterbackAdjustment(IEnumerable<SeasonProjection> seasonProjections, Dictionary<int, QuarterbackChange> qbChanges, Tunings tunings, int seasonGames)
+        private async Task<Dictionary<int, double>> PreviousSeasonBackupQuarterbackAdjustment(IEnumerable<SeasonProjection> seasonProjections, Dictionary<int, QuarterbackChange> qbChanges, Tunings tunings, int seasonGames, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
             var previousSeason = _season.CurrentSeason - 1;
@@ -105,6 +108,7 @@ namespace Football.Projections.Services
                             var projectionRatio = (starter.CurrentSeasonProjection / backupFantasyPoints) / (seasonGames - starter.PreviousSeasonGames);
                             var ratio = Math.Min(1 + projectionRatio, tunings.BackupQBAdjustmentMax);
                             adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (ratio - 1));
+                            adjustmentTracker.Add((sp.PlayerId, Adjustment.PreviousSeasonBackupQuarterback.ToString()));
                         }
                     }
                 }
@@ -113,7 +117,7 @@ namespace Football.Projections.Services
             return adjustments;
 
         }
-        private async Task<Dictionary<int, double>> SharedReceivingDutiesAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> wrTeamChanges, Tunings tunings)
+        private async Task<Dictionary<int, double>> SharedReceivingDutiesAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> wrTeamChanges, Tunings tunings, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
             var seasonProjectionDictionary = seasonProjections.ToDictionary(s => s.PlayerId, s => s.ProjectedPoints);
@@ -129,18 +133,24 @@ namespace Football.Projections.Services
                     {
                         var otherReceivers = await playerService.GetPlayersByTeamIdAndPosition(team.TeamId, Position.WR, _season.CurrentSeason, true);
                         if (otherReceivers.Any(r => r.PlayerId != sp.PlayerId && seasonProjectionDictionary.TryGetValue(r.PlayerId, out var proj) && proj > tunings.NewWRMinPoints))
+                        {
                             adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (tunings.NewWRAdjustmentFactor - 1));
+                            adjustmentTracker.Add((sp.PlayerId, Adjustment.SharedReceivingDuties.ToString()));
+                        }
+                            
+                        
                     }
                     else if (wrsThatMovedToProjectedPlayersTeam.Any(w => seasonProjectionDictionary.TryGetValue(w, out var proj) && proj > tunings.NewWRMinPoints))
                     {
                         adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (tunings.ExistingWRAdjustmentFactor - 1));
+                        adjustmentTracker.Add((sp.PlayerId, Adjustment.SharedReceivingDuties.ToString()));
                     }                        
                 }                
             }
             return adjustments;
         }
 
-        private async Task<Dictionary<int, double>> VeteranQBOnNewTeamAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> teamChanges, Tunings tunings)
+        private async Task<Dictionary<int, double>> VeteranQBOnNewTeamAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> teamChanges, Tunings tunings, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
             var qbChangesDictionary = teamChanges.ToDictionary(t => t.PlayerId);
@@ -152,13 +162,14 @@ namespace Football.Projections.Services
                     if (yearsExperience > tunings.VetQBNewTeamYears) 
                     {
                         adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (tunings.VetQBNewTeamFactor - 1));
+                        adjustmentTracker.Add((sp.PlayerId, Adjustment.VeteranQBonNewTeam.ToString()));
                     }
                 }
             }
             return adjustments;
         }
 
-        private async Task<Dictionary<int, double>> SharedBackfieldAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> rbTeamChanges, Tunings tunings)
+        private async Task<Dictionary<int, double>> SharedBackfieldAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> rbTeamChanges, Tunings tunings, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
             var seasonProjectionDictionary = seasonProjections.ToDictionary(s => s.PlayerId, s => s.ProjectedPoints);
@@ -174,18 +185,27 @@ namespace Football.Projections.Services
                     {
                         var otherRBs = await playerService.GetPlayersByTeamIdAndPosition(team.TeamId, Position.RB, _season.CurrentSeason, true);
                         if (otherRBs.Any(r => r.PlayerId != sp.PlayerId && seasonProjectionDictionary.TryGetValue(r.PlayerId, out var proj) && proj > tunings.NewRBMinPoints))
+                        {
                             adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (tunings.NewRBAdjustmentFactor - 1));
+                            adjustmentTracker.Add((sp.PlayerId, Adjustment.SharedBackfield.ToString()));
+                        }
+                            
                     }
                     else if (rbsThatMovedToProjectedPlayersTeam.Any(w => seasonProjectionDictionary.TryGetValue(w, out var proj) && proj > tunings.NewRBMinPoints))
                     {
                         adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (tunings.ExistingRBAdjustmentFactor - 1));
+                        adjustmentTracker.Add((sp.PlayerId, Adjustment.SharedBackfield.ToString()));
                     }
                     else
                     {
                         foreach (var otherRB in otherRBsOnTeam)
                         {
                             if (seasonProjectionDictionary.TryGetValue(otherRB.Key, out var otherProjection) && otherProjection > tunings.NewRBMinPoints && !adjustments.ContainsKey(sp.PlayerId))
+                            {
                                 adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (tunings.ExistingRBAdjustmentFactor - 1));
+                                adjustmentTracker.Add((sp.PlayerId, Adjustment.SharedBackfield.ToString()));
+                            }
+                                
                         }
                     }
 
@@ -195,7 +215,7 @@ namespace Football.Projections.Services
             return adjustments;
         }
 
-        private async Task<Dictionary<int, double>> DownwardTrendingAdjustment(IEnumerable<SeasonProjection> seasonProjections)
+        private async Task<Dictionary<int, double>> DownwardTrendingAdjustment(IEnumerable<SeasonProjection> seasonProjections, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
             foreach (var sp in seasonProjections)
@@ -210,13 +230,14 @@ namespace Football.Projections.Services
                     {
                         var diff = (seasonFantasy.ElementAt(0).FantasyPoints - seasonFantasy.ElementAt(2).FantasyPoints);
                         adjustments.Add(sp.PlayerId, diff);
+                        adjustmentTracker.Add((sp.PlayerId, Adjustment.DownwardTrending.ToString()));
                     }
                 }
             }
             return adjustments;
         }
 
-        private async Task<Dictionary<int, double>> EliteRookieWRTopTargetAdjustment(IEnumerable<SeasonProjection> seasonProjections, Tunings tunings)
+        private async Task<Dictionary<int, double>> EliteRookieWRTopTargetAdjustment(IEnumerable<SeasonProjection> seasonProjections, Tunings tunings, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
             var seasonProjectionDictionary = seasonProjections.ToDictionary(p => p.PlayerId, p => p.ProjectedPoints);
@@ -230,14 +251,18 @@ namespace Football.Projections.Services
                 {
                     var otherReceiversOnTeam = playerTeams.Where(p => p.TeamId == rookieRecord.TeamId && p.PlayerId != sp.PlayerId);
                     if (!otherReceiversOnTeam.Any(o => seasonProjectionDictionary.TryGetValue(o.PlayerId, out var proj) && proj > tunings.WR1MinPoints))
+                    {
                         adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (tunings.EliteWRRookieTopReceiverFactor - 1));
+                        adjustmentTracker.Add((sp.PlayerId, Adjustment.EliteRookieWRTopTarget.ToString()));
+                    }
+                        
                 }
             }
             return adjustments;
 
         }
 
-        private async Task<Dictionary<int, double>> LeadRBPromotionAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> rbTeamChanges, Tunings tunings)
+        private async Task<Dictionary<int, double>> LeadRBPromotionAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> rbTeamChanges, Tunings tunings, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
             var playerTeamDictionary = (await playerService.GetPlayerTeams(_season.CurrentSeason, seasonProjections.Select(s => s.PlayerId))).ToDictionary(p => p.PlayerId, t => t.TeamId);
@@ -255,7 +280,11 @@ namespace Football.Projections.Services
                     {
                         var seasonData = await statisticsService.GetSeasonData<SeasonDataRB>(Position.RB, sp.PlayerId, true);
                         if (seasonData.Count < 3 && YardsPerCarryCareerAverage(seasonData) > tunings.RBPromotionMinYardsPerCarry)
+                        {
                             adjustments.Add(sp.PlayerId, sp.ProjectedPoints * (tunings.RBPromotionFactor - 1));
+                            adjustmentTracker.Add((sp.PlayerId, Adjustment.LeadRBPromotion.ToString()));
+                        }
+                            
                     }
                 }
             }
@@ -469,60 +498,73 @@ namespace Football.Projections.Services
         private async Task<IEnumerable<SeasonProjection>> QBSeasonProjectionAdjustments(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> allTeamChanges, Tunings tunings, int seasonGames, SeasonAdjustments seasonAdjustments)
         {
             List<Dictionary<int, double>> adjustments = [];
-            if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames));
-            if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames));
-            if (seasonAdjustments.VeteranQBonNewTeamAdjustment) adjustments.Add(await VeteranQBOnNewTeamAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.QB), tunings));
+            List<(int, string)> adjustmentTracker = []; 
 
-            return AccumulateAdjustments(seasonProjections, adjustments);
+            if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.VeteranQBonNewTeamAdjustment) adjustments.Add(await VeteranQBOnNewTeamAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.QB), tunings, adjustmentTracker));
+
+            return AccumulateAdjustments(seasonProjections, adjustments, adjustmentTracker);
         }
 
         private async Task<IEnumerable<SeasonProjection>> RBSeasonProjectionAdjustments(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> allTeamChanges, Tunings tunings, int seasonGames, SeasonAdjustments seasonAdjustments)
         {
             List<Dictionary<int, double>> adjustments = [];
+            List<(int, string)> adjustmentTracker = [];
+
             var qbChanges = (await GetQuarterbackChanges(allTeamChanges, tunings)).ToDictionary(q => q.PlayerId);
 
-            if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames));
-            if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames));
-            if (seasonAdjustments.DownwardTrendingAdjustment) adjustments.Add(await DownwardTrendingAdjustment(seasonProjections));
-            if (seasonAdjustments.SharedBackfieldAdjustment) adjustments.Add(await SharedBackfieldAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.RB), tunings));
-            if (seasonAdjustments.QuarterbackChangeAdjustment) adjustments.Add(await QuarterbackChangeAdjustment(seasonProjections, qbChanges, tunings));
-            if (seasonAdjustments.LeadRBPromotionAdjustment) adjustments.Add(await LeadRBPromotionAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.RB), tunings));
+            if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.DownwardTrendingAdjustment) adjustments.Add(await DownwardTrendingAdjustment(seasonProjections, adjustmentTracker));
+            if (seasonAdjustments.SharedBackfieldAdjustment) adjustments.Add(await SharedBackfieldAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.RB), tunings, adjustmentTracker));
+            if (seasonAdjustments.QuarterbackChangeAdjustment) adjustments.Add(await QuarterbackChangeAdjustment(seasonProjections, qbChanges, tunings, adjustmentTracker));
+            if (seasonAdjustments.LeadRBPromotionAdjustment) adjustments.Add(await LeadRBPromotionAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.RB), tunings, adjustmentTracker));
 
-            return AccumulateAdjustments(seasonProjections, adjustments);
+            return AccumulateAdjustments(seasonProjections, adjustments, adjustmentTracker);
         }
 
         private async Task<IEnumerable<SeasonProjection>> WRSeasonProjectionAdjustments(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> allTeamChanges, Tunings tunings, int seasonGames, SeasonAdjustments seasonAdjustments)
         {
             List<Dictionary<int, double>> adjustments = [];
+            List<(int, string)> adjustmentTracker = [];
+
             var qbChanges = (await GetQuarterbackChanges(allTeamChanges, tunings)).ToDictionary(q => q.PlayerId);
 
-            if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames));
-            if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames));
-            if (seasonAdjustments.EliteRookieWRTopTargetAdjustment) adjustments.Add(await EliteRookieWRTopTargetAdjustment(seasonProjections, tunings));
-            if (seasonAdjustments.PreviousSeasonBackupQuarterbackAdjustment) adjustments.Add(await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges, tunings, seasonGames));
-            if (seasonAdjustments.SharedReceivingDutiesAdjustment) adjustments.Add(await SharedReceivingDutiesAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.WR), tunings));
-            if (seasonAdjustments.QuarterbackChangeAdjustment) adjustments.Add(await QuarterbackChangeAdjustment(seasonProjections, qbChanges, tunings));
+            if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.EliteRookieWRTopTargetAdjustment) adjustments.Add(await EliteRookieWRTopTargetAdjustment(seasonProjections, tunings, adjustmentTracker));
+            if (seasonAdjustments.PreviousSeasonBackupQuarterbackAdjustment) adjustments.Add(await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges, tunings, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.SharedReceivingDutiesAdjustment) adjustments.Add(await SharedReceivingDutiesAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.WR), tunings, adjustmentTracker));
+            if (seasonAdjustments.QuarterbackChangeAdjustment) adjustments.Add(await QuarterbackChangeAdjustment(seasonProjections, qbChanges, tunings, adjustmentTracker));
 
-            return AccumulateAdjustments(seasonProjections, adjustments);
+            return AccumulateAdjustments(seasonProjections, adjustments, adjustmentTracker);
         }
 
         private async Task<IEnumerable<SeasonProjection>> TESeasonProjectionAdjustment(IEnumerable<SeasonProjection> seasonProjections, IEnumerable<TeamChange> allTeamChanges, Tunings tunings, int seasonGames, SeasonAdjustments seasonAdjustments)
         {
             List<Dictionary<int, double>> adjustments = [];
+            List<(int, string)> adjustmentTracker = [];
+
             var qbChanges = (await GetQuarterbackChanges(allTeamChanges, tunings)).ToDictionary(q => q.PlayerId);
 
-            if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames));
-            if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames));
-            if (seasonAdjustments.PreviousSeasonBackupQuarterbackAdjustment) adjustments.Add(await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges, tunings, seasonGames));
-            if (seasonAdjustments.QuarterbackChangeAdjustment) adjustments.Add(await QuarterbackChangeAdjustment(seasonProjections, qbChanges, tunings));
+            if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.PreviousSeasonBackupQuarterbackAdjustment) adjustments.Add(await PreviousSeasonBackupQuarterbackAdjustment(seasonProjections, qbChanges, tunings, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.QuarterbackChangeAdjustment) adjustments.Add(await QuarterbackChangeAdjustment(seasonProjections, qbChanges, tunings, adjustmentTracker));
 
-            return AccumulateAdjustments(seasonProjections, adjustments);
+            return AccumulateAdjustments(seasonProjections, adjustments, adjustmentTracker);
         }
 
-        private static IEnumerable<SeasonProjection> AccumulateAdjustments(IEnumerable<SeasonProjection> seasonProjections, List<Dictionary<int, double>> adjustments)
+        private static IEnumerable<SeasonProjection> AccumulateAdjustments(IEnumerable<SeasonProjection> seasonProjections, List<Dictionary<int, double>> adjustments, List<(int, string)> adjustmentTracker)
         {
-            foreach (var sp in seasonProjections) 
+            foreach (var sp in seasonProjections)
+            {
                 sp.ProjectedPoints += adjustments.Where(a => a.ContainsKey(sp.PlayerId)).Select(d => d[sp.PlayerId]).DefaultIfEmpty(0).Sum();
+                var playerAdjustments = adjustmentTracker.Where(a => a.Item1 == sp.PlayerId).Select(a => a.Item2).ToArray();
+                sp.Adjustments = string.Join(", ", playerAdjustments);
+            }
+                
             return seasonProjections;
         } 
     }
