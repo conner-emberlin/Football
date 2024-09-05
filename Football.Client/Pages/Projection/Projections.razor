@@ -131,22 +131,22 @@
                 <tr>
                     @if (!sort.IsSortedAscending)
                     {
-                        <th>Rank</th>
+                        <th>#</th>
                     }                    
                     <th>Name</th>
                     @if (PositionEnum == "FLEX")
                     {
-                        <th>Position</th>        
+                        <th>Pos</th>        
                     }
                     <th>Team</th>
                     <th>
-                        <span class="sort-link" onclick="@(() => SetTable("ProjectedPoints"))">Total Points</span>
+                        <span class="sort-link" onclick="@(() => SetTable("ProjectedPoints"))">Pts</span>
                         <span class="oi @(sort.GetSortStyle("ProjectedPoints"))"></span>
                     </th>
                     <th>PPG</th>
                     <th>Games</th>
                     <th>
-                        <span class="sort-link" onclick="@(() => SetTable("AdjustedProjectedPoints"))">Adjusted Total</span>
+                        <span class="sort-link" onclick="@(() => SetTable("AdjustedProjectedPoints"))">Adj Pts</span>
                         <span class="oi @(sort.GetSortStyle("AdjustedProjectedPoints"))"></span>
                     </th>
                     @if (players.Any(p => p.SeasonProjectionError != null))
@@ -159,14 +159,16 @@
                     else
                     {
                         <th>ADP</th>
-                        <th>Consensus</th>
-                        <th>FantasySplit</th>
+                        <th>Expert</th>
+                        <th>FPtsSplit</th>
                         <th>SnapSplit</th>
                     }
+                        <th>Adjustments</th>
                     @if (players.Any(p => p.CanDelete))
                     {
                         <th></th>                        
                     }
+                    
 
                 </tr>
         </thead>
@@ -219,13 +221,24 @@
                     <td>@Math.Round(p.PreviousSeasonSplitDifference, 2)</td>
                     <td>@Math.Round(p.PreviousSeasonSnapCountSplitDifference, 2)</td>
              }
+             @if (p.Adjustments != null && !string.IsNullOrEmpty(p.Adjustments))
+             {
+                var url = GetAdjustmentLink(p.Adjustments);
+                <td><a href="@url"> <i class="oi oi-magnifying-glass" /></a></td>
+             }
+             else
+             {
+                <td>--</td>
+             }
              @if (p.CanDelete)
              {
                 <td>
                 <button type="button" style="color:red" class="btn btn-link" @onclick="() => HandleDelete(p.PlayerId, p.Season)"> <i sytle="color:red" class="oi oi-x" /></button>
                 </td>
              }
-            </tr>
+          
+             
+              </tr>
         }
         </tbody>
     </table>
@@ -359,6 +372,7 @@
     private void HandleExpand() => expandVariables = !expandVariables;
 
     private void SetTable(string columnName) => players = sort.SortTable<SeasonProjectionModel>(players, columnName);
+    private string GetAdjustmentLink(string adjustments) => string.Format("{0}/{1}", "/adjustments", adjustments);
 
 }
 

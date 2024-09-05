@@ -26,8 +26,7 @@ namespace Football.Api
                     .ReverseMap();
             CreateMap<SeasonProjection, SeasonProjectionModel>(MemberList.Destination)
                 .ForMember(spm => spm.CanDelete, o => o.Ignore())
-                .ForMember(spm => spm.Team, o => o.Ignore())
-                .ForMember(spm => spm.Adjustments, o => o.MapFrom(sm => sm.Adjustments != null ? sm.Adjustments.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() : null));
+                .ForMember(spm => spm.Team, o => o.Ignore());
             CreateMap<SeasonFlex, SeasonProjectionModel>();
             CreateMap<SeasonFlex, SeasonFlexExportModel>();
             CreateMap<WeekProjection, WeekProjectionModel>(MemberList.Destination)

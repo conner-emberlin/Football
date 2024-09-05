@@ -7,7 +7,7 @@
         public string Name { get; set; } = "";
         public string Position { get; set; } = "";
         public double ProjectedPoints { get; set; }
-        public List<string>? Adjustments { get; set; }
+        public string? Adjustments { get; set; }
         public bool CanDelete { get; set; }
         public string Team { get; set; } = "";
         public double AvgerageGamesMissed { get; set; }

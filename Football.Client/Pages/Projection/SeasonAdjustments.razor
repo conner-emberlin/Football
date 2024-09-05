@@ -1,0 +1,9 @@
+﻿@page "/adjustments/{adjustments}"
+
+<h3>Season Projection Adjustments</h3>
+
+ <p>@adjustments</p>
+@code {
+    [Parameter]
+    public string adjustments { get; set; }
+}
