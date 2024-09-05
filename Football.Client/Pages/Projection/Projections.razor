@@ -223,7 +223,8 @@
              }
              @if (p.Adjustments != null && !string.IsNullOrEmpty(p.Adjustments))
              {
-                var url = GetAdjustmentLink(p.Adjustments);
+                var hash = p.Adjustments.GetHashCode();
+                var url = GetAdjustmentLink(p.Adjustments, p.PlayerId);
                 <td><a href="@url"> <i class="oi oi-magnifying-glass" /></a></td>
              }
              else
@@ -372,7 +373,7 @@
     private void HandleExpand() => expandVariables = !expandVariables;
 
     private void SetTable(string columnName) => players = sort.SortTable<SeasonProjectionModel>(players, columnName);
-    private string GetAdjustmentLink(string adjustments) => string.Format("{0}/{1}", "/adjustments", adjustments);
+    private string GetAdjustmentLink(string adjustments, int playerId) => string.Format("{0}/{1}/{2}", "/adjustments", adjustments, playerId.ToString());
 
 }
 

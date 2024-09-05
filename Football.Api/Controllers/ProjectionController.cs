@@ -43,10 +43,8 @@ namespace Football.Api.Controllers
             else
                 model = mapper.Map<List<SeasonProjectionModel>>(await seasonProjectionService.GetProjections(positionEnum, filter));
 
-            var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
-            model.ForEach(m => m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty);
-
             var currentSeasonGames = await playersService.GetCurrentSeasonGames();
+            var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
             var adpDictionary = (await statisticsService.GetAdpByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(a => a.PlayerId);
             var consensusProjectionDictionary = (await statisticsService.GetConsensusProjectionsByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(c => c.PlayerId);
             var splitsDictionary = (await fantasyAnalysisService.GetFantasySplits(positionEnum, _season.CurrentSeason - 1)).ToDictionary(f => f.PlayerId);
@@ -54,6 +52,7 @@ namespace Football.Api.Controllers
 
             foreach (var m in model)
             {
+                m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty;
                 var avgGamesMissed = await statisticsService.GetAverageGamesMissed(m.PlayerId);
                 m.AvgerageGamesMissed = avgGamesMissed;
                 m.AdjustedProjectedPoints = m.ProjectedPoints - (m.ProjectedPoints / currentSeasonGames) * avgGamesMissed;

@@ -8,6 +8,7 @@ namespace Football.Client.Interfaces
         public Task<PlayerDataModel?> GetPlayerDataRequest(int playerId);
         public Task<List<TrendingPlayerModel>?> GetTrendingPlayersRequest();
         public Task<List<SimplePlayerModel>?> GetSimplePlayersRequest(bool activeOnly = false, string position = "");
+        public Task<SimplePlayerModel?> GetSimplePlayerRequest(string playerId);
         public Task<List<SnapCountModel>?> GetSnapCountsRequest(string id);
         public Task<List<RookiePlayerModel>?> GetAllRookiesRequest();
         public Task<int> InactivatePlayersRequest(List<int> playerIds);

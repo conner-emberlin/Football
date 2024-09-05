@@ -6,6 +6,7 @@ namespace Football.Client.Services
     public class PlayersService(IRequests requests) : IPlayersService
     {
         public async Task<PlayerDataModel?> GetPlayerDataRequest(int playerId) => await requests.Get<PlayerDataModel?>("/player/" + playerId.ToString());
+        public async Task<SimplePlayerModel?> GetSimplePlayerRequest(string playerId) => await requests.Get<SimplePlayerModel?>("/player/simple/" + playerId);
         public async Task<List<TrendingPlayerModel>?> GetTrendingPlayersRequest() => await requests.Get<List<TrendingPlayerModel>?>("/player/trending-players");
         public async Task<bool> CreateRookieRequest(RookiePlayerModel rookie) => await requests.Post<bool, RookiePlayerModel>("/player/add-rookie", rookie);
         public async Task<List<SnapCountModel>?> GetSnapCountsRequest(string id) => await requests.Get<List<SnapCountModel>?>("/player/snap-counts/" + id);

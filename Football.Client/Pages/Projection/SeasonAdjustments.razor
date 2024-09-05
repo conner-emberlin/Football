@@ -1,9 +1,59 @@
-﻿@page "/adjustments/{adjustments}"
+﻿@page "/adjustments/{adjustments}/{playerId}"
 
-<h3>Season Projection Adjustments</h3>
+@using Football.Shared.Models.Players;
+@using Football.Client.Interfaces;
 
- <p>@adjustments</p>
+@inject IPlayersService playersService;
+
+<h4>@GetHeader(player)</h4>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+@if (adjustmentList.Any())
+{
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Adjustment</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in adjustmentList)
+                {
+                    <tr>
+                        <td>@a</td>
+                        <td>Blurb to describe what the adjustment does</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
 @code {
     [Parameter]
-    public string adjustments { get; set; }
+    public string? adjustments { get; set; }
+
+    [Parameter]
+    public string? playerId { get; set; }
+
+    private List<string> adjustmentList { get; set; } = [];
+    private SimplePlayerModel? player = new();
+
+    private bool loading { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        player = await playersService.GetSimplePlayerRequest(playerId);
+        adjustmentList = adjustments != null ? adjustments.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() : [];
+        loading = false;
+    }
+
+    private string GetHeader(SimplePlayerModel? player) => player != null ? string.Format("Season Projection Adjustments for {0}", player.Name) : "Season Projection Adjustments";
 }

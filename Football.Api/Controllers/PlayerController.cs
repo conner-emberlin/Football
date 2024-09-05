@@ -99,6 +99,11 @@ namespace Football.Api.Controllers
             return Ok(playerModel);
         }
 
+        [HttpGet("simple/{playerId}")]
+        [ProducesResponseType(typeof(SimplePlayerModel), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSimplePlayer(int playerId) => Ok(mapper.Map<SimplePlayerModel>(await playersService.GetPlayer(playerId)));
+
+
         [HttpPost("add")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreatePlayer([FromBody] SimplePlayerModel player) => Ok(await playersService.CreatePlayer(player.Name, player.Active, player.Position));
