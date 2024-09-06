@@ -87,6 +87,10 @@ namespace Football.Models
         public int ReplacementLevelRB { get; set; }
         public int ReplacementLevelWR { get; set; }
         public int ReplacementLevelTE { get; set; }
+        public int QBProjectionCount { get; set; }
+        public int RBProjectionCount { get; set; }
+        public int WRProjectionCount { get; set; }
+        public int TEProjectionCount { get; set; }
     }
 
     public class WeeklyTunings

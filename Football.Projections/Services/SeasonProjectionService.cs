@@ -71,7 +71,7 @@ namespace Football.Projections.Services
                 _ => throw new NotImplementedException()
             };
             var adjustedProjections = await adjustmentService.AdjustmentEngine((await RookieSeasonProjections(position, seasonGames)).Union(projections), tunings, seasonGames, seasonAdjustments);
-            var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints);
+            var formattedProjections = adjustedProjections.OrderByDescending(p => p.ProjectedPoints).Take(GetProjectionsCount(position, tunings));
             cache.Set(position.ToString() + Cache.SeasonProjections.ToString(), formattedProjections);
             return formattedProjections;
         }
@@ -244,6 +244,18 @@ namespace Football.Projections.Services
                 rookieSeasons.Add(rookieFantasy);
             }
             return MultipleRegression.NormalEquations(matrixCalculator.RegressorMatrix(historicalRookies), matrixCalculator.DependentVector(rookieSeasons, Model.FantasyPoints));
+        }
+
+        private int GetProjectionsCount(Position position, Tunings tunings)
+        {
+            return position switch
+            {
+                Position.QB => tunings.QBProjectionCount,
+                Position.RB => tunings.RBProjectionCount,
+                Position.WR => tunings.WRProjectionCount,
+                Position.TE => tunings.TEProjectionCount,
+                _ => 0
+            };
         }
     }
 }
