@@ -17,5 +17,6 @@ namespace Football.Projections.Interfaces
         public Task<bool> PostWeeklyProjectionConfiguration(WeeklyProjectionConfiguration config);
         public Task<string?> GetCurrentSeasonProjectionFilter(string position, int season);
         public Task<string?> GetCurrentWeekProjectionFilter(string position, int week, int season);
+        public Task<IEnumerable<AdjustmentDescription>> GetAdjustmentDescriptions();
     }
 }

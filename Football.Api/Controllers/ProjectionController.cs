@@ -16,7 +16,8 @@ namespace Football.Api.Controllers
     [ApiController]
     public class ProjectionController(IPlayersService playersService, IStatisticsService statisticsService,
         IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season, IFantasyAnalysisService fantasyAnalysisService, ISnapCountService snapCountService,
-        IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, IMapper mapper) : ControllerBase
+        IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, 
+        IAdjustmentService adjustmentService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -341,5 +342,11 @@ namespace Football.Api.Controllers
 
             return NotFound();
         }
+
+        [HttpGet("season-adjustment-descriptions")]
+        [ProducesResponseType(typeof(List<AdjustmentDescriptionModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetSeasonAdjustmentDescriptions() => Ok(mapper.Map<List<AdjustmentDescriptionModel>>(await adjustmentService.GetAdjustmentDescriptions()));
+
     }
 }

@@ -4,6 +4,7 @@
 @using Football.Client.Interfaces;
 
 @inject IPlayersService playersService;
+@inject IProjectionService projectionService;
 
 <h4>@GetHeader(player)</h4>
 
@@ -27,7 +28,7 @@
                 {
                     <tr>
                         <td>@a</td>
-                        <td>Blurb to describe what the adjustment does</td>
+                        <td>@adjustmentDescriptions[a]</td>
                     </tr>
                 }
             </tbody>
@@ -43,6 +44,7 @@
     public string? playerId { get; set; }
 
     private List<string> adjustmentList { get; set; } = [];
+    private Dictionary<string, string> adjustmentDescriptions { get; set; } = new();
     private SimplePlayerModel? player = new();
 
     private bool loading { get; set; }
@@ -51,7 +53,8 @@
     {
         loading = true;
         player = await playersService.GetSimplePlayerRequest(playerId);
-        adjustmentList = adjustments != null ? adjustments.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() : [];
+        adjustmentDescriptions = (await projectionService.GetSeasonAdjustmentDescriptionsRequest()).ToDictionary(a => a.Adjustment, a => a.Description);
+        adjustmentList = adjustments != null ? adjustments.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList() : [];
         loading = false;
     }
 

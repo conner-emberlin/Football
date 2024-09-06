@@ -20,5 +20,6 @@ namespace Football.Client.Interfaces
         public Task<SeasonProjectionsExistModel?> GetSeasonProjectionsExistRequest(string position);
         public Task<List<string>?> GetWeeklyModelVariablesRequest(string position);
         public Task<WeeklyProjectionsExistModel?> GetWeeklyProjectionsExistRequest(string position);
+        public Task<List<AdjustmentDescriptionModel>?> GetSeasonAdjustmentDescriptionsRequest();
     }
 }

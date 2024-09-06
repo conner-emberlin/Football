@@ -223,9 +223,7 @@
              }
              @if (p.Adjustments != null && !string.IsNullOrEmpty(p.Adjustments))
              {
-                var hash = p.Adjustments.GetHashCode();
-                var url = GetAdjustmentLink(p.Adjustments, p.PlayerId);
-                <td><a href="@url"> <i class="oi oi-magnifying-glass" /></a></td>
+                 <td><a href="@GetAdjustmentLink(p.Adjustments, p.PlayerId)"> <i class="oi oi-magnifying-glass" /></a></td>
              }
              else
              {

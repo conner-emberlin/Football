@@ -11,7 +11,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace Football.Projections.Services
 {
     public class AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, IStatisticsService statisticsService, IFantasyAnalysisService fantasyAnalysisService,
-        IFantasyDataService fantasyDataService, IOptionsMonitor<Season> season, IMemoryCache cache) : IAdjustmentService
+        IFantasyDataService fantasyDataService, IProjectionRepository projectionRepository, IOptionsMonitor<Season> season, IMemoryCache cache) : IAdjustmentService
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -35,6 +35,8 @@ namespace Football.Projections.Services
             weekProjections = await InjuryAdustment(weekProjections);
             return weekProjections;
         }
+
+        public async Task<IEnumerable<AdjustmentDescription>> GetAdjustmentDescriptions() => await projectionRepository.GetAdjustmentDescriptions();
 
         private async Task<Dictionary<int, double>> InjuryAdjustment(IEnumerable<SeasonProjection> seasonProjections, int seasonGames, List<(int, string)> adjustmentTracker)
         {

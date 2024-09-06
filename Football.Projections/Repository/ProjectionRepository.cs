@@ -105,5 +105,11 @@ namespace Football.Projections.Repository
             return (await dbConnection.QueryAsync<string>(query, new { season, week, position })).FirstOrDefault();
         }
 
+        public async Task<IEnumerable<AdjustmentDescription>> GetAdjustmentDescriptions()
+        {
+            var query = $@"SELECT * FROM [dbo].AdjustmentDescription";
+            return await dbConnection.QueryAsync<AdjustmentDescription>(query);
+        }
+
     }
 }
