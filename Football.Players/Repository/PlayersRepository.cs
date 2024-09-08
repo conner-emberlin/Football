@@ -232,6 +232,12 @@ namespace Football.Players.Repository
                                 AND [Week] = @week";
             return (await dbConnection.QueryAsync<ScheduleDetails>(query, new {season, week})).ToList();
         }
+
+        public async Task<IEnumerable<Schedule>> GetByeWeeks(int season)
+        {
+            var query = $@"SELECT * FROM [dbo].Schedule WHERE [Season] = @season AND [OpposingTeamId] = 0";
+            return await dbConnection.QueryAsync<Schedule>(query, new { season });
+        }
         public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season)
         {
             var query = $@"SELECT * FROM [dbo].InSeasonInjuries

@@ -42,21 +42,29 @@ namespace Football.Api.Controllers
                 model.ForEach(m => m.CanDelete = true);
             }
             else
+            {
                 model = mapper.Map<List<SeasonProjectionModel>>(await seasonProjectionService.GetProjections(positionEnum, filter));
-
+            }
+                
             var currentSeasonGames = await playersService.GetCurrentSeasonGames();
             var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
             var adpDictionary = (await statisticsService.GetAdpByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(a => a.PlayerId);
             var consensusProjectionDictionary = (await statisticsService.GetConsensusProjectionsByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(c => c.PlayerId);
             var splitsDictionary = (await fantasyAnalysisService.GetFantasySplits(positionEnum, _season.CurrentSeason - 1)).ToDictionary(f => f.PlayerId);
             var snapSplitsDictionary = (await snapCountService.GetSnapCountSplits(model.Select(m => m.PlayerId), _season.CurrentSeason - 1)).ToDictionary(s => s.PlayerId);
+            var byeWeeksDictionary = (await playersService.GetByeWeeks(_season.CurrentSeason)).ToDictionary(b => b.Team, b => b.Week);
 
             foreach (var m in model)
             {
-                m.Team = teamDictionary.TryGetValue(m.PlayerId, out var team) ? team : string.Empty;
                 var avgGamesMissed = await statisticsService.GetAverageGamesMissed(m.PlayerId);
                 m.AvgerageGamesMissed = avgGamesMissed;
                 m.AdjustedProjectedPoints = m.ProjectedPoints - (m.ProjectedPoints / currentSeasonGames) * avgGamesMissed;
+
+                if (teamDictionary.TryGetValue(m.PlayerId, out var team))
+                {
+                    m.Team = team;
+                    m.ByeWeek = byeWeeksDictionary[team];
+                }
 
                 if (adpDictionary.TryGetValue(m.PlayerId, out var adp))
                 {

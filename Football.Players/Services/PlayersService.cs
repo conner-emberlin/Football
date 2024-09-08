@@ -63,6 +63,7 @@ namespace Football.Players.Services
         public async Task<List<int>> GetIgnoreList() => await playersRepository.GetIgnoreList();
         public async Task<TeamLocation> GetTeamLocation(int teamId) => await playersRepository.GetTeamLocation(teamId);
         public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => await playersRepository.GetScheduleDetails(season, week);
+        public async Task<IEnumerable<Schedule>> GetByeWeeks(int season) => await playersRepository.GetByeWeeks(season);
         public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => await playersRepository.GetActiveInSeasonInjuries(season);
         public async Task<Dictionary<int, double>> GetGamesPlayedInjuredBySeason(int season) => await playersRepository.GetGamesPlayedInjuredBySeason(season);
         public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await playersRepository.PostInSeasonInjury(injury);

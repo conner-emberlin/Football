@@ -10,6 +10,7 @@
         public string? Adjustments { get; set; }
         public bool CanDelete { get; set; }
         public string Team { get; set; } = "";
+        public int ByeWeek { get; set; }
         public double AvgerageGamesMissed { get; set; }
         public double AdjustedProjectedPoints { get; set; }
         public double PositionalADP { get; set; }
