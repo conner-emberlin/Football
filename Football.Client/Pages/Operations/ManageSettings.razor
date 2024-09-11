@@ -53,6 +53,36 @@
                     </td>
                 </tr>
                 <tr>
+                    <td><b style="color:@format.PositionColorFromGenericString("AverageRBProjection")"> AverageRBProjection </b></td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.AverageRBProjection" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><b style="color:@format.PositionColorFromGenericString("AverageWRProjection")"> AverageWRProjection </b></td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.AverageWRProjection" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><b style="color:@format.PositionColorFromGenericString("AverageTEProjection")"> AverageTEProjection </b></td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.AverageTEProjection" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><b style="color:@format.PositionColorFromGenericString("AverageDSTProjection")"> AverageDSTProjection </b></td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.AverageDSTProjection" />
+                    </td>
+                </tr>
+                <tr>
+                    <td><b style="color:@format.PositionColorFromGenericString("AverageKProjection")"> AverageKProjection </b></td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@tunings.AverageKProjection" />
+                    </td>
+                </tr>
+                <tr>
                     <td><b style="color:@format.PositionColorFromGenericString("BackupQBAdjustmentMax")"> BackupQBAdjustmentMax </b></td>
                     <td>
                         <input type="text" class="form-control" @bind="@tunings.BackupQBAdjustmentMax" />
@@ -587,7 +617,7 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
     {
 
         loading = true;
-        weeklyTuningsUpdated = await operationsService.PostSeasonTuningsRequest(tunings);
+        weeklyTuningsUpdated = await operationsService.PostWeeklyTuningsRequest(weeklyTunings);
         weeklyTunings = await operationsService.GetWeeklyTuningsRequest();
         loading = false;
         shouldRender = true;

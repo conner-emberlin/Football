@@ -81,6 +81,19 @@ namespace Football
             };
         }
 
+        public double GetAverageProjectionByPosition(Position position, Tunings tunings)
+        {
+            return position switch
+            {
+                Position.QB => tunings.AverageQBProjection,
+                Position.RB => tunings.AverageRBProjection,
+                Position.WR => tunings.AverageWRProjection,
+                Position.TE => tunings.AverageTEProjection,
+                Position.DST => tunings.AverageDSTProjection,
+                Position.K => tunings.AverageKProjection,
+                _ => 0
+            };
+        }
         public double GetValueFromModel<T>(T model, Model value)
         {
             var prop = typeof(T).GetProperties().First(p => p.ToString()!.Contains(value.ToString()));

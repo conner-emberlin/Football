@@ -64,6 +64,11 @@ namespace Football.Models
         public double NewQBCeilingForRB { get; set; }
         public int SeasonDataTrimmingGames { get; set; }
         public double AverageQBProjection { get; set; }
+        public double AverageRBProjection { get; set; }
+        public double AverageWRProjection { get; set; }
+        public double AverageTEProjection { get; set; }
+        public double AverageDSTProjection { get; set; }
+        public double AverageKProjection { get; set; }
         public double NewWRMinPoints { get; set; }
         public double NewWRAdjustmentFactor { get; set; }
         public double ExistingWRAdjustmentFactor { get; set; }

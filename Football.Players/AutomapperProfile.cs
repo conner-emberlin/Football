@@ -7,7 +7,9 @@ namespace Football.Players
     {
         public AutomapperProfile() 
         {
-            CreateMap<InSeasonInjury, PlayerInjury>();        
+            CreateMap<InSeasonInjury, PlayerInjury>();
+            CreateMap<TeamMap, PlayerTeam>()
+                .ForMember(pt => pt.Name, o => o.MapFrom(t => t.TeamDescription));
         }
     }
 }

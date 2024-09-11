@@ -14,13 +14,13 @@ namespace Football
 
                 var query = $@"INSERT INTO [dbo].Tunings (Season,	
                             RBFloor, LeadRBFactor, QBWeight, Weight, SecondYearWRLeap, SecondYearRBLeap, SecondYearQBLeap, SecondYearTELeap, NewQBFloor, NewQBCeiling, SeasonDataTrimmingGames,
-                            AverageQBProjection, NewWRMinPoints, NewWRAdjustmentFactor, ExistingWRAdjustmentFactor, NewRBMinPoints, NewRBAdjustmentFactor, ExistingRBAdjustmentFactor, RushingQBThreshold,
+                            AverageQBProjection, AverageRBProjection, AverageWRProjection, AverageTEProjection, AverageDSTProjection, AverageKProjection, NewWRMinPoints, NewWRAdjustmentFactor, ExistingWRAdjustmentFactor, NewRBMinPoints, NewRBAdjustmentFactor, ExistingRBAdjustmentFactor, RushingQBThreshold,
                             ReceivingRBThreshold, BackupQBAdjustmentMax, VetQBNewTeamYears, VetQBNewTeamFactor, EliteWRDraftPositionMax, EliteWRRookieTopReceiverFactor, WR1MinPoints, RB1MinPoints,  
                             RBPromotionMinYardsPerCarry, RBPromotionFactor, NewQBCeilingForRB, MinGamesForMissedAverage, ReplacementLevelQB, ReplacementLevel2QB, ReplacementLevelRB, ReplacementLevelWR, ReplacementLevelTE,
                             QBProjectionCount, RBProjectionCount, WRProjectionCount, TEProjectionCount )
                            VALUES (@Season,	
                             @RBFloor, @LeadRBFactor, @QBWeight, @Weight, @SecondYearWRLeap, @SecondYearRBLeap, @SecondYearQBLeap, @SecondYearTELeap, @NewQBFloor, @NewQBCeiling, @SeasonDataTrimmingGames,
-                            @AverageQBProjection, @NewWRMinPoints, @NewWRAdjustmentFactor, @ExistingWRAdjustmentFactor, @NewRBMinPoints, @NewRBAdjustmentFactor, @ExistingRBAdjustmentFactor, @RushingQBThreshold,
+                            @AverageQBProjection, @AverageRBProjection, @AverageWRProjection, @AverageTEProjection, @AverageDSTProjection, @AverageKProjection, @NewWRMinPoints, @NewWRAdjustmentFactor, @ExistingWRAdjustmentFactor, @NewRBMinPoints, @NewRBAdjustmentFactor, @ExistingRBAdjustmentFactor, @RushingQBThreshold,
                             @ReceivingRBThreshold, @BackupQBAdjustmentMax, @VetQBNewTeamYears, @VetQBNewTeamFactor, @EliteWRDraftPositionMax, @EliteWRRookieTopReceiverFactor, @WR1MinPoints, @RB1MinPoints,  
                             @RBPromotionMinYardsPerCarry, @RBPromotionFactor, @NewQBCeilingForRB, @MinGamesForMissedAverage, @ReplacementLevelQB, @ReplacementLevel2QB, @ReplacementLevelRB, @ReplacementLevelWR, @ReplacementLevelTE,
                             @QBProjectionCount, @RBProjectionCount, @WRProjectionCount, @TEProjectionCount 

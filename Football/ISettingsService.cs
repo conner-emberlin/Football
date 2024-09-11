@@ -17,6 +17,7 @@ namespace Football
         public double GoodWeek(Position position);
         public double GetPlayerComparison(Position position);
         public int GetReplacementLevel(Position position, Tunings tunings);
+        public double GetAverageProjectionByPosition(Position position, Tunings tunings);
         public double GetValueFromModel<T>(T type, Model model);
         public List<PropertyInfo> GetPropertiesFromModel<T>(List<string>? filter = null);
         public IEnumerable<string> GetPropertyNamesFromModel<T>();

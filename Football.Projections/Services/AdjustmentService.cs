@@ -7,11 +7,12 @@ using Football.Projections.Interfaces;
 using Microsoft.Extensions.Options;
 using Football.Players.Models;
 using Microsoft.Extensions.Caching.Memory;
+using AutoMapper;
 
 namespace Football.Projections.Services
 {
     public class AdjustmentService(IPlayersService playerService, IMatchupAnalysisService mathupAnalysisService, IStatisticsService statisticsService, IFantasyAnalysisService fantasyAnalysisService,
-        IFantasyDataService fantasyDataService, IProjectionRepository projectionRepository, IOptionsMonitor<Season> season, IMemoryCache cache) : IAdjustmentService
+        IFantasyDataService fantasyDataService, IProjectionRepository projectionRepository, IOptionsMonitor<Season> season, IMemoryCache cache, IMapper mapper) : IAdjustmentService
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -315,7 +316,8 @@ namespace Football.Projections.Services
             if (matchupRanks.Count > 0)
             {
                 var avgMatchup = matchupRanks.ElementAt((int)Math.Floor((double)(matchupRanks.Count / 2)));
-                var teamDictionary = (await playerService.GetPlayerTeams(_season.CurrentSeason, weekProjections.Select(w => w.PlayerId))).ToDictionary(p => p.PlayerId);
+                var teamDictionary = position != Position.DST ? (await playerService.GetPlayerTeams(_season.CurrentSeason, weekProjections.Select(w => w.PlayerId))).ToDictionary(p => p.PlayerId)
+                                                    : (mapper.Map<List<PlayerTeam>>(await playerService.GetAllTeams())).ToDictionary(p => p.PlayerId);
                 var scheduleDictionary = (await playerService.GetWeeklySchedule(_season.CurrentSeason, weekProjections.First().Week)).ToDictionary(s => s.TeamId);
 
                 foreach (var w in weekProjections)

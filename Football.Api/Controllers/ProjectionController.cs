@@ -1,5 +1,6 @@
 ﻿using Football.Enums;
 using Football.Models;
+using Football.Players.Models;
 using Football.Players.Interfaces;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
@@ -205,7 +206,8 @@ namespace Football.Api.Controllers
             else
                 models = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum, filter));
 
-            var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId);
+            var teamDictionary = positionEnum != Position.DST ? (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId)
+                                : (mapper.Map<List<PlayerTeam>>(await playersService.GetAllTeams())).ToDictionary(p => p.PlayerId);
             var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, currentWeek)).ToDictionary(s => s.TeamId);
             var consensusProjectionDictionary = (await statisticsService.GetConsensusWeeklyProjectionsByPosition(_season.CurrentSeason, currentWeek, positionEnum)).ToDictionary(c => c.PlayerId);
 

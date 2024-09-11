@@ -125,6 +125,7 @@ namespace Football.Projections.Services
         private async Task<IEnumerable<WeekProjection>> CalculateProjections<T>(List<T> model, Position position, int currentWeek, WeeklyTunings tunings, int seasonGames, List<string>? filter = null)
         {
             List<WeekProjection> projections = [];
+            
             var coefficients = await CalculateCoefficients(model, position, filter);
             var players = await playersService.GetPlayersByPosition(position, activeOnly: true);
             var seasonProjections = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), _season.CurrentSeason);
@@ -136,7 +137,7 @@ namespace Football.Projections.Services
 
                 if (projectedPoints > 0)
                 {
-                    var seasonProjection = seasonProjections.TryGetValue(player.PlayerId, out var proj) ? proj : 0;
+                    var seasonProjection = seasonProjections.TryGetValue(player.PlayerId, out var proj) ? proj : settingsService.GetAverageProjectionByPosition(position, await settingsService.GetSeasonTunings(_season.CurrentSeason));
                     var projection = seasonProjection > 0 ? WeightedWeeklyProjection(seasonProjection / seasonGames, projectedPoints, currentWeek - 1, tunings) : projectedPoints;
                     var avgError = await GetAverageProjectionError(player.PlayerId);
 
@@ -181,7 +182,7 @@ namespace Football.Projections.Services
         private async Task<List<WRModelWeek>> WRProjectionModel() => mapper.Map<List<WRModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataWR>(Position.WR));
         private async Task<List<TEModelWeek>> TEProjectionModel() => mapper.Map<List<TEModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataTE>(Position.TE));
         private async Task<List<KModelWeek>> KProjectionModel() => mapper.Map<List<KModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataK>(Position.K));
-        private async Task<List<DSTModelWeek>> DSTProjectionModel() => mapper.Map<List<DSTModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataDST>(Position.TE));
+        private async Task<List<DSTModelWeek>> DSTProjectionModel() => mapper.Map<List<DSTModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataDST>(Position.DST));
         private async Task<Vector<double>> GetWeightedAverageVector(Player player, int currentWeek, WeeklyTunings tunings, List<string>? filter = null)
         {
             _ = Enum.TryParse(player.Position, out Position position);

@@ -75,8 +75,21 @@
                     </tr>
                     <tr>
                         <td><b style="color:@form.PositionColor("RB")">RB</b></td>
-                        <td><a class="page-links" href="@PlayerPage(rbTeam.ElementAt(1).PlayerId)">@rbTeam.ElementAt(1).Name</a>: @rbTeam.ElementAt(1).FantasyPoints</td>
-                        <td><a class="page-links" href="@PlayerPage(rbOpp.ElementAt(1).PlayerId)">@rbOpp.ElementAt(1).Name</a>: @rbOpp.ElementAt(1).FantasyPoints</td>
+                        @if (rbTeam.Count > 1){
+                            <td><a class="page-links" href="@PlayerPage(rbTeam.ElementAt(1).PlayerId)">@rbTeam.ElementAt(1).Name</a>: @rbTeam.ElementAt(1).FantasyPoints</td>
+                        }
+                        else
+                        {
+                            <td>--</td>
+                        }
+                        @if (rbOpp.Count > 1)
+                        {
+                            <td><a class="page-links" href="@PlayerPage(rbOpp.ElementAt(1).PlayerId)">@rbOpp.ElementAt(1).Name</a>: @rbOpp.ElementAt(1).FantasyPoints</td>
+                        }
+                        else
+                        {
+                            <td>--</td>
+                        }
                     </tr>
                     <tr>
                         <td><b style="color:@form.PositionColor("WR")">WR</b></td>
