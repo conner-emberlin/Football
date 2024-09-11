@@ -41,7 +41,8 @@ namespace Football.Fantasy.Services
                     var weeklyFantasy = await _fantasyService.GetWeeklyFantasy(rp.PlayerId);
                     var goodWeekCount = weeklyFantasy.Count(w => w.FantasyPoints > _settingsService.GoodWeek(pos));
                     var recentWeekFantasy = weeklyFantasy.FirstOrDefault(wf => wf.Week == week - 1);            
-                    if(goodWeekCount > _settings.GoodWeekMinimum && recentWeekFantasy != null)
+                    if((week > 2 && goodWeekCount > _settings.GoodWeekMinimum && recentWeekFantasy != null) 
+                            || (week == 2 & goodWeekCount == _settings.GoodWeekMinimum && recentWeekFantasy != null))
                     {
                         if (recentWeekFantasy.FantasyPoints > _settingsService.GoodWeek(pos))
                         {

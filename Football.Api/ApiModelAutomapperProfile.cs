@@ -164,6 +164,7 @@ namespace Football.Api
                 .ForMember(t => t.Team, o => o.MapFrom(t => t.PlayerTeam != null ? t.PlayerTeam.Team : string.Empty));
             CreateMap<WaiverWireCandidate, WaiverWireCandidateModel>()
                 .ForMember(w => w.Name, o => o.MapFrom(w => w.Player.Name))
+                .ForMember(w => w.PlayerId, o => o.MapFrom(w => w.Player.PlayerId))
                 .ForMember(w => w.Position, o => o.MapFrom(w => w.Player.Position))
                 .ForMember(w => w.Team, o => o.MapFrom(w => w.PlayerTeam != null ? w.PlayerTeam.Team : string.Empty));
             CreateMap<Player, SimplePlayerModel>();
