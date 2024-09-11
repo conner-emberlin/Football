@@ -75,7 +75,7 @@ namespace Football.Projections.Services
             if (projections.Any())
             {
                 projections = await adjustmentService.AdjustmentEngine(projections.ToList(), tunings);
-                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints);
+                var formattedProjections = projections.OrderByDescending(p => p.ProjectedPoints).Take(GetProjectionsCount(position, tunings));
                 return formattedProjections;
             }
             return projections;
@@ -246,6 +246,18 @@ namespace Football.Projections.Services
                 }
             }
             return await adjustmentService.AdjustmentEngine(weekOneProjections, tunings);
+        }
+
+        private int GetProjectionsCount(Position position, WeeklyTunings tunings)
+        {
+            return position switch
+            {
+                Position.QB => tunings.QBProjectionCount,
+                Position.RB => tunings.RBProjectionCount,
+                Position.WR => tunings.WRProjectionCount,
+                Position.TE => tunings.TEProjectionCount,
+                _ => 32
+            };
         }
     }    
 }

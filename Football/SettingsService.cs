@@ -111,7 +111,7 @@ namespace Football
                                             && !p.ToString()!.Contains(Model.Position.ToString())
                                             && !p.ToString()!.Contains(Model.TeamId.ToString())
                                             ).ToList();
-            return filter != null ? props.Where(p => filter.Select(f => PascalCase(f)).Contains(p.Name)).ToList() : props;
+            return filter != null ? props.Where(p => filter.Select(f => f.Replace(" ", "").ToLower()).Contains(p.Name.ToLower())).ToList() : props;
         }
 
         public IEnumerable<string> GetPropertyNamesFromModel<T>()
@@ -124,11 +124,6 @@ namespace Football
         public bool GetFromCache<T>(int id, Cache cache, out T cachedValue) => _cache.TryGetValue(id.ToString() + cache.ToString(), out cachedValue!);
 
         private string ConvertToWords(string str) => Regex.Replace(str, "[a-z][A-Z]", m => $"{m.Value[0]} {char.ToLower(m.Value[1])}");
-        private string PascalCase(string str)
-        {
-            var textInfo = CultureInfo.CurrentCulture.TextInfo;
-            return textInfo.ToTitleCase(str).Replace(" ", "");
-        }
 
     }
 }
