@@ -59,5 +59,15 @@ namespace Football.Fantasy.Repository
                             ORDER BY [PlayerId], [Season]";
             return (await dbConnection.QueryAsync<SeasonFantasy>(query, new { position, minGames })).ToList();
         }
+
+        public async Task<Dictionary<int, double>> GetAverageWeeklyFantasyPoints(IEnumerable<int> playerIds, int season)
+        {
+            var query = $@"select PlayerId, AVG(FantasyPoints) as AverageFantasy
+                           from WeeklyFantasyData 
+                           where Season = @season
+                           and PlayerId IN @playerIds
+                           group by PlayerId";
+            return (await dbConnection.QueryAsync<(int PlayerId, double AverageFantasy)>(query, new { playerIds, season })).ToDictionary(p => p.PlayerId, p => p.AverageFantasy);
+        }
     }
 }

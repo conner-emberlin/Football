@@ -46,12 +46,12 @@ namespace Football.Api.Controllers
                 count += await weeklyDataService.UploadWeeklySnapCounts(season, week, Position.WR.ToString());
                 count += await weeklyDataService.UploadWeeklySnapCounts(season, week, Position.TE.ToString());
 
-                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.QB.ToString(), ignoreList);
-                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.RB.ToString(), ignoreList);
-                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.WR.ToString(), ignoreList);
-                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.TE.ToString(), ignoreList);
-                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.DST.ToString(), ignoreList);
-                count += await weeklyDataService.UploadConsensusWeeklyProjections(week, Position.K.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week + 1, Position.QB.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week + 1, Position.RB.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week + 1, Position.WR.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week + 1, Position.TE.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week + 1, Position.DST.ToString(), ignoreList);
+                count += await weeklyDataService.UploadConsensusWeeklyProjections(week + 1, Position.K.ToString(), ignoreList);
                 return Ok(count);
             }
             return BadRequest();

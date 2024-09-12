@@ -95,22 +95,22 @@ namespace Football.Api.Controllers
         [HttpPost("adp/{position}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadADP(string position) => Ok(await seasonDataService.UploadADP(_season.CurrentSeason, position));
+        public async Task<IActionResult> UploadADP(string position) => Ok(await seasonDataService.UploadADP(_season.CurrentSeason, position));
 
         [HttpPost("consensus-projections/{position}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadConsensusProjections(string position) => Ok(await seasonDataService.UploadConsensusProjections(position));
+        public async Task<IActionResult> UploadConsensusProjections(string position) => Ok(await seasonDataService.UploadConsensusProjections(position));
 
         [HttpPost("consensus-weekly-projections/{week}/{position}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadConsensusWeeklyProjections(int week, string position) => Ok(await weeklyDataService.UploadConsensusWeeklyProjections(week, position, await playersService.GetIgnoreList()));
+        public async Task<IActionResult> UploadConsensusWeeklyProjections(int week, string position) => Ok(await weeklyDataService.UploadConsensusWeeklyProjections(week, position, await playersService.GetIgnoreList()));
 
         [HttpPost("snaps/{position}/{season}/{week}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadWeeklySnapCounts(string position, int season, int week) => Ok(await weeklyDataService.UploadWeeklySnapCounts(season, week, position));
+        public async Task<IActionResult> UploadWeeklySnapCounts(string position, int season, int week) => Ok(await weeklyDataService.UploadWeeklySnapCounts(season, week, position));
 
     }
 }

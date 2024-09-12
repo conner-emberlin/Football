@@ -110,49 +110,56 @@
         <text>Record deleted.</text>
     }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
-
-    <h5>Week @players.First().Week</h5>
-    <div class="table_container">
-        <table class="base_table">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Name</th>
-                    <th>Team</th>
-                    <th>Opponent</th>
-                    <th>Points</th>
-                    <th>Consensus</th>
-                    @if (players.First().CanDelete)
-                    {
-                        <th></th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var player in players)
-                {
-                    var logoPhotoPath = player.Team != null ? "https://localhost:7237/Logos/" + player.Team + ".png" : "https://localhost:7237/Logos/nfl.png";
-                    var opponentPhotoPath = !string.IsNullOrEmpty(player.Opponent) ? "https://localhost:7237/Logos/" + player.Opponent + ".png" : "https://localhost:7237/Logos/nfl.png";
+    @if (!loading)
+    {
+        <h5>Week @players.First().Week
+        </h5>
+        <div class="table_container">
+            <table class="base_table">
+                <thead>
                     <tr>
-                        <td>@GetRank(player)</td>
-                        <td><a class="page-links" href="Players/@player.PlayerId"> @player.Name</a></td>
-                        <td><img src="@logoPhotoPath" width="30" height="30"></td>                        
-                        <td><img src="@opponentPhotoPath" width="30" height="30"></td>
-                        <td>@Math.Round((double)player.ProjectedPoints,2)</td>
-                        <td>@player.ConsensusProjection</td>
-                        @if (player.CanDelete)
+                        <th></th>
+                        <th>Name</th>
+                        <th>Team</th>
+                        <th>Opponent</th>
+                        <th>Points</th>
+                        <th>Consensus</th>
+                        <th>Avg</th>
+                        <th>OppAvgPts</th>
+                        @if (players.First().CanDelete)
                         {
-                            <td>
-                                <button type="button" style="color:red" class="btn btn-link" @onclick="() => HandleDelete(player.PlayerId, player.Season, player.Week)">
-                                    <i sytle="color:red" class="oi oi-x" />
-                                </button>
-                            </td>
+                            <th></th>
                         }
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (var player in players)
+                    {
+                        var logoPhotoPath = player.Team != null ? "https://localhost:7237/Logos/" + player.Team + ".png" : "https://localhost:7237/Logos/nfl.png";
+                        var opponentPhotoPath = !string.IsNullOrEmpty(player.Opponent) ? "https://localhost:7237/Logos/" + player.Opponent + ".png" : "https://localhost:7237/Logos/nfl.png";
+                        <tr>
+                            <td>@GetRank(player)</td>
+                            <td><a class="page-links" href="Players/@player.PlayerId"> @player.Name</a></td>
+                            <td><img src="@logoPhotoPath" width="30" height="30"></td>                        
+                            <td><img src="@opponentPhotoPath" width="30" height="30"></td>
+                            <td>@Math.Round((double)player.ProjectedPoints,2)</td>
+                            <td>@player.ConsensusProjection</td>
+                            <td>@Math.Round(player.AverageFantasy, 2)</td>
+                            <td>@player.AveragePointsAllowedByOpponent</td>
+                            @if (player.CanDelete)
+                            {
+                                <td>
+                                    <button type="button" style="color:red" class="btn btn-link" @onclick="() => HandleDelete(player.PlayerId, player.Season, player.Week)">
+                                        <i sytle="color:red" class="oi oi-x" />
+                                    </button>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 }
 @code {
     private bool shouldRender;

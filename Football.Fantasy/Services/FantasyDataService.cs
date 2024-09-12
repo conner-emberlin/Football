@@ -22,6 +22,7 @@ namespace Football.Fantasy.Services
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasyBySeason(int playerId, int season) => await fantasyData.GetWeeklyFantasyByPlayer(playerId, season);
         public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => await fantasyData.GetWeeklyFantasy(season, week);
         public async Task<List<WeeklyFantasy>> GetAllWeeklyFantasyByPosition(Position position) => await fantasyData.GetAllWeeklyFantasyByPosition(position.ToString());
+        public async Task<Dictionary<int, double>> GetAverageWeeklyFantasyPoints(IEnumerable<int> playerIds, int season) => await fantasyData.GetAverageWeeklyFantasyPoints(playerIds, season);
         public async Task<int> PostSeasonFantasy(int season, Position position)
         {
             List<SeasonFantasy> seasonFantasy = [];
@@ -181,6 +182,24 @@ namespace Football.Fantasy.Services
                 cache.Set(Cache.SeasonTotals.ToString() + season.ToString(), leaders);
                 return leaders;
             }
+        }
+
+        public async Task<double> GetAverageSeasonFantasyTotal(int playerId)
+        {
+            var seasonFantasy = await GetSeasonFantasy(playerId, true);
+            return seasonFantasy.Count > 0 ? seasonFantasy.Select(f => f.FantasyPoints).Average() : 0;
+        }
+
+        public async Task<double> GetRecentSeasonFantasyTotal(int playerId)
+        {
+            var seasonFantasy = (await GetSeasonFantasy(playerId, true)).OrderByDescending(s => s.Season).FirstOrDefault();
+            if (seasonFantasy != null)
+            {
+                var seasonGames = await playersService.GetGamesBySeason(seasonFantasy.Season);
+                return seasonFantasy.FantasyPoints / seasonFantasy.Games * seasonGames;
+            }
+
+            return 0;
         }
     }
 }

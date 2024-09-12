@@ -18,7 +18,7 @@ namespace Football.Api.Controllers
     public class ProjectionController(IPlayersService playersService, IStatisticsService statisticsService,
         IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season, IFantasyAnalysisService fantasyAnalysisService, ISnapCountService snapCountService,
         IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, 
-        IAdjustmentService adjustmentService, IMapper mapper) : ControllerBase
+        IAdjustmentService adjustmentService, IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -210,16 +210,21 @@ namespace Football.Api.Controllers
                                 : (mapper.Map<List<PlayerTeam>>(await playersService.GetAllTeams())).ToDictionary(p => p.PlayerId);
             var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, currentWeek)).ToDictionary(s => s.TeamId);
             var consensusProjectionDictionary = (await statisticsService.GetConsensusWeeklyProjectionsByPosition(_season.CurrentSeason, currentWeek, positionEnum)).ToDictionary(c => c.PlayerId);
+            var averageFantasyDictionary = await fantasyDataService.GetAverageWeeklyFantasyPoints(models.Select(m => m.PlayerId), _season.CurrentSeason);
+            var matchupRankingsDictionary = (await matchupAnalysisService.GetPositionalMatchupRankingsFromSQL(positionEnum, _season.CurrentSeason, currentWeek)).ToDictionary(m => m.TeamId);
 
             foreach (var m in models)
             {
                 if (teamDictionary.TryGetValue(m.PlayerId, out var team))
                 {
+                    var schedule = scheduleDictionary[team.TeamId];
                     m.Team = team.Team;
-                    m.Opponent = scheduleDictionary[team.TeamId].OpposingTeam;
+                    m.Opponent = schedule.OpposingTeam;
+                    m.AveragePointsAllowedByOpponent = matchupRankingsDictionary[schedule.OpposingTeamId].AvgPointsAllowed;
                 }
 
-                m.ConsensusProjection = consensusProjectionDictionary.TryGetValue(m.PlayerId, out var cproj) ? cproj.FantasyPoints : 0; 
+                m.ConsensusProjection = consensusProjectionDictionary.TryGetValue(m.PlayerId, out var cproj) ? cproj.FantasyPoints : 0;
+                m.AverageFantasy = averageFantasyDictionary.TryGetValue(m.PlayerId, out var avg) ? avg : 0;
             }
 
             return Ok(models.OrderByDescending(m => m.ProjectedPoints));
