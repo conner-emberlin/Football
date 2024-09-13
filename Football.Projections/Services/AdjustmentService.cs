@@ -32,7 +32,9 @@ namespace Football.Projections.Services
         }
         public async Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections, WeeklyTunings tunings)
         {
-            weekProjections = await MatchupAdjustment(weekProjections, tunings);
+            if (weekProjections.Count == 0) return weekProjections;
+            
+            if (weekProjections.First().Week >= tunings.MinWeekMatchupAdjustment) weekProjections = await MatchupAdjustment(weekProjections, tunings);
             weekProjections = await InjuryAdustment(weekProjections);
             return weekProjections;
         }

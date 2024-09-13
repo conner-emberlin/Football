@@ -39,6 +39,7 @@
 
     private EspnNews? root = new();
     private List<Article> articles = new();
+    
     protected override async Task OnInitializedAsync()
     {
         loading = true;
@@ -61,5 +62,6 @@
         shouldRender = true;
         
     }
+    
 
 }

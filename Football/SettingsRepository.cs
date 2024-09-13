@@ -34,9 +34,9 @@ namespace Football
             _ = await DeleteWeeklyTunings(tunings.Season, tunings.Week);
 
             var query = $@"INSERT INTO [dbo].WeeklyTunings (Season, Week, RecentWeekWeight, ProjectionWeight, TamperedMin, TamperedMax, MinWeekWeighted, RecentWeeks, ErrorAdjustmentWeek,
-                            QBProjectionCount, RBProjectionCount, WRProjectionCount, TEProjectionCount)
+                            QBProjectionCount, RBProjectionCount, WRProjectionCount, TEProjectionCount, MinWeekMatchupAdjustment)
                             VALUES (@Season, @Week, @RecentWeekWeight, @ProjectionWeight, @TamperedMin, @TamperedMax, @MinWeekWeighted, @RecentWeeks, @ErrorAdjustmentWeek,
-                            @QBProjectionCount, @RBProjectionCount, @WRProjectionCount, @TEProjectionCount )";
+                            @QBProjectionCount, @RBProjectionCount, @WRProjectionCount, @TEProjectionCount, @MinWeekMatchupAdjustment )";
             return (await dbConnection.ExecuteAsync(query, tunings)) > 0;
         }
 

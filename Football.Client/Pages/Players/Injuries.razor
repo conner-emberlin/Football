@@ -159,6 +159,7 @@ else if (injuryEdits.Any() && !badRequestError)
                         <td>@injury.InjuryStartWeek</td>
                         <td>@FormatEndWeek(injury.InjuryEndWeek)</td>
                         <td>@injury.Description</td>
+                        <td>@injury.GamesPlayedInjured</td>
                         <td>
                             <button type="button" class="btn btn-link" @onclick="() => EnableEditing(true, injury)">
                                 <i class="oi oi-pencil" />

@@ -14,6 +14,21 @@
     <text>Tunings updated</text>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
 }
+
+@if (seasonAdjustmentsUpdated)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <text>Season Adjustments updated</text>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+}
+
+@if (weeklyTuningsUpdated)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <text>Weekly Tunings updated</text>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+}
+
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 @foreach (var setting in settings)
 {
@@ -488,6 +503,14 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
                         <input type="text" class="form-control" @bind="@weeklyTunings.TEProjectionCount" />
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        MinWeekMatchupAdjustment
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@weeklyTunings.MinWeekMatchupAdjustment" />
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -687,5 +710,6 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
         seasonTuningsSetting = false;
         seasonAdjustmentsSetting = false;
         weeklyTuningsSetting = false;
+        weeklyTuningsUpdated = false;
     }
 }

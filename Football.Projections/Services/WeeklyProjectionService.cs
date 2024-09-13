@@ -138,7 +138,7 @@ namespace Football.Projections.Services
                 if (projectedPoints > 0)
                 {
                     var seasonProjection = seasonProjections.TryGetValue(player.PlayerId, out var proj) ? proj : await fantasyService.GetRecentSeasonFantasyTotal(player.PlayerId);
-                    var projection = seasonProjection > 0 ? WeightedWeeklyProjection(seasonProjection / seasonGames, projectedPoints, currentWeek - 1, tunings) : projectedPoints;
+                    var projection = seasonProjection > 0 ? WeightedWeeklyProjection(seasonProjection / seasonGames, projectedPoints, currentWeek, tunings) : projectedPoints;
                     var avgError = await GetAverageProjectionError(player.PlayerId);
 
                     projections.Add(new WeekProjection

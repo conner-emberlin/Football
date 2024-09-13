@@ -113,6 +113,7 @@ namespace Football.Models
         public int RBProjectionCount { get; set; }
         public int WRProjectionCount { get; set; }
         public int TEProjectionCount { get; set; }
+        public int MinWeekMatchupAdjustment { get; set; }
     }
 
 
