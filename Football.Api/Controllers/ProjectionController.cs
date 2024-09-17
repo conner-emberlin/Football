@@ -267,7 +267,7 @@ namespace Football.Api.Controllers
         [HttpGet("weekly-analysis/player/{playerId}")]
         [ProducesResponseType(typeof(WeeklyProjectionAnalysisModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyProjectionAnalysis(int playerId) => Ok(mapper.Map<List<WeeklyProjectionAnalysisModel>>(await analysisService.GetWeeklyProjectionAnalysis(playerId)));
+        public async Task<IActionResult> GetWeeklyProjectionAnalysis(int playerId) => Ok(mapper.Map<WeeklyProjectionAnalysisModel>(await analysisService.GetWeeklyProjectionAnalysis(playerId)));
 
         [HttpGet("weekly-error/{position}/{week}")]
         [ProducesResponseType(typeof(List<WeeklyProjectionErrorModel>), StatusCodes.Status200OK)]

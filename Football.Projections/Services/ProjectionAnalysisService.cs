@@ -77,7 +77,7 @@ namespace Football.Projections.Services
         public async Task<Dictionary<int, double>> GetAverageWeeklyProjectionErrorsByPosition(Position position, int season)
         {
             var weeklyFantasy = await fantasyService.GetWeeklyFantasy(position, season);           
-            if (weeklyFantasy.Count > 0 && weeklyFantasy.Max(w => w.Week) > 1)
+            if (weeklyFantasy.Count > 0)
             {
                 var weeks = weeklyFantasy.Select(w => w.Week).Distinct();
                 List<WeekProjection> projections = [];
