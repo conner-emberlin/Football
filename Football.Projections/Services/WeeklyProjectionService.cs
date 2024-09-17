@@ -139,7 +139,6 @@ namespace Football.Projections.Services
                 {
                     var seasonProjection = seasonProjections.TryGetValue(player.PlayerId, out var proj) ? proj : await fantasyService.GetRecentSeasonFantasyTotal(player.PlayerId);
                     var projection = seasonProjection > 0 ? WeightedWeeklyProjection(seasonProjection / seasonGames, projectedPoints, currentWeek, tunings) : projectedPoints;
-                    var avgError = await GetAverageProjectionError(player.PlayerId);
 
                     projections.Add(new WeekProjection
                     {
@@ -148,7 +147,7 @@ namespace Football.Projections.Services
                         Week = currentWeek,
                         Name = player.Name,
                         Position = player.Position,
-                        ProjectedPoints = (2 * projection - avgError) / 2
+                        ProjectedPoints = projection
                     });
                 }
             }
@@ -164,18 +163,6 @@ namespace Football.Projections.Services
             return MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
         }
 
-        private async Task<double> GetAverageProjectionError(int playerId)
-        {
-            var weeklyProjections = await GetPlayerProjections(playerId);
-            var weeklyFantasy = await fantasyService.GetWeeklyFantasy(playerId);
-            if (weeklyProjections != null && weeklyFantasy.Count > 0 && weeklyProjections.Count() > _tunings.ErrorAdjustmentWeek - 1)
-            {
-                var diffs = weeklyProjections.Join(weeklyFantasy, wp => wp.Week, wf => wf.Week, (wp, wf) => new { WeekProjection = wp, WeeklyFantasy = wf })
-                                            .Select(r => r.WeekProjection.ProjectedPoints - r.WeeklyFantasy.FantasyPoints);
-                return diffs.Any() ? diffs.Average() : 0;                                                          
-            }
-            return 0;
-        }
         private async Task<List<WeeklyFantasy>> FantasyProjectionModel(Position position) => await fantasyService.GetAllWeeklyFantasyByPosition(position);
         private async Task<List<QBModelWeek>> QBProjectionModel() => mapper.Map<List<QBModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataQB>(Position.QB));
         private async Task<List<RBModelWeek>> RBProjectionModel() => mapper.Map<List<RBModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataRB>(Position.RB));

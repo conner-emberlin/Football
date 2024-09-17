@@ -20,7 +20,7 @@ namespace Football.Projections.Services
         public async Task<List<WeeklyProjectionError>> GetWeeklyProjectionError(int playerId)
         {
             List<WeeklyProjectionError> errors = [];
-            var projections = await weekProjection.GetPlayerProjections(playerId);
+            var projections = (await weekProjection.GetPlayerProjections(playerId)).Where(p => p.Season == _season.CurrentSeason);
             if (projections != null)
             {
                 var fantasy = (await fantasyService.GetWeeklyFantasy(playerId)).ToDictionary(f => f.Week);
@@ -72,6 +72,31 @@ namespace Football.Projections.Services
                 return weeklyProjectionErrors;
             }
             return Enumerable.Empty<WeeklyProjectionError>().ToList();  
+        }
+
+        public async Task<Dictionary<int, double>> GetAverageWeeklyProjectionErrorsByPosition(Position position, int season)
+        {
+            var weeklyFantasy = await fantasyService.GetWeeklyFantasy(position, season);           
+            if (weeklyFantasy.Count > 0 && weeklyFantasy.Max(w => w.Week) > 1)
+            {
+                var weeks = weeklyFantasy.Select(w => w.Week).Distinct();
+                List<WeekProjection> projections = [];
+                foreach (var week in weeks)
+                {
+                    if (weekProjection.GetProjectionsFromSQL(position, week, out var weekProj))
+                    {
+                        projections.AddRange(weekProj);
+                    }
+                }
+
+                var weeklyData = weeklyFantasy.Join(projections, f => new { f.PlayerId, f.Week, f.Season }, p => new { p.PlayerId, p.Week, p.Season }, (f, p) => new { WeeklyFantasy = f, WeeklyProjection = p })
+                                              .GroupBy(w => new { w.WeeklyFantasy.PlayerId })
+                                              .Select(p => new { p.Key.PlayerId, AverageDiff = p.Average(f => Math.Abs(f.WeeklyFantasy.FantasyPoints - f.WeeklyProjection.ProjectedPoints)) })
+                                              .ToDictionary(d => d.PlayerId, d => d.AverageDiff);
+                return weeklyData;
+            }
+
+            return [];
         }
 
         public async Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(Position position, int week)

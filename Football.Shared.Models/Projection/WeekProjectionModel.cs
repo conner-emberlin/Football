@@ -13,6 +13,7 @@
         public string Opponent { get; set; } = "";
         public double ConsensusProjection { get; set; }
         public double AverageFantasy { get; set; }
+        public double AverageWeeklyProjectionError { get; set; }
         public double AveragePointsAllowedByOpponent { get; set; }
 
     }

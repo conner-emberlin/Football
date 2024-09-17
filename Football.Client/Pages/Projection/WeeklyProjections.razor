@@ -112,6 +112,8 @@
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     @if (!loading)
     {
+        var showErrors = players.Any(p => p.AverageWeeklyProjectionError > 0);
+
         <h5>Week @players.First().Week
         </h5>
         <div class="table_container">
@@ -124,7 +126,8 @@
                         <th>Opponent</th>
                         <th>Points</th>
                         <th>Consensus</th>
-                        <th>Avg</th>
+                        <th>AvgFPts</th>
+                        <th>AvgError</th>
                         <th>OppAvgPts</th>
                         @if (players.First().CanDelete)
                         {
@@ -134,7 +137,7 @@
                 </thead>
                 <tbody>
                     @foreach (var player in players)
-                    {
+                    {                       
                         var logoPhotoPath = player.Team != null ? "https://localhost:7237/Logos/" + player.Team + ".png" : "https://localhost:7237/Logos/nfl.png";
                         var opponentPhotoPath = !string.IsNullOrEmpty(player.Opponent) ? "https://localhost:7237/Logos/" + player.Opponent + ".png" : "https://localhost:7237/Logos/nfl.png";
                         <tr>
@@ -145,6 +148,14 @@
                             <td>@Math.Round((double)player.ProjectedPoints,2)</td>
                             <td>@player.ConsensusProjection</td>
                             <td>@Math.Round(player.AverageFantasy, 2)</td>
+                            @if (showErrors)
+                            {
+                                <td>@Math.Round(player.AverageWeeklyProjectionError, 2)</td>
+                            }
+                            else
+                            {
+                                <td>--</td>
+                            }
                             <td>@player.AveragePointsAllowedByOpponent</td>
                             @if (player.CanDelete)
                             {

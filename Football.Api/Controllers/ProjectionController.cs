@@ -212,6 +212,7 @@ namespace Football.Api.Controllers
             var consensusProjectionDictionary = (await statisticsService.GetConsensusWeeklyProjectionsByPosition(_season.CurrentSeason, currentWeek, positionEnum)).ToDictionary(c => c.PlayerId);
             var averageFantasyDictionary = await fantasyDataService.GetAverageWeeklyFantasyPoints(models.Select(m => m.PlayerId), _season.CurrentSeason);
             var matchupRankingsDictionary = (await matchupAnalysisService.GetPositionalMatchupRankingsFromSQL(positionEnum, _season.CurrentSeason, currentWeek)).ToDictionary(m => m.TeamId);
+            var avgProjectionErrorDictionary = await analysisService.GetAverageWeeklyProjectionErrorsByPosition(positionEnum, _season.CurrentSeason);
 
             foreach (var m in models)
             {
@@ -223,6 +224,7 @@ namespace Football.Api.Controllers
                     m.AveragePointsAllowedByOpponent = matchupRankingsDictionary[schedule.OpposingTeamId].AvgPointsAllowed;
                 }
 
+                m.AverageWeeklyProjectionError = avgProjectionErrorDictionary.TryGetValue(m.PlayerId, out var avgError) ? avgError : 0;
                 m.ConsensusProjection = consensusProjectionDictionary.TryGetValue(m.PlayerId, out var cproj) ? cproj.FantasyPoints : 0;
                 m.AverageFantasy = averageFantasyDictionary.TryGetValue(m.PlayerId, out var avg) ? avg : 0;
             }
