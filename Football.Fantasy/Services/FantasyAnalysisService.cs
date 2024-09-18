@@ -278,7 +278,7 @@ namespace Football.Fantasy.Services
 
         public async Task<List<WeeklyFantasyTrend>> GetWeeklyFantasyTrendsByPosition(Position position, int season)
         {
-            if (cache.TryGetValue<List<WeeklyFantasyTrend>>(Cache.WeeklyFantasyTrends.ToString(), out var weeklyTrends) && weeklyTrends != null) 
+            if (cache.TryGetValue<List<WeeklyFantasyTrend>>(position.ToString() + Cache.WeeklyFantasyTrends.ToString(), out var weeklyTrends) && weeklyTrends != null) 
                 return weeklyTrends;
 
             List<WeeklyFantasyTrend> trends = [];
@@ -291,7 +291,7 @@ namespace Football.Fantasy.Services
             {
                 trends.AddRange(GetWeeklyFantasyTrend([.. weeklyData.Where(w => w.Week == week).OrderByDescending(w => w.FantasyPoints)]));
             }
-            cache.Set(Cache.WeeklyFantasyTrends.ToString(), trends);
+            cache.Set(position.ToString() + Cache.WeeklyFantasyTrends.ToString(), trends);
             return trends;
         }
 

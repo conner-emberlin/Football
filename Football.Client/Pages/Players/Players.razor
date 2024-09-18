@@ -148,7 +148,9 @@ else if (!loading && !playerSelected)
                             <th>RYds</th>
                             <th>RTd</th>
                             <th>Fum</th>
+                            <th>Rank</th>
                             <th>Fpts &nbsp;<span class="sort-link" onclick="@(() => ShowWeekly())"><span class="oi oi-expand-down"></span></span></th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -156,6 +158,8 @@ else if (!loading && !playerSelected)
                         {
                             @foreach (var stat in playerData.WeeklyData)
                             {
+                                var trend = playerData.WeeklyFantasyTrends.First(w => w.Week == stat.Week).PositionalRank;
+
                                 <tr>
                                     <td>@stat.Season</td>
                                     <td>@stat.Week</td>
@@ -169,13 +173,14 @@ else if (!loading && !playerSelected)
                                     <td>@stat.RushingYards</td>
                                     <td>@stat.RushingTouchdowns</td>
                                     <td>@stat.Fumbles</td>
+                                    <td><b style="@form.FormatQBRankColor(trend)">@string.Format("QB{0}", trend)</b></td>
                                     <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
 
                                 </tr>
                             }
                             <tr>
                                 <td><b>Total</b></td>
-                                <td>-</td>
+                                <td>--</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.Completions)</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.Attempts)</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.PassingYards)</td>
@@ -186,11 +191,12 @@ else if (!loading && !playerSelected)
                                 <td>@playerData.WeeklyData.Sum(w => w.RushingYards)</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.RushingTouchdowns)</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.Fumbles)</td>
+                                <td>--</td>
                                 <td>@Math.Round(playerData.WeeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
                             </tr>
                             <tr>
                                 <td><b>Avg</b></td>
-                                <td>-</td>
+                                <td>--</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.Completions))</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.Attempts) )</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.PassingYards) )</td>
@@ -201,11 +207,12 @@ else if (!loading && !playerSelected)
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards))</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns))</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles))</td>
+                                <td>--</td>
                                 <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
                             </tr>
                             <tr>
                                 <td><b>Pace</b></td>
-                            <td>-</td>
+                            <td>--</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.Completions)*17)</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.Attempts)*17)</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.PassingYards)*17)</td>
@@ -216,6 +223,7 @@ else if (!loading && !playerSelected)
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards)*17)</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns)*17)</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles)*17)</td>
+                                <td>--</td>
                             <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
                         </tr>
                         }
@@ -292,14 +300,17 @@ else if (!loading && !playerSelected)
                             <th>RecYds</th>
                             <th>RecTD</th>
                             <th>Fum</th>
+                            <th>Rank</th>
                             <th>Fpts &nbsp;<span class="sort-link" onclick="@(() => ShowWeekly())"><span class="oi oi-expand-down"></span></span></th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (showWeekly)
                         {
+                            
                             @foreach (var stat in playerData.WeeklyData)
                             {
+                                var trend = playerData.WeeklyFantasyTrends.First(w => w.Week == stat.Week).PositionalRank;
                                 <tr>
                                     <td>@stat.Season</td>
                                     <td>@stat.Week</td>
@@ -311,6 +322,7 @@ else if (!loading && !playerSelected)
                                     <td>@stat.ReceivingYards</td>
                                     <td>@stat.ReceivingTouchdowns</td>
                                     <td>@stat.Fumbles</td>
+                                    <td><b style="@form.FormatRBRankColor(trend)">@string.Format("RB{0}", trend)</b></td>
                                     <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
                                 </tr>
                             }
@@ -325,6 +337,7 @@ else if (!loading && !playerSelected)
                                 <td>@playerData.WeeklyData.Sum(w => w.ReceivingYards)</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.ReceivingTouchdowns)</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.Fumbles)</td>
+                                <td>--</td>
                                 <td>@Math.Round(playerData.WeeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
                             </tr>
                             <tr>
@@ -338,6 +351,7 @@ else if (!loading && !playerSelected)
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingYards) )</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingTouchdowns))</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles) )</td>
+                                <td>--</td>
                                 <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
                             </tr>
                             <tr>
@@ -351,6 +365,7 @@ else if (!loading && !playerSelected)
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingYards)*17)</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.ReceivingTouchdowns)*17)</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles)*17)</td>
+                            <td>--</td>
                             <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
                         </tr>
                         }
@@ -424,14 +439,17 @@ else if (!loading && !playerSelected)
                             <th>RYds</th>
                             <th>RTD</th>
                             <th>Fum</th>
+                            <th>Rank</th>
                             <th>Fpts &nbsp;<span class="sort-link" onclick="@(() => ShowWeekly())"><span class="oi oi-expand-down"></span></span></th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (showWeekly)
                         {
+
                             @foreach (var stat in playerData.WeeklyData)
                             {
+                                var trend = playerData.WeeklyFantasyTrends.First(w => w.Week == stat.Week).PositionalRank;
                                 <tr>
                                     <td>@stat.Season</td>
                                     <td>@stat.Week</td>
@@ -444,6 +462,7 @@ else if (!loading && !playerSelected)
                                     <td>@stat.RushingYards</td>
                                     <td>@stat.RushingTouchdowns</td>
                                     <td>@stat.Fumbles</td>
+                                    <td><b style="@form.FormatWRRankColor(trend)">@string.Format("WR{0}", trend)</b></td>
                                     <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
                                 </tr>
                             }
@@ -459,6 +478,7 @@ else if (!loading && !playerSelected)
                                 <td>@playerData.WeeklyData.Sum(w => w.RushingYards)</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.RushingTouchdowns)</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.Fumbles)</td>
+                                <td>--</td>
                                 <td>@Math.Round(playerData.WeeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
                             </tr>
                             <tr>
@@ -473,6 +493,7 @@ else if (!loading && !playerSelected)
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards))</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns) )</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles) )</td>
+                                <td>--</td>
                                 <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
                             </tr>
                             <tr>
@@ -487,6 +508,7 @@ else if (!loading && !playerSelected)
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards)*17)</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns)*17)</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles)*17)</td>
+                            <td>--</td>
                             <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
                         </tr>
                         }
@@ -562,14 +584,17 @@ else if (!loading && !playerSelected)
                             <th>RYds</th>
                             <th>RTD</th>
                             <th>Fum</th>
+                            <th>Rank</th>
                             <th>Fpts &nbsp;<span class="sort-link" onclick="@(() => ShowWeekly())"><span class="oi oi-expand-down"></span></span></th>
                         </tr>
                     </thead>
                     <tbody>
                         @if (showWeekly)
                         {
+
                             @foreach (var stat in playerData.WeeklyData)
                             {
+                                var trend = playerData.WeeklyFantasyTrends.First(w => w.Week == stat.Week).PositionalRank;
                                 <tr>
                                     <td>@stat.Season</td>
                                     <td>@stat.Week</td>
@@ -582,6 +607,7 @@ else if (!loading && !playerSelected)
                                     <td>@stat.RushingYards</td>
                                     <td>@stat.RushingTouchdowns</td>
                                     <td>@stat.Fumbles</td>
+                                    <td><b style="@form.FormatTERankColor(trend)">@string.Format("TE{0}", trend)</b></td>
                                     <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
                                 </tr>
                             }
@@ -597,6 +623,7 @@ else if (!loading && !playerSelected)
                                 <td>@playerData.WeeklyData.Sum(w => w.RushingYards)</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.RushingTouchdowns)</td>
                                 <td>@playerData.WeeklyData.Sum(w => w.Fumbles)</td>
+                                <td>--</td>
                                 <td>@Math.Round(playerData.WeeklyFantasy.Sum(w => w.FantasyPoints),2)</td>
                             </tr>
                             <tr>
@@ -611,6 +638,7 @@ else if (!loading && !playerSelected)
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards) )</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns))</td>
                                 <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles) )</td>
+                                <td>--</td>
                                 <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints), 2)</td>
                             </tr>
                             <tr>
@@ -625,6 +653,7 @@ else if (!loading && !playerSelected)
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingYards)*17)</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.RushingTouchdowns)*17)</td>
                             <td>@Math.Round(playerData.WeeklyData.Average(w => w.Fumbles)*17)</td>
+                            <td>--</td>
                             <td>@Math.Round(playerData.WeeklyFantasy.Average(w => w.FantasyPoints) * 17,2)</td>
                         </tr>
                         }
@@ -697,6 +726,7 @@ else if (!loading && !playerSelected)
                             <th>DefTD</th>
                             <th>Safety</th>
                             <th>SpecTD</th>
+                            <th>Rank</th>
                             <th>Fpts &nbsp;<span class="sort-link" onclick="@(() => ShowWeekly())"><span class="oi oi-expand-down"></span></span></th>
                         </tr>
                     </thead>
@@ -705,6 +735,7 @@ else if (!loading && !playerSelected)
                         {
                             @foreach (var stat in playerData.WeeklyData)
                             {
+                                var trend = playerData.WeeklyFantasyTrends.First(w => w.Week == stat.Week).PositionalRank;
                                 <tr>
                                     <td>@stat.Season</td>
                                     <td>@stat.Week</td>
@@ -715,6 +746,7 @@ else if (!loading && !playerSelected)
                                     <td>@stat.DefensiveTouchdowns</td>
                                     <td>@stat.DefensiveSafties</td>
                                     <td>@stat.SpecialTeamsTouchdowns</td>
+                                    <td><b style="@form.FormatDSTRankColor(trend)">@string.Format("DST{0}", trend)</b></td>
                                     <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints,2)</td>
                                 </tr>
                             }
@@ -782,6 +814,7 @@ else if (!loading && !playerSelected)
                             <th>50+</th>
                             <th>XP</th>
                             <th>XPA</th>
+                            <th>Rank</th>
                             <th>Fpts &nbsp;<span class="sort-link" onclick="@(() => ShowWeekly())"><span class="oi oi-expand-down"></span></span></th>
                         </tr>
                     </thead>
@@ -790,6 +823,7 @@ else if (!loading && !playerSelected)
                         {
                             @foreach (var stat in playerData.WeeklyData)
                             {
+                                var trend = playerData.WeeklyFantasyTrends.First(w => w.Week == stat.Week).PositionalRank;
                                 <tr>
                                     <td>@stat.Season</td>
                                     <td>@stat.Week</td>
@@ -802,6 +836,7 @@ else if (!loading && !playerSelected)
                                     <td>@stat.Fifty</td>
                                     <td>@stat.ExtraPoints</td>
                                     <td>@stat.ExtraPointAttempts</td>
+                                    <td><b style="@form.FormatKRankColor(trend)">@string.Format("K{0}", trend)</b></td>
                                     <td>@Math.Round(playerData.WeeklyFantasy.Where(s => s.Week == stat.Week).First().FantasyPoints, 2)</td>
                                 </tr>
                             }

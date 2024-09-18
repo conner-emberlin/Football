@@ -45,6 +45,45 @@ namespace Football.Client.Helpers
                   : "color:green";
         }
 
+        public string FormatQBRankColor(int rank)
+        {
+            return 1 <= rank && rank <= 12 ? "color:green"
+                  : 13 <= rank && rank < 20 ? "color:orange"
+                  : "color:red";
+        }
+
+        public string FormatRBRankColor(int rank)
+        {
+            return 1 <= rank && rank <= 16 ? "color:green"
+                  : 17 <= rank && rank < 28 ? "color:orange"
+                  : "color:red";
+        }
+
+        public string FormatWRRankColor(int rank)
+        {
+            return 1 <= rank && rank <= 20 ? "color:green"
+                  : 21 <= rank && rank < 34 ? "color:orange"
+                  : "color:red";
+        }
+        public string FormatTERankColor(int rank)
+        {
+            return 1 <= rank && rank <= 12 ? "color:green"
+                  : 13 <= rank && rank < 20 ? "color:orange"
+                  : "color:red";
+        }
+        public string FormatDSTRankColor(int rank)
+        {
+            return 1 <= rank && rank <= 12 ? "color:green"
+                  : 13 <= rank && rank < 20 ? "color:orange"
+                  : "color:red";
+        }
+        public string FormatKRankColor(int rank)
+        {
+            return 1 <= rank && rank <= 12 ? "color:green"
+                  : 13 <= rank && rank < 20 ? "color:orange"
+                  : "color:red";
+        }
+
         public string AdpDiffColor(double diff)
         {
             return diff < 0 ? "color:red" : "color:green";
