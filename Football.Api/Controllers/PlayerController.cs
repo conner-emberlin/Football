@@ -13,7 +13,7 @@ namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season, IMapper mapper, IFantasyDataService fantasyDataService) : ControllerBase
+    public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season, IMapper mapper, IFantasyDataService fantasyDataService, IFantasyAnalysisService fantasyAnalysisService) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -72,7 +72,7 @@ namespace Football.Api.Controllers
                 Position.TE => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataTE>(position, playerId, season)),
                 Position.DST => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataDST>(position, playerId, season)),
                 Position.K => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataK>(position, playerId, season)),
-                _ => throw new NotImplementedException()
+                _ => []
             }).OrderByDescending(w => w.Week).ToList();
 
             playerModel.SeasonData = position switch
@@ -82,7 +82,7 @@ namespace Football.Api.Controllers
                 Position.RB => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataRB>(position, playerId, true)),
                 Position.TE => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataTE>(position, playerId, true)),
                 Position.DST => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataDST>(position, playerId, true)),
-                _ => throw new NotImplementedException()
+                _ => []
             };
 
             playerModel.SeasonFantasy = mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetSeasonFantasy(playerId));
@@ -94,6 +94,8 @@ namespace Football.Api.Controllers
                 playerModel.RunningFantasyTotal = currentTotals.First(c => c.PlayerId == playerId).FantasyPoints;
                 playerModel.OverallRank = currentTotals.Select(p => p.PlayerId).ToList().IndexOf(playerId);
                 playerModel.PositionRank = currentTotals.Where(c => c.Position == player.Position).Select(p => p.PlayerId).ToList().IndexOf(playerId);
+
+                playerModel.WeeklyFantasyTrends = mapper.Map<List<WeeklyFantasyTrendModel>>(await fantasyAnalysisService.GetPlayerWeeklyFantasyTrends(playerId, season));
             }
            
             return Ok(playerModel);

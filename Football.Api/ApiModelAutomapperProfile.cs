@@ -181,6 +181,7 @@ namespace Football.Api
             CreateMap<InSeasonInjury, InSeasonInjuryModel>().ReverseMap();
             CreateMap<SeasonAdjustments, SeasonAdjustmentsModel>().ReverseMap();
             CreateMap<AdjustmentDescription, AdjustmentDescriptionModel>().ReverseMap();
+            CreateMap<WeeklyFantasyTrend, WeeklyFantasyTrendModel>();
         }
 
     }

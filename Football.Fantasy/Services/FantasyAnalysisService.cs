@@ -5,12 +5,13 @@ using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Football.Fantasy.Services
 {
     public class FantasyAnalysisService(IOptionsMonitor<Season> season,
         IPlayersService playersService, IFantasyDataService fantasyDataService, ISettingsService settingsService,
-        IStatisticsService statsService, IOptionsMonitor<FantasyScoring> scoring) : IFantasyAnalysisService
+        IStatisticsService statsService, IOptionsMonitor<FantasyScoring> scoring, IMemoryCache cache) : IFantasyAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
         private readonly FantasyScoring _scoring = scoring.CurrentValue;
@@ -273,6 +274,46 @@ namespace Football.Fantasy.Services
                 });
             }                        
             return splits;
+        }
+
+        public async Task<List<WeeklyFantasyTrend>> GetWeeklyFantasyTrendsByPosition(Position position, int season)
+        {
+            if (cache.TryGetValue<List<WeeklyFantasyTrend>>(Cache.WeeklyFantasyTrends.ToString(), out var weeklyTrends) && weeklyTrends != null) 
+                return weeklyTrends;
+
+            List<WeeklyFantasyTrend> trends = [];
+            var weeklyData = await fantasyDataService.GetWeeklyFantasy(position, season);
+
+            if (weeklyData.Count == 0) return trends;
+
+            var weeks = weeklyData.Select(w => w.Week).Distinct();
+            foreach (var week in weeks)
+            {
+                trends.AddRange(GetWeeklyFantasyTrend([.. weeklyData.Where(w => w.Week == week).OrderByDescending(w => w.FantasyPoints)]));
+            }
+            cache.Set(Cache.WeeklyFantasyTrends.ToString(), trends);
+            return trends;
+        }
+
+        public async Task<IEnumerable<WeeklyFantasyTrend>> GetPlayerWeeklyFantasyTrends(int playerId, int season)
+        {
+            var player = await playersService.GetPlayer(playerId);
+            _ = Enum.TryParse<Position>(player.Position, out var position);
+            var allPlayersTrends = await GetWeeklyFantasyTrendsByPosition(position, season);
+            return allPlayersTrends.Where(p => p.PlayerId == playerId).OrderBy(p => p.Week);
+        }
+
+        private IEnumerable<WeeklyFantasyTrend> GetWeeklyFantasyTrend(List<WeeklyFantasy> weeklyFantasy)
+        {
+            return weeklyFantasy.Select(w => new WeeklyFantasyTrend
+            {
+                Season = w.Season,
+                Week = w.Week,
+                PlayerId = w.PlayerId,
+                Name = w.Name,
+                FantasyPoints = w.FantasyPoints,
+                PositionalRank = weeklyFantasy.IndexOf(w) + 1
+            });
         }
 
         private static List<FantasyPercentage> CleanPercentageAmounts(List<FantasyPercentage> fantasyPercentages)

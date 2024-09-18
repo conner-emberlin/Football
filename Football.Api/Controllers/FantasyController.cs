@@ -194,5 +194,11 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetSnapCountAnalysis([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<SnapCountAnalysisModel>>(await snapCountService.GetSnapCountAnalysis(posEnum, _season.CurrentSeason))) : BadRequest();
 
+        [HttpGet("trends/{position}/{season}")]
+        [ProducesResponseType(typeof(List<SnapCountAnalysisModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetFantasyTrends([FromRoute] string position, [FromRoute] int season) 
+            => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<WeeklyFantasyTrendModel>>(await fantasyAnalysisService.GetWeeklyFantasyTrendsByPosition(posEnum, season))) : BadRequest();
+
     }
 }

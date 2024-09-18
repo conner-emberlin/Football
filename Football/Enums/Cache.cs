@@ -15,6 +15,7 @@
         WeatherZip,
         PlayerComparisons,
         MarketShare,
-        QuarterbackChanges
+        QuarterbackChanges,
+        WeeklyFantasyTrends
     }
 }

@@ -17,5 +17,6 @@ namespace Football.Shared.Models.Players
         public List<WeeklyFantasyModel> WeeklyFantasy { get; set; } = [];
         public string Team { get; set; } = "";
         public List<ScheduleModel> Schedule { get; set; } = [];
+        public List<WeeklyFantasyTrendModel> WeeklyFantasyTrends { get; set; } = [];
     }
 }
