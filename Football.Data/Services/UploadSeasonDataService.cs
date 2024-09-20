@@ -6,11 +6,12 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using AutoMapper;
+using Serilog;
 
 namespace Football.Data.Services
 {
     public class UploadSeasonDataService(IScraperService scraperService, IUploadSeasonDataRepository uploadSeasonDataRepository,
-         IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playerService, IMapper mapper, IOptionsMonitor<Season> season) : IUploadSeasonDataService
+         IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playerService, IMapper mapper, IOptionsMonitor<Season> season, ILogger logger) : IUploadSeasonDataService
     {
         private readonly WeeklyScraping _scraping = scraping.CurrentValue;
         private readonly Season _season = season.CurrentValue;
@@ -47,18 +48,21 @@ namespace Football.Data.Services
                             .Where(p => !ignoreList.Contains(p.PlayerId));
             return await uploadSeasonDataRepository.UploadSeasonTEData(players);
         }
-        public async Task<int> UploadCurrentTeams(int season, string position)
+        public async Task<int> UploadCurrentTeams(int season, Position position)
         {
             var url = string.Format("https://www.fantasypros.com/nfl/projections/{0}.php?week=draft", position);
             var str = scraperService.ScrapeData(url, _scraping.FantasyProsXPath);
-            var playerTeams = await scraperService.ParseFantasyProsPlayerTeam(str, position);
+            var players = await playerService.GetPlayersByPosition(position, true);
+            var existingPlayerTeams = (await playerService.GetPlayerTeams(season, players.Select(p => p.PlayerId))).Select(p => p.PlayerId);
+            var playerTeams = await scraperService.ParseFantasyProsPlayerTeam(str, position.ToString());
             List<PlayerTeam> currentTeams = [];
             foreach (var pt in playerTeams)
             {
-                var player = await playerService.GetPlayerByName(pt.Name);
-                if (player != null && string.Equals(position, player.Position, StringComparison.OrdinalIgnoreCase))
+                var player = players.FirstOrDefault(p => p.Name == pt.Name);
+                if (player != null && string.Equals(position.ToString(), player.Position, StringComparison.OrdinalIgnoreCase)
+                    && !existingPlayerTeams.Contains(pt.PlayerId))
                 {
-                    
+                    logger.Information("Player: {0 Team: {1} uploading", pt.Name, pt.Team);
                     currentTeams.Add(new PlayerTeam
                     {
                         PlayerId = player.PlayerId,

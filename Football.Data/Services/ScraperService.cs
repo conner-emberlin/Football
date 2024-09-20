@@ -343,14 +343,17 @@ namespace Football.Data.Services
             List<PlayerTeam> playerTeams = [];
             for (int i = 0; i < strings.Length - len; i += len)
             {
-                var team = teams.First(t => strings[i].Contains(t.Team));
-                var playerName = strings[i].Remove(strings[i].LastIndexOf(team.Team));
-                playerTeams.Add(new PlayerTeam
+                var team = teams.FirstOrDefault(t => strings[i].Contains(t.Team));
+                if (team != null)
                 {
-                    Name = FormatName(playerName),
-                    Team = team.Team,
-                    TeamId = team.TeamId
-                });
+                    var playerName = strings[i].Remove(strings[i].LastIndexOf(team.Team));
+                    playerTeams.Add(new PlayerTeam
+                    {
+                        Name = FormatName(playerName),
+                        Team = team.Team,
+                        TeamId = team.TeamId
+                    });
+                }
             }
             return playerTeams;
         }

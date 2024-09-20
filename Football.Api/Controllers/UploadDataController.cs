@@ -76,8 +76,8 @@ namespace Football.Api.Controllers
         [HttpPost("teams/{position}")]
         [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<ActionResult<int>> UploadCurrentTeams(string position) => !string.IsNullOrEmpty(position) ?
-            Ok(await seasonDataService.UploadCurrentTeams(_season.CurrentSeason, position)) : BadRequest();
+        public async Task<ActionResult<int>> UploadCurrentTeams(string position) => Enum.TryParse(position, out Position pos) ?
+            Ok(await seasonDataService.UploadCurrentTeams(_season.CurrentSeason, pos)) : BadRequest();
 
         [HttpPost("schedule")]
         [ProducesResponseType(StatusCodes.Status200OK)]
