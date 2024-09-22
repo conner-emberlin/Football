@@ -1,14 +1,16 @@
 ﻿@page "/FantasyDistribution"
 <PageTitle>Market Share</PageTitle>
+
 @using Football.Client.Helpers;
 @using Football.Client.Interfaces;
+@using Football.Client.Shared;
 @using Football.Shared.Models.Fantasy;
 
 @inject IFantasyService fantasyService;
 <h4>Fantasy Distribution</h4>
 
 <div>
-    @foreach (var position in format.Positions())
+    @foreach (var position in format.Positions(includeDST: false, includeK: false, includeFlex: false))
     {
 
         <input type="radio" name="players" id=" @position" value="@position"
@@ -29,9 +31,11 @@
     <div class="spinner"></div>
 }
 
-@if (fantasyShare.Any())
+@if (filteredFantasyShares.Any())
 {
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <EditForm model="this" OnSubmit="HandleSearch">
+    <TextBoxName @bind-Value ="this.Value"/>
+    </EditForm>
     if (positionEnum == "QB")
     {
         <div class="table_container">
@@ -59,7 +63,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var f in fantasyShare)
+                    @foreach (var f in filteredFantasyShares)
                     {
                         <tr>
                             <td>
@@ -107,7 +111,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var f in fantasyShare)
+                    @foreach (var f in filteredFantasyShares)
                     {
                         <tr>
                             <td>
@@ -135,16 +139,21 @@
 
     private bool loading { get; set; } = false;
     private bool shouldRender;
-    
+
 
     private TableSort tableSort = new();
     private Formatter format = new();
+
+    private List<FantasyPercentageModel> filteredFantasyShares = new();
+    private string Value { get; set; } = "";
 
     protected override bool ShouldRender() => shouldRender;
 
     private void SetPosition(ChangeEventArgs args)
     {
         fantasyShare?.Clear();
+        filteredFantasyShares.Clear();
+        Value = string.Empty;
         tableSort = new();
         positionEnum = format.SetPosition(args);
     }
@@ -152,10 +161,28 @@
     {
         loading = true;
         fantasyShare?.Clear();
+        filteredFantasyShares.Clear();
+        Value = string.Empty;
         shouldRender = true;
         fantasyShare = await fantasyService.GetFantasyPercentageRequest(positionEnum);
+        filteredFantasyShares.AddRange(fantasyShare);
         loading = false;
         shouldRender = true;
+    }
+
+    private void HandleSearch()
+    {
+        filteredFantasyShares.Clear();
+
+        if (!string.IsNullOrEmpty(Value))
+        {
+            filteredFantasyShares = fantasyShare.Where(m => m.Name.ToLower().Contains(Value.ToLower())).ToList();
+            shouldRender = true;
+        }
+        else
+        {
+            filteredFantasyShares.AddRange(fantasyShare);
+        }
     }
     private void SetTable(string columnName) => fantasyShare = tableSort.SortTable<FantasyPercentageModel>(fantasyShare, columnName);
 

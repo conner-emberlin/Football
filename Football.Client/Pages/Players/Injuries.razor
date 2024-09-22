@@ -103,8 +103,11 @@
     }
 
 }
-else if (injuryEdits.Any() && !badRequestError)
+else if (filteredInjuryEdits.Count > 0)
 {
+    <EditForm model="this" OnSubmit="HandleSearch">
+        <TextBoxName @bind-Value="this.Value" />
+    </EditForm>
     <div class="table_container">
         <table class="base_table">
             <thead>
@@ -120,7 +123,7 @@ else if (injuryEdits.Any() && !badRequestError)
                 </tr>
             </thead>
             <tbody>
-                @foreach (var injury in injuryEdits)
+                @foreach (var injury in filteredInjuryEdits)
                 {
                     var pos = injury.Position;
                     if (injury.IsEditing)
@@ -175,28 +178,31 @@ else if (injuryEdits.Any() && !badRequestError)
 
 @code {
 
-    public bool badRequestError = false;
+    private bool badRequestError = false;
     private bool shouldRender;
     private bool loading = false;
 
     private bool adding = false;
 
-    public List<PlayerInjuryModel>? injuries = new();
+    private List<PlayerInjuryModel>? injuries = new();
     private List<InjuryEdit> injuryEdits = new();
-    public InSeasonInjuryModel newInjury { get; set; } = new();
+    private InSeasonInjuryModel newInjury { get; set; } = new();
 
-    public List<SimplePlayerModel>? allPlayers = new();
-    public List<SimplePlayerModel>? filteredPlayers { get; set; }
-    public string selectedPlayer { get; set; } = "";
-    public SimplePlayerModel playerSelected { get; set; } = new();
-    public bool playerChosen { get; set; } = false;
-    public string playerName { get; set; } = "";
-    public string playerPosition { get; set; } = "";
+    private List<SimplePlayerModel>? allPlayers = new();
+    private List<SimplePlayerModel>? filteredPlayers { get; set; }
+    private string selectedPlayer { get; set; } = "";
+    private SimplePlayerModel playerSelected { get; set; } = new();
+    private bool playerChosen { get; set; } = false;
+    private string playerName { get; set; } = "";
+    private string playerPosition { get; set; } = "";
 
-    public bool youTriedToAdd { get; set; }
-    public int injuryAdded { get; set; }
+    private bool youTriedToAdd { get; set; }
+    private int injuryAdded { get; set; }
 
-    public Formatter form = new();
+    private Formatter form = new();
+
+    private List<InjuryEdit> filteredInjuryEdits = new();
+    private string Value { get; set; } = "";
 
     protected override bool ShouldRender() => shouldRender;
 
@@ -210,6 +216,9 @@ else if (injuryEdits.Any() && !badRequestError)
 
     private async Task GetInjuryEdits()
     {
+        injuryEdits.Clear();
+        filteredInjuryEdits.Clear();
+        Value = string.Empty;
         injuries = await playersService.GetAllInSeasonInjuriesRequest();
         if (injuries != null && injuries.Count > 0)
         {
@@ -227,6 +236,7 @@ else if (injuryEdits.Any() && !badRequestError)
                 }).OrderBy(ie => ie.Name).ToList();
 
             injuryEdits.ForEach(i => i.IsEditing = false);
+            filteredInjuryEdits.AddRange(injuryEdits);
         }
     }
     private async void Add()
@@ -309,6 +319,21 @@ else if (injuryEdits.Any() && !badRequestError)
         playerPosition = string.Empty;
         injuryAdded = await playersService.PostInSeasonInjuryRequest(injury);
         await GetInjuryEdits();
+    }
+
+    private void HandleSearch()
+    {
+        filteredInjuryEdits.Clear();
+
+        if (!string.IsNullOrEmpty(Value))
+        {
+            filteredInjuryEdits = injuryEdits.Where(m => m.Name.ToLower().Contains(Value.ToLower())).ToList();
+            shouldRender = true;
+        }
+        else
+        {
+            filteredInjuryEdits.AddRange(injuryEdits);
+        }
     }
 
     private async Task GetPlayers() => allPlayers = (await playersService.GetSimplePlayersRequest(activeOnly: true)).OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();

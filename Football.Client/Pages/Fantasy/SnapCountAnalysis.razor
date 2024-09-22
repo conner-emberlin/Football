@@ -2,6 +2,7 @@
 <PageTitle>Snap Count Analysis</PageTitle>
 
 @using Football.Client.Helpers;
+@using Football.Client.Shared;
 @using Football.Client.Interfaces;
 @using Football.Shared.Models.Fantasy;
 
@@ -31,9 +32,11 @@
     <div class="spinner"></div>
 }
 
-@if (snapCounts.Any())
+@if (filteredSnapCounts.Count > 0)
 {
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <EditForm model="this" OnSubmit="HandleSearch">
+    <TextBoxName @bind-Value ="this.Value"/>
+    </EditForm>
         <div class="table_container">
             <table class="base_table">
                 <thead>
@@ -55,7 +58,7 @@
                             <span class="sort-link" onclick="@(() => SetTable("RushAttsPerSnap"))">Rush/Snap</span>
                             <span class="oi @(tableSort.GetSortStyle("RushAttsPerSnap"))"></span>
                         </th>
-                    @if (snapCounts.First().Position != "QB")
+                    @if (filteredSnapCounts.First().Position != "QB")
                     {
                         <th>
                             <span class="sort-link" onclick="@(() => SetTable("TargetsPerSnap"))">Tgts/Snap</span>
@@ -70,7 +73,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var s in snapCounts)
+                    @foreach (var s in filteredSnapCounts)
                     {
                         <tr>
                             <td>
@@ -94,20 +97,25 @@
 }
 
 @code {
-    public string Position { get; set; } = "Quarterback";
-    public string positionEnum { get; set; } = "QB";
-    public List<SnapCountAnalysisModel>? snapCounts = new();
+    private string Position { get; set; } = "Quarterback";
+    private string positionEnum { get; set; } = "QB";
+    private List<SnapCountAnalysisModel>? snapCounts = new();
 
-    public bool loading { get; set; } = false;
+    private bool loading { get; set; } = false;
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
 
-    public TableSort tableSort = new();
-    public Formatter format = new();
+    private TableSort tableSort = new();
+    private Formatter format = new();
+
+    private List<SnapCountAnalysisModel> filteredSnapCounts = new();
+    private string Value { get; set; } = "";
 
     private void SetPosition(ChangeEventArgs args)
     {
-        if (snapCounts != null) snapCounts.Clear();
+        snapCounts?.Clear();
+        filteredSnapCounts.Clear();
+        Value = string.Empty;
         tableSort = new();
         positionEnum = format.SetPosition(args);
     }
@@ -117,10 +125,28 @@
     private async Task HandleInput()
     {
         loading = true;
-        if (snapCounts != null) snapCounts.Clear();
+        snapCounts?.Clear();
+        filteredSnapCounts.Clear();
+        Value = string.Empty;
         shouldRender = true;
         snapCounts = (await fantasyService.SnapCountAnalysisRequest(positionEnum)).OrderByDescending(s => s.TotalSnaps).ToList();
+        filteredSnapCounts.AddRange(snapCounts);
         loading = false;
         shouldRender = true;
+    }
+
+    private void HandleSearch()
+    {
+        filteredSnapCounts.Clear();
+
+        if (!string.IsNullOrEmpty(Value))
+        {
+            filteredSnapCounts = snapCounts.Where(m => m.Name.ToLower().Contains(Value.ToLower())).ToList();
+            shouldRender = true;
+        }
+        else
+        {
+            filteredSnapCounts.AddRange(snapCounts);
+        }
     }
 }

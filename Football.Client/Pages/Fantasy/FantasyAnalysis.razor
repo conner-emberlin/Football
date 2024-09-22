@@ -3,6 +3,7 @@
 
 @using Football.Client.Helpers;
 @using Football.Client.Interfaces;
+@using Football.Client.Shared;
 @using Football.Shared.Models.Fantasy;
 
 @inject IFantasyService fantasyService;
@@ -31,9 +32,11 @@
     <div class="spinner"></div>
 }
 
-@if (FantasyAnalyses != null && FantasyAnalyses.Any())
+@if (filteredFantasyAnalyses.Count > 0)
 {
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <EditForm model="this" OnSubmit="HandleSearch">
+    <TextBoxName @bind-Value ="this.Value"/>
+    </EditForm>
     <div class="table_container">
         <table class="base_table">
             <thead>
@@ -75,22 +78,22 @@
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 1; i <= FantasyAnalyses.Count; i++)
+                @foreach(var f in filteredFantasyAnalyses)
                 {
                     <tr>
                         <td>
-                            <a class="page-links" href="Players/@FantasyAnalyses.ElementAt(i-1).PlayerId"> @FantasyAnalyses.ElementAt(i-1).Name</a>                            
+                            <a class="page-links" href="Players/@f.PlayerId"> @f.Name</a>
                         </td>
-                        <td>@Math.Round(FantasyAnalyses.ElementAt(i-1).AvgFantasy,2)</td>
-                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).TotalFantasy, 2)</td>
-                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).MinFantasy, 2)</td>
-                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).MaxFantasy, 2)</td>
-                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).Variance, 2)</td>
-                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).StdDev, 2)</td>
-                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).BoomPercentage, 2)</td>
-                        <td>@Math.Round(FantasyAnalyses.ElementAt(i - 1).BustPercentage, 2)</td>
+                        <td>@Math.Round(f.AvgFantasy, 2)</td>
+                        <td>@Math.Round(f.TotalFantasy, 2)</td>
+                        <td>@Math.Round(f.MinFantasy, 2)</td>
+                        <td>@Math.Round(f.MaxFantasy, 2)</td>
+                        <td>@Math.Round(f.Variance, 2)</td>
+                        <td>@Math.Round(f.StdDev, 2)</td>
+                        <td>@Math.Round(f.BoomPercentage, 2)</td>
+                        <td>@Math.Round(f.BustPercentage, 2)</td>
                         <td>
-                            <a href="error-graph/@FantasyAnalyses.ElementAt(i-1).PlayerId"> <i class="oi oi-graph" /></a>
+                            <a href="error-graph/@f.PlayerId"> <i class="oi oi-graph" /></a>
                         </td>
                     </tr>
                 }
@@ -112,11 +115,16 @@
     private TableSort tableSort = new();
     private Formatter format = new();
 
+    private List<FantasyAnalysisModel> filteredFantasyAnalyses = new();
+    private string Value { get; set; } = "";
+
     protected override bool ShouldRender() => shouldRender;
 
     private void SetPosition(ChangeEventArgs args)
     {
         FantasyAnalyses?.Clear();
+        filteredFantasyAnalyses.Clear();
+        Value = string.Empty;
         tableSort = new();
         positionEnum = format.SetPosition(args);
     }
@@ -125,10 +133,29 @@
     {
         loading = true;
         FantasyAnalyses?.Clear();
+        filteredFantasyAnalyses.Clear();
+        Value = string.Empty;
         shouldRender = true;
-        FantasyAnalyses = (await fantasyService.GetFantasyAnalysesRequest(positionEnum))?.Where(f => f.AvgFantasy >= 5).ToList(); ;
+        FantasyAnalyses = (await fantasyService.GetFantasyAnalysesRequest(positionEnum))?.Where(f => f.AvgFantasy >= 5).ToList();
+        filteredFantasyAnalyses.AddRange(FantasyAnalyses);
         loading = false;
         shouldRender = true;
+    }
+
+
+    private void HandleSearch()
+    {
+        filteredFantasyAnalyses.Clear();
+
+        if (!string.IsNullOrEmpty(Value))
+        {
+            filteredFantasyAnalyses = FantasyAnalyses.Where(m => m.Name.ToLower().Contains(Value.ToLower())).ToList();
+            shouldRender = true;
+        }
+        else
+        {
+            filteredFantasyAnalyses.AddRange(FantasyAnalyses);
+        }
     }
 
     private void SetTable(string columnName) => FantasyAnalyses = tableSort.SortTable<FantasyAnalysisModel>(FantasyAnalyses, columnName);
