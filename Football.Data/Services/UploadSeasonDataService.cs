@@ -62,7 +62,6 @@ namespace Football.Data.Services
                 if (player != null && string.Equals(position.ToString(), player.Position, StringComparison.OrdinalIgnoreCase)
                     && !existingPlayerTeams.Contains(pt.PlayerId))
                 {
-                    logger.Information("Player: {0} Team: {1} uploading", pt.Name, pt.Team);
                     currentTeams.Add(new PlayerTeam
                     {
                         PlayerId = player.PlayerId,

@@ -2,6 +2,7 @@
 <PageTitle>Market Share</PageTitle>
 
 @using Football.Client.Helpers;
+@using Football.Client.Shared;
 @using Football.Client.Interfaces;
 @using Football.Shared.Models.Fantasy;
 
@@ -31,9 +32,11 @@
     <div class="spinner"></div>
 }
 
-@if (marketShare?.Any() == true)
+@if (filteredMarketShare.Count > 0)
 {
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <EditForm model="this" OnSubmit="HandleSearch">
+    <TextBoxName @bind-Value ="this.Value"/>
+    </EditForm>
     <div class="table_container">
         <table class="base_table">
             <thead>
@@ -73,22 +76,22 @@
                 </tr>
             </thead>
             <tbody>
-                @for (int i = 1; i <= marketShare.Count; i++)
+                @foreach (var market in filteredMarketShare)
                 {
                     <tr>
-                        <td><a class="page-links" href="Players/@marketShare.ElementAt(i-1).PlayerId"> @marketShare.ElementAt(i-1).Name</a>
-                        
+                        <td>
+                            <a class="page-links" href="Players/@market.PlayerId"> @market.Name</a>
                         </td>
-                        <td>@marketShare.ElementAt(i-1).Team</td>
-                        <td>@Math.Round(marketShare.ElementAt(i-1).FantasyShare * 100, 1) </td>
-                        <td>@Math.Round(marketShare.ElementAt(i-1).RushAttShare *100,1)</td>
-                        <td>@Math.Round(marketShare.ElementAt(i-1).RushYdShare *100,1)</td>
-                        <td>@Math.Round(marketShare.ElementAt(i-1).RushTDShare *100,1)</td>
-                        <td>@Math.Round(marketShare.ElementAt(i-1).TargetShare * 100, 1)</td>
-                        <td>@Math.Round(marketShare.ElementAt(i-1).ReceptionShare * 100, 1)</td>
-                        <td>@Math.Round(marketShare.ElementAt(i-1).RecYdShare * 100, 1)</td>
-                        <td>@Math.Round(marketShare.ElementAt(i-1).RecTDShare * 100, 1)</td>
-                        <td><a href="share-graph/@marketShare.ElementAt(i-1).Position/@marketShare.ElementAt(i-1).PlayerId"> <i class="oi oi-bar-chart" /></a></td>
+                        <td>@market.Team</td>
+                        <td>@Math.Round(market.FantasyShare * 100, 1) </td>
+                        <td>@Math.Round(market.RushAttShare * 100, 1)</td>
+                        <td>@Math.Round(market.RushYdShare * 100, 1)</td>
+                        <td>@Math.Round(market.RushTDShare * 100, 1)</td>
+                        <td>@Math.Round(market.TargetShare * 100, 1)</td>
+                        <td>@Math.Round(market.ReceptionShare * 100, 1)</td>
+                        <td>@Math.Round(market.RecYdShare * 100, 1)</td>
+                        <td>@Math.Round(market.RecTDShare * 100, 1)</td>
+                        <td><a href="share-graph/@market.Position/@market.PlayerId"> <i class="oi oi-bar-chart" /></a></td>
                     </tr>
                 }
             </tbody>
@@ -98,31 +101,54 @@
 
 @code {
 
-    public string Position { get; set; } = "Runningback";
-    public string positionEnum { get; set; } = "RB";
-    public List<MarketShareModel>? marketShare = new();
+    private string Position { get; set; } = "Runningback";
+    private string positionEnum { get; set; } = "RB";
+    private List<MarketShareModel>? marketShare = new();
 
-    public bool loading { get; set; } = false;
+    private bool loading { get; set; } = false;
     private bool shouldRender;
 
-    public TableSort tableSort = new();
-    public Formatter format = new();
+    private TableSort tableSort = new();
+    private Formatter format = new();
+
+    private string Value { get; set; } = "";
+    private List<MarketShareModel> filteredMarketShare = new();
 
     protected override bool ShouldRender() => shouldRender;
 
-    public void SetPosition(ChangeEventArgs args)
+    private void SetPosition(ChangeEventArgs args)
     {
         marketShare?.Clear();
+        filteredMarketShare.Clear();
+        Value = string.Empty;
         positionEnum = format.SetPosition(args);
     }
-    public async Task HandleInput()
+    private async Task HandleInput()
     {
         loading = true;
         marketShare?.Clear();
+        filteredMarketShare.Clear();
+        Value = string.Empty;
         shouldRender = true;
         marketShare = await fantasyService.GetMarketShareRequest(positionEnum);
+        filteredMarketShare.AddRange(marketShare);
         loading = false;
         shouldRender = true;
+    }
+
+    private void HandleSearch()
+    {
+        filteredMarketShare.Clear();
+
+        if (!string.IsNullOrEmpty(Value))
+        {
+            filteredMarketShare = marketShare.Where(m => m.Name.ToLower().Contains(Value.ToLower())).ToList();
+            shouldRender = true;
+        }
+        else
+        {
+            filteredMarketShare.AddRange(marketShare);
+        }
     }
 
     private void SetTable(string columnName) => marketShare = tableSort.SortTable<MarketShareModel>(marketShare, columnName);
