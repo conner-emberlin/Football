@@ -35,7 +35,7 @@ namespace Football.Api.Controllers
                 count += await weeklyDataService.UploadWeeklyDSTData(season, week);
 
                 count += await weeklyDataService.UploadWeeklyGameResults(season, week);
-
+               
                 count += await weeklyDataService.UploadWeeklyRosterPercentages(season, week, Position.QB.ToString());
                 count += await weeklyDataService.UploadWeeklyRosterPercentages(season, week, Position.RB.ToString());
                 count += await weeklyDataService.UploadWeeklyRosterPercentages(season, week, Position.WR.ToString());

@@ -75,6 +75,7 @@ builder.Services.AddScoped<ISleeperLeagueService, SleeperLeagueService>();
 builder.Services.AddScoped<IDistanceService, DistanceService>();
 builder.Services.AddScoped<IAdvancedStatisticsService, AdvancedStatisticsService>();
 builder.Services.AddScoped<ISnapCountService, SnapCountService>();
+builder.Services.AddScoped<IWeeklyAdjustmentService, WeeklyAdjustmentService>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);

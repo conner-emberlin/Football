@@ -15,7 +15,7 @@ using MathNet.Numerics.LinearAlgebra;
 namespace Football.Projections.Services
 {
     public class WeeklyProjectionService(IFantasyDataService fantasyService, IMemoryCache cache,IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
-    IStatisticsService statisticsService, IOptionsMonitor<Season> season, IOptionsMonitor<WeeklyTunings> tunings, IPlayersService playersService, IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService, IMapper mapper) : IProjectionService<WeekProjection>
+    IStatisticsService statisticsService, IOptionsMonitor<Season> season, IOptionsMonitor<WeeklyTunings> tunings, IPlayersService playersService, IWeeklyAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService, IMapper mapper) : IProjectionService<WeekProjection>
     {
         private readonly Season _season = season.CurrentValue;
         private readonly WeeklyTunings _tunings = tunings.CurrentValue;
