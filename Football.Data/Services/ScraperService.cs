@@ -545,10 +545,14 @@ namespace Football.Data.Services
             List<FantasyProsPlayerTeam> playerTeams = [];
             for (int i = 0; i < strings.Length - len; i += len)
             {
+                var i1 = strings[i].IndexOf('(');
+                var i2 = strings[i].IndexOf(')');
+                var leng = i2 - i1;
+
                 playerTeams.Add(new FantasyProsPlayerTeam
                 {
                     Name = FormatName(strings[i]),
-                    Team = strings[i].Substring(strings[i].IndexOf('(') + 1, strings[i].IndexOf(')') - 1)
+                    Team = strings[i].Substring(i1 + 1, leng - 1)
                 });
             }
             return playerTeams;
