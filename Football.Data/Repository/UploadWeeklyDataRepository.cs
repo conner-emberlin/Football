@@ -88,5 +88,12 @@ namespace Football.Data.Repository
                         VALUES (@PlayerId, @Season, @Week, @Position, @FantasyPoints)";
             return await dbConnection.ExecuteAsync(query, projections);
         }
+
+        public async Task<int> UploadPlayerTeamsInSeason(IEnumerable<PlayerTeam> playerTeams)
+        {
+            var query = $@"INSERT INTO [dbo].PlayerTeam (PlayerId, Name, Season, Team, TeamId)
+                            VALUES (@PlayerId, @Name, @Season, @Team, @TeamId)";
+            return await dbConnection.ExecuteAsync(query, playerTeams);
+        }
     }
 }

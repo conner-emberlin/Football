@@ -4,15 +4,13 @@ using Football.Data.Interfaces;
 using Football.Players.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Football.Shared.Models.Players;
-using AutoMapper;
 
 namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class UploadDataController(IUploadWeeklyDataService weeklyDataService, IUploadSeasonDataService seasonDataService,
-        IScraperService scraperService, IPlayersService playersService, IOptionsMonitor<Season> season, IMapper mapper) : ControllerBase
+        IScraperService scraperService, IPlayersService playersService, IOptionsMonitor<Season> season) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -82,10 +80,10 @@ namespace Football.Api.Controllers
             Ok(await seasonDataService.UploadCurrentTeams(_season.CurrentSeason, pos)) : BadRequest();
 
         [HttpPost("teams/in-season/{position}/{week}")]
-        [ProducesResponseType(typeof(List<PlayerTeamModel>), 200)]
+        [ProducesResponseType(typeof(int), 200)]
         [ProducesResponseType(typeof(string), 400)]
         public async Task<ActionResult<int>> UploadWeeklyPlayerTeams(string position, int week) => Enum.TryParse(position, out Position pos) ?
-                        Ok(mapper.Map<List<PlayerTeamModel>>(await weeklyDataService.UploadPlayerTeams(_season.CurrentSeason, week, pos))) : BadRequest();
+                        Ok(await weeklyDataService.UploadPlayerTeams(_season.CurrentSeason, week, pos)) : BadRequest();
 
         [HttpPost("schedule")]
         [ProducesResponseType(StatusCodes.Status200OK)]

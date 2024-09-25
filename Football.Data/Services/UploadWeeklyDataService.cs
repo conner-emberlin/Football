@@ -77,12 +77,15 @@ namespace Football.Data.Services
             return added;
         }
 
-        public async Task<List<PlayerTeam>> UploadPlayerTeams(int season, int week, Position position)
+        public async Task<int> UploadPlayerTeams(int season, int week, Position position)
         {
+            logger.Information("Uploading new player teams for position {0}", position);
             var url = FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
             var existingPlayerIds = (await playerService.GetPlayerTeams(season, (await playerService.GetPlayersByPosition(position, activeOnly: true)).Select(p => p.PlayerId))).Select(e => e.PlayerId);
-            var players = await PlayerTeam(scraperService.ScrapePlayerTeamsFromWeeklyData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position.ToString()), season, existingPlayerIds);
-            return players;
+            var players = await PlayerTeam(scraperService.ScrapePlayerTeamsFromWeeklyData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position.ToString()), season, position.ToString(), existingPlayerIds);
+            var added = await uploadWeeklyDataRepository.UploadPlayerTeamsInSeason(players);
+            logger.Information("Upload complete. {0} player teams added", added);
+            return added;
         }
 
         public async Task<int> UploadWeeklyRedZoneRB(int season, int week, int yardline)
@@ -299,14 +302,14 @@ namespace Football.Data.Services
             return weeklyData;
         }
 
-        private async Task<List<PlayerTeam>> PlayerTeam(List<FantasyProsPlayerTeam> playerTeams, int season, IEnumerable<int> existingPlayerIds)
+        private async Task<List<PlayerTeam>> PlayerTeam(List<FantasyProsPlayerTeam> playerTeams, int season, string position, IEnumerable<int> existingPlayerIds)
         {
             List<PlayerTeam> newPlayerTeams = [];
             var allTeams = (await playerService.GetAllTeams()).ToDictionary(t => t.Team);
             foreach (var pt in playerTeams)
             {
                 var player = await playerService.GetPlayerByName(pt.Name);
-                if (player != null && allTeams.TryGetValue(pt.Team, out var teamMap) && !existingPlayerIds.Contains(player.PlayerId))
+                if (player != null && allTeams.TryGetValue(pt.Team, out var teamMap) && !existingPlayerIds.Contains(player.PlayerId) && player.Position == position && player.Active == 1)
                 {
                     newPlayerTeams.Add(new PlayerTeam
                     {
@@ -316,6 +319,7 @@ namespace Football.Data.Services
                         Team = teamMap.Team,
                         TeamId = teamMap.TeamId
                     });
+                    logger.Information("{0}: {1} missing team. Uploading.", player.PlayerId, player.Name);
                 }
             }
             return newPlayerTeams;

@@ -16,6 +16,6 @@ namespace Football.Data.Interfaces
         public Task<int> UploadWeeklySnapCounts(int season, int week, string position);
         public Task<int> UploadWeeklyRedZoneRB(int season, int week, int yardline);
         public Task<int> UploadConsensusWeeklyProjections(int week, string position, List<int> ignoreList);
-        public Task<List<PlayerTeam>> UploadPlayerTeams(int season, int week, Position position);
+        public Task<int> UploadPlayerTeams(int season, int week, Position position);
     }
 }
