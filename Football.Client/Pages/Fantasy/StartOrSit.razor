@@ -205,6 +205,7 @@
                     name1 = player1.Name;
                 }
                 else name1 = string.Empty;
+                shouldRender = true;
             }
             if (!string.IsNullOrEmpty(name2))
             {
@@ -215,6 +216,7 @@
                     name2 = player2.Name;
                 }
                 else name2 = string.Empty;
+                shouldRender = true;
             }
             if (!string.IsNullOrEmpty(name3))
             {
@@ -225,8 +227,8 @@
                     name3 = player3.Name;
                 }
                 else name3 = string.Empty;
+                shouldRender = true;
             }
-            shouldRender = true;
         }
     }
 

@@ -158,6 +158,6 @@
         }
     }
 
-    private void SetTable(string columnName) => FantasyAnalyses = tableSort.SortTable<FantasyAnalysisModel>(FantasyAnalyses, columnName);
+    private void SetTable(string columnName) => filteredFantasyAnalyses = tableSort.SortTable<FantasyAnalysisModel>(filteredFantasyAnalyses, columnName);
 
 }

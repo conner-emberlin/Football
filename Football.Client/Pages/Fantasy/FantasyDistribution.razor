@@ -184,6 +184,6 @@
             filteredFantasyShares.AddRange(fantasyShare);
         }
     }
-    private void SetTable(string columnName) => fantasyShare = tableSort.SortTable<FantasyPercentageModel>(fantasyShare, columnName);
+    private void SetTable(string columnName) => filteredFantasyShares = tableSort.SortTable<FantasyPercentageModel>(filteredFantasyShares, columnName);
 
 }

@@ -92,8 +92,8 @@ namespace Football.Api.Controllers
             {
                 var currentTotals = await fantasyDataService.GetCurrentFantasyTotals(season);
                 playerModel.RunningFantasyTotal = currentTotals.First(c => c.PlayerId == playerId).FantasyPoints;
-                playerModel.OverallRank = currentTotals.Select(p => p.PlayerId).ToList().IndexOf(playerId);
-                playerModel.PositionRank = currentTotals.Where(c => c.Position == player.Position).Select(p => p.PlayerId).ToList().IndexOf(playerId);
+                playerModel.OverallRank = currentTotals.Select(p => p.PlayerId).ToList().IndexOf(playerId) + 1;
+                playerModel.PositionRank = currentTotals.Where(c => c.Position == player.Position).Select(p => p.PlayerId).ToList().IndexOf(playerId) + 1;
 
                 playerModel.WeeklyFantasyTrends = mapper.Map<List<WeeklyFantasyTrendModel>>(await fantasyAnalysisService.GetPlayerWeeklyFantasyTrends(playerId, season));
             }

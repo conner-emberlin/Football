@@ -120,7 +120,7 @@
         positionEnum = format.SetPosition(args);
     }
 
-    private void SetTable(string columnName) => snapCounts = tableSort.SortTable<SnapCountAnalysisModel>(snapCounts, columnName);
+    private void SetTable(string columnName) => filteredSnapCounts = tableSort.SortTable<SnapCountAnalysisModel>(filteredSnapCounts, columnName);
 
     private async Task HandleInput()
     {
