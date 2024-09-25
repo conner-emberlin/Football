@@ -53,14 +53,12 @@ namespace Football.Data.Services
             var url = string.Format("https://www.fantasypros.com/nfl/projections/{0}.php?week=draft", position);
             var str = scraperService.ScrapeData(url, _scraping.FantasyProsXPath);
             var players = await playerService.GetPlayersByPosition(position, true);
-            var existingPlayerTeams = (await playerService.GetPlayerTeams(season, players.Select(p => p.PlayerId))).Select(p => p.PlayerId);
             var playerTeams = await scraperService.ParseFantasyProsPlayerTeam(str, position.ToString());
             List<PlayerTeam> currentTeams = [];
             foreach (var pt in playerTeams)
             {
                 var player = players.FirstOrDefault(p => p.Name == pt.Name);
-                if (player != null && string.Equals(position.ToString(), player.Position, StringComparison.OrdinalIgnoreCase)
-                    && !existingPlayerTeams.Contains(pt.PlayerId))
+                if (player != null && string.Equals(position.ToString(), player.Position, StringComparison.OrdinalIgnoreCase))
                 {
                     currentTeams.Add(new PlayerTeam
                     {

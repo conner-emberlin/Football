@@ -116,4 +116,9 @@
         public double FantasyPoints { get; set; }
     }
 
+    public class FantasyProsPlayerTeam
+    {
+        public string Name { get; set; } = "";
+        public string Team { get; set; } = "";
+    }
 }

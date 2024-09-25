@@ -7,6 +7,7 @@ using Football.Players.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
 using AutoMapper;
+using Football.Data.Repository;
 
 namespace Football.Data.Services
 {
@@ -76,6 +77,14 @@ namespace Football.Data.Services
             return added;
         }
 
+        public async Task<List<PlayerTeam>> UploadPlayerTeams(int season, int week, Position position)
+        {
+            var url = FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
+            var existingPlayerIds = (await playerService.GetPlayerTeams(season, (await playerService.GetPlayersByPosition(position, activeOnly: true)).Select(p => p.PlayerId))).Select(e => e.PlayerId);
+            var players = await PlayerTeam(scraperService.ScrapePlayerTeamsFromWeeklyData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position.ToString()), season, existingPlayerIds);
+            return players;
+        }
+
         public async Task<int> UploadWeeklyRedZoneRB(int season, int week, int yardline)
         {
             logger.Information("Uploading RB Redzone data for week {0}", week);
@@ -128,7 +137,6 @@ namespace Football.Data.Services
             logger.Information("Consensus Projection upload complete. {0} records added", added);
             return added;
         }
-
         private async Task<List<WeeklyRosterPercent>> WeeklyRosterPercent(List<FantasyProsRosterPercent> rosterPercents, int season, int week)
         {
             List<WeeklyRosterPercent> rosterPercentages = [];
@@ -289,6 +297,28 @@ namespace Football.Data.Services
                 }
             }
             return weeklyData;
+        }
+
+        private async Task<List<PlayerTeam>> PlayerTeam(List<FantasyProsPlayerTeam> playerTeams, int season, IEnumerable<int> existingPlayerIds)
+        {
+            List<PlayerTeam> newPlayerTeams = [];
+            var allTeams = (await playerService.GetAllTeams()).ToDictionary(t => t.Team);
+            foreach (var pt in playerTeams)
+            {
+                var player = await playerService.GetPlayerByName(pt.Name);
+                if (player != null && allTeams.TryGetValue(pt.Team, out var teamMap) && !existingPlayerIds.Contains(player.PlayerId))
+                {
+                    newPlayerTeams.Add(new PlayerTeam
+                    {
+                        PlayerId = player.PlayerId,
+                        Name = player.Name,
+                        Season = season,
+                        Team = teamMap.Team,
+                        TeamId = teamMap.TeamId
+                    });
+                }
+            }
+            return newPlayerTeams;
         }
 
         private async Task<List<GameResult>> GameResult(List<ProFootballReferenceGameScores> games, int season)

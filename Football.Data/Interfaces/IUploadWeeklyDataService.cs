@@ -1,4 +1,7 @@
-﻿namespace Football.Data.Interfaces
+﻿using Football.Enums;
+using Football.Players.Models;
+
+namespace Football.Data.Interfaces
 {
     public interface IUploadWeeklyDataService
     {
@@ -13,5 +16,6 @@
         public Task<int> UploadWeeklySnapCounts(int season, int week, string position);
         public Task<int> UploadWeeklyRedZoneRB(int season, int week, int yardline);
         public Task<int> UploadConsensusWeeklyProjections(int week, string position, List<int> ignoreList);
+        public Task<List<PlayerTeam>> UploadPlayerTeams(int season, int week, Position position);
     }
 }

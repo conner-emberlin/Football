@@ -538,6 +538,21 @@ namespace Football.Data.Services
             });
             return task;
         }
+
+        public List<FantasyProsPlayerTeam> ScrapePlayerTeamsFromWeeklyData(string[] strings, string position)
+        {
+            var len = GetFantasyProsTableLength(position);
+            List<FantasyProsPlayerTeam> playerTeams = [];
+            for (int i = 0; i < strings.Length - len; i += len)
+            {
+                playerTeams.Add(new FantasyProsPlayerTeam
+                {
+                    Name = FormatName(strings[i]),
+                    Team = strings[i].Substring(strings[i].IndexOf('(') + 1, strings[i].IndexOf(')') - 1)
+                });
+            }
+            return playerTeams;
+        }
         private static string FormatName(string name) => Regex.Replace(Regex.Replace(name, @"[\d-]", string.Empty), @"\(.*\)", string.Empty).Trim();
 
         private static int GetFantasyProsTableLength(string position)
@@ -594,5 +609,6 @@ namespace Football.Data.Services
 
             return string.Format("{0}-{1}-{2}", _season.CurrentSeason, month, day);
         }
+
     }
 }
