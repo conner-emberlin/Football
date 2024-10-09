@@ -76,12 +76,13 @@ namespace Football.Api.Controllers
             return BadRequest();
         }
 
-        [HttpPost("matchup-rankings/{week}")]
+        [HttpPost("matchup-rankings")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UploadMatchupRankings(int week)
+        public async Task<IActionResult> UploadMatchupRankings()
         {
             var count = 0;
+            var week = await playersService.GetCurrentWeek(_season.CurrentSeason);
             count += await matchupAnalysisService.PostMatchupRankings(Position.QB, week);
             count += await matchupAnalysisService.PostMatchupRankings(Position.RB, week);
             count += await matchupAnalysisService.PostMatchupRankings(Position.WR, week);

@@ -221,7 +221,7 @@ namespace Football.Api.Controllers
                     var schedule = scheduleDictionary[team.TeamId];
                     m.Team = team.Team;
                     m.Opponent = schedule.OpposingTeam;
-                    m.AveragePointsAllowedByOpponent = matchupRankingsDictionary[schedule.OpposingTeamId].AvgPointsAllowed;
+                    m.AveragePointsAllowedByOpponent = schedule.OpposingTeamId > 0 ? matchupRankingsDictionary[schedule.OpposingTeamId].AvgPointsAllowed : 0;
                 }
 
                 m.AverageWeeklyProjectionError = avgProjectionErrorDictionary.TryGetValue(m.PlayerId, out var avgError) ? avgError : 0;
