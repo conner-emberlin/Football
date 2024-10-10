@@ -90,6 +90,13 @@ namespace Football.Fantasy.Services
                             return weather;
                         }
                     }
+                    else
+                    {
+                        return new Weather
+                        {
+                            GameTime = FormatTime(scheduleDetail.Time, scheduleDetail.Date)
+                        };
+                    }
                 }
             }
             return new ();
