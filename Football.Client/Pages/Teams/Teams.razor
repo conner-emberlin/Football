@@ -94,11 +94,11 @@ else if (badRequestError)
         <b>@teamChosen.TeamDescription</b>
     </div>
     @if(teamRecord != null)
-    {
-        <p>Record: @teamRecord.Wins - @teamRecord.Losses
-            @if(leagueInfo != null)
+    {        
+        <p>Record: @teamRecord.Wins-@teamRecord.Losses-@teamRecord.Ties
+            @if(leagueInfo != null && divisionalRecord != null)
             {
-                <text>&nbsp;(@leagueInfo.Division: )</text>
+                <text>&nbsp;(@leagueInfo.Division: @divisionalRecord.Wins-@divisionalRecord.Losses-@divisionalRecord.Ties)</text>
             }
 
         </p>
@@ -265,6 +265,7 @@ else if (badRequestError)
     private List<TeamRecordModel>? teamRecords = new();
     private TeamRecordModel? teamRecord = new();
     private TeamLeagueInformationModel? leagueInfo = new();
+    private TeamRecordModel? divisionalRecord = new();
 
     private bool showSchedule { get; set; } = false;
     private List<ScheduleDetailsModel>? scheduleDetails = new();
@@ -323,6 +324,7 @@ else if (badRequestError)
         SetFantasyPerformances(await teamsService.GetFantasyPerformancesRequest(tid));
 
         leagueInfo = await teamsService.GetTeamLeagueInformationRequest(tid);
+        divisionalRecord = await teamsService.GetTeamRecordInDivisionRequest(tid);
 
         selectedTeam = teamChosen.TeamDescription;
         teamSelected = true;

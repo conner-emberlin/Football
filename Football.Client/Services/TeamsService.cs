@@ -13,6 +13,7 @@ namespace Football.Client.Services
         public async Task<List<ScheduleDetailsModel>?> GetScheduleDetailsRequest() => await requests.Get<List<ScheduleDetailsModel>?>("/team/schedule-details/current");
         public async Task<List<WeeklyFantasyModel>?> GetTeamWeeklyFantasyRequest(string team, string week) => await requests.Get<List<WeeklyFantasyModel>?>(string.Format("{0}/{1}/{2}", "/team/weekly-fantasy", team, week));
         public async Task<TeamLeagueInformationModel?> GetTeamLeagueInformationRequest(int teamId) => await requests.Get<TeamLeagueInformationModel?>("/team/league-information/" + teamId.ToString());
+        public async Task<TeamRecordModel?> GetTeamRecordInDivisionRequest(int teamId) => await requests.Get<TeamRecordModel?>("/team/team-records/division/" + teamId.ToString());
 
     }
 }

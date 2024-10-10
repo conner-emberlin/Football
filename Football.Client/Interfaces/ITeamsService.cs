@@ -12,5 +12,6 @@ namespace Football.Client.Interfaces
         public Task<List<ScheduleDetailsModel>?> GetScheduleDetailsRequest();
         public Task<List<WeeklyFantasyModel>?> GetTeamWeeklyFantasyRequest(string team, string week);
         public Task<TeamLeagueInformationModel?> GetTeamLeagueInformationRequest(int teamId);
+        public Task<TeamRecordModel?> GetTeamRecordInDivisionRequest(int teamId);
     }
 }
