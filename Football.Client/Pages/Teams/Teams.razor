@@ -95,10 +95,10 @@ else if (badRequestError)
     </div>
     @if(teamRecord != null)
     {        
-        <p>Record: @teamRecord.Wins-@teamRecord.Losses-@teamRecord.Ties
+        <p>Record: @FormatRecord(teamRecord.Wins, teamRecord.Losses, teamRecord.Ties)
             @if(leagueInfo != null && divisionalRecord != null)
             {
-                <text>&nbsp;(@leagueInfo.Division: @divisionalRecord.Wins-@divisionalRecord.Losses-@divisionalRecord.Ties)</text>
+                <text>&nbsp;(@leagueInfo.Division: @FormatRecord(divisionalRecord.Wins, divisionalRecord.Losses, divisionalRecord.Ties)</text>
             }
 
         </p>
@@ -276,7 +276,7 @@ else if (badRequestError)
     private FantasyPerformanceModel? tePerformance = new();
     private FantasyPerformanceModel? dstPerformance = new();
     private FantasyPerformanceModel? kPerformance = new();
-    
+
 
     public Formatter form = new();
 
@@ -354,5 +354,11 @@ else if (badRequestError)
             dstPerformance = allPerformances.Where(p => p.Position == "DST").FirstOrDefault();
             kPerformance = allPerformances.Where(p => p.Position == "K").FirstOrDefault();
         }
+    }
+
+    private static string FormatRecord(int wins, int losses, int ties)
+    {
+        return ties > 0 ? string.Format("{0}-{1}-{2", wins, losses, ties)
+                : string.Format("{0}-{1}", wins, losses);
     }
 }
