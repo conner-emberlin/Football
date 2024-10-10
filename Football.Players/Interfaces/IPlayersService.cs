@@ -57,5 +57,6 @@ namespace Football.Players.Interfaces
         public Task<int> GetGamesBySeason(int season);
         public Task<int> GetWeeksBySeason(int season);
         public Task<TeamLeagueInformation> GetTeamLeagueInformation(int teamId);
+        public Task<IEnumerable<TeamLeagueInformation>> GetTeamsInDivision(int teamId);
     }
 }

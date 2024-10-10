@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using AutoMapper;
 using Serilog;
+using Football.Players.Repository;
 
 namespace Football.Players.Services
 {
@@ -214,6 +215,7 @@ namespace Football.Players.Services
         public async Task<int> GetWeeksBySeason(int season) => (await playersRepository.GetSeasonInfo(season)).Weeks;
         public async Task<int> GetCurrentSeasonGames() => await GetGamesBySeason(_season.CurrentSeason);
         public async Task<int> GetCurrentSeasonWeeks() => await GetWeeksBySeason(_season.CurrentSeason);
+        public async Task<IEnumerable<TeamLeagueInformation>> GetTeamsInDivision(int teamId) =>  await playersRepository.GetTeamsLeagueInformationByDivision((await GetTeamLeagueInformation(teamId)).Division, teamId);
 
         public async Task<TeamLeagueInformation> GetTeamLeagueInformation(int teamId) => await playersRepository.GetTeamLeagueInformation(teamId);
         private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMap(List<SleeperPlayer> sleeperPlayers)

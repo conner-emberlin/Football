@@ -60,5 +60,9 @@ namespace Football.Api.Controllers
         [HttpGet("league-information/{teamId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<TeamLeagueInformationModel>>> GetTeamLeagueInformation([FromRoute] int teamId) => Ok(mapper.Map<TeamLeagueInformationModel>(await playersService.GetTeamLeagueInformation(teamId)));
+
+        [HttpGet("team-records/division/{teamId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<TeamRecordModel>>> GetTeamRecordInDivision([FromRoute] int teamId) => Ok(mapper.Map<TeamRecordModel>(await statisticsService.GetTeamRecordInDivision(teamId)));
     }
 }
