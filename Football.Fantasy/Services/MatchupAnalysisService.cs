@@ -4,17 +4,19 @@ using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.Players.Interfaces;
 using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace Football.Fantasy.Services
 {
     public class MatchupAnalysisService(IPlayersService playersService, IFantasyDataService fantasyDataService,
-        IOptionsMonitor<Season> season, IMatchupAnalysisRepository matchupAnalysisRepository) : IMatchupAnalysisService
+        IOptionsMonitor<Season> season, IMatchupAnalysisRepository matchupAnalysisRepository, ILogger logger) : IMatchupAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
 
         public async Task<List<MatchupRanking>> GetPositionalMatchupRankingsFromSQL(Position position, int season, int week) => await matchupAnalysisRepository.GetPositionalMatchupRankingsFromSQL(position.ToString(), season, week);
         public async Task<int> PostMatchupRankings(Position position, int week = 0)
         {
+            logger.Information("Uploading Matchup Rankings for position {0} week {1}", position.ToString(), week);
             if (week == 1)
             {
                 var weekOneRankings = await GetPositionalMatchupRankingsFromSQL(position, _season.CurrentSeason - 1, await playersService.GetWeeksBySeason(_season.CurrentSeason - 1) + 1);
@@ -29,7 +31,9 @@ namespace Football.Fantasy.Services
                 }
                 return await matchupAnalysisRepository.PostMatchupRankings(weekOneRankings);
             }
-            return await matchupAnalysisRepository.PostMatchupRankings(await CalculatePositionalMatchupRankings(position, week));
+            var recordsAdded = await matchupAnalysisRepository.PostMatchupRankings(await CalculatePositionalMatchupRankings(position, week));
+            logger.Information("Upload complete. {0} records uploaded", recordsAdded);
+            return recordsAdded;
         }
 
         public async Task<int> GetMatchupRanking(int playerId)
