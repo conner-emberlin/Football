@@ -388,5 +388,11 @@ namespace Football.Players.Repository
                             WHERE Season = @season";
             return (await dbConnection.QueryAsync<SeasonInfo>(query, new { season })).First();
         }
+
+        public async Task<TeamLeagueInformation> GetTeamLeagueInformation(int teamId)
+        {
+            var query = $@"SELECT * FROM [dbo].TeamLeagueInformation WHERE TeamId = @teamId";
+            return (await dbConnection.QueryAsync<TeamLeagueInformation>(query, new { teamId })).First();
+        }
     }
 }

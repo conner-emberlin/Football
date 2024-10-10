@@ -56,5 +56,9 @@ namespace Football.Api.Controllers
         [HttpGet("sos")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<StrengthOfSchedule>>> GetRemainingStrengthOfSchedule() => Ok(await advancedStatisticsService.RemainingStrengthOfSchedule());
+
+        [HttpGet("league-information/{teamId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<TeamLeagueInformationModel>>> GetTeamLeagueInformation([FromRoute] int teamId) => Ok(mapper.Map<TeamLeagueInformationModel>(await playersService.GetTeamLeagueInformation(teamId)));
     }
 }

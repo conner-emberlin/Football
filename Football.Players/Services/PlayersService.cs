@@ -215,6 +215,7 @@ namespace Football.Players.Services
         public async Task<int> GetCurrentSeasonGames() => await GetGamesBySeason(_season.CurrentSeason);
         public async Task<int> GetCurrentSeasonWeeks() => await GetWeeksBySeason(_season.CurrentSeason);
 
+        public async Task<TeamLeagueInformation> GetTeamLeagueInformation(int teamId) => await playersRepository.GetTeamLeagueInformation(teamId);
         private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMap(List<SleeperPlayer> sleeperPlayers)
         {
             List<SleeperPlayerMap> playerMap = [];

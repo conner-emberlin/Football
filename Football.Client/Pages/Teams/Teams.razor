@@ -95,7 +95,13 @@ else if (badRequestError)
     </div>
     @if(teamRecord != null)
     {
-        <p>Record: @teamRecord.Wins - @teamRecord.Losses</p>
+        <p>Record: @teamRecord.Wins - @teamRecord.Losses
+            @if(leagueInfo != null)
+            {
+                <text>&nbsp;(@leagueInfo.Division: )</text>
+            }
+
+        </p>
     }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <h5>Team Leaders</h5>
@@ -243,31 +249,33 @@ else if (badRequestError)
     [Parameter]
     public string id { get; set; } = "";
 
-    public bool loading { get; set; }
+    private bool loading { get; set; }
     private bool shouldRender;
-    public bool badRequestError { get; set; } = false;
-    public bool youTried { get; set; } = false;
+    private bool badRequestError { get; set; } = false;
+    private bool youTried { get; set; } = false;
 
-    public List<TeamMapModel>? teams = new();
-    public List<TeamMapModel>? filteredTeams { get; set; }
-    public bool teamSelected { get; set; } = false;
-    public string selectedTeam { get; set; } = "";
-    public TeamMapModel teamChosen = new();
+    private List<TeamMapModel>? teams = new();
+    private List<TeamMapModel>? filteredTeams { get; set; }
+    private bool teamSelected { get; set; } = false;
+    private string selectedTeam { get; set; } = "";
+    private TeamMapModel teamChosen = new();
 
-    public List<GameResultModel>? gameResults = new();
-    public List<GameResultModel>? teamGameResults = new();
-    public List<TeamRecordModel>? teamRecords = new();
-    public TeamRecordModel? teamRecord = new();
+    private List<GameResultModel>? gameResults = new();
+    private List<GameResultModel>? teamGameResults = new();
+    private List<TeamRecordModel>? teamRecords = new();
+    private TeamRecordModel? teamRecord = new();
+    private TeamLeagueInformationModel? leagueInfo = new();
 
-    public bool showSchedule { get; set; } = false;
-    public List<ScheduleDetailsModel>? scheduleDetails = new();
+    private bool showSchedule { get; set; } = false;
+    private List<ScheduleDetailsModel>? scheduleDetails = new();
 
-    public FantasyPerformanceModel? qbPerformance = new();
-    public List<FantasyPerformanceModel>? rbPerformance = new();
-    public List<FantasyPerformanceModel>? wrPerformance = new();
-    public FantasyPerformanceModel? tePerformance = new();
-    public FantasyPerformanceModel? dstPerformance = new();
-    public FantasyPerformanceModel? kPerformance = new();
+    private FantasyPerformanceModel? qbPerformance = new();
+    private List<FantasyPerformanceModel>? rbPerformance = new();
+    private List<FantasyPerformanceModel>? wrPerformance = new();
+    private FantasyPerformanceModel? tePerformance = new();
+    private FantasyPerformanceModel? dstPerformance = new();
+    private FantasyPerformanceModel? kPerformance = new();
+    
 
     public Formatter form = new();
 
@@ -313,6 +321,8 @@ else if (badRequestError)
         teamRecord = teamRecords.FirstOrDefault(t => t.TeamId == tid);
 
         SetFantasyPerformances(await teamsService.GetFantasyPerformancesRequest(tid));
+
+        leagueInfo = await teamsService.GetTeamLeagueInformationRequest(tid);
 
         selectedTeam = teamChosen.TeamDescription;
         teamSelected = true;
