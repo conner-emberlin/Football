@@ -395,12 +395,21 @@ namespace Football.Players.Repository
             return (await dbConnection.QueryAsync<TeamLeagueInformation>(query, new { teamId })).First();
         }
 
-        public async Task<IEnumerable<TeamLeagueInformation>> GetTeamsLeagueInformationByDivision(string division, int teamId)
+        public async Task<IEnumerable<TeamLeagueInformation>> GetTeamsLeagueInformationByDivision(string division, int teamId = 0)
         {
             var query = $@"SELECT * FROM [dbo].TeamLeagueInformation 
-                            WHERE [Division] = @division
-                                AND [TeamId] <> @teamId";
+                            WHERE [Division] = @division";
+            if (teamId > 0) query += " AND [TeamId] <> @teamId";
+
             return await dbConnection.QueryAsync<TeamLeagueInformation>(query, new { division,  teamId });
         }
+
+        public async Task<IEnumerable<TeamLeagueInformation>> GetTeamLeagueInformationByConference(string conference)
+        {
+            var query = $@"SELECT * FROM [dbo].TeamLeagueInformation 
+                            WHERE [Conference] = @conference";
+            return await dbConnection.QueryAsync<TeamLeagueInformation>(query, new { conference});
+        }
+            
     }
 }

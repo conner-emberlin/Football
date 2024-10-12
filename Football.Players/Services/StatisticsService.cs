@@ -3,6 +3,7 @@ using Football.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
+using System.Text.RegularExpressions;
 
 namespace Football.Players.Services
 {
@@ -23,12 +24,12 @@ namespace Football.Players.Services
         public async Task<List<T>> GetSeasonDataByTeamIdAndPosition<T>(int teamId, Position position, int season) => await statisticsRepository.GetSeasonDataByTeamIdAndPosition<T>(teamId, position, season);
         public async Task<double> GetYearsExperience(int playerId, Position position) => await statisticsRepository.GetYearsExperience(playerId, position);
         public async Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection) => await statisticsRepository.GetCurrentStartersThatMissedGamesLastSeason(currentSeason, previousSeason, maxGames, avgProjection);
-        public async Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, Position position) 
+        public async Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, Position position)
         {
             if (position == Position.FLEX) return await statisticsRepository.GetAdpByPosition(season);
 
             return await statisticsRepository.GetAdpByPosition(season, position.ToString());
-        } 
+        }
 
         public async Task<bool> DeleteAdpByPosition(int season, Position position)
         {
@@ -109,7 +110,7 @@ namespace Football.Players.Services
                     var week = (int)settingsService.GetValueFromModel(data, Model.Week);
                     if (teamChange.PreviousTeam == team && week < teamChange.WeekEffective)
                         filteredData.Add(data);
-                    else if(teamChange.NewTeam == team && week >= teamChange.WeekEffective)
+                    else if (teamChange.NewTeam == team && week >= teamChange.WeekEffective)
                         filteredData.Add(data);
                 }
                 return filteredData;
@@ -132,6 +133,78 @@ namespace Football.Players.Services
             }
 
             return gamesPerSeason.Any() ? diff / gamesPerSeason.Count() : 0;
+        }
+
+        public async Task<IEnumerable<DivisionStanding>> GetStandingsByDivision(Division division)
+        {
+            var teams = await playersService.GetTeamsByDivision(division);
+            var teamMapDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
+            var conferenceTeams = await playersService.GetTeamsByConference(Enum.Parse<Conference>(teams.First().Conference));
+
+            var allTeamRecords = await GetTeamRecords(_season.CurrentSeason);
+            var gameResults = await GetGameResults(_season.CurrentSeason);
+            List<TeamRecord> divisionalRecords = [];
+            foreach (var team in teams)
+            {
+                divisionalRecords.Add(await GetTeamRecordInDivision(team.TeamId));
+            }
+
+            var winPercentages = CalculateWinPercentages(allTeamRecords, divisionalRecords);
+            var teamsWithSameOverallWinPercentage = winPercentages.GroupBy(w => w.Value.Item1).Where(g => g.Count() > 1).Select(g => g.ToList());
+            var orderedPercentages = winPercentages.OrderByDescending(w => w.Value.Item1).ToList();
+            var divisionStandings = orderedPercentages
+                                    .Select(w => new DivisionStanding
+                                    {
+                                        Division = division.ToString(),
+                                        TeamId = w.Key,
+                                        TeamDescription = teamMapDictionary[w.Key],
+                                        Standing = orderedPercentages.IndexOf(w)
+                                    });
+
+            var sameWinCount = teamsWithSameOverallWinPercentage.Count();
+            if (sameWinCount == 0) return divisionStandings;
+
+            foreach (var winGroup in teamsWithSameOverallWinPercentage)
+            {
+                Dictionary<int, List<(int, double?)>> groupHeadToHeadDictionary = [];
+                for (int i = 0; i < winGroup.Count; i++)
+                {
+                    var teamId = winGroup.ElementAt(i).Key;
+                    var h2hs = GetHeadToHeads(teamId, gameResults, winGroup.Where(t => t.Key != teamId).Select(t => t.Key));
+                }
+
+            }
+
+
+            return [];
+        }
+
+        private Dictionary<int, (double, double)> CalculateWinPercentages(List<TeamRecord> allTeamRecords, List<TeamRecord> divisionalRecords)
+        {
+            var join = allTeamRecords.Join(divisionalRecords, a => a.TeamMap.TeamId, d => d.TeamMap.TeamId, (a, d) => new { a.TeamMap.TeamId, OverallRecord = a, DivisionalRecord = d });
+            Dictionary<int, (double, double)> winPercentages = [];
+
+            foreach (var j in join)
+            {
+                var overallWinPercentage = j.OverallRecord.Wins / (j.OverallRecord.Wins + j.OverallRecord.Losses + j.OverallRecord.Ties);
+                var divisionalWinPercentage = j.DivisionalRecord.Wins / (j.DivisionalRecord.Wins + j.DivisionalRecord.Losses + j.DivisionalRecord.Ties);
+                winPercentages.Add(j.TeamId, (overallWinPercentage, divisionalWinPercentage));
+            }
+            return winPercentages;
+        }
+
+        private List<(int, double?)> GetHeadToHeads(int teamId, List<GameResult> gameResults, IEnumerable<int> otherTeamIds)
+        {
+            List<(int, double?)> h2hs = [];
+            foreach (var otherId in otherTeamIds)
+            {
+                var h2hWins = gameResults.Where(g => g.WinnerId == teamId && g.LoserId == otherId);
+                var total = gameResults.Where(g => (g.HomeTeamId == teamId && g.AwayTeamId == otherId) || (g.AwayTeamId == teamId && g.HomeTeamId == otherId));
+                if (total.Any()) h2hs.Add((otherId, h2hWins.Count() / total.Count()));
+                else h2hs.Add((otherId, null));
+
+            }
+            return h2hs;
         }
     }
 }
