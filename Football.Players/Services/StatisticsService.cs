@@ -86,11 +86,13 @@ namespace Football.Players.Services
         {
             var gameResults = await GetGameResults(_season.CurrentSeason);
             var teamsInDivision = (await playersService.GetTeamsInDivision(teamId)).Select(t => t.TeamId).ToList();
+            var teamsDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId);
             var gamesWon = gameResults.Where(g => (g.WinnerId == teamId && teamsInDivision.Contains(g.LoserId)));
             var gamesLost = gameResults.Where(g => (g.LoserId == teamId && teamsInDivision.Contains(g.WinnerId)));
             var gamesTied = gameResults.Where(g => (g.LoserPoints == g.WinnerPoints && ((g.HomeTeamId == teamId || g.AwayTeamId == teamId)) && (teamsInDivision.Contains(g.HomeTeamId) || teamsInDivision.Contains(g.AwayTeamId))));
             return new TeamRecord
             {
+                TeamMap = teamsDictionary[teamId],
                 Wins = gamesWon.Count(),
                 Losses = gamesLost.Count(),
                 Ties = gamesTied.Count()
@@ -158,25 +160,26 @@ namespace Football.Players.Services
                                         Division = division.ToString(),
                                         TeamId = w.Key,
                                         TeamDescription = teamMapDictionary[w.Key],
-                                        Standing = orderedPercentages.IndexOf(w)
+                                        Standing = orderedPercentages.IndexOf(w) + 1
                                     });
 
             var sameWinCount = teamsWithSameOverallWinPercentage.Count();
             if (sameWinCount == 0) return divisionStandings;
 
+            Dictionary<int, List<(int, double?)>> groupHeadToHeadDictionary = [];
             foreach (var winGroup in teamsWithSameOverallWinPercentage)
             {
-                Dictionary<int, List<(int, double?)>> groupHeadToHeadDictionary = [];
+                
                 for (int i = 0; i < winGroup.Count; i++)
                 {
                     var teamId = winGroup.ElementAt(i).Key;
                     var h2hs = GetHeadToHeads(teamId, gameResults, winGroup.Where(t => t.Key != teamId).Select(t => t.Key));
+                    groupHeadToHeadDictionary.Add(teamId, h2hs);
                 }
-
             }
 
 
-            return [];
+            return CalcuateDivisionStandingsWithHeadToHeads(divisionStandings.ToList(), groupHeadToHeadDictionary);
         }
 
         private Dictionary<int, (double, double)> CalculateWinPercentages(List<TeamRecord> allTeamRecords, List<TeamRecord> divisionalRecords)
@@ -186,8 +189,10 @@ namespace Football.Players.Services
 
             foreach (var j in join)
             {
-                var overallWinPercentage = j.OverallRecord.Wins / (j.OverallRecord.Wins + j.OverallRecord.Losses + j.OverallRecord.Ties);
-                var divisionalWinPercentage = j.DivisionalRecord.Wins / (j.DivisionalRecord.Wins + j.DivisionalRecord.Losses + j.DivisionalRecord.Ties);
+                var totalGames = j.OverallRecord.Wins + j.OverallRecord.Losses + j.OverallRecord.Ties;
+                var totalDivisionalGames = j.DivisionalRecord.Wins + j.DivisionalRecord.Losses + j.DivisionalRecord.Ties;
+                var overallWinPercentage = totalGames >= 1 ? (double)j.OverallRecord.Wins / (double)totalGames : 0;
+                var divisionalWinPercentage = totalDivisionalGames >= 1 ? (double) j.DivisionalRecord.Wins / (double) totalDivisionalGames: 0;
                 winPercentages.Add(j.TeamId, (overallWinPercentage, divisionalWinPercentage));
             }
             return winPercentages;
@@ -205,6 +210,66 @@ namespace Football.Players.Services
 
             }
             return h2hs;
+        }
+
+        private List<DivisionStanding> CalcuateDivisionStandingsWithHeadToHeads(List<DivisionStanding> divisionStandings, Dictionary<int, List<(int, double?)>> headToHeadDictionary)
+        {
+            List<List<DivisionStanding>> subDivisionStandings = [];
+            List<DivisionStanding> divisionStandingsCopy = [];
+            divisionStandingsCopy.AddRange(divisionStandings);
+
+            var counter = 0;
+            while(counter < divisionStandings.Count)
+            {
+                var teamId = divisionStandings.ElementAt(counter).TeamId;
+                if (headToHeadDictionary.TryGetValue(teamId, out var h2h) && divisionStandingsCopy.Any(d => d.TeamId == teamId))
+                {
+                    if (counter > 0)
+                    {
+                        var subStandings = divisionStandings.Where(d => divisionStandings.IndexOf(d) < counter && divisionStandingsCopy.Contains(d)).ToList();
+                        if (subStandings.Count > 0)
+                        {
+                            subDivisionStandings.Add(subStandings);
+                            divisionStandingsCopy.RemoveAll(d => subStandings.Contains(d));
+                        }
+                    }
+                    var otherTeamIds = h2h.Select(g => g.Item1);
+                    var subStandingsFromGroup = divisionStandings.Where(d => otherTeamIds.Contains(d.TeamId) || d.TeamId == teamId).ToList();
+                    if (subStandingsFromGroup.Count > 0)
+                    {
+                        subStandingsFromGroup = SortStandingsByHeadToHead(subStandingsFromGroup, headToHeadDictionary);
+                        counter = 0;
+                        subDivisionStandings.Add(subStandingsFromGroup);
+                        divisionStandingsCopy.RemoveAll(d => subStandingsFromGroup.Contains(d));
+                    }
+                    else counter++;
+                }
+                else counter++;
+            }
+
+            List<DivisionStanding> finalStandings = [];
+            for (int i = 0; i < subDivisionStandings.Count; i++)
+            {
+                finalStandings.AddRange(subDivisionStandings.ElementAt(i));
+            }
+            return [.. finalStandings.OrderBy(f => f.Standing)];
+        }
+
+        private List<DivisionStanding> SortStandingsByHeadToHead(List<DivisionStanding> standings, Dictionary<int, List<(int, double?)>> headToHeadDictionary)
+        {
+            for (int i = 0; i < standings.Count - 1; i++)
+            {
+                var winPercentVsNextTeam = headToHeadDictionary[standings.ElementAt(i).TeamId].FirstOrDefault(h => h.Item1 == standings.ElementAt(i + 1).TeamId);
+                if (winPercentVsNextTeam.Item2 != null && winPercentVsNextTeam.Item2 < 0.5)
+                {
+                    var first = standings.ElementAt(i).Standing;
+                    var second = standings.ElementAt(i + 1).Standing;
+                    standings.ElementAt(i).Standing = second;
+                    standings.ElementAt(i + 1).Standing = first;
+                    standings = SortStandingsByHeadToHead([.. standings.OrderBy(s => s.Standing)], headToHeadDictionary);                    
+                }
+            }
+            return standings;
         }
     }
 }
