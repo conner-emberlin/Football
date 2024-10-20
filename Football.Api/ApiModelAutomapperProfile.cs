@@ -184,6 +184,7 @@ namespace Football.Api
             CreateMap<WeeklyFantasyTrend, WeeklyFantasyTrendModel>();
             CreateMap<PlayerTeam, PlayerTeamModel>();
             CreateMap<TeamLeagueInformation, TeamLeagueInformationModel>();
+            CreateMap<InSeasonTeamChange, InSeasonTeamChangeModel>().ReverseMap();
         }
 
     }

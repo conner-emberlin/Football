@@ -15,5 +15,7 @@ namespace Football.Client.Interfaces
         public Task<int> PostInSeasonInjuryRequest(InSeasonInjuryModel injury);
         public Task<List<PlayerInjuryModel>?> GetAllInSeasonInjuriesRequest();
         public Task<bool> UpdateInSeasonInjuryRequest(InSeasonInjuryModel injury);
+        public Task<List<InSeasonTeamChangeModel>?> GetInSeasonTeamChangesRequest();
+        public Task<int> PostInSeasonTeamChangesRequest(InSeasonTeamChangeModel change);
     }
 }

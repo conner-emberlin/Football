@@ -124,8 +124,38 @@ namespace Football.Api.Controllers
 
 
         [HttpPost("team-change/in-season")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-        public async Task<IActionResult> PostInSeasonTeamChange([FromBody] InSeasonTeamChange teamChange) => Ok(await playersService.PostInSeasonTeamChange(teamChange));
+        public async Task<IActionResult> PostInSeasonTeamChange([FromBody] InSeasonTeamChangeModel teamChange)
+        {
+            var allTeamsDictionary = (await playersService.GetAllTeams()).Select(t => t.Team);
+            var allPlayers = (await playersService.GetAllPlayers()).Select(p => p.PlayerId);
+
+            if (teamChange.WeekEffective <= 0) return BadRequest();
+            if (!allTeamsDictionary.Contains(teamChange.PreviousTeam) || !allTeamsDictionary.Contains(teamChange.NewTeam) || !allPlayers.Contains(teamChange.PlayerId)) return NotFound();
+
+            var tc = mapper.Map<InSeasonTeamChange>(teamChange);
+            tc.Season = _season.CurrentSeason;
+
+            return Ok(await playersService.PostInSeasonTeamChange(tc));
+        }
+
+        [HttpGet("team-changes")]
+        [ProducesResponseType(typeof(List<InSeasonTeamChangeModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetInSeasonTeamChanges() 
+        {
+            var teamChanges = mapper.Map<List<InSeasonTeamChangeModel>>(await playersService.GetInSeasonTeamChanges());
+
+            if (teamChanges.Count > 0)
+            {
+                var nameDictionary = (await playersService.GetAllPlayers()).ToDictionary(p => p.PlayerId, p => p.Name);
+                teamChanges.ForEach(t => t.Name = nameDictionary.TryGetValue(t.PlayerId, out var name) ? name : string.Empty);
+            }
+
+            return Ok(teamChanges);
+        } 
+
 
         [HttpGet("snap-counts/{playerId}")]
         [ProducesResponseType(typeof(List<SnapCountModel>), StatusCodes.Status200OK)]

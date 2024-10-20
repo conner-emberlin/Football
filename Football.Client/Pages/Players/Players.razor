@@ -56,6 +56,12 @@ else if (!loading && !playerSelected)
         Manage Injuries
     </button>
         </td>
+    <td>&nbsp;</td>
+    <td>
+            <button class="button-22" role="button" @onclick="@(()=>NavigationManager.NavigateTo("/TeamChanges"))">
+        Manage Team Changes
+    </button>
+        </td>
     </tr>
 }
 @if(!playerSelected && showTrending && trendingPlayers != null)

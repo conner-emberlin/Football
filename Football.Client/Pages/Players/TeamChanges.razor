@@ -1,0 +1,207 @@
+﻿@page "/TeamChanges"
+
+@using Football.Shared.Models.Players;
+@using Football.Client.Interfaces;
+
+@inject IPlayersService playersService;
+
+<h3>Team Changes</h3>
+
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="Add">
+    New Team Change
+</button>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+@if (adding)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="autocomplete w-25">
+        <input @bind=selectedPlayer @oninput=HandleInput class="form-control filter" placeholder="Player Name..." />
+        @if (filteredPlayers is not null)
+        {
+            <ul class="options">
+                @if (filteredPlayers.Any())
+                {
+                    @foreach (var p in filteredPlayers)
+                    {
+                        <li class="option" @onclick=@(_ => SelectPlayer(p))>
+                            <span class="option-text">@p.Name</span>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="disabled option">No results</li>
+                }
+            </ul>
+        }
+    </div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+
+    @if (playerChosen)
+    {
+        <div class="table_container">
+            <table class="base_table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Week Effective</th>
+                        <th>Prior Team</th>
+                        <th>Current Team</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@playerName</td>
+                        <td>
+                            <input type="text" class="form-control" placeholder="Name" @bind="@newTeamChange.WeekEffective" />
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" @bind="@newTeamChange.PreviousTeam" />
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" @bind="@newTeamChange.NewTeam" />
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-link" @onclick="() => CancellAdd()">
+                                <i class="oi oi-circle-x" />
+                            </button>
+                            <button type="button" class="btn btn-link" @onclick="() => AddTeamChange(newTeamChange)">
+                                <i class="oi oi-circle-check" />
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+
+}
+
+else if (teamChanges != null && teamChanges.Count > 0)
+{
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Week Effective</th>
+                    <th>Prior Team</th>
+                    <th>Current Team</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var tc in teamChanges)
+                {
+                    <tr>
+                        <td>@tc.Name</td>
+                        <td>@tc.WeekEffective</td>
+                        <td>@tc.PreviousTeam</td>
+                        <td>@tc.NewTeam</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+
+    private bool shouldRender;
+    private bool loading = false;
+
+    private List<InSeasonTeamChangeModel>? teamChanges = [];
+
+    private List<SimplePlayerModel>? allPlayers = [];
+    private List<SimplePlayerModel>? filteredPlayers { get; set; }
+    private string selectedPlayer { get; set; } = "";
+    private string playerName { get; set; } = "";
+    private SimplePlayerModel playerSelected { get; set; } = new();
+    private bool playerChosen { get; set; } = false;
+    private bool adding = false;
+
+    private InSeasonTeamChangeModel newTeamChange = new();
+    private int teamChangeAdded { get; set; }
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        await GetPlayers();
+        await GetTeamChanges();
+        loading = false;
+        shouldRender = true;
+    }
+
+    private async Task GetTeamChanges()
+    {
+        teamChanges?.Clear();
+        teamChanges = await playersService.GetInSeasonTeamChangesRequest();
+    }
+
+    private void SelectPlayer(SimplePlayerModel player)
+    {
+        selectedPlayer = "";
+        playerChosen = true;
+        playerSelected = player;
+        playerName = player.Name;
+
+        newTeamChange.PlayerId = player.PlayerId;
+        newTeamChange.Name = player.Name;
+        filteredPlayers = null;
+        selectedPlayer = playerName;
+        StateHasChanged();
+    }
+
+    private void HandleInput(ChangeEventArgs e)
+    {
+        var filter = e.Value?.ToString();
+        if (filter?.Length > 2)
+        {
+            filteredPlayers = allPlayers.Where(p => p.Name.ToLower().Contains(filter.ToLower())).ToList();
+        }
+        else
+        {
+            filteredPlayers = null;
+        }
+    }
+
+    private async void Add()
+    {
+        adding = true;
+        selectedPlayer = string.Empty;
+        newTeamChange = new InSeasonTeamChangeModel();
+        await GetPlayers();
+        shouldRender = true;
+    }
+
+    private void CancellAdd()
+    {
+        adding = false;
+        newTeamChange = new InSeasonTeamChangeModel();
+        playerChosen = false;
+        playerSelected = new SimplePlayerModel();
+        playerName = string.Empty;
+        shouldRender = true;
+    }
+
+    private async Task AddTeamChange(InSeasonTeamChangeModel change)
+    {
+        adding = false;
+        playerChosen = false;
+        playerSelected = new SimplePlayerModel();
+        playerName = string.Empty;
+        teamChangeAdded = await playersService.PostInSeasonTeamChangesRequest(change);
+        await GetTeamChanges();
+    }
+
+    private async Task GetPlayers() => allPlayers = (await playersService.GetSimplePlayersRequest(activeOnly: true)).OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
+}
