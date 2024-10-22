@@ -21,8 +21,9 @@ namespace Football.Fantasy.Services
             else
             {
                 var teams = await playersService.GetAllTeams();
+                var playersDictionary = (await playersService.GetAllPlayers()).Where(p => p.Active == 1).ToDictionary(P => P.PlayerId);
                 List<TargetShare> shares = [];
-                foreach (var team in teams) shares.Add(await GetTargetShare(team));
+                foreach (var team in teams) shares.Add(await GetTargetShare(team, playersDictionary));
                 var orderedShares = shares.OrderBy(s => s.Team.TeamDescription).ToList();
                 cache.Set(Cache.TargetShares.ToString(), orderedShares);
                 return orderedShares;
@@ -83,9 +84,9 @@ namespace Football.Fantasy.Services
             return total;
         }
 
-        private async Task<TargetShare> GetTargetShare(TeamMap teamMap)
+        private async Task<TargetShare> GetTargetShare(TeamMap teamMap, Dictionary<int, Player> playersDictionary)
         {
-            var allPlayers = await playersService.GetPlayersByTeam(teamMap.Team);
+            var teamPlayers = await playersService.GetPlayersByTeam(teamMap.Team);
 
             var totalAttempts = 0.0;
             var totalCompletions = 0.0;
@@ -96,9 +97,11 @@ namespace Football.Fantasy.Services
             var TETargets = 0.0;
             var TEComps = 0.0;
 
-            foreach (var p in allPlayers)
+            foreach (var p in teamPlayers)
             {
-                _ = Enum.TryParse((await playersService.GetPlayer(p.PlayerId)).Position, out Position position);
+                if (!(playersDictionary.TryGetValue(p.PlayerId, out var player) && Enum.TryParse<Position>(player.Position, out var position)))
+                    continue;
+
                 if (position == Position.QB)
                 {
                     var stats = await statisticsService.GetWeeklyData<WeeklyDataQB>(Position.QB, p.PlayerId, teamMap.Team);

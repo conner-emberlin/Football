@@ -167,9 +167,7 @@ namespace Football.Players.Services
             return await playersRepository.UpdateCurrentTeam(teamChange.PlayerId, teamChange.NewTeam, _season.CurrentSeason) ?
                    await playersRepository.PostTeamChange(teamChange) : 0;
         }
-
         
-
         public async Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week) => await playersRepository.GetWeeklySchedule(season, week);
 
         public async Task<List<TrendingPlayer>> GetTrendingPlayers()

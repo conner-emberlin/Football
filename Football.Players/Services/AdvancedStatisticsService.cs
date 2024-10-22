@@ -99,22 +99,27 @@ namespace Football.Players.Services
             List<StrengthOfSchedule> sos = [];
             foreach (var team in teams)
             {
-                sos.Add(new StrengthOfSchedule
+                var remainingGames = (await playersService.GetTeamGames(team.TeamId)).Where(g => g.Week >= currentWeek && g.OpposingTeamId > 0);
+                
+                if (remainingGames.Any())
                 {
-                    TeamMap = team,
-                    CurrentWeek = currentWeek,
-                    Strength = await RemainingStrengthOfSchedule(team, currentWeek)
-                });
+                    sos.Add(new StrengthOfSchedule
+                    {
+                        TeamMap = team,
+                        CurrentWeek = currentWeek,
+                        StrengthBCS = await RemainingStrengthOfScheduleBCS(team, remainingGames, currentWeek)
+                    });
+                }
             }
-            cache.Set(Cache.RemainingSOS.ToString(), sos);
-            return sos;
+            var ordered = sos.OrderByDescending(s => s.StrengthBCS).ToList();
+            cache.Set(Cache.RemainingSOS.ToString(), ordered);
+            return ordered;
         }
-        private async Task<double> RemainingStrengthOfSchedule(TeamMap teamMap, int currentWeek)
+        private async Task<double> RemainingStrengthOfScheduleBCS(TeamMap teamMap, IEnumerable<Schedule> remainingGames, int currentWeek)
         {
-            var schedule = (await playersService.GetTeamGames(teamMap.TeamId)).Where(g => g.Week >= currentWeek && g.OpposingTeamId > 0);
             var or = 0.0;
             var oor = 0.0;
-            foreach (var s in schedule)
+            foreach (var s in remainingGames)
             {
                 or += await TeamWinPercentage(s.OpposingTeamId);
                 foreach (var oo in (await playersService.GetTeamGames(s.OpposingTeamId)).Where(g => g.Week < currentWeek && g.OpposingTeamId > 0))
@@ -124,6 +129,10 @@ namespace Football.Players.Services
 
         }
 
+        private async Task<double> RemainingStrengthOfScheduleStandard(TeamMap teamMap, IEnumerable<Schedule> remainingGames, int currentWeek)
+        {
+            return 0;
+        }
         public async Task<double> StrengthOfSchedule(int teamId, int atWeek)
         {
             var schedule = (await playersService.GetTeamGames(teamId)).Where(g => g.Week <= atWeek && g.OpposingTeamId > 0);
@@ -148,5 +157,6 @@ namespace Football.Players.Services
             var gameResults = (await statisticsService.GetGameResults(_season.CurrentSeason)).Where(g => (g.HomeTeamId == teamId || g.AwayTeamId == teamId) && g.Week <= week);
             return (double)gameResults.Where(g => g.WinnerId == teamId).Count() / (double)gameResults.Count();
         }
+
     }
 }
