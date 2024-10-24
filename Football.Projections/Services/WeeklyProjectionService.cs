@@ -134,8 +134,8 @@ namespace Football.Projections.Services
             {
                 var weightedVector = await GetWeightedAverageVector(player, currentWeek, tunings, filter);
                 var projectedPoints = weightedVector * coefficients;
-
-                if (projectedPoints > 0)
+                
+                if (projectedPoints > 0 && projectedPoints != coefficients[0])
                 {
                     var seasonProjection = seasonProjections.TryGetValue(player.PlayerId, out var proj) ? proj : await fantasyService.GetRecentSeasonFantasyTotal(player.PlayerId);
                     var projection = seasonProjection > 0 ? WeightedWeeklyProjection(seasonProjection / seasonGames, projectedPoints, currentWeek, tunings) : projectedPoints;
