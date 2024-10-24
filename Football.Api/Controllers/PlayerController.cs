@@ -222,14 +222,5 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<TrendingPlayerModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetTrendingPlayers() => Ok(mapper.Map<List<TrendingPlayerModel>>(await playersService.GetTrendingPlayers()));
 
-        [HttpGet("division-standings/{division}")]
-        [ProducesResponseType(typeof(List<DivisionStanding>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetStandingsByDivision(string division)
-        {
-            if (!Enum.TryParse<Division>(division, out var divisionEnum)) return NotFound();
-
-            return Ok(await statisticsService.GetStandingsByDivision(divisionEnum));
-        }
     }
 }

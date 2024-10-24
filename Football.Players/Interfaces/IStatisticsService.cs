@@ -29,6 +29,5 @@ namespace Football.Players.Interfaces
         public Task<IEnumerable<ConsensusWeeklyProjections>> GetConsensusWeeklyProjectionsByPosition(int season, int week, Position position);
         public Task<bool> DeleteConsensusWeeklyProjectionsByPosition(int season, int week, Position position);
         public Task<TeamRecord> GetTeamRecordInDivision(int teamId);
-        public Task<IEnumerable<DivisionStanding>> GetStandingsByDivision(Division division);
     }
 }
