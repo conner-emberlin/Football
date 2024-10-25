@@ -8,7 +8,6 @@ using AutoMapper;
 using Football.Fantasy.Interfaces;
 using Football.Shared.Models.Players;
 using Football.Shared.Models.Fantasy;
-using System;
 
 namespace Football.Api.Controllers
 {
