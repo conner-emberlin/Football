@@ -22,12 +22,14 @@ namespace Football.Players.Repository
                         VALUES (@name, @position, @active)";
             return await dbConnection.QuerySingleAsync<int>(query, new {name, active, position});
         }
-        public async Task<List<Player>> GetAllPlayers()
+        public async Task<List<Player>> GetAllPlayers(int active = 0, string position = "")
         {
             var query = $@"SELECT [PlayerId], [Name], [Position], [Active]
                         FROM [dbo].Players  
-                        ";
-            return (await dbConnection.QueryAsync<Player>(query)).ToList();
+                        WHERE 1=1";
+            if (active > 0) query += " AND [Active] = @active";
+            if (position != "") query += " AND [Position] = @position";
+            return (await dbConnection.QueryAsync<Player>(query, new {active, position})).ToList();
         }
         public async Task<List<Player>> GetPlayersByPosition(string position, bool activeOnly)
         {

@@ -112,16 +112,12 @@ namespace Football.Players.Services
             }
             return playerInjuries;
         }
-        public async Task<List<Player>> GetAllPlayers()
+        public async Task<List<Player>> GetAllPlayers(int active = 0, string position = "")
         {
-            if (settingsService.GetFromCache<Player>(Cache.AllPlayers, out var cachedValues))
-                return cachedValues;
-            else
-            {
-                var players = await playersRepository.GetAllPlayers();
-                cache.Set(Cache.AllPlayers.ToString(), players);
-                return players;
-            }
+            if (cache.TryGetValue<List<Player>>(Cache.AllPlayers + active.ToString() + position, out var cachedPlayers) && cachedPlayers != null) return cachedPlayers;
+            var players = await playersRepository.GetAllPlayers(active, position);
+            cache.Set(Cache.AllPlayers.ToString() + active.ToString() + position, players);
+            return players;
         }
 
         public async Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, Position position, int season, bool activeOnly = false) => await playersRepository.GetPlayersByTeamIdAndPosition(teamId, position.ToString(), season, activeOnly);

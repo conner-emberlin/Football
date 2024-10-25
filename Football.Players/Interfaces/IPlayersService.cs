@@ -5,7 +5,7 @@ namespace Football.Players.Interfaces
 {
     public interface IPlayersService
     {
-        public Task<List<Player>> GetAllPlayers();
+        public Task<List<Player>> GetAllPlayers(int active = 0, string position = "");
         public Task<int> GetPlayerId(string name);             
         public Task<List<Player>> GetPlayersByPosition(Position position, bool activeOnly = false);
         public Task<Player> GetPlayer(int playerId);

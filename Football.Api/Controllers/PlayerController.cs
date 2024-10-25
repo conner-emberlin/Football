@@ -8,6 +8,7 @@ using AutoMapper;
 using Football.Fantasy.Interfaces;
 using Football.Shared.Models.Players;
 using Football.Shared.Models.Fantasy;
+using System;
 
 namespace Football.Api.Controllers
 {
@@ -19,24 +20,13 @@ namespace Football.Api.Controllers
 
         [HttpGet("data/players")]
         [ProducesResponseType(typeof(List<SimplePlayerModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAllPlayers([FromQuery] int active, [FromQuery] string position = "") 
-        {
-            var allPlayers = await playersService.GetAllPlayers();
-            var filteredPlayers =  
-                                  active == 1 && position != string.Empty ? allPlayers.Where(p => p.Active == 1 && p.Position == position)
-                                : active == 1 && position == string.Empty ? allPlayers.Where(p => p.Active == 1)
-                                : position != string.Empty && active != 1 ? allPlayers.Where(p => p.Position == position)
-                                : allPlayers;
-
-            return Ok(mapper.Map<List<SimplePlayerModel>>(filteredPlayers.OrderBy(p => p.Name)));
-        }
+        public async Task<IActionResult> GetAllPlayers([FromQuery] int active, [FromQuery] string position = "") => Ok(mapper.Map<List<SimplePlayerModel>>((await playersService.GetAllPlayers(active, position)).OrderBy(p => p.Name)));
 
         [HttpGet("{playerId}")]
         [ProducesResponseType(typeof(PlayerDataModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetPlayer(int playerId)
-        {
-            
+        {            
             var player = await playersService.GetPlayer(playerId);
             if (player == null) return NotFound();
             var playerModel = mapper.Map<PlayerDataModel>(player);
@@ -49,7 +39,6 @@ namespace Football.Api.Controllers
                 playerModel.Schedule = mapper.Map<List<ScheduleModel>>(await playersService.GetUpcomingGames(playerId));
 
             }
-
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             var season = 0;
             if (currentWeek == 1)
@@ -64,27 +53,8 @@ namespace Football.Api.Controllers
                 playerModel.WeeklyDataFromPastSeason = false;
             }
 
-            playerModel.WeeklyData = (position switch
-            {
-                Position.QB => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataQB>(position, playerId, season)),
-                Position.WR => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataWR>(position, playerId, season)),
-                Position.RB => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataRB>(position, playerId, season)),
-                Position.TE => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataTE>(position, playerId, season)),
-                Position.DST => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataDST>(position, playerId, season)),
-                Position.K => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataK>(position, playerId, season)),
-                _ => []
-            }).OrderByDescending(w => w.Week).ToList();
-
-            playerModel.SeasonData = position switch
-            {
-                Position.QB => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataQB>(position, playerId, true)),
-                Position.WR => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataWR>(position, playerId, true)),
-                Position.RB => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataRB>(position, playerId, true)),
-                Position.TE => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataTE>(position, playerId, true)),
-                Position.DST => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataDST>(position, playerId, true)),
-                _ => []
-            };
-
+            playerModel.WeeklyData = await GetWeeklyDataModel(position, playerId, season);
+            playerModel.SeasonData = await GetSeasonDataModel(position, playerId, season);
             playerModel.SeasonFantasy = mapper.Map<List<SeasonFantasyModel>>(await fantasyDataService.GetSeasonFantasy(playerId));
             playerModel.WeeklyFantasy = mapper.Map<List<WeeklyFantasyModel>>(await fantasyDataService.GetWeeklyFantasyBySeason(playerId, season));
 
@@ -222,5 +192,34 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<TrendingPlayerModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetTrendingPlayers() => Ok(mapper.Map<List<TrendingPlayerModel>>(await playersService.GetTrendingPlayers()));
 
+
+        private async Task<List<SeasonDataModel>> GetSeasonDataModel(Position position, int playerId, int season)
+        {
+            return position switch
+            {
+                Position.QB => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataQB>(position, playerId, true)),
+                Position.WR => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataWR>(position, playerId, true)),
+                Position.RB => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataRB>(position, playerId, true)),
+                Position.TE => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataTE>(position, playerId, true)),
+                Position.DST => mapper.Map<List<SeasonDataModel>>(await statisticsService.GetSeasonData<SeasonDataDST>(position, playerId, true)),
+                _ => []
+            };
+        }
+
+        private async Task<List<WeeklyDataModel>> GetWeeklyDataModel(Position position, int playerId, int season)
+        {
+            var data = position switch
+            {
+                Position.QB => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataQB>(position, playerId, season)),
+                Position.WR => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataWR>(position, playerId, season)),
+                Position.RB => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataRB>(position, playerId, season)),
+                Position.TE => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataTE>(position, playerId, season)),
+                Position.DST => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataDST>(position, playerId, season)),
+                Position.K => mapper.Map<List<WeeklyDataModel>>(await statisticsService.GetWeeklyDataByPlayer<WeeklyDataK>(position, playerId, season)),
+                _ => []
+            };
+
+            return [.. data.OrderByDescending(d => d.Week)];
+        }
     }
 }
