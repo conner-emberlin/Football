@@ -39,18 +39,8 @@ namespace Football.Api.Controllers
 
             }
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            var season = 0;
-            if (currentWeek == 1)
-            {
-                season = _season.CurrentSeason - 1;
-                playerModel.WeeklyDataFromPastSeason = true;
-            }
-
-            else
-            {
-                season = _season.CurrentSeason;
-                playerModel.WeeklyDataFromPastSeason = false;
-            }
+            var season = currentWeek == 1 ? _season.CurrentSeason - 1 : _season.CurrentSeason;
+            playerModel.WeeklyDataFromPastSeason = currentWeek == 1;
 
             playerModel.WeeklyData = await GetWeeklyDataModel(position, playerId, season);
             playerModel.SeasonData = await GetSeasonDataModel(position, playerId, season);
