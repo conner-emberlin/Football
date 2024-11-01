@@ -71,6 +71,32 @@ namespace Football.Fantasy.Services
             return opponentFantasy;
         }
 
+        public async Task<Dictionary<string, List<MatchupRanking>>> GetRestOfSeasonMatchupRankingsByTeam(int teamId)
+        {
+            Dictionary<string, List<MatchupRanking>> rosRankings = [];
+            rosRankings.Add(Position.QB.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.QB));
+            rosRankings.Add(Position.RB.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.RB));
+            rosRankings.Add(Position.WR.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.WR));
+            rosRankings.Add(Position.TE.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.TE));
+            rosRankings.Add(Position.K.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.K));
+            rosRankings.Add(Position.DST.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.DST));
+            return rosRankings;
+        }
+
+        private async Task<List<MatchupRanking>> GetRestOfSeasonMatchupRankingsByTeamAndPosition(int teamId, Position position)
+        {
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            var upcomingGames = (await playersService.GetTeamGames(teamId)).Where(g => g.Week >= currentWeek && g.OpposingTeamId > 0);
+            var matchupRankingDictionary = (await GetPositionalMatchupRankingsFromSQL(position, _season.CurrentSeason, currentWeek)).ToDictionary(t => t.TeamId);
+
+            List<MatchupRanking> rosRankings = [];
+            foreach (var game in upcomingGames)
+            {
+                rosRankings.Add(matchupRankingDictionary[game.OpposingTeamId]);
+            }
+
+            return rosRankings;
+        }
         private async Task<List<MatchupRanking>> CalculatePositionalMatchupRankings(Position position, int week = 0)
         {
             List<MatchupRanking> rankings = [];
