@@ -1,0 +1,161 @@
+﻿@page "/qualitystarts"
+<PageTitle>Quality Starts</PageTitle>
+
+@using Football.Client.Helpers;
+@using Football.Client.Interfaces;
+@using Football.Client.Shared;
+@using Football.Shared.Models.Fantasy;
+
+@inject IFantasyService fantasyService;
+
+<h4>Quality Starts</h4>
+
+<div>
+    @foreach (var position in format.Positions())
+    {
+
+        <input type="radio" name="players" id=" @position" value="@position"
+               @onchange="SetPosition"
+               checked=@(Position.Equals(position,StringComparison.OrdinalIgnoreCase)) />
+        <label for="@position ">@position</label>
+
+    }
+</div>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+<button class="button-22" role="button" @onclick="HandleInput">
+    Submit
+</button>
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+@if (filteredQualityStarts.Count > 0)
+{
+    <EditForm model="this" OnSubmit="HandleSearch">
+        <TextBoxName @bind-Value="this.Value" />
+    </EditForm>
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Games</th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("PoorStarts"))">Poor#</span>
+                        <span class="oi @(tableSort.GetSortStyle("PoorStarts"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("PoorStartPercentage"))">Poor%</span>
+                        <span class="oi @(tableSort.GetSortStyle("PoorStartPercentage"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("GoodStarts"))">Good#</span>
+                        <span class="oi @(tableSort.GetSortStyle("GoodStarts"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("GoodStartPercentage"))">Good%</span>
+                        <span class="oi @(tableSort.GetSortStyle("GoodStartPercentage"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("GreatStarts"))">Great#</span>
+                        <span class="oi @(tableSort.GetSortStyle("GreatStarts"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("GreatStartPercentage"))">Great%</span>
+                        <span class="oi @(tableSort.GetSortStyle("GreatStartPercentage"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("QualityCount"))">Quality#</span>
+                        <span class="oi @(tableSort.GetSortStyle("QualityCount"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("QualityPercentage"))">Quality%</span>
+                        <span class="oi @(tableSort.GetSortStyle("QualityPercentage"))"></span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var f in filteredQualityStarts)
+                {
+                    <tr>
+                        <td>
+                            <a class="page-links" href="Players/@f.PlayerId"> @f.Name</a>
+                        </td>
+                        <td>@f.GamesPlayed</td>
+                        <td>@f.PoorStarts</td>
+                        <td>@f.PoorStartPercentage</td>
+                        <td>@f.GoodStarts</td>
+                        <td>@f.GoodStartPercentage</td>
+                        <td>@f.GreatStarts</td>
+                        <td>@f.GreatStartPercentage</td>
+                        <td>@f.QualityCount</td>
+                        <td>@f.QualityPercentage</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+@code {
+    private string Position { get; set; } = "Quarterback";
+    private string positionEnum { get; set; } = "QB";
+    private List<QualityStartsModel>? qualityStarts = new();
+
+    private bool loading { get; set; } = false;
+    private bool badRequestError { get; set; } = false;
+    private bool shouldRender;
+
+    private TableSort tableSort = new();
+    private Formatter format = new();
+
+    private List<QualityStartsModel> filteredQualityStarts = new();
+    private string Value { get; set; } = "";
+
+    protected override bool ShouldRender() => shouldRender;
+
+    private void SetPosition(ChangeEventArgs args)
+    {
+        qualityStarts?.Clear();
+        filteredQualityStarts?.Clear();
+        Value = string.Empty;
+        tableSort = new();
+        positionEnum = format.SetPosition(args);
+    }
+
+    private async Task HandleInput()
+    {
+        loading = true;
+        qualityStarts?.Clear();
+        filteredQualityStarts.Clear();
+        Value = string.Empty;
+        shouldRender = true;
+        qualityStarts = (await fantasyService.GetQualityStartsRequest(positionEnum))?.OrderByDescending(q => q.QualityPercentage).ToList();
+        filteredQualityStarts.AddRange(qualityStarts);
+        loading = false;
+        shouldRender = true;
+    }
+
+
+    private void HandleSearch()
+    {
+        filteredQualityStarts.Clear();
+
+        if (!string.IsNullOrEmpty(Value))
+        {
+            filteredQualityStarts = qualityStarts.Where(m => m.Name.ToLower().Contains(Value.ToLower())).ToList();
+            shouldRender = true;
+        }
+        else
+        {
+            filteredQualityStarts.AddRange(qualityStarts);
+        }
+    }
+
+    private void SetTable(string columnName) => filteredQualityStarts = tableSort.SortTable<QualityStartsModel>(filteredQualityStarts, columnName);
+
+}

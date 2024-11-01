@@ -185,6 +185,13 @@ namespace Football.Api
             CreateMap<PlayerTeam, PlayerTeamModel>();
             CreateMap<TeamLeagueInformation, TeamLeagueInformationModel>();
             CreateMap<InSeasonTeamChange, InSeasonTeamChangeModel>().ReverseMap();
+
+            CreateMap<QualityStarts, QualityStartsModel>()
+                .ForMember(qm => qm.PoorStartPercentage, o => o.MapFrom(q => q.GamesPlayed > 0 ? Math.Round((double)q.PoorStarts / (double)q.GamesPlayed, 2) : 0))
+                .ForMember(qm => qm.GoodStartPercentage, o => o.MapFrom(q => q.GamesPlayed > 0 ? Math.Round((double)q.GoodStarts / (double)q.GamesPlayed, 2) : 0))
+                .ForMember(qm => qm.GreatStartPercentage, o => o.MapFrom(q => q.GamesPlayed > 0 ? Math.Round((double)q.GreatStarts / (double)q.GamesPlayed, 2) : 0))
+                .ForMember(qm => qm.QualityCount, o => o.MapFrom(q => q.GoodStarts + q.GreatStarts))
+                .ForMember(qm => qm.QualityPercentage, o => o.MapFrom(q => q.GamesPlayed > 0 ? Math.Round((double)(q.GoodStarts + q.GreatStarts) / (double)q.GamesPlayed, 2) : 0));
         }
 
     }

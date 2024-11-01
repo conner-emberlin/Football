@@ -16,6 +16,35 @@ namespace Football.Fantasy.Services
         private readonly Season _season = season.CurrentValue;
         private readonly FantasyScoring _scoring = scoring.CurrentValue;
 
+        public async Task<List<QualityStarts>> GetQualityStartsByPosition(Position position)
+        {
+            List<QualityStarts> qualityStarts = [];
+            var players = await playersService.GetPlayersByPosition(position, activeOnly: true);
+            var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(position);
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+
+            foreach (var player in players)
+            {
+                var playerFantasy = weeklyFantasy.Where(w => w.PlayerId == player.PlayerId);
+                if (playerFantasy.Any())
+                {
+                    qualityStarts.Add(new()
+                    {
+                        PlayerId = player.PlayerId,
+                        Name = player.Name,
+                        Position = player.Position,
+                        Season = _season.CurrentSeason,
+                        Week = currentWeek,
+                        GamesPlayed = playerFantasy.Count(),
+                        PoorStarts = playerFantasy.Count(p => p.FantasyPoints <= settingsService.GetBustSetting(position)),
+                        GoodStarts = playerFantasy.Count(p => p.FantasyPoints > settingsService.GetBustSetting(position) && p.FantasyPoints < settingsService.GetBoomSetting(position)),
+                        GreatStarts = playerFantasy.Count(p => p.FantasyPoints >= settingsService.GetBoomSetting(position))
+                    }) ;
+                }
+            }
+
+            return qualityStarts;
+        }
         public async Task<List<BoomBust>> GetBoomBusts(Position position)
         {
             var weeklyFantasy = await fantasyDataService.GetWeeklyFantasy(position);

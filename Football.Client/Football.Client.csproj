@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Pages\Fantasy\QualityStarts.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazor-ApexCharts" Version="3.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.0" PrivateAssets="all" />
@@ -15,6 +19,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Football.Shared.Models\Football.Shared.Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Pages\Fantasy\QualityStarts.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\Fantasy\QualityStarts.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Pages\Fantasy\QualityStarts.razor" />
   </ItemGroup>
 
 </Project>

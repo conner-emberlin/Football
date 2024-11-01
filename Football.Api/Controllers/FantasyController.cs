@@ -200,5 +200,10 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetFantasyTrends([FromRoute] string position, [FromRoute] int season) 
             => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<WeeklyFantasyTrendModel>>(await fantasyAnalysisService.GetWeeklyFantasyTrendsByPosition(posEnum, season))) : BadRequest();
 
+        [HttpGet("quality-starts/{position}")]
+        [ProducesResponseType(typeof(List<QualityStartsModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetQualityStarts([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<QualityStartsModel>>(await fantasyAnalysisService.GetQualityStartsByPosition(posEnum))) : BadRequest();
+
     }
 }

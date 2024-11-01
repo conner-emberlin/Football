@@ -6,6 +6,7 @@ namespace Football.Fantasy.Interfaces
 {
     public interface IFantasyAnalysisService
     {
+        public Task<List<QualityStarts>> GetQualityStartsByPosition(Position position);
         public Task<List<BoomBust>> GetBoomBusts(Position position);
         public Task<List<FantasyPerformance>> GetFantasyPerformances(Position position);
         public Task<List<FantasyPerformance>> GetFantasyPerformances(int teamId);

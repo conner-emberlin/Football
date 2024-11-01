@@ -633,9 +633,9 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
     private bool seasonAdjustmentsUpdated { get; set; } = false;
     private bool weeklyTuningsUpdated { get; set; } = false;
 
-    private string Setting { get; set; } = "Season Tunings";
+    private string Setting { get; set; } = "Season Settings";
 
-    private List<string> settings = ["Season Tunings", "Season Adjustments", "Weekly Tunings"];
+    private List<string> settings = ["Season Settings", "Season Adjustments", "Weekly Settings"];
 
     private bool seasonTuningsSetting { get; set; }
     private bool seasonAdjustmentsSetting { get; set; }
@@ -682,7 +682,7 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
         loading = true;
         shouldRender = true;
 
-        if(Setting == "Season Tunings")
+        if(Setting == "Season Settings")
         {
             tunings = await operationsService.GetSeasonTuningsRequest();
             seasonTuningsSetting = true;
@@ -692,7 +692,7 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
             seasonAdjustments = await operationsService.GetSeasonAdjustmentsRequest();
             seasonAdjustmentsSetting = true;
         }
-        else if (Setting == "Weekly Tunings")
+        else if (Setting == "Weekly Settings")
         {
             weeklyTunings = await operationsService.GetWeeklyTuningsRequest();
             weeklyTuningsSetting = true;          

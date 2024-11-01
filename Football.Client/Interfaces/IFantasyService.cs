@@ -16,5 +16,6 @@ namespace Football.Client.Interfaces
         public Task<List<WaiverWireCandidateModel>?> GetWaiverWireCandidatesRequest();
         public Task<List<WeeklyFantasyModel>?> GetWeeklyFantasyByPlayerRequest(string playerId);
         public Task<List<TopOpponentsModel>?> GetTopOpponentsRequest(string teamId, string position);
+        public Task<List<QualityStartsModel>?> GetQualityStartsRequest(string position);
     }
 }
