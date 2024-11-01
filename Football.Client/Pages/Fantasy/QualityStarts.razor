@@ -135,7 +135,7 @@
         Value = string.Empty;
         shouldRender = true;
         qualityStarts = (await fantasyService.GetQualityStartsRequest(positionEnum))?.OrderByDescending(q => q.QualityPercentage).ToList();
-        filteredQualityStarts.AddRange(qualityStarts);
+        if (qualityStarts != null) filteredQualityStarts.AddRange(qualityStarts);
         loading = false;
         shouldRender = true;
     }
