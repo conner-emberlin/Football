@@ -107,7 +107,11 @@ else if (!loading && !playerSelected)
         <img src="@photoPath" width="100" onerror="this.src = 'https://localhost:7237/PlayerPhotos/gen.png'">
     </div>
     <div>
-       <b>@playerData.Name</b> 
+        <b>@playerData.Name</b> 
+        @if (playerData.ActiveInjury != null)
+        {
+            <small style="color:red"> (Out: @playerData.ActiveInjury.Description) </small>
+        }
     </div>
     @if(!string.IsNullOrEmpty(playerData.Team))
     {

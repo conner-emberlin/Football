@@ -56,6 +56,9 @@ namespace Football.Api.Controllers
 
                 playerModel.WeeklyFantasyTrends = mapper.Map<List<WeeklyFantasyTrendModel>>(await fantasyAnalysisService.GetPlayerWeeklyFantasyTrends(playerId, season));
             }
+
+            var inSeasonInjuries = (await playersService.GetActiveInSeasonInjuries(_season.CurrentSeason)).ToDictionary(i => i.PlayerId);
+            if (inSeasonInjuries.TryGetValue(playerId, out var injury)) playerModel.ActiveInjury = mapper.Map<InSeasonInjuryModel>(injury);
            
             return Ok(playerModel);
         }
