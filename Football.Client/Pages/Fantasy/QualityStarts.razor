@@ -44,6 +44,10 @@
                     <th>Name</th>
                     <th>Games</th>
                     <th>
+                        <span class="sort-link" onclick="@(() => SetTable("Team"))">Team</span>
+                        <span class="oi @(tableSort.GetSortStyle("Team"))"></span>
+                    </th>
+                    <th>
                         <span class="sort-link" onclick="@(() => SetTable("QualityCount"))">Quality#</span>
                         <span class="oi @(tableSort.GetSortStyle("QualityCount"))"></span>
                     </th>
@@ -80,11 +84,13 @@
             <tbody>
                 @foreach (var f in filteredQualityStarts)
                 {
+                    var logoPhotoPath = f.Team != "" ? "https://localhost:7237/Logos/" + f.Team + ".png" : "https://localhost:7237/Logos/nfl.png";
                     <tr>
                         <td>
                             <a class="page-links" href="Players/@f.PlayerId"> @f.Name</a>
                         </td>
                         <td>@f.GamesPlayed</td>
+                        <td><img src="@logoPhotoPath" width="30" height="30"></td>
                         <td>@f.QualityCount</td>
                         <td>@f.QualityPercentage</td>
                         <td>@f.PoorStarts</td>

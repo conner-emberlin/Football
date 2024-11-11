@@ -5,6 +5,7 @@ namespace Football.Shared.Models.Fantasy
     {
         public int PlayerId { get; set; }
         public string Name { get; set; } = "";
+        public string Team { get; set; } = "";
         public string Position { get; set; } = "";
         public int Season { get; set; }
         public int Week { get; set; }

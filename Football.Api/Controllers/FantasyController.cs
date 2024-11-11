@@ -204,6 +204,17 @@ namespace Football.Api.Controllers
         [HttpGet("quality-starts/{position}")]
         [ProducesResponseType(typeof(List<QualityStartsModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetQualityStarts([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<QualityStartsModel>>(await fantasyAnalysisService.GetQualityStartsByPosition(posEnum))) : BadRequest();
+        public async Task<IActionResult> GetQualityStarts([FromRoute] string position) 
+        {
+
+            if (!Enum.TryParse(position, out Position posEnum)) return BadRequest();
+            var qualityStarts = mapper.Map<List<QualityStartsModel>>(await fantasyAnalysisService.GetQualityStartsByPosition(posEnum));
+            var playerTeams = (await playersService.GetPlayerTeams(_season.CurrentSeason, qualityStarts.Select(q => q.PlayerId))).ToDictionary(p => p.PlayerId);
+            foreach (var qs in qualityStarts)
+            {
+                qs.Team = playerTeams.TryGetValue(qs.PlayerId, out var team) ? team.Team : "";
+            }
+            return Ok(qualityStarts);
+        } 
     }
 }

@@ -1,12 +1,11 @@
-﻿using Football.Enums;
+﻿using AutoMapper;
+using Football.Enums;
 using Football.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using AutoMapper;
 using Serilog;
-using Football.Players.Repository;
 
 namespace Football.Players.Services
 {

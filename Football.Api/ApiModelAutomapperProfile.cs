@@ -186,11 +186,11 @@ namespace Football.Api
             CreateMap<TeamLeagueInformation, TeamLeagueInformationModel>();
             CreateMap<InSeasonTeamChange, InSeasonTeamChangeModel>().ReverseMap();
             CreateMap<QualityStarts, QualityStartsModel>()
-                .ForMember(qm => qm.PoorStartPercentage, o => o.MapFrom(q => Math.Round(((double)q.PoorStarts / (double)q.GamesPlayed) * 100, 2)))
-                .ForMember(qm => qm.GoodStartPercentage, o => o.MapFrom(q => Math.Round(((double)q.GoodStarts / (double)q.GamesPlayed) * 100, 2)))
-                .ForMember(qm => qm.GreatStartPercentage, o => o.MapFrom(q => Math.Round(((double)q.GreatStarts / (double)q.GamesPlayed) * 100, 2)))
+                .ForMember(qm => qm.PoorStartPercentage, o => o.MapFrom(q => Math.Round(((double)q.PoorStarts / (double)q.GamesPlayed) * 100, 1)))
+                .ForMember(qm => qm.GoodStartPercentage, o => o.MapFrom(q => Math.Round(((double)q.GoodStarts / (double)q.GamesPlayed) * 100, 1)))
+                .ForMember(qm => qm.GreatStartPercentage, o => o.MapFrom(q => Math.Round(((double)q.GreatStarts / (double)q.GamesPlayed) * 100, 1)))
                 .ForMember(qm => qm.QualityCount, o => o.MapFrom(q => q.GoodStarts + q.GreatStarts))
-                .ForMember(qm => qm.QualityPercentage, o => o.MapFrom(q => Math.Round(((double)(q.GoodStarts + q.GreatStarts) / (double)q.GamesPlayed) * 100, 2)));
+                .ForMember(qm => qm.QualityPercentage, o => o.MapFrom(q => Math.Round(((double)(q.GoodStarts + q.GreatStarts) / (double)q.GamesPlayed) * 100, 1)));
         }
 
     }

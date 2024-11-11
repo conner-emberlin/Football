@@ -1,7 +1,7 @@
 ﻿using Football.Enums;
-using Football.Models;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
+using Football.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Caching.Memory;
@@ -31,16 +31,19 @@ namespace Football.Fantasy.Services
         }
         public async Task<List<MarketShare>> GetMarketShare(Position position)
         {
-            if (cache.TryGetValue(Cache.MarketShare.ToString() + position.ToString(), out List<MarketShare>? marketShares) && marketShares != null) return marketShares;
+            if (cache.TryGetValue(Cache.MarketShare.ToString() + position.ToString(), out List<MarketShare>? marketShares) && marketShares != null) 
+                return marketShares;
 
             List<MarketShare> shares = [];
             var players = await playersService.GetPlayersByPosition(position, true);
             var teamTotals = (await GetTeamTotals()).ToDictionary(t => t.Team.TeamId);
+            var playerTeams = (await playersService.GetPlayerTeams(_season.CurrentSeason, players.Select(p => p.PlayerId))).ToDictionary(p => p.PlayerId);
             foreach (var player in players)
             {
-                var team = await playersService.GetPlayerTeam(_season.CurrentSeason, player.PlayerId);
-                if (team != null) 
-                    shares.Add(await GetMarketShare(position, player, team, teamTotals[team.TeamId], await fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team)));                                    
+                if (playerTeams.TryGetValue(player.PlayerId, out var team))
+                {
+                    shares.Add(await GetMarketShare(position, player, team, teamTotals[team.TeamId], await fantasyService.GetWeeklyFantasy(player.PlayerId, team.Team)));
+                }                               
             }
             var mShares = shares.Where(s => s.TotalFantasy > 0).OrderByDescending(s => s.FantasyShare);
             cache.Set(Cache.MarketShare.ToString() + position.ToString(), mShares);
