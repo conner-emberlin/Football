@@ -44,6 +44,14 @@
                     <th>Name</th>
                     <th>Games</th>
                     <th>
+                        <span class="sort-link" onclick="@(() => SetTable("QualityCount"))">Quality#</span>
+                        <span class="oi @(tableSort.GetSortStyle("QualityCount"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("QualityPercentage"))">Quality%</span>
+                        <span class="oi @(tableSort.GetSortStyle("QualityPercentage"))"></span>
+                    </th>
+                    <th>
                         <span class="sort-link" onclick="@(() => SetTable("PoorStarts"))">Poor#</span>
                         <span class="oi @(tableSort.GetSortStyle("PoorStarts"))"></span>
                     </th>
@@ -67,14 +75,6 @@
                         <span class="sort-link" onclick="@(() => SetTable("GreatStartPercentage"))">Great%</span>
                         <span class="oi @(tableSort.GetSortStyle("GreatStartPercentage"))"></span>
                     </th>
-                    <th>
-                        <span class="sort-link" onclick="@(() => SetTable("QualityCount"))">Quality#</span>
-                        <span class="oi @(tableSort.GetSortStyle("QualityCount"))"></span>
-                    </th>
-                    <th>
-                        <span class="sort-link" onclick="@(() => SetTable("QualityPercentage"))">Quality%</span>
-                        <span class="oi @(tableSort.GetSortStyle("QualityPercentage"))"></span>
-                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -85,14 +85,14 @@
                             <a class="page-links" href="Players/@f.PlayerId"> @f.Name</a>
                         </td>
                         <td>@f.GamesPlayed</td>
+                        <td>@f.QualityCount</td>
+                        <td>@f.QualityPercentage</td>
                         <td>@f.PoorStarts</td>
                         <td>@f.PoorStartPercentage</td>
                         <td>@f.GoodStarts</td>
                         <td>@f.GoodStartPercentage</td>
                         <td>@f.GreatStarts</td>
                         <td>@f.GreatStartPercentage</td>
-                        <td>@f.QualityCount</td>
-                        <td>@f.QualityPercentage</td>
                     </tr>
                 }
             </tbody>

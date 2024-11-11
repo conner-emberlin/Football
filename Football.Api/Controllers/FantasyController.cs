@@ -205,31 +205,5 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<QualityStartsModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetQualityStarts([FromRoute] string position) => Enum.TryParse(position, out Position posEnum) ? Ok(mapper.Map<List<QualityStartsModel>>(await fantasyAnalysisService.GetQualityStartsByPosition(posEnum))) : BadRequest();
-
-        [HttpGet("matchup-rankings/ros")]
-        [ProducesResponseType(typeof(List<RestOfSeasonMatchupRankingModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetRestOfSeasonMatchupRankings()
-        {
-            var teams = await playersService.GetAllTeams();
-            List<RestOfSeasonMatchupRankingModel> rankings = [];
-            foreach (var team in teams)
-            {
-                var mrs = await matchupAnalysisService.GetRestOfSeasonMatchupRankingsByTeam(team.TeamId);
-                Dictionary<string, List<MatchupRankingModel>> teamMR = [];
-                foreach (var mr in mrs)
-                {
-                    teamMR.Add(mr.Key, mapper.Map<List<MatchupRankingModel>>(mr.Value));
-                }
-
-                rankings.Add(new()
-                {
-                    TeamMapModel = mapper.Map<TeamMapModel>(team),
-                    Rankings = teamMR
-                });
-            }
-            return Ok(rankings);
-        }
-
     }
 }
