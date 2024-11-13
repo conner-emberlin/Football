@@ -47,7 +47,7 @@ namespace Football.Projections.Services
                 var avgMatchup = matchupRanks.ElementAt((int)Math.Floor((double)(matchupRanks.Count / 2)));
                 var teamDictionary = position != Position.DST ? (await teamsService.GetPlayerTeams(_season.CurrentSeason, weekProjections.Select(w => w.PlayerId))).ToDictionary(p => p.PlayerId)
                                                     : (mapper.Map<List<PlayerTeam>>(await teamsService.GetAllTeams())).ToDictionary(p => p.PlayerId);
-                var scheduleDictionary = (await playerService.GetWeeklySchedule(_season.CurrentSeason, weekProjections.First().Week)).ToDictionary(s => s.TeamId);
+                var scheduleDictionary = (await teamsService.GetWeeklySchedule(_season.CurrentSeason, weekProjections.First().Week)).ToDictionary(s => s.TeamId);
 
                 foreach (var w in weekProjections)
                 {

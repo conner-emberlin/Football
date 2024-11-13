@@ -53,7 +53,7 @@ namespace Football.Api.Controllers
             var consensusProjectionDictionary = (await statisticsService.GetConsensusProjectionsByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(c => c.PlayerId);
             var splitsDictionary = (await fantasyAnalysisService.GetFantasySplits(positionEnum, _season.CurrentSeason - 1)).ToDictionary(f => f.PlayerId);
             var snapSplitsDictionary = (await snapCountService.GetSnapCountSplits(model.Select(m => m.PlayerId), _season.CurrentSeason - 1)).ToDictionary(s => s.PlayerId);
-            var byeWeeksDictionary = (await playersService.GetByeWeeks(_season.CurrentSeason)).ToDictionary(b => b.Team, b => b.Week);
+            var byeWeeksDictionary = (await teamsService.GetByeWeeks(_season.CurrentSeason)).ToDictionary(b => b.Team, b => b.Week);
 
             foreach (var m in model)
             {
@@ -208,7 +208,7 @@ namespace Football.Api.Controllers
 
             var teamDictionary = positionEnum != Position.DST ? (await teamsService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId)
                                 : (mapper.Map<List<PlayerTeam>>(await teamsService.GetAllTeams())).ToDictionary(p => p.PlayerId);
-            var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, currentWeek)).ToDictionary(s => s.TeamId);
+            var scheduleDictionary = (await teamsService.GetWeeklySchedule(_season.CurrentSeason, currentWeek)).ToDictionary(s => s.TeamId);
             var consensusProjectionDictionary = (await statisticsService.GetConsensusWeeklyProjectionsByPosition(_season.CurrentSeason, currentWeek, positionEnum)).ToDictionary(c => c.PlayerId);
             var averageFantasyDictionary = await fantasyDataService.GetAverageWeeklyFantasyPoints(models.Select(m => m.PlayerId), _season.CurrentSeason);
             var matchupRankingsDictionary = (await matchupAnalysisService.GetPositionalMatchupRankingsFromSQL(positionEnum, _season.CurrentSeason, currentWeek)).ToDictionary(m => m.TeamId);

@@ -16,16 +16,8 @@ namespace Football.Players.Interfaces
         public Task<List<Suspensions>> GetPlayerSuspensions(int season);
         public Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season);
         public Task<double> GetWeeklyProjection(int season, int week, int playerId);
-
         public Task<int> GetCurrentWeek(int season);
-
-
-        public Task<List<Schedule>> GetGames(int season, int week);
-        public Task<IEnumerable<Schedule>> GetByeWeeks(int season);
-        public Task<List<Schedule>> GetTeamGames(int teamId, int season);
         public Task<List<int>> GetIgnoreList();
-        public Task<TeamLocation> GetTeamLocation(int teamId);
-        public Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week);
         public Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season);
         public Task<Dictionary<int, double>> GetGamesPlayedInjuredBySeason(int season);
         public Task<int> PostInSeasonInjury(InSeasonInjury injury);
@@ -38,12 +30,15 @@ namespace Football.Players.Interfaces
         public Task<List<int>> GetSeasons();
         public Task<bool> CreateRookie(Rookie rookie);
         public Task<List<Rookie>> GetAllRookies();
-        public Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week);
         public Task<int> UploadSleeperPlayerMap(List<SleeperPlayerMap> playerMap);
         public Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId);
         public Task<List<SleeperPlayerMap>> GetSleeperPlayerMaps();
         public Task<IEnumerable<TeamChange>> GetAllTeamChanges(int currentSeason, int previousSeason);
         public Task<SeasonInfo> GetSeasonInfo(int season);
+
+
+
+
 
     }
 }

@@ -35,20 +35,18 @@ namespace Football.Players.Interfaces
         public Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position);
         public Task<bool> CreateRookie(Rookie rookie);
         public Task<List<Rookie>> GetAllRookies();
-
-
-        public Task<TeamLocation> GetTeamLocation(int teamId);
-
-        public Task<List<Schedule>> GetGames(int season, int week);
-        public Task<List<Schedule>> GetTeamGames(int teamId);
-        public Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week);
-        public Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week);
-        public Task<IEnumerable<Schedule>> GetByeWeeks(int season);
-        public Task<IEnumerable<TeamChange>> GetAllTeamChanges(int currentSeason);
         public Task<int> GetCurrentSeasonGames();
         public Task<int> GetCurrentSeasonWeeks();
         public Task<int> GetGamesBySeason(int season);
         public Task<int> GetWeeksBySeason(int season);
+        public Task<IEnumerable<TeamChange>> GetAllTeamChanges(int currentSeason);
+
+
+
+
+
+
+
 
     }
 }

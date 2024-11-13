@@ -2,7 +2,6 @@
 using Football.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
-using Football.Players.Repository;
 using Microsoft.Extensions.Options;
 
 namespace Football.Players.Services
@@ -20,6 +19,12 @@ namespace Football.Players.Services
         public async Task<int> GetTeamId(int playerId) => await teamsRepository.GetTeamId(playerId);
         public async Task<IEnumerable<PlayerTeam>> GetPlayerTeams(int season, IEnumerable<int> playerIds) => await teamsRepository.GetPlayerTeams(season, playerIds);
         public async Task<int> GetTeamIdFromDescription(string teamDescription) => await teamsRepository.GetTeamIdFromDescription(teamDescription);
+        public async Task<List<Schedule>> GetTeamGames(int teamId) => await teamsRepository.GetTeamGames(teamId, _season.CurrentSeason);
+        public async Task<TeamLocation> GetTeamLocation(int teamId) => await teamsRepository.GetTeamLocation(teamId);
+        public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => await teamsRepository.GetScheduleDetails(season, week);
+        public async Task<IEnumerable<Schedule>> GetByeWeeks(int season) => await teamsRepository.GetByeWeeks(season);
+        public async Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week) => await teamsRepository.GetWeeklySchedule(season, week);
+        public async Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, Position position, int season, bool activeOnly = false) => await teamsRepository.GetPlayersByTeamIdAndPosition(teamId, position.ToString(), season, activeOnly);
         public async Task<TeamRecord> GetTeamRecordInDivision(int teamId)
         {
             var gameResults = await statisticsService.GetGameResults(_season.CurrentSeason);
@@ -52,7 +57,7 @@ namespace Football.Players.Services
                                             && (gr.HomeTeamId == team.TeamId || gr.AwayTeamId == team.TeamId))
             }).ToList();
         }
-        public async Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, Position position, int season, bool activeOnly = false) => await teamsRepository.GetPlayersByTeamIdAndPosition(teamId, position.ToString(), season, activeOnly);
+
         public async Task<List<PlayerTeam>> GetPlayersByTeam(string team)
         {
             var playerTeams = await teamsRepository.GetPlayersByTeam(team, _season.CurrentSeason);

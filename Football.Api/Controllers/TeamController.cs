@@ -28,7 +28,7 @@ namespace Football.Api.Controllers
 
         [HttpGet("schedule-details/current")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<ScheduleDetailsModel>>> GetScheduleDetails() => Ok(mapper.Map<List<ScheduleDetailsModel>>(await playersService.GetScheduleDetails(_season.CurrentSeason, await playersService.GetCurrentWeek(_season.CurrentSeason))));
+        public async Task<ActionResult<List<ScheduleDetailsModel>>> GetScheduleDetails() => Ok(mapper.Map<List<ScheduleDetailsModel>>(await teamsService.GetScheduleDetails(_season.CurrentSeason, await playersService.GetCurrentWeek(_season.CurrentSeason))));
 
         [HttpGet("team-records")]
         [ProducesResponseType(StatusCodes.Status200OK)]

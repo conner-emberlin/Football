@@ -24,7 +24,7 @@ namespace Football.Fantasy.Services
         {
             List<StartOrSit> startOrSits = [];
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            var schedule = await playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
+            var schedule = await teamsService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
             foreach (var playerId in playerIds)
             {           
                 if (settingsService.GetFromCache<StartOrSit>(playerId, Cache.StartOrSit, out var startOrSit)) startOrSits.Add(startOrSit);
@@ -67,7 +67,7 @@ namespace Football.Fantasy.Services
         {
             if (scheduleDetail != null)
             {
-                var homeLocation = await playersService.GetTeamLocation(scheduleDetail.HomeTeamId);
+                var homeLocation = await teamsService.GetTeamLocation(scheduleDetail.HomeTeamId);
                 if (homeLocation.Indoor == 1)
                     return new Weather
                     {
@@ -113,7 +113,7 @@ namespace Football.Fantasy.Services
             var playerComparison = settingsService.GetPlayerComparison(position);
 
             var opponentId = schedule.HomeTeamId == teamId ? schedule.AwayTeamId : schedule.HomeTeamId;
-            var opponentSchedule = (await playersService.GetTeamGames(opponentId)).Where(s => s.Week < currentWeek && s.OpposingTeamId > 0);
+            var opponentSchedule = (await teamsService.GetTeamGames(opponentId)).Where(s => s.Week < currentWeek && s.OpposingTeamId > 0);
             foreach (var match in opponentSchedule)
             {
                 var opposingTeamPlayers = await teamsService.GetPlayersByTeamIdAndPosition(match.OpposingTeamId, position, _season.CurrentSeason);

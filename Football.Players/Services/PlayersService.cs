@@ -24,7 +24,6 @@ namespace Football.Players.Services
         public async Task<List<Player>> GetPlayersByPosition(Position position, bool activeOnly = false) => await playersRepository.GetPlayersByPosition(position.ToString(), activeOnly);
         public async Task<Player> GetPlayer(int playerId) => await playersRepository.GetPlayer(playerId);
         public async Task<Player?> GetPlayerByName(string name) => await playersRepository.GetPlayerByName(name);
-
         public async Task<Player> RetrievePlayer(string name, Position position, bool activatePlayer = false)
         {
             var player = await GetPlayerByName(name);
@@ -52,15 +51,8 @@ namespace Football.Players.Services
         public async Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season) => await playersRepository.GetSeasonProjections(playerIds, season);
         public async Task<double> GetWeeklyProjection(int season, int week, int playerId) => await playersRepository.GetWeeklyProjection(season, week, playerId);
         public async Task<IEnumerable<TeamChange>> GetAllTeamChanges(int currentSeason) => await playersRepository.GetAllTeamChanges(currentSeason, currentSeason - 1);
-
         public async Task<int> GetCurrentWeek(int season) => await playersRepository.GetCurrentWeek(season);
-        public async Task<List<Schedule>> GetGames(int season, int week) => await playersRepository.GetGames(season, week);
-        public async Task<List<Schedule>> GetTeamGames(int teamId) => await playersRepository.GetTeamGames(teamId, _season.CurrentSeason);
-
         public async Task<List<int>> GetIgnoreList() => await playersRepository.GetIgnoreList();
-        public async Task<TeamLocation> GetTeamLocation(int teamId) => await playersRepository.GetTeamLocation(teamId);
-        public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => await playersRepository.GetScheduleDetails(season, week);
-        public async Task<IEnumerable<Schedule>> GetByeWeeks(int season) => await playersRepository.GetByeWeeks(season);
         public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => await playersRepository.GetActiveInSeasonInjuries(season);
         public async Task<Dictionary<int, double>> GetGamesPlayedInjuredBySeason(int season) => await playersRepository.GetGamesPlayedInjuredBySeason(season);
         public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await playersRepository.PostInSeasonInjury(injury);
@@ -101,10 +93,7 @@ namespace Football.Players.Services
         {
             return await playersRepository.UpdateCurrentTeam(teamChange.PlayerId, teamChange.NewTeam, _season.CurrentSeason) ?
                    await playersRepository.PostTeamChange(teamChange) : 0;
-        }
-        
-        public async Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week) => await playersRepository.GetWeeklySchedule(season, week);
-
+        }        
         public async Task<List<TrendingPlayer>> GetTrendingPlayers()
         {
             if (settingsService.GetFromCache<TrendingPlayer>(Cache.TrendingPlayers, out var cachedTrending))

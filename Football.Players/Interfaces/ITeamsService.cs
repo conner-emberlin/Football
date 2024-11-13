@@ -22,5 +22,12 @@ namespace Football.Players.Interfaces
         public Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, Position position, int season, bool activeOnly = false);
         public Task<List<Schedule>> GetUpcomingGames(int playerId);
 
+
+        public Task<TeamLocation> GetTeamLocation(int teamId);
+        public Task<List<Schedule>> GetTeamGames(int teamId);
+        public Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week);
+        public Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week);
+        public Task<IEnumerable<Schedule>> GetByeWeeks(int season);
+
     }
 }

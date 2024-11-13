@@ -99,7 +99,7 @@ namespace Football.Players.Services
             List<StrengthOfSchedule> sos = [];
             foreach (var team in teams)
             {
-                var remainingGames = (await playersService.GetTeamGames(team.TeamId)).Where(g => g.Week >= currentWeek && g.OpposingTeamId > 0);
+                var remainingGames = (await teamsService.GetTeamGames(team.TeamId)).Where(g => g.Week >= currentWeek && g.OpposingTeamId > 0);
                 
                 if (remainingGames.Any())
                 {
@@ -122,7 +122,7 @@ namespace Football.Players.Services
             foreach (var s in remainingGames)
             {
                 or += await TeamWinPercentage(s.OpposingTeamId);
-                foreach (var oo in (await playersService.GetTeamGames(s.OpposingTeamId)).Where(g => g.Week < currentWeek && g.OpposingTeamId > 0))
+                foreach (var oo in (await teamsService.GetTeamGames(s.OpposingTeamId)).Where(g => g.Week < currentWeek && g.OpposingTeamId > 0))
                     oor += await TeamWinPercentage(oo.OpposingTeamId);
             }
             return (2 * or + oor) / 3;
@@ -135,13 +135,13 @@ namespace Football.Players.Services
         }
         public async Task<double> StrengthOfSchedule(int teamId, int atWeek)
         {
-            var schedule = (await playersService.GetTeamGames(teamId)).Where(g => g.Week <= atWeek && g.OpposingTeamId > 0);
+            var schedule = (await teamsService.GetTeamGames(teamId)).Where(g => g.Week <= atWeek && g.OpposingTeamId > 0);
             var or = 0.0;
             var oor = 0.0;
             foreach (var s in schedule)
             {
                 or += await TeamWinPercentage(s.TeamId, atWeek);
-                foreach (var oo in (await playersService.GetTeamGames(s.OpposingTeamId)).Where(g => g.Week < atWeek && g.OpposingTeamId > 0))
+                foreach (var oo in (await teamsService.GetTeamGames(s.OpposingTeamId)).Where(g => g.Week < atWeek && g.OpposingTeamId > 0))
                     oor += await TeamWinPercentage(oo.OpposingTeamId, atWeek);
             }
             return (2 * or + oor) / 3;

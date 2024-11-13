@@ -56,46 +56,6 @@ namespace Football.Tests
 
             _sut = new PlayersService(_mockPlayersRepository.Object, _mockMemoryCache.Object, _mockSeason.Object, _mockSettingsService.Object, _mapper, _mockLogger.Object, _mockSleeperLeagueService.Object);
         }
-
-        [Fact]
-        public async Task GetPlayerTeam_DST_ReturnsNameAsDescriptionAndIsNotNull()
-        {
-            var actual = await _sut.GetPlayerTeam(_season.CurrentSeason, _playerId);
-            Assert.NotNull(actual);
-            Assert.Equal(_playerDST.Name, actual.Name);
-        }
-
-        [Fact] 
-        public async Task GetPlayersByTeam_IncludesFormerPlayers()
-        {
-            List<PlayerTeam> playerTeams = [];
-            List<InSeasonTeamChange> teamChanges = [];
-            var formerPlayer = new Player { Name = "Former", PlayerId = 3, Active = 1, Position = "QB" };
-            var inSeasonTeamChange = new InSeasonTeamChange { PlayerId = 3, PreviousTeam = _team, NewTeam = "NEW", Season = _season.CurrentSeason, WeekEffective = 10 };
-            teamChanges.Add(inSeasonTeamChange);
-
-            _mockPlayersRepository.Setup(pr => pr.GetPlayersByTeam(_teamMap.Team, It.IsAny<int>())).ReturnsAsync(playerTeams);
-            _mockPlayersRepository.Setup(ps => ps.GetInSeasonTeamChanges(It.IsAny<int>())).ReturnsAsync(teamChanges);
-            _mockPlayersRepository.Setup(pr => pr.GetPlayer(inSeasonTeamChange.PlayerId)).ReturnsAsync(formerPlayer);
-            
-            var expected = new PlayerTeam { Name = "Former", PlayerId = 3, Season = _season.CurrentSeason, Team = _team };
-            var actual = await _sut.GetPlayersByTeam(_team);
-
-            Assert.Contains(actual, pt => pt.Name == expected.Name && pt.Team == expected.Team && pt.PlayerId == expected.PlayerId);
-        }
-
-        [Fact]
-        public async Task GetPlayersByTeam_IncludesTeamDST()
-        {
-            List<PlayerTeam> playerTeams = [];
-            List<InSeasonTeamChange> teamChanges = [];
-            _mockPlayersRepository.Setup(pr => pr.GetPlayersByTeam(_teamMap.Team, It.IsAny<int>())).ReturnsAsync(playerTeams);
-            _mockPlayersRepository.Setup(ps => ps.GetInSeasonTeamChanges(It.IsAny<int>())).ReturnsAsync(teamChanges);
-
-            var actual = await _sut.GetPlayersByTeam(_team);
-            Assert.Contains(actual, pt => pt.PlayerId == _playerId && pt.Team == _team);
-        }
-
         [Fact]
         public async Task RetrievePlayer_PlayerDoesNotExist_PlayerCreated()
         {

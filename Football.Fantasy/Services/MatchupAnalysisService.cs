@@ -42,7 +42,7 @@ namespace Football.Fantasy.Services
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             if (team != null && currentWeek < await playersService.GetCurrentSeasonWeeks())
             {           
-                var opponentId = (await playersService.GetTeamGames(team.TeamId)).First(g => g.Week == currentWeek).OpposingTeamId;
+                var opponentId = (await teamsService.GetTeamGames(team.TeamId)).First(g => g.Week == currentWeek).OpposingTeamId;
                 if (opponentId > 0)
                 {
                     var player = await playersService.GetPlayer(playerId);
@@ -59,7 +59,7 @@ namespace Football.Fantasy.Services
         {
             List<WeeklyFantasy> opponentFantasy = [];
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            var schedule = (await playersService.GetTeamGames(teamId)).Where(g => g.Week < currentWeek && g.OpposingTeamId > 0);
+            var schedule = (await teamsService.GetTeamGames(teamId)).Where(g => g.Week < currentWeek && g.OpposingTeamId > 0);
             foreach (var s in schedule)
             {
                 var oppFantasy = (await fantasyDataService.GetWeeklyTeamFantasy(s.OpposingTeam, s.Week))
@@ -86,7 +86,7 @@ namespace Football.Fantasy.Services
         private async Task<List<MatchupRanking>> GetRestOfSeasonMatchupRankingsByTeamAndPosition(int teamId, Position position)
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            var upcomingGames = (await playersService.GetTeamGames(teamId)).Where(g => g.Week >= currentWeek && g.OpposingTeamId > 0);
+            var upcomingGames = (await teamsService.GetTeamGames(teamId)).Where(g => g.Week >= currentWeek && g.OpposingTeamId > 0);
             var matchupRankingDictionary = (await GetPositionalMatchupRankingsFromSQL(position, _season.CurrentSeason, currentWeek)).ToDictionary(t => t.TeamId);
 
             List<MatchupRanking> rosRankings = [];
@@ -106,7 +106,7 @@ namespace Football.Fantasy.Services
             foreach (var team in allTeams)
             {
                 double fpTotal = 0;
-                var games = await playersService.GetTeamGames(team.TeamId);
+                var games = await teamsService.GetTeamGames(team.TeamId);
                 var filteredGames = games.Where(g => g.Week < asOfWeek && g.OpposingTeamId > 0);
                 foreach (var game in filteredGames)
                 {

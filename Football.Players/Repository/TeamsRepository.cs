@@ -119,5 +119,39 @@ namespace Football.Players.Repository
                             AND [Season] = @season";
             return (await dbConnection.QueryAsync<Schedule>(query, new { teamId, season, currentWeek })).ToList();
         }
+        public async Task<List<Schedule>> GetTeamGames(int teamId, int season)
+        {
+            var query = $@"SELECT [Season], [TeamId], [Team], [Week], [OpposingTeamId], [OpposingTeam]
+                        FROM [dbo].Schedule
+                        WHERE [TeamId] = @teamId
+                            AND [Season] = @season";
+            return (await dbConnection.QueryAsync<Schedule>(query, new { teamId, season })).ToList();
+        }
+        public async Task<TeamLocation> GetTeamLocation(int teamId)
+        {
+            var query = $@"SELECT * FROM [dbo].TeamLocation
+                            WHERE [TeamId] = @teamId";
+            return (await dbConnection.QueryAsync<TeamLocation>(query, new { teamId })).First();
+        }
+        public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week)
+        {
+            var query = $@"SELECT * FROM [dbo].ScheduleDetails
+                            WHERE [Season] = @season
+                                AND [Week] = @week";
+            return (await dbConnection.QueryAsync<ScheduleDetails>(query, new { season, week })).ToList();
+        }
+
+        public async Task<IEnumerable<Schedule>> GetByeWeeks(int season)
+        {
+            var query = $@"SELECT * FROM [dbo].Schedule WHERE [Season] = @season AND [OpposingTeamId] = 0";
+            return await dbConnection.QueryAsync<Schedule>(query, new { season });
+        }
+        public async Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week)
+        {
+            var query = $@"SELECT * FROM [dbo].Schedule
+                            WHERE [Season] = @season
+                                AND [Week] = @week";
+            return await dbConnection.QueryAsync<Schedule>(query, new { season, week });
+        }
     }
 }

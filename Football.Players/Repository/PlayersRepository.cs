@@ -112,46 +112,13 @@ namespace Football.Players.Repository
             return (await dbConnection.QueryAsync<int>(query, new { season })).FirstOrDefault();
         }
 
-        public async Task<List<Schedule>> GetGames(int season, int week)
-        {
-            var query = $@"SELECT [Season], [TeamId], [Team], [Week], [OpposingTeamId], [OpposingTeam]
-                        FROM [dbo].Schedule
-                        WHERE [Season] = @season
-                        AND [Week] = @week";
-            return (await dbConnection.QueryAsync<Schedule>(query, new {season, week})).ToList();
-        }
-        public async Task<List<Schedule>> GetTeamGames(int teamId, int season)
-        {
-            var query = $@"SELECT [Season], [TeamId], [Team], [Week], [OpposingTeamId], [OpposingTeam]
-                        FROM [dbo].Schedule
-                        WHERE [TeamId] = @teamId
-                            AND [Season] = @season";
-            return (await dbConnection.QueryAsync<Schedule>(query, new { teamId, season })).ToList();
-        }
         public async Task<List<int>> GetIgnoreList()
         {
             var query = $@"SELECT [PlayerId] FROM [dbo].IgnoreList";
             return (await dbConnection.QueryAsync<int>(query)).ToList();
         }
-        public async Task<TeamLocation> GetTeamLocation(int teamId)
-        {
-            var query = $@"SELECT * FROM [dbo].TeamLocation
-                            WHERE [TeamId] = @teamId";
-            return (await dbConnection.QueryAsync<TeamLocation>(query, new { teamId })).First();
-        }
-        public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week)
-        {
-            var query = $@"SELECT * FROM [dbo].ScheduleDetails
-                            WHERE [Season] = @season
-                                AND [Week] = @week";
-            return (await dbConnection.QueryAsync<ScheduleDetails>(query, new {season, week})).ToList();
-        }
 
-        public async Task<IEnumerable<Schedule>> GetByeWeeks(int season)
-        {
-            var query = $@"SELECT * FROM [dbo].Schedule WHERE [Season] = @season AND [OpposingTeamId] = 0";
-            return await dbConnection.QueryAsync<Schedule>(query, new { season });
-        }
+
         public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season)
         {
             var query = $@"SELECT * FROM [dbo].InSeasonInjuries
@@ -250,15 +217,6 @@ namespace Football.Players.Repository
             var query = $@"SELECT * FROM [dbo].Rookie";
             return (await dbConnection.QueryAsync<Rookie>(query)).ToList();
         }
-
-        public async Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week)
-        {
-            var query = $@"SELECT * FROM [dbo].Schedule
-                            WHERE [Season] = @season
-                                AND [Week] = @week";
-            return await dbConnection.QueryAsync<Schedule>(query, new { season, week });
-        }
-
         public async Task<int> UploadSleeperPlayerMap(List<SleeperPlayerMap> playerMap)
         {
             var query = $@"INSERT INTO [dbo].SleeperPlayerMap (SleeperPlayerId, PlayerId) VALUES (@SleeperPlayerId, @PlayerId)";

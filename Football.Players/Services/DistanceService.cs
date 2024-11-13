@@ -13,7 +13,7 @@ namespace Football.Players.Services
         public async Task<double> GetTravelDistance(int playerId)
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            var scheduleDetails = await playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
+            var scheduleDetails = await teamsService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
             var playerTeam = await teamsService.GetPlayerTeam(_season.CurrentSeason, playerId);
             if (playerTeam != null)
             {
@@ -24,7 +24,7 @@ namespace Football.Players.Services
                 else if (scheduleDetail.HomeTeamId == teamId)
                     return 0;
                 else
-                    return GetDistance(await playersService.GetTeamLocation(teamId), await playersService.GetTeamLocation(scheduleDetail.HomeTeamId));
+                    return GetDistance(await teamsService.GetTeamLocation(teamId), await teamsService.GetTeamLocation(scheduleDetail.HomeTeamId));
             }
             else return 0;
         }

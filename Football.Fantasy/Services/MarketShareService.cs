@@ -69,7 +69,7 @@ namespace Football.Fantasy.Services
             var team = await teamsService.GetTeam(teamId);
             var players = await teamsService.GetPlayersByTeam(team.Team);
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
-            var schedule = (await playersService.GetTeamGames(team.TeamId)).Where(t => t.Week < currentWeek && t.OpposingTeamId > 0);
+            var schedule = (await teamsService.GetTeamGames(team.TeamId)).Where(t => t.Week < currentWeek && t.OpposingTeamId > 0);
 
             var total = new TeamTotals
             {
