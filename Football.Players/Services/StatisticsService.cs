@@ -81,23 +81,6 @@ namespace Football.Players.Services
                                             && (gr.HomeTeamId == team.TeamId || gr.AwayTeamId == team.TeamId))
             }).ToList();
         }
-
-        public async Task<TeamRecord> GetTeamRecordInDivision(int teamId)
-        {
-            var gameResults = await GetGameResults(_season.CurrentSeason);
-            var teamsInDivision = (await playersService.GetTeamsInDivision(teamId)).Select(t => t.TeamId).ToList();
-            var teamsDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId);
-            var gamesWon = gameResults.Where(g => (g.WinnerId == teamId && teamsInDivision.Contains(g.LoserId)));
-            var gamesLost = gameResults.Where(g => (g.LoserId == teamId && teamsInDivision.Contains(g.WinnerId)));
-            var gamesTied = gameResults.Where(g => (g.LoserPoints == g.WinnerPoints && ((g.HomeTeamId == teamId || g.AwayTeamId == teamId)) && (teamsInDivision.Contains(g.HomeTeamId) || teamsInDivision.Contains(g.AwayTeamId))));
-            return new TeamRecord
-            {
-                TeamMap = teamsDictionary[teamId],
-                Wins = gamesWon.Count(),
-                Losses = gamesLost.Count(),
-                Ties = gamesTied.Count()
-            };
-        }
         public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId, string team)
         {
             var weeklyData = await GetWeeklyDataByPlayer<T>(position, playerId, _season.CurrentSeason);

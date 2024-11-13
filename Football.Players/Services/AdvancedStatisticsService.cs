@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Football.Players.Services
 {
-    public class AdvancedStatisticsService(IStatisticsService statisticsService, IPlayersService playersService, 
+    public class AdvancedStatisticsService(IStatisticsService statisticsService, IPlayersService playersService, ITeamsService teamsService,
         IOptionsMonitor<FiveThirtyEightValueSettings> value, IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settingsService) : IAdvancedStatisticsService
     {
         private readonly FiveThirtyEightValueSettings _value = value.CurrentValue;
@@ -160,16 +160,16 @@ namespace Football.Players.Services
 
         public async Task<IEnumerable<DivisionStanding>> GetStandingsByDivision(Division division)
         {
-            var teams = await playersService.GetTeamsByDivision(division);
+            var teams = await teamsService.GetTeamsByDivision(division);
             var teamMapDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
-            var conferenceTeams = await playersService.GetTeamsByConference(Enum.Parse<Conference>(teams.First().Conference));
+            var conferenceTeams = await teamsService.GetTeamsByConference(Enum.Parse<Conference>(teams.First().Conference));
 
             var allTeamRecords = await statisticsService.GetTeamRecords(_season.CurrentSeason);
             var gameResults = await statisticsService.GetGameResults(_season.CurrentSeason);
             List<TeamRecord> divisionalRecords = [];
             foreach (var team in teams)
             {
-                divisionalRecords.Add(await statisticsService.GetTeamRecordInDivision(team.TeamId));
+                divisionalRecords.Add(await teamsService.GetTeamRecordInDivision(team.TeamId));
             }
 
             var winPercentages = CalculateWinPercentages(allTeamRecords, divisionalRecords);

@@ -14,7 +14,7 @@ namespace Football.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class TeamController(IPlayersService playersService, IStatisticsService statisticsService, IFantasyAnalysisService fantasyAnalysisService,
-        IOptionsMonitor<Season> season, IFantasyDataService fantasyDataService, IMarketShareService marketShareService, IAdvancedStatisticsService advancedStatisticsService, IMapper mapper) : ControllerBase
+        IOptionsMonitor<Season> season, IFantasyDataService fantasyDataService, IMarketShareService marketShareService, IAdvancedStatisticsService advancedStatisticsService, ITeamsService teamsService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -59,10 +59,10 @@ namespace Football.Api.Controllers
 
         [HttpGet("league-information/{teamId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<TeamLeagueInformationModel>>> GetTeamLeagueInformation([FromRoute] int teamId) => Ok(mapper.Map<TeamLeagueInformationModel>(await playersService.GetTeamLeagueInformation(teamId)));
+        public async Task<ActionResult<List<TeamLeagueInformationModel>>> GetTeamLeagueInformation([FromRoute] int teamId) => Ok(mapper.Map<TeamLeagueInformationModel>(await teamsService.GetTeamLeagueInformation(teamId)));
 
         [HttpGet("team-records/division/{teamId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<TeamRecordModel>>> GetTeamRecordInDivision([FromRoute] int teamId) => Ok(mapper.Map<TeamRecordModel>(await statisticsService.GetTeamRecordInDivision(teamId)));
+        public async Task<ActionResult<List<TeamRecordModel>>> GetTeamRecordInDivision([FromRoute] int teamId) => Ok(mapper.Map<TeamRecordModel>(await teamsService.GetTeamRecordInDivision(teamId)));
     }
 }
