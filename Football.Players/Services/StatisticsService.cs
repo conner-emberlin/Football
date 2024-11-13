@@ -3,7 +3,6 @@ using Football.Models;
 using Football.Players.Interfaces;
 using Football.Players.Models;
 using Microsoft.Extensions.Options;
-using System.Text.RegularExpressions;
 
 namespace Football.Players.Services
 {
