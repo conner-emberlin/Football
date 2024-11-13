@@ -9,22 +9,22 @@ namespace Football.Players.Services
     public class TeamsService(IStatisticsService statisticsService, IPlayersService playersService, ITeamsRepository teamsRepository, IOptionsMonitor<Season> season) : ITeamsService
     {
         private readonly Season _season = season.CurrentValue;
+        public Task<IEnumerable<TeamLeagueInformation>> GetTeamsByDivision(Division division) => teamsRepository.GetTeamsLeagueInformationByDivision(division.ToString());
+        public Task<IEnumerable<TeamLeagueInformation>> GetTeamsByConference(Conference conference) => teamsRepository.GetTeamLeagueInformationByConference(conference.ToString());
+        public Task<TeamLeagueInformation> GetTeamLeagueInformation(int teamId) => teamsRepository.GetTeamLeagueInformation(teamId);
+        public Task<List<TeamMap>> GetAllTeams() => teamsRepository.GetAllTeams();
+        public Task<TeamMap> GetTeam(int teamId) => teamsRepository.GetTeam(teamId);
+        public Task<int> GetTeamId(string teamName) => teamsRepository.GetTeamId(teamName);
+        public Task<int> GetTeamId(int playerId) => teamsRepository.GetTeamId(playerId);
+        public Task<IEnumerable<PlayerTeam>> GetPlayerTeams(int season, IEnumerable<int> playerIds) => teamsRepository.GetPlayerTeams(season, playerIds);
+        public Task<int> GetTeamIdFromDescription(string teamDescription) => teamsRepository.GetTeamIdFromDescription(teamDescription);
+        public Task<List<Schedule>> GetTeamGames(int teamId) => teamsRepository.GetTeamGames(teamId, _season.CurrentSeason);
+        public Task<TeamLocation> GetTeamLocation(int teamId) => teamsRepository.GetTeamLocation(teamId);
+        public Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => teamsRepository.GetScheduleDetails(season, week);
+        public Task<IEnumerable<Schedule>> GetByeWeeks(int season) => teamsRepository.GetByeWeeks(season);
+        public Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week) => teamsRepository.GetWeeklySchedule(season, week);
+        public Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, Position position, int season, bool activeOnly = false) => teamsRepository.GetPlayersByTeamIdAndPosition(teamId, position.ToString(), season, activeOnly);
         public async Task<IEnumerable<TeamLeagueInformation>> GetTeamsInDivision(int teamId) => await teamsRepository.GetTeamsLeagueInformationByDivision((await GetTeamLeagueInformation(teamId)).Division, teamId);
-        public async Task<IEnumerable<TeamLeagueInformation>> GetTeamsByDivision(Division division) => await teamsRepository.GetTeamsLeagueInformationByDivision(division.ToString());
-        public async Task<IEnumerable<TeamLeagueInformation>> GetTeamsByConference(Conference conference) => await teamsRepository.GetTeamLeagueInformationByConference(conference.ToString());
-        public async Task<TeamLeagueInformation> GetTeamLeagueInformation(int teamId) => await teamsRepository.GetTeamLeagueInformation(teamId);
-        public async Task<List<TeamMap>> GetAllTeams() => await teamsRepository.GetAllTeams();
-        public async Task<TeamMap> GetTeam(int teamId) => await teamsRepository.GetTeam(teamId);
-        public async Task<int> GetTeamId(string teamName) => await teamsRepository.GetTeamId(teamName);
-        public async Task<int> GetTeamId(int playerId) => await teamsRepository.GetTeamId(playerId);
-        public async Task<IEnumerable<PlayerTeam>> GetPlayerTeams(int season, IEnumerable<int> playerIds) => await teamsRepository.GetPlayerTeams(season, playerIds);
-        public async Task<int> GetTeamIdFromDescription(string teamDescription) => await teamsRepository.GetTeamIdFromDescription(teamDescription);
-        public async Task<List<Schedule>> GetTeamGames(int teamId) => await teamsRepository.GetTeamGames(teamId, _season.CurrentSeason);
-        public async Task<TeamLocation> GetTeamLocation(int teamId) => await teamsRepository.GetTeamLocation(teamId);
-        public async Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week) => await teamsRepository.GetScheduleDetails(season, week);
-        public async Task<IEnumerable<Schedule>> GetByeWeeks(int season) => await teamsRepository.GetByeWeeks(season);
-        public async Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week) => await teamsRepository.GetWeeklySchedule(season, week);
-        public async Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, Position position, int season, bool activeOnly = false) => await teamsRepository.GetPlayersByTeamIdAndPosition(teamId, position.ToString(), season, activeOnly);
         public async Task<TeamRecord> GetTeamRecordInDivision(int teamId)
         {
             var gameResults = await statisticsService.GetGameResults(_season.CurrentSeason);

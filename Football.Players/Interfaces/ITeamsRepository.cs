@@ -17,8 +17,6 @@ namespace Football.Players.Interfaces
         public Task<List<PlayerTeam>> GetPlayersByTeam(string team, int season);
         public Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, string position, int season, bool activeOnly = false);
         public Task<List<Schedule>> GetUpcomingGames(int teamId, int season, int currentWeek);
-
-
         public Task<IEnumerable<Schedule>> GetByeWeeks(int season);
         public Task<List<Schedule>> GetTeamGames(int teamId, int season);
         public Task<TeamLocation> GetTeamLocation(int teamId);

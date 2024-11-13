@@ -14,16 +14,16 @@ namespace Football.Players.Services
     {
         private readonly Season _season = season.CurrentValue;
 
-        public async Task<int> GetPlayerId(string name) => await playersRepository.GetPlayerId(name);
+        public Task<int> GetPlayerId(string name) => playersRepository.GetPlayerId(name);
         public async Task<Player> CreatePlayer(string name, int active, string position)
         {
             var playerId = await playersRepository.CreatePlayer(name, active, position);
             return new Player { PlayerId = playerId, Name = name, Active = active, Position = position };
         }
-        public async Task<int> ActivatePlayer(int playerId) => await playersRepository.ActivatePlayer(playerId);
-        public async Task<List<Player>> GetPlayersByPosition(Position position, bool activeOnly = false) => await playersRepository.GetPlayersByPosition(position.ToString(), activeOnly);
-        public async Task<Player> GetPlayer(int playerId) => await playersRepository.GetPlayer(playerId);
-        public async Task<Player?> GetPlayerByName(string name) => await playersRepository.GetPlayerByName(name);
+        public Task<int> ActivatePlayer(int playerId) => playersRepository.ActivatePlayer(playerId);
+        public Task<List<Player>> GetPlayersByPosition(Position position, bool activeOnly = false) => playersRepository.GetPlayersByPosition(position.ToString(), activeOnly);
+        public Task<Player> GetPlayer(int playerId) => playersRepository.GetPlayer(playerId);
+        public Task<Player?> GetPlayerByName(string name) => playersRepository.GetPlayerByName(name);
         public async Task<Player> RetrievePlayer(string name, Position position, bool activatePlayer = false)
         {
             var player = await GetPlayerByName(name);
@@ -44,31 +44,34 @@ namespace Football.Players.Services
             }
             return player;
         }
-        public async Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position) => await playersRepository.GetHistoricalRookies(currentSeason, position);
-        public async Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position) => await playersRepository.GetCurrentRookies(currentSeason, position);
-        public async Task<List<InjuryConcerns>> GetPlayerInjuries(int season) => await playersRepository.GetPlayerInjuries(season);
-        public async Task<List<Suspensions>> GetPlayerSuspensions(int season) => await playersRepository.GetPlayerSuspensions(season);
-        public async Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season) => await playersRepository.GetSeasonProjections(playerIds, season);
-        public async Task<double> GetWeeklyProjection(int season, int week, int playerId) => await playersRepository.GetWeeklyProjection(season, week, playerId);
-        public async Task<IEnumerable<TeamChange>> GetAllTeamChanges(int currentSeason) => await playersRepository.GetAllTeamChanges(currentSeason, currentSeason - 1);
-        public async Task<int> GetCurrentWeek(int season) => await playersRepository.GetCurrentWeek(season);
-        public async Task<List<int>> GetIgnoreList() => await playersRepository.GetIgnoreList();
-        public async Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => await playersRepository.GetActiveInSeasonInjuries(season);
-        public async Task<Dictionary<int, double>> GetGamesPlayedInjuredBySeason(int season) => await playersRepository.GetGamesPlayedInjuredBySeason(season);
-        public async Task<int> PostInSeasonInjury(InSeasonInjury injury) => await playersRepository.PostInSeasonInjury(injury);
-        public async Task<bool> UpdateInjury(InSeasonInjury injury) => await playersRepository.UpdateInjury(injury);
-        public async Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => await playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
-        public async Task<List<int>> GetSeasons() => await playersRepository.GetSeasons();
-        public async Task<bool> CreateRookie(Rookie rookie) => await playersRepository.CreateRookie(rookie);
-        public async Task<List<Rookie>> GetAllRookies() => await playersRepository.GetAllRookies();
-        public async Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => await playersRepository.GetSleeperPlayerMap(sleeperId);
+        public Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position) => playersRepository.GetHistoricalRookies(currentSeason, position);
+        public Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position) => playersRepository.GetCurrentRookies(currentSeason, position);
+        public Task<List<InjuryConcerns>> GetPlayerInjuries(int season) => playersRepository.GetPlayerInjuries(season);
+        public Task<List<Suspensions>> GetPlayerSuspensions(int season) => playersRepository.GetPlayerSuspensions(season);
+        public Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season) => playersRepository.GetSeasonProjections(playerIds, season);
+        public Task<double> GetWeeklyProjection(int season, int week, int playerId) => playersRepository.GetWeeklyProjection(season, week, playerId);
+        public Task<IEnumerable<TeamChange>> GetAllTeamChanges(int currentSeason) => playersRepository.GetAllTeamChanges(currentSeason, currentSeason - 1);
+        public Task<int> GetCurrentWeek(int season) => playersRepository.GetCurrentWeek(season);
+        public Task<List<int>> GetIgnoreList() => playersRepository.GetIgnoreList();
+        public Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => playersRepository.GetActiveInSeasonInjuries(season);
+        public Task<Dictionary<int, double>> GetGamesPlayedInjuredBySeason(int season) => playersRepository.GetGamesPlayedInjuredBySeason(season);
+        public Task<int> PostInSeasonInjury(InSeasonInjury injury) => playersRepository.PostInSeasonInjury(injury);
+        public Task<bool> UpdateInjury(InSeasonInjury injury) => playersRepository.UpdateInjury(injury);
+        public Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
+        public Task<List<int>> GetSeasons() => playersRepository.GetSeasons();
+        public Task<bool> CreateRookie(Rookie rookie) => playersRepository.CreateRookie(rookie);
+        public Task<List<Rookie>> GetAllRookies() => playersRepository.GetAllRookies();
+        public Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => playersRepository.GetSleeperPlayerMap(sleeperId);
+        public Task<int> GetCurrentSeasonGames() => GetGamesBySeason(_season.CurrentSeason);
+        public Task<int> GetCurrentSeasonWeeks() => GetWeeksBySeason(_season.CurrentSeason);
+        public async Task<int> GetGamesBySeason(int season) => (await playersRepository.GetSeasonInfo(season)).Games;
+        public async Task<int> GetWeeksBySeason(int season) => (await playersRepository.GetSeasonInfo(season)).Weeks;
         public async Task<int> InactivatePlayers(List<int> playerIds)
         {
             var updated = await playersRepository.InactivatePlayers(playerIds);
             if (updated > 0) cache.Remove(Cache.AllPlayers.ToString());
             return updated;
-        }
-   
+        }   
         public async Task<List<PlayerInjury>> GetPlayerInjuries()
         {
             List<PlayerInjury> playerInjuries = [];
@@ -88,7 +91,6 @@ namespace Football.Players.Services
             cache.Set(Cache.AllPlayers.ToString() + active.ToString() + position, players);
             return players;
         }
-
         public async Task<int> PostInSeasonTeamChange(InSeasonTeamChange teamChange)
         {
             return await playersRepository.UpdateCurrentTeam(teamChange.PlayerId, teamChange.NewTeam, _season.CurrentSeason) ?
@@ -134,10 +136,6 @@ namespace Football.Players.Services
             var playerMap = (await GetSleeperPlayerMap(sleeperPlayers)).Where(s => !existingMaps.Any(e => e.PlayerId == s.PlayerId)).ToList();
             return await playersRepository.UploadSleeperPlayerMap(playerMap);
         }
-        public async Task<int> GetGamesBySeason(int season) => (await playersRepository.GetSeasonInfo(season)).Games;
-        public async Task<int> GetWeeksBySeason(int season) => (await playersRepository.GetSeasonInfo(season)).Weeks;
-        public async Task<int> GetCurrentSeasonGames() => await GetGamesBySeason(_season.CurrentSeason);
-        public async Task<int> GetCurrentSeasonWeeks() => await GetWeeksBySeason(_season.CurrentSeason);
         private async Task<List<SleeperPlayerMap>> GetSleeperPlayerMap(List<SleeperPlayer> sleeperPlayers)
         {
             List<SleeperPlayerMap> playerMap = [];
