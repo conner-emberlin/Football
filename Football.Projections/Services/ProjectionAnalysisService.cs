@@ -110,6 +110,7 @@ namespace Football.Projections.Services
                     Season = _season.CurrentSeason,
                     Week = week,
                     Position = position.ToString(),
+                    ProjectionCount = projections.Count(p => weeklyFantasy.Any(w => w.PlayerId == p.PlayerId)),
                     MSE = GetMeanSquaredError(projections, weeklyFantasy),
                     RSquared = GetRSquared(projections, weeklyFantasy),
                     MAE = GetMeanAbsoluteError(projections, weeklyFantasy),

@@ -87,6 +87,7 @@
             <thead>
                 <tr>
                     <th>Week </th>
+                    <th>Count</th>
                     <th>
                         <span class="sort-link" onclick="@(() => SetTable("MSE"))">MSE</span>
                         <span class="oi @(tableSort.GetSortStyle("MSE"))"></span>
@@ -118,7 +119,8 @@
                 @foreach (var p in ProjectionAnalyses)
                 {
                     <tr>
-                        <td>@p.Week</td>                        
+                        <td>@p.Week</td>  
+                        <td>@p.ProjectionCount</td>
                         <td>@Math.Round(p.MSE,2)</td>
                         <td>@Math.Round(p.RSquared,4)</td>
                         <td>@Math.Round(p.MAE,2)</td>

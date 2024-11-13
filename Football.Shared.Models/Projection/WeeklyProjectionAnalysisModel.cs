@@ -5,6 +5,7 @@
         public int Season { get; set; }
         public int Week { get; set; }
         public string Position { get; set; } = "";
+        public int ProjectionCount { get; set; }
         public double MSE { get; set; }
         public double RSquared { get; set; }
         public double MAE { get; set; }
