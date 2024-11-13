@@ -12,7 +12,7 @@ using Football.Data.Repository;
 namespace Football.Data.Services
 {
     public class UploadWeeklyDataService(IScraperService scraperService, IUploadWeeklyDataRepository uploadWeeklyDataRepository,
-        IPlayersService playerService, ILogger logger, IMapper mapper, IOptionsMonitor<WeeklyScraping> scraping, IOptionsMonitor<Season> season) : IUploadWeeklyDataService
+        IPlayersService playerService, ITeamsService teamsService, ILogger logger, IMapper mapper, IOptionsMonitor<WeeklyScraping> scraping, IOptionsMonitor<Season> season) : IUploadWeeklyDataService
     {
         private readonly WeeklyScraping _scraping = scraping.CurrentValue;
         private readonly Season _season = season.CurrentValue;
@@ -81,7 +81,7 @@ namespace Football.Data.Services
         {
             logger.Information("Uploading new player teams for position {0}", position);
             var url = FantasyProsURLFormatter(position.ToString(), season.ToString(), week.ToString());
-            var existingPlayerIds = (await playerService.GetPlayerTeams(season, (await playerService.GetPlayersByPosition(position, activeOnly: true)).Select(p => p.PlayerId))).Select(e => e.PlayerId);
+            var existingPlayerIds = (await teamsService.GetPlayerTeams(season, (await playerService.GetPlayersByPosition(position, activeOnly: true)).Select(p => p.PlayerId))).Select(e => e.PlayerId);
             var players = await PlayerTeam(scraperService.ScrapePlayerTeamsFromWeeklyData(scraperService.ScrapeData(url, _scraping.FantasyProsXPath), position.ToString()), season, position.ToString(), existingPlayerIds);
             var added = await uploadWeeklyDataRepository.UploadPlayerTeamsInSeason(players);
             logger.Information("Upload complete. {0} player teams added", added);
@@ -305,7 +305,7 @@ namespace Football.Data.Services
         private async Task<List<PlayerTeam>> PlayerTeam(List<FantasyProsPlayerTeam> playerTeams, int season, string position, IEnumerable<int> existingPlayerIds)
         {
             List<PlayerTeam> newPlayerTeams = [];
-            var allTeams = (await playerService.GetAllTeams()).ToDictionary(t => t.Team);
+            var allTeams = (await teamsService.GetAllTeams()).ToDictionary(t => t.Team);
             foreach (var pt in playerTeams)
             {
                 var player = await playerService.GetPlayerByName(pt.Name);
@@ -330,8 +330,8 @@ namespace Football.Data.Services
             List<GameResult> results = [];
             foreach (var g in games)
             {
-                var winnerId = await playerService.GetTeamIdFromDescription(g.Winner);
-                var loserId = await playerService.GetTeamIdFromDescription(g.Loser);
+                var winnerId = await teamsService.GetTeamIdFromDescription(g.Winner);
+                var loserId = await teamsService.GetTeamIdFromDescription(g.Loser);
                 results.Add(new GameResult
                 {
                     Season = season,

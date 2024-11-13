@@ -159,9 +159,9 @@ namespace Football.Api
             CreateMap<Schedule, ScheduleModel>();
             CreateMap<Player, PlayerDataModel>();
             CreateMap<TrendingPlayer, TrendingPlayerModel>()
+                .ForMember(t => t.PlayerId, o => o.MapFrom(t => t.Player.PlayerId))
                 .ForMember(t => t.Name, o => o.MapFrom(t => t.Player.Name))
-                .ForMember(t => t.Position, o => o.MapFrom(t => t.Player.Position))
-                .ForMember(t => t.Team, o => o.MapFrom(t => t.PlayerTeam != null ? t.PlayerTeam.Team : string.Empty));
+                .ForMember(t => t.Position, o => o.MapFrom(t => t.Player.Position));
             CreateMap<WaiverWireCandidate, WaiverWireCandidateModel>()
                 .ForMember(w => w.Name, o => o.MapFrom(w => w.Player.Name))
                 .ForMember(w => w.PlayerId, o => o.MapFrom(w => w.Player.PlayerId))

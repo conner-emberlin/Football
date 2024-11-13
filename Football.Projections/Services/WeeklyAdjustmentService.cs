@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Football.Projections.Services
 {
-    public class WeeklyAdjustmentService(IPlayersService playerService, IMatchupAnalysisService matchupAnalysisService, IOptionsMonitor<Season> season, IMapper mapper) : IWeeklyAdjustmentService
+    public class WeeklyAdjustmentService(IPlayersService playerService, ITeamsService teamsService, IMatchupAnalysisService matchupAnalysisService, IOptionsMonitor<Season> season, IMapper mapper) : IWeeklyAdjustmentService
     {
         private readonly Season _season = season.CurrentValue;
         public async Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections, WeeklyTunings tunings)
@@ -45,8 +45,8 @@ namespace Football.Projections.Services
             if (matchupRanks.Count > 0)
             {
                 var avgMatchup = matchupRanks.ElementAt((int)Math.Floor((double)(matchupRanks.Count / 2)));
-                var teamDictionary = position != Position.DST ? (await playerService.GetPlayerTeams(_season.CurrentSeason, weekProjections.Select(w => w.PlayerId))).ToDictionary(p => p.PlayerId)
-                                                    : (mapper.Map<List<PlayerTeam>>(await playerService.GetAllTeams())).ToDictionary(p => p.PlayerId);
+                var teamDictionary = position != Position.DST ? (await teamsService.GetPlayerTeams(_season.CurrentSeason, weekProjections.Select(w => w.PlayerId))).ToDictionary(p => p.PlayerId)
+                                                    : (mapper.Map<List<PlayerTeam>>(await teamsService.GetAllTeams())).ToDictionary(p => p.PlayerId);
                 var scheduleDictionary = (await playerService.GetWeeklySchedule(_season.CurrentSeason, weekProjections.First().Week)).ToDictionary(s => s.TeamId);
 
                 foreach (var w in weekProjections)

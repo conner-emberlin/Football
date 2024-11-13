@@ -94,7 +94,7 @@ namespace Football.Players.Services
         {
             if (settingsService.GetFromCache<StrengthOfSchedule>(Cache.RemainingSOS, out var cachedSOS))
                 return cachedSOS;
-            var teams = await playersService.GetAllTeams();
+            var teams = await teamsService.GetAllTeams();
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             List<StrengthOfSchedule> sos = [];
             foreach (var team in teams)
@@ -161,10 +161,10 @@ namespace Football.Players.Services
         public async Task<IEnumerable<DivisionStanding>> GetStandingsByDivision(Division division)
         {
             var teams = await teamsService.GetTeamsByDivision(division);
-            var teamMapDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
+            var teamMapDictionary = (await teamsService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
             var conferenceTeams = await teamsService.GetTeamsByConference(Enum.Parse<Conference>(teams.First().Conference));
 
-            var allTeamRecords = await statisticsService.GetTeamRecords(_season.CurrentSeason);
+            var allTeamRecords = await teamsService.GetTeamRecords(_season.CurrentSeason);
             var gameResults = await statisticsService.GetGameResults(_season.CurrentSeason);
             List<TeamRecord> divisionalRecords = [];
             foreach (var team in teams)

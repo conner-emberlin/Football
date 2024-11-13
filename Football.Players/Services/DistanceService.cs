@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Football.Players.Services
 {
-    public class DistanceService(IPlayersService playersService, IOptionsMonitor<GeoDistance> geo, IOptionsMonitor<Season> season) : IDistanceService
+    public class DistanceService(IPlayersService playersService, ITeamsService teamsService, IOptionsMonitor<GeoDistance> geo, IOptionsMonitor<Season> season) : IDistanceService
     {
         private readonly GeoDistance _geo = geo.CurrentValue;
         private readonly Season _season = season.CurrentValue;
@@ -14,10 +14,10 @@ namespace Football.Players.Services
         {
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             var scheduleDetails = await playersService.GetScheduleDetails(_season.CurrentSeason, currentWeek);
-            var playerTeam = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+            var playerTeam = await teamsService.GetPlayerTeam(_season.CurrentSeason, playerId);
             if (playerTeam != null)
             {
-                var teamId = await playersService.GetTeamId(playerTeam.Team);
+                var teamId = await teamsService.GetTeamId(playerTeam.Team);
                 var scheduleDetail = scheduleDetails.FirstOrDefault(s => s.HomeTeamId == teamId || s.AwayTeamId == teamId);
                 if (scheduleDetail == null)
                     return 0;

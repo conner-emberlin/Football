@@ -20,11 +20,11 @@ namespace Football.Api.Controllers
 
         [HttpGet("all")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<TeamMapModel>>> GetAllTeams() => Ok(mapper.Map<List<TeamMapModel>>(await playersService.GetAllTeams()));
+        public async Task<ActionResult<List<TeamMapModel>>> GetAllTeams() => Ok(mapper.Map<List<TeamMapModel>>(await teamsService.GetAllTeams()));
 
         [HttpGet("players/{team}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<PlayerTeam>>> GetPlayersByTeam(string team) => Ok(await playersService.GetPlayersByTeam(team));
+        public async Task<ActionResult<List<PlayerTeam>>> GetPlayersByTeam(string team) => Ok(await teamsService.GetPlayersByTeam(team));
 
         [HttpGet("schedule-details/current")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -32,7 +32,7 @@ namespace Football.Api.Controllers
 
         [HttpGet("team-records")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<TeamRecordModel>>> GetTeamRecords() => Ok(mapper.Map<List<TeamRecordModel>>(await statisticsService.GetTeamRecords(_season.CurrentSeason)));
+        public async Task<ActionResult<List<TeamRecordModel>>> GetTeamRecords() => Ok(mapper.Map<List<TeamRecordModel>>(await teamsService.GetTeamRecords(_season.CurrentSeason)));
 
         [HttpGet("game-results")]
         [ProducesResponseType(StatusCodes.Status200OK)]

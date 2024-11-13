@@ -65,22 +65,7 @@ namespace Football.Players.Services
 
             return await statisticsRepository.DeleteConsensusWeeklyProjectionsByPosition(season, week, position.ToString());
         }
-        public async Task<List<TeamRecord>> GetTeamRecords(int season)
-        {
-            var gameResults = await GetGameResults(season);
-            var teams = await playersService.GetAllTeams();
-            var currentWeek = await playersService.GetCurrentWeek(season);
-            return teams.Select(team => new TeamRecord
-            {
-                TeamMap = team,
-                Season = season,
-                CurrentWeek = currentWeek,
-                Wins = gameResults.Count(gr => gr.WinnerId == team.TeamId),
-                Losses = gameResults.Count(gr => gr.LoserId == team.TeamId),
-                Ties = gameResults.Count(gr => gr.LoserPoints == gr.WinnerPoints
-                                            && (gr.HomeTeamId == team.TeamId || gr.AwayTeamId == team.TeamId))
-            }).ToList();
-        }
+
         public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId, string team)
         {
             var weeklyData = await GetWeeklyDataByPlayer<T>(position, playerId, _season.CurrentSeason);

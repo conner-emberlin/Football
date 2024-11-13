@@ -18,7 +18,7 @@ namespace Football.Api.Controllers
     public class ProjectionController(IPlayersService playersService, IStatisticsService statisticsService,
         IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season, IFantasyAnalysisService fantasyAnalysisService, ISnapCountService snapCountService,
         IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, 
-        IAdjustmentService adjustmentService, IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMapper mapper) : ControllerBase
+        IAdjustmentService adjustmentService, IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, ITeamsService teamsService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -48,7 +48,7 @@ namespace Football.Api.Controllers
             }
                 
             var currentSeasonGames = await playersService.GetCurrentSeasonGames();
-            var teamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
+            var teamDictionary = (await teamsService.GetPlayerTeams(_season.CurrentSeason, model.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
             var adpDictionary = (await statisticsService.GetAdpByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(a => a.PlayerId);
             var consensusProjectionDictionary = (await statisticsService.GetConsensusProjectionsByPosition(_season.CurrentSeason, positionEnum)).ToDictionary(c => c.PlayerId);
             var splitsDictionary = (await fantasyAnalysisService.GetFantasySplits(positionEnum, _season.CurrentSeason - 1)).ToDictionary(f => f.PlayerId);
@@ -206,8 +206,8 @@ namespace Football.Api.Controllers
             else
                 models = mapper.Map<List<WeekProjectionModel>>(await weekProjectionService.GetProjections(positionEnum, filter));
 
-            var teamDictionary = positionEnum != Position.DST ? (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId)
-                                : (mapper.Map<List<PlayerTeam>>(await playersService.GetAllTeams())).ToDictionary(p => p.PlayerId);
+            var teamDictionary = positionEnum != Position.DST ? (await teamsService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId)
+                                : (mapper.Map<List<PlayerTeam>>(await teamsService.GetAllTeams())).ToDictionary(p => p.PlayerId);
             var scheduleDictionary = (await playersService.GetWeeklySchedule(_season.CurrentSeason, currentWeek)).ToDictionary(s => s.TeamId);
             var consensusProjectionDictionary = (await statisticsService.GetConsensusWeeklyProjectionsByPosition(_season.CurrentSeason, currentWeek, positionEnum)).ToDictionary(c => c.PlayerId);
             var averageFantasyDictionary = await fantasyDataService.GetAverageWeeklyFantasyPoints(models.Select(m => m.PlayerId), _season.CurrentSeason);

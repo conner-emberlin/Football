@@ -13,7 +13,7 @@ namespace Football.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, IOptionsMonitor<Season> season, IMapper mapper, IFantasyDataService fantasyDataService, IFantasyAnalysisService fantasyAnalysisService) : ControllerBase
+    public class PlayerController(IPlayersService playersService, IStatisticsService statisticsService, ITeamsService teamsService, IOptionsMonitor<Season> season, IMapper mapper, IFantasyDataService fantasyDataService, IFantasyAnalysisService fantasyAnalysisService) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -31,11 +31,11 @@ namespace Football.Api.Controllers
             var playerModel = mapper.Map<PlayerDataModel>(player);
             _ = Enum.TryParse(player.Position, out Position position);
 
-            var playerTeam = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+            var playerTeam = await teamsService.GetPlayerTeam(_season.CurrentSeason, playerId);
             if (playerTeam != null) 
             {
                 playerModel.Team = playerTeam.Team;
-                playerModel.Schedule = mapper.Map<List<ScheduleModel>>(await playersService.GetUpcomingGames(playerId));
+                playerModel.Schedule = mapper.Map<List<ScheduleModel>>(await teamsService.GetUpcomingGames(playerId));
 
             }
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
@@ -91,7 +91,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         public async Task<IActionResult> PostInSeasonTeamChange([FromBody] InSeasonTeamChangeModel teamChange)
         {
-            var allTeamsDictionary = (await playersService.GetAllTeams()).Select(t => t.Team);
+            var allTeamsDictionary = (await teamsService.GetAllTeams()).Select(t => t.Team);
             var allPlayers = (await playersService.GetAllPlayers()).Select(p => p.PlayerId);
 
             if (teamChange.WeekEffective <= 0) return BadRequest();
@@ -137,7 +137,7 @@ namespace Football.Api.Controllers
             {                
                 var rookie = mapper.Map<Rookie>(model);
 
-                var teamId = await playersService.GetTeamId(rookie.TeamDrafted);
+                var teamId = await teamsService.GetTeamId(rookie.TeamDrafted);
                 if (teamId == 0) return NotFound();
                 rookie.TeamId = teamId;
 
@@ -182,7 +182,14 @@ namespace Football.Api.Controllers
 
         [HttpGet("trending-players")]
         [ProducesResponseType(typeof(List<TrendingPlayerModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetTrendingPlayers() => Ok(mapper.Map<List<TrendingPlayerModel>>(await playersService.GetTrendingPlayers()));
+        public async Task<IActionResult> GetTrendingPlayers() 
+        { 
+            var trendingPlayers = await playersService.GetTrendingPlayers();
+            var playerTeams = (await teamsService.GetPlayerTeams(_season.CurrentSeason, trendingPlayers.Select(t => t.Player.PlayerId))).ToDictionary(t => t.PlayerId);
+            var models = mapper.Map<List<TrendingPlayerModel>>(trendingPlayers);
+            models.ForEach(m => m.Team = playerTeams.TryGetValue(m.PlayerId, out var team) ? team.Team : "");
+            return Ok(models);
+        } 
 
 
         private async Task<List<SeasonDataModel>> GetSeasonDataModel(Position position, int playerId, int season)

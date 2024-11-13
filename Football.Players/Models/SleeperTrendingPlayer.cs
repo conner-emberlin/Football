@@ -15,7 +15,6 @@ namespace Football.Players.Models
     public class TrendingPlayer
     {
         public Player Player { get; set; } = new();
-        public PlayerTeam? PlayerTeam { get; set; } = new();
         public int Adds { get; set; }
     }
 }

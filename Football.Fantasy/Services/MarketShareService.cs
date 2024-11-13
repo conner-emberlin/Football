@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Services
 {
-    public class MarketShareService(IPlayersService playersService, IStatisticsService statisticsService, IFantasyDataService fantasyService,
+    public class MarketShareService(IPlayersService playersService, IStatisticsService statisticsService, IFantasyDataService fantasyService, ITeamsService teamsService,
         IOptionsMonitor<Season> season, IMemoryCache cache, ISettingsService settingsService) : IMarketShareService
     {
         private readonly Season _season = season.CurrentValue;
@@ -20,7 +20,7 @@ namespace Football.Fantasy.Services
                 return cachedShares;
             else
             {
-                var teams = await playersService.GetAllTeams();
+                var teams = await teamsService.GetAllTeams();
                 var playersDictionary = (await playersService.GetAllPlayers()).Where(p => p.Active == 1).ToDictionary(P => P.PlayerId);
                 List<TargetShare> shares = [];
                 foreach (var team in teams) shares.Add(await GetTargetShare(team, playersDictionary));
@@ -37,7 +37,7 @@ namespace Football.Fantasy.Services
             List<MarketShare> shares = [];
             var players = await playersService.GetPlayersByPosition(position, true);
             var teamTotals = (await GetTeamTotals()).ToDictionary(t => t.Team.TeamId);
-            var playerTeams = (await playersService.GetPlayerTeams(_season.CurrentSeason, players.Select(p => p.PlayerId))).ToDictionary(p => p.PlayerId);
+            var playerTeams = (await teamsService.GetPlayerTeams(_season.CurrentSeason, players.Select(p => p.PlayerId))).ToDictionary(p => p.PlayerId);
             foreach (var player in players)
             {
                 if (playerTeams.TryGetValue(player.PlayerId, out var team))
@@ -56,7 +56,7 @@ namespace Football.Fantasy.Services
             else
             {
                 List<TeamTotals> totals = [];
-                var teams = await playersService.GetAllTeams();
+                var teams = await teamsService.GetAllTeams();
                 foreach (var team in teams) totals.Add(await GetTeamTotals(team.TeamId));
                 var teamTotals = totals.OrderByDescending(t => t.TotalFantasy).ToList();
                 cache.Set(Cache.TeamTotals.ToString(), teamTotals);
@@ -66,8 +66,8 @@ namespace Football.Fantasy.Services
 
         public async Task<TeamTotals> GetTeamTotals(int teamId)
         {
-            var team = await playersService.GetTeam(teamId);
-            var players = await playersService.GetPlayersByTeam(team.Team);
+            var team = await teamsService.GetTeam(teamId);
+            var players = await teamsService.GetPlayersByTeam(team.Team);
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             var schedule = (await playersService.GetTeamGames(team.TeamId)).Where(t => t.Week < currentWeek && t.OpposingTeamId > 0);
 
@@ -89,7 +89,7 @@ namespace Football.Fantasy.Services
 
         private async Task<TargetShare> GetTargetShare(TeamMap teamMap, Dictionary<int, Player> playersDictionary)
         {
-            var teamPlayers = await playersService.GetPlayersByTeam(teamMap.Team);
+            var teamPlayers = await teamsService.GetPlayersByTeam(teamMap.Team);
 
             var totalAttempts = 0.0;
             var totalCompletions = 0.0;

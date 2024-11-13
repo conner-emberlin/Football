@@ -52,9 +52,7 @@ namespace Football.Tests
 
             _mockSeason.Setup(s => s.CurrentValue).Returns(_season);
             _mockPlayersRepository.Setup(pr => pr.GetPlayer(_playerId)).ReturnsAsync(_playerDST);
-            _mockPlayersRepository.Setup(s => s.GetTeam(_teamId)).ReturnsAsync(_teamMap);
-            _mockPlayersRepository.Setup(ps => ps.GetTeamId(_playerId)).ReturnsAsync(_teamId);
-            _mockPlayersRepository.Setup(ps => ps.GetTeamId(_teamMap.Team)).ReturnsAsync(_teamId);
+
 
             _sut = new PlayersService(_mockPlayersRepository.Object, _mockMemoryCache.Object, _mockSeason.Object, _mockSettingsService.Object, _mapper, _mockLogger.Object, _mockSleeperLeagueService.Object);
         }

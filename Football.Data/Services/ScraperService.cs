@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace Football.Data.Services
 {
-    public class ScraperService(IHttpClientFactory clientFactory, IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playersService, ILogger logger, IOptionsMonitor<Season> season) : IScraperService
+    public class ScraperService(IHttpClientFactory clientFactory, IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playersService, ITeamsService teamsService, ILogger logger, IOptionsMonitor<Season> season) : IScraperService
     {
         private readonly WeeklyScraping _scraping = scraping.CurrentValue;
         private readonly Season _season = season.CurrentValue;
@@ -317,7 +317,7 @@ namespace Football.Data.Services
         }
         public async Task<int> DownloadTeamLogos()
         {
-            var teams = await playersService.GetAllTeams();
+            var teams = await teamsService.GetAllTeams();
             var count = 0;
             foreach (var team in teams)
             {
@@ -339,7 +339,7 @@ namespace Football.Data.Services
         public async Task<List<PlayerTeam>> ParseFantasyProsPlayerTeam(string[] strings, string position)
         {
             var len = GetPlayerTeamTableLength(position);
-            var teams = await playersService.GetAllTeams();
+            var teams = await teamsService.GetAllTeams();
             List<PlayerTeam> playerTeams = [];
             for (int i = 0; i < strings.Length - len; i += len)
             {
@@ -390,10 +390,10 @@ namespace Football.Data.Services
                     schedules.Add(new Schedule
                     {
                         Season = _season.CurrentSeason,
-                        TeamId = await playersService.GetTeamId(g.ElementAt(0).Trim()),
+                        TeamId = await teamsService.GetTeamId(g.ElementAt(0).Trim()),
                         Team = g.ElementAt(0).Trim(),
                         Week = i,
-                        OpposingTeamId = g.ElementAt(i).Trim() == "BYE" ? 0 : await playersService.GetTeamId(g.ElementAt(i).Trim()),
+                        OpposingTeamId = g.ElementAt(i).Trim() == "BYE" ? 0 : await teamsService.GetTeamId(g.ElementAt(i).Trim()),
                         OpposingTeam = g.ElementAt(i).Trim()
                     });
                 }

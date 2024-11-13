@@ -13,7 +13,7 @@ using System.Text.Json;
 namespace Football.Fantasy.Services
 {
     public class StartOrSitService(IPlayersService playersService, IMatchupAnalysisService matchupAnalysisService,
-        IFantasyDataService fantasyDataService, ISettingsService settingsService, IMemoryCache cache,
+        IFantasyDataService fantasyDataService, ITeamsService teamsService, ISettingsService settingsService, IMemoryCache cache,
         IOptionsMonitor<Season> season, IOptionsMonitor<NFLOddsAPI> oddsAPI, IOptionsMonitor<WeatherAPI> weatherAPI, JsonOptions options, IHttpClientFactory clientFactory, IMapper mapper) : IStartOrSitService
     {
         private readonly Season _season = season.CurrentValue;
@@ -30,12 +30,12 @@ namespace Football.Fantasy.Services
                 if (settingsService.GetFromCache<StartOrSit>(playerId, Cache.StartOrSit, out var startOrSit)) startOrSits.Add(startOrSit);
                 else 
                 {
-                    var team = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+                    var team = await teamsService.GetPlayerTeam(_season.CurrentSeason, playerId);
                     if (team != null)
                     {                       
                         var projection = await playersService.GetWeeklyProjection(_season.CurrentSeason, currentWeek, playerId);
                         var scheduleDetail = schedule.FirstOrDefault(s => s.AwayTeamId == team.TeamId || s.HomeTeamId == team.TeamId);
-                        var teamMap = await playersService.GetTeam(team.TeamId);
+                        var teamMap = await teamsService.GetTeam(team.TeamId);
                         var player = await playersService.GetPlayer(playerId);
                         var sos = new StartOrSit
                         {
@@ -116,7 +116,7 @@ namespace Football.Fantasy.Services
             var opponentSchedule = (await playersService.GetTeamGames(opponentId)).Where(s => s.Week < currentWeek && s.OpposingTeamId > 0);
             foreach (var match in opponentSchedule)
             {
-                var opposingTeamPlayers = await playersService.GetPlayersByTeamIdAndPosition(match.OpposingTeamId, position, _season.CurrentSeason);
+                var opposingTeamPlayers = await teamsService.GetPlayersByTeamIdAndPosition(match.OpposingTeamId, position, _season.CurrentSeason);
 
                 foreach (var op in opposingTeamPlayers)
                 {

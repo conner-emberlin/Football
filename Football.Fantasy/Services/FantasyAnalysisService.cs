@@ -10,7 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace Football.Fantasy.Services
 {
     public class FantasyAnalysisService(IOptionsMonitor<Season> season,
-        IPlayersService playersService, IFantasyDataService fantasyDataService, ISettingsService settingsService,
+        IPlayersService playersService, ITeamsService teamsService, IFantasyDataService fantasyDataService, ISettingsService settingsService,
         IStatisticsService statsService, IOptionsMonitor<FantasyScoring> scoring, IMemoryCache cache) : IFantasyAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
@@ -70,8 +70,8 @@ namespace Football.Fantasy.Services
 
         public async Task<List<FantasyPerformance>> GetFantasyPerformances(int teamId)
         {
-            var teamMap = await playersService.GetTeam(teamId);
-            var players = await playersService.GetPlayersByTeam(teamMap.Team);
+            var teamMap = await teamsService.GetTeam(teamId);
+            var players = await teamsService.GetPlayersByTeam(teamMap.Team);
             List<FantasyPerformance> teamFantasyPerformances = [];
             if (players.Count > 0)
             {

@@ -11,7 +11,7 @@ using Serilog;
 namespace Football.Data.Services
 {
     public class UploadSeasonDataService(IScraperService scraperService, IUploadSeasonDataRepository uploadSeasonDataRepository,
-         IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playerService, IMapper mapper, IOptionsMonitor<Season> season, ILogger logger) : IUploadSeasonDataService
+         IOptionsMonitor<WeeklyScraping> scraping, IPlayersService playerService, ITeamsService teamsService, IMapper mapper, IOptionsMonitor<Season> season, ILogger logger) : IUploadSeasonDataService
     {
         private readonly WeeklyScraping _scraping = scraping.CurrentValue;
         private readonly Season _season = season.CurrentValue;
@@ -219,13 +219,13 @@ namespace Football.Data.Services
                 var awayTeamId = 0;
                 if (s.HomeIndicator == "@") 
                 {
-                    homeTeamId = await playerService.GetTeamIdFromDescription(s.Loser);
-                    awayTeamId = await playerService.GetTeamIdFromDescription(s.Winner);
+                    homeTeamId = await teamsService.GetTeamIdFromDescription(s.Loser);
+                    awayTeamId = await teamsService.GetTeamIdFromDescription(s.Winner);
                 }
                 else
                 {
-                    homeTeamId = await playerService.GetTeamIdFromDescription(s.Winner);
-                    awayTeamId = await playerService.GetTeamIdFromDescription(s.Loser);
+                    homeTeamId = await teamsService.GetTeamIdFromDescription(s.Winner);
+                    awayTeamId = await teamsService.GetTeamIdFromDescription(s.Loser);
                 }
 
                 if (awayTeamId > 0 && homeTeamId > 0)

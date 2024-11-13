@@ -9,7 +9,7 @@ using Serilog;
 namespace Football.Fantasy.Services
 {
     public class MatchupAnalysisService(IPlayersService playersService, IFantasyDataService fantasyDataService,
-        IOptionsMonitor<Season> season, IMatchupAnalysisRepository matchupAnalysisRepository, ILogger logger) : IMatchupAnalysisService
+        IOptionsMonitor<Season> season, IMatchupAnalysisRepository matchupAnalysisRepository, ITeamsService teamsService, ILogger logger) : IMatchupAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -38,7 +38,7 @@ namespace Football.Fantasy.Services
 
         public async Task<int> GetMatchupRanking(int playerId)
         {
-            var team = await playersService.GetPlayerTeam(_season.CurrentSeason, playerId);
+            var team = await teamsService.GetPlayerTeam(_season.CurrentSeason, playerId);
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             if (team != null && currentWeek < await playersService.GetCurrentSeasonWeeks())
             {           
@@ -102,7 +102,7 @@ namespace Football.Fantasy.Services
             List<MatchupRanking> rankings = [];
             var playersByPosition = (await playersService.GetPlayersByPosition(position)).ToDictionary(p => p.PlayerId);
             var asOfWeek = week > 0 ? week : await playersService.GetCurrentWeek(_season.CurrentSeason);
-            var allTeams = await playersService.GetAllTeams();
+            var allTeams = await teamsService.GetAllTeams();
             foreach (var team in allTeams)
             {
                 double fpTotal = 0;
@@ -110,7 +110,7 @@ namespace Football.Fantasy.Services
                 var filteredGames = games.Where(g => g.Week < asOfWeek && g.OpposingTeamId > 0);
                 foreach (var game in filteredGames)
                 {
-                    var opposingPlayers = await playersService.GetPlayersByTeam(game.OpposingTeam);
+                    var opposingPlayers = await teamsService.GetPlayersByTeam(game.OpposingTeam);
                     foreach (var op in opposingPlayers)
                     {
                         if (playersByPosition.TryGetValue(op.PlayerId, out var player))

@@ -16,17 +16,10 @@ namespace Football.Players.Interfaces
         public Task<List<Suspensions>> GetPlayerSuspensions(int season);
         public Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season);
         public Task<double> GetWeeklyProjection(int season, int week, int playerId);
-        public Task<PlayerTeam?> GetPlayerTeam(int season, int playerId);
-        public Task<IEnumerable<PlayerTeam>> GetPlayerTeams(int season, IEnumerable<int> playerIds);
-        public Task<List<PlayerTeam>> GetPlayersByTeam(string team, int season);
-        public Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, string position, int season, bool activeOnly = false);
+
         public Task<int> GetCurrentWeek(int season);
-        public Task<int> GetTeamId(string teamName);
-        public Task<int> GetTeamId(int playerId);
-        public Task<int> GetTeamIdFromDescription(string teamDescription);
-        public Task<List<TeamMap>> GetAllTeams();
-        public Task<TeamMap> GetTeam(int teamId);
-        public Task<List<Schedule>> GetUpcomingGames(int teamId, int season, int currentWeek);
+
+
         public Task<List<Schedule>> GetGames(int season, int week);
         public Task<IEnumerable<Schedule>> GetByeWeeks(int season);
         public Task<List<Schedule>> GetTeamGames(int teamId, int season);

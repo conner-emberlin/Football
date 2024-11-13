@@ -14,7 +14,7 @@ namespace Football.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMarketShareService marketShareService,
-        IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService,
+        IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService, ITeamsService teamsService,
         IPlayersService playersService, IFantasyAnalysisService fantasyAnalysisService, ISnapCountService snapCountService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
@@ -95,7 +95,7 @@ namespace Football.Api.Controllers
             {
                 var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
                 var model = mapper.Map<List<MatchupRankingModel>>(await matchupAnalysisService.GetPositionalMatchupRankingsFromSQL(positionEnum, _season.CurrentSeason, currentWeek));
-                var teamDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
+                var teamDictionary = (await teamsService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
                 model.ForEach(m => m.TeamDescription = teamDictionary[m.TeamId]);
                 return Ok(model);
             }  
@@ -129,11 +129,11 @@ namespace Football.Api.Controllers
         {
             if (!Enum.TryParse(position.Trim().ToUpper(), out Position positionEnum)) return BadRequest();
 
-            var teamMap = await playersService.GetTeam(teamId);
+            var teamMap = await teamsService.GetTeam(teamId);
             if (teamMap == null) return NotFound();
 
             var models = mapper.Map<List<TopOpponentsModel>>(await matchupAnalysisService.GetTopOpponents(positionEnum, teamId));
-            var playerTeamDictionary = (await playersService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
+            var playerTeamDictionary = (await teamsService.GetPlayerTeams(_season.CurrentSeason, models.Select(m => m.PlayerId))).ToDictionary(p => p.PlayerId, p => p.Team);
             foreach (var m in models)
             {
                 m.TopOpponentTeamDescription = teamMap.TeamDescription;
@@ -161,7 +161,7 @@ namespace Football.Api.Controllers
         {
             List<StartOrSitModel> sosModels = [];
             var startOrSits = await startOrSitService.GetStartOrSits(playerIds);
-            var teamDictionary = (await playersService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.Team);
+            var teamDictionary = (await teamsService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.Team);
             foreach (var sos in startOrSits)
             {
                 var sosModel = mapper.Map<StartOrSitModel>(sos);
@@ -209,7 +209,7 @@ namespace Football.Api.Controllers
 
             if (!Enum.TryParse(position, out Position posEnum)) return BadRequest();
             var qualityStarts = mapper.Map<List<QualityStartsModel>>(await fantasyAnalysisService.GetQualityStartsByPosition(posEnum));
-            var playerTeams = (await playersService.GetPlayerTeams(_season.CurrentSeason, qualityStarts.Select(q => q.PlayerId))).ToDictionary(p => p.PlayerId);
+            var playerTeams = (await teamsService.GetPlayerTeams(_season.CurrentSeason, qualityStarts.Select(q => q.PlayerId))).ToDictionary(p => p.PlayerId);
             foreach (var qs in qualityStarts)
             {
                 qs.Team = playerTeams.TryGetValue(qs.PlayerId, out var team) ? team.Team : "";

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 namespace Football.Fantasy.Services
 {
     public class FantasyDataService(IFantasyDataRepository fantasyData, IFantasyCalculator calculator,
-        IStatisticsService statistics, IPlayersService playersService,
+        IStatisticsService statistics, IPlayersService playersService, ITeamsService teamsService,
         IMemoryCache cache, IOptionsMonitor<Season> season, ILogger logger) : IFantasyDataService
     {
         private readonly Season _season = season.CurrentValue;
@@ -97,10 +97,10 @@ namespace Football.Fantasy.Services
                     break;
                 case Position.DST:
                     var stats = await statistics.GetWeeklyData<WeeklyDataDST>(position, season, week);
-                    var teams = await playersService.GetAllTeams();
+                    var teams = await teamsService.GetAllTeams();
                     foreach (var data in stats)
                     {
-                        var teamId = await playersService.GetTeamId(data.PlayerId);
+                        var teamId = await teamsService.GetTeamId(data.PlayerId);
                         var gameResult = (await statistics.GetGameResults(season)).First(g => g.Week == week && (g.WinnerId == teamId || g.LoserId == teamId));
                         var opponent = gameResult.WinnerId == teamId ? gameResult.LoserId : gameResult.WinnerId;
                         var opponentPID = teams.First(t => t.TeamId == opponent).PlayerId;
@@ -138,7 +138,7 @@ namespace Football.Fantasy.Services
         public async Task<List<WeeklyFantasy>> GetWeeklyTeamFantasy(string team, int week)
         {
             List<WeeklyFantasy> teamFantasy = [];
-            var players = await playersService.GetPlayersByTeam(team);
+            var players = await teamsService.GetPlayersByTeam(team);
             foreach (var player in players)
             {
                 var weeklyFantasy = (await GetWeeklyFantasy(player.PlayerId, team)).FirstOrDefault(f => f.Week == week);

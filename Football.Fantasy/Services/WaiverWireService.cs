@@ -7,49 +7,35 @@ using Microsoft.Extensions.Options;
 
 namespace Football.Fantasy.Services
 {
-    public class WaiverWireService : IWaiverWireService
+    public class WaiverWireService(IStatisticsService statisticsService, IFantasyDataService fantasyService,
+        ISettingsService settingsService, IPlayersService playersService, ITeamsService teamsService, IOptionsMonitor<Season> season, IOptionsMonitor<WaiverWireSettings> settings) : IWaiverWireService
     {
-        private readonly IStatisticsService _statisticsService;
-        private readonly IFantasyDataService _fantasyService;
-        private readonly IPlayersService _playersService;
-        private readonly ISettingsService _settingsService;
-        private readonly WaiverWireSettings _settings;
-        private readonly Season _season;
-
-        public WaiverWireService(IStatisticsService statisticsService, IFantasyDataService fantasyService, 
-            ISettingsService settingsService, IPlayersService playersService, IOptionsMonitor<Season> season, IOptionsMonitor<WaiverWireSettings> settings)
-        {
-            _statisticsService = statisticsService;
-            _fantasyService = fantasyService;
-            _settingsService = settingsService;
-            _playersService = playersService;
-            _season = season.CurrentValue;
-            _settings = settings.CurrentValue;
-        }
+        private readonly WaiverWireSettings _settings = settings.CurrentValue;
+        private readonly Season _season = season.CurrentValue;
 
         public async Task<List<WaiverWireCandidate>> GetWaiverWireCandidates(int season, int week)
         {
             List<WaiverWireCandidate> candidates = [];
-            if (week > await _playersService.GetCurrentSeasonWeeks()) return candidates;
+            if (week > await playersService.GetCurrentSeasonWeeks()) return candidates;
 
-            var rosterPercentages = (await _statisticsService.GetWeeklyRosterPercentages(season, week - 1)).Where(r => r.RosterPercent < _settings.RostershipMax).ToList();
+            var rosterPercentages = (await statisticsService.GetWeeklyRosterPercentages(season, week - 1)).Where(r => r.RosterPercent < _settings.RostershipMax).ToList();
             foreach (var rp in rosterPercentages)
             {
-                var player = await _playersService.GetPlayer(rp.PlayerId);
+                var player = await playersService.GetPlayer(rp.PlayerId);
                 if (Enum.TryParse(player.Position, out Position pos) && player.Active == 1)
                 {
-                    var weeklyFantasy = await _fantasyService.GetWeeklyFantasy(rp.PlayerId);
-                    var goodWeekCount = weeklyFantasy.Count(w => w.FantasyPoints > _settingsService.GoodWeek(pos));
+                    var weeklyFantasy = await fantasyService.GetWeeklyFantasy(rp.PlayerId);
+                    var goodWeekCount = weeklyFantasy.Count(w => w.FantasyPoints > settingsService.GoodWeek(pos));
                     var recentWeekFantasy = weeklyFantasy.FirstOrDefault(wf => wf.Week == week - 1);            
                     if((week > 2 && goodWeekCount > _settings.GoodWeekMinimum && recentWeekFantasy != null) 
                             || (week == 2 & goodWeekCount == _settings.GoodWeekMinimum && recentWeekFantasy != null))
                     {
-                        if (recentWeekFantasy.FantasyPoints > _settingsService.GoodWeek(pos))
+                        if (recentWeekFantasy.FantasyPoints > settingsService.GoodWeek(pos))
                         {
                             candidates.Add(new WaiverWireCandidate
                             {
                                 Player = player,
-                                PlayerTeam = await _playersService.GetPlayerTeam(_season.CurrentSeason, player.PlayerId),
+                                PlayerTeam = await teamsService.GetPlayerTeam(_season.CurrentSeason, player.PlayerId),
                                 Week = rp.Week + 1,
                                 RosteredPercentage = rp.RosterPercent
                             });
@@ -62,7 +48,7 @@ namespace Football.Fantasy.Services
                             candidates.Add(new WaiverWireCandidate
                             {
                                 Player = player,
-                                PlayerTeam = await _playersService.GetPlayerTeam(_season.CurrentSeason, player.PlayerId),
+                                PlayerTeam = await teamsService.GetPlayerTeam(_season.CurrentSeason, player.PlayerId),
                                 Week = rp.Week + 1,
                                 RosteredPercentage = rp.RosterPercent
                             });
@@ -74,17 +60,17 @@ namespace Football.Fantasy.Services
         }
         private async Task<bool> InjuryToLeadRB(int playerId)
         {                       
-            var playerTeam = await _playersService.GetPlayerTeam(_season.CurrentSeason, playerId);            
+            var playerTeam = await teamsService.GetPlayerTeam(_season.CurrentSeason, playerId);            
             if (playerTeam != null)
             {
-                var activeInjuries = await _playersService.GetActiveInSeasonInjuries(_season.CurrentSeason);
-                var otherPlayersOnTeam = (await _playersService.GetPlayersByTeam(playerTeam.Team)).Where(p => p.PlayerId != playerId);
+                var activeInjuries = await playersService.GetActiveInSeasonInjuries(_season.CurrentSeason);
+                var otherPlayersOnTeam = (await teamsService.GetPlayersByTeam(playerTeam.Team)).Where(p => p.PlayerId != playerId);
                 var injuredPlayersOnTeam = activeInjuries.Join(otherPlayersOnTeam, ai => ai.PlayerId, op => op.PlayerId, (ai, op) => new { InSeasonInjury = ai, PlayerTeam = op });                                                        
                 if (injuredPlayersOnTeam.Any())
                 {
                     foreach (var injuredPlayer in injuredPlayersOnTeam)
                     {
-                        var position = (await _playersService.GetPlayer(injuredPlayer.PlayerTeam.PlayerId)).Position;
+                        var position = (await playersService.GetPlayer(injuredPlayer.PlayerTeam.PlayerId)).Position;
                         if (position == Position.RB.ToString())
                             return true;
                     }
