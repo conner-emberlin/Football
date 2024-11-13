@@ -9,20 +9,20 @@ namespace Football.Players.Services
     public class StatisticsService(IStatisticsRepository statisticsRepository, IPlayersService playersService, ISettingsService settingsService, IOptionsMonitor<Season> season) : IStatisticsService
     {
         private readonly Season _season = season.CurrentValue;
-        public async Task<List<T>> GetSeasonData<T>(Position position, int queryParam, bool isPlayer) => await statisticsRepository.GetSeasonData<T>(position, queryParam, isPlayer);
-        public async Task<List<T>> GetWeeklyData<T>(Position position, int playerId) => await statisticsRepository.GetWeeklyDataByPlayer<T>(position, playerId, _season.CurrentSeason);
-        public async Task<List<T>> GetWeeklyData<T>(Position position, int season, int week) => await statisticsRepository.GetWeeklyData<T>(position, season, week);
-        public async Task<List<T>> GetWeeklyDataByPlayer<T>(Position position, int playerId, int season) => await statisticsRepository.GetWeeklyDataByPlayer<T>(position, playerId, season);
-        public async Task<List<T>> GetAllWeeklyDataByPosition<T>(Position position) => await statisticsRepository.GetAllWeeklyDataByPosition<T>(position);
-        public async Task<List<T>> GetAllSeasonDataByPosition<T>(Position position) => (await statisticsRepository.GetAllSeasonDataByPosition<T>(position));
-        public async Task<List<GameResult>> GetGameResults(int season) => await statisticsRepository.GetGameResults(season);
-        public async Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week) => await statisticsRepository.GetWeeklyRosterPercentages(season, week);
-        public async Task<List<SnapCount>> GetSnapCounts(int playerId) => await statisticsRepository.GetSnapCounts(playerId, _season.CurrentSeason);
-        public async Task<IEnumerable<SnapCount>> GetSnapCountsBySeason(IEnumerable<int> playerIds, int season) => await statisticsRepository.GetSnapCountsBySeason(playerIds, season);
-        public async Task<double> GetSnapsByGame(int playerId, int season, int week) => await statisticsRepository.GetSnapsByGame(playerId, season, week);
-        public async Task<List<T>> GetSeasonDataByTeamIdAndPosition<T>(int teamId, Position position, int season) => await statisticsRepository.GetSeasonDataByTeamIdAndPosition<T>(teamId, position, season);
-        public async Task<double> GetYearsExperience(int playerId, Position position) => await statisticsRepository.GetYearsExperience(playerId, position);
-        public async Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection) => await statisticsRepository.GetCurrentStartersThatMissedGamesLastSeason(currentSeason, previousSeason, maxGames, avgProjection);
+        public Task<List<T>> GetSeasonData<T>(Position position, int queryParam, bool isPlayer) => statisticsRepository.GetSeasonData<T>(position, queryParam, isPlayer);
+        public Task<List<T>> GetWeeklyData<T>(Position position, int playerId) => statisticsRepository.GetWeeklyDataByPlayer<T>(position, playerId, _season.CurrentSeason);
+        public Task<List<T>> GetWeeklyData<T>(Position position, int season, int week) => statisticsRepository.GetWeeklyData<T>(position, season, week);
+        public Task<List<T>> GetWeeklyDataByPlayer<T>(Position position, int playerId, int season) => statisticsRepository.GetWeeklyDataByPlayer<T>(position, playerId, season);
+        public Task<List<T>> GetAllWeeklyDataByPosition<T>(Position position) => statisticsRepository.GetAllWeeklyDataByPosition<T>(position);
+        public Task<List<T>> GetAllSeasonDataByPosition<T>(Position position) => statisticsRepository.GetAllSeasonDataByPosition<T>(position);
+        public Task<List<GameResult>> GetGameResults(int season) => statisticsRepository.GetGameResults(season);
+        public Task<List<WeeklyRosterPercent>> GetWeeklyRosterPercentages(int season, int week) => statisticsRepository.GetWeeklyRosterPercentages(season, week);
+        public Task<List<SnapCount>> GetSnapCounts(int playerId) => statisticsRepository.GetSnapCounts(playerId, _season.CurrentSeason);
+        public Task<IEnumerable<SnapCount>> GetSnapCountsBySeason(IEnumerable<int> playerIds, int season) => statisticsRepository.GetSnapCountsBySeason(playerIds, season);
+        public Task<double> GetSnapsByGame(int playerId, int season, int week) => statisticsRepository.GetSnapsByGame(playerId, season, week);
+        public Task<List<T>> GetSeasonDataByTeamIdAndPosition<T>(int teamId, Position position, int season) => statisticsRepository.GetSeasonDataByTeamIdAndPosition<T>(teamId, position, season);
+        public Task<double> GetYearsExperience(int playerId, Position position) => statisticsRepository.GetYearsExperience(playerId, position);
+        public Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection) => statisticsRepository.GetCurrentStartersThatMissedGamesLastSeason(currentSeason, previousSeason, maxGames, avgProjection);
         public async Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, Position position)
         {
             if (position == Position.FLEX) return await statisticsRepository.GetAdpByPosition(season);

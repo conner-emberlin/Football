@@ -16,13 +16,13 @@ namespace Football.Fantasy.Services
     {
         private readonly Season _season = season.CurrentValue;
 
-        public async Task<List<SeasonFantasy>> GetSeasonFantasy(int filter, bool isPlayer = true) => await fantasyData.GetSeasonFantasy(filter, isPlayer);
-        public async Task<List<SeasonFantasy>> GetAllSeasonFantasyByPosition(Position position, int minGames) => await fantasyData.GetAllSeasonFantasyByPosition(position.ToString(), minGames);
-        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId) => await fantasyData.GetWeeklyFantasyByPlayer(playerId, _season.CurrentSeason);
-        public async Task<List<WeeklyFantasy>> GetWeeklyFantasyBySeason(int playerId, int season) => await fantasyData.GetWeeklyFantasyByPlayer(playerId, season);
-        public async Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => await fantasyData.GetWeeklyFantasy(season, week);
-        public async Task<List<WeeklyFantasy>> GetAllWeeklyFantasyByPosition(Position position) => await fantasyData.GetAllWeeklyFantasyByPosition(position.ToString());
-        public async Task<Dictionary<int, double>> GetAverageWeeklyFantasyPoints(IEnumerable<int> playerIds, int season) => await fantasyData.GetAverageWeeklyFantasyPoints(playerIds, season);
+        public Task<List<SeasonFantasy>> GetSeasonFantasy(int filter, bool isPlayer = true) => fantasyData.GetSeasonFantasy(filter, isPlayer);
+        public Task<List<SeasonFantasy>> GetAllSeasonFantasyByPosition(Position position, int minGames) => fantasyData.GetAllSeasonFantasyByPosition(position.ToString(), minGames);
+        public Task<List<WeeklyFantasy>> GetWeeklyFantasy(int playerId) => fantasyData.GetWeeklyFantasyByPlayer(playerId, _season.CurrentSeason);
+        public Task<List<WeeklyFantasy>> GetWeeklyFantasyBySeason(int playerId, int season) => fantasyData.GetWeeklyFantasyByPlayer(playerId, season);
+        public Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => fantasyData.GetWeeklyFantasy(season, week);
+        public Task<List<WeeklyFantasy>> GetAllWeeklyFantasyByPosition(Position position) => fantasyData.GetAllWeeklyFantasyByPosition(position.ToString());
+        public Task<Dictionary<int, double>> GetAverageWeeklyFantasyPoints(IEnumerable<int> playerIds, int season) => fantasyData.GetAverageWeeklyFantasyPoints(playerIds, season);
         public async Task<int> PostSeasonFantasy(int season, Position position)
         {
             List<SeasonFantasy> seasonFantasy = [];
