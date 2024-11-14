@@ -191,6 +191,7 @@ namespace Football.Api
                 .ForMember(qm => qm.GreatStartPercentage, o => o.MapFrom(q => Math.Round(((double)q.GreatStarts / (double)q.GamesPlayed) * 100, 1)))
                 .ForMember(qm => qm.QualityCount, o => o.MapFrom(q => q.GoodStarts + q.GreatStarts))
                 .ForMember(qm => qm.QualityPercentage, o => o.MapFrom(q => Math.Round(((double)(q.GoodStarts + q.GreatStarts) / (double)q.GamesPlayed) * 100, 1)));
+            CreateMap<TeamDepthChart, TeamDepthChartModel>();
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using Football.Enums;
+﻿using AutoMapper;
+using Football.Enums;
 using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using Football.Models;
@@ -6,11 +7,10 @@ using Football.Players.Interfaces;
 using Football.Players.Models;
 using Football.Projections.Interfaces;
 using Football.Projections.Models;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearRegression;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using MathNet.Numerics.LinearRegression;
-using MathNet.Numerics.LinearAlgebra;
-using AutoMapper;
 
 namespace Football.Projections.Services
 {
@@ -22,14 +22,9 @@ namespace Football.Projections.Services
     {
         private readonly Season _season = season.CurrentValue;
 
-        public async Task<bool> DeleteProjection(SeasonProjection projection)
-        {
-           var recordDeleted  = await projectionRepository.DeleteSeasonProjection(projection.PlayerId, projection.Season);
-            if (recordDeleted)
-                cache.Remove(projection.Position + Cache.SeasonProjections.ToString());
-            return recordDeleted;
-        }
-        public async Task<IEnumerable<SeasonProjection>?> GetPlayerProjections(int playerId) => await projectionRepository.GetSeasonProjection(playerId);
+        public Task<IEnumerable<SeasonProjection>?> GetPlayerProjections(int playerId) => projectionRepository.GetSeasonProjection(playerId);
+        public Task<string?> GetCurrentProjectionConfigurationFilter(Position position) => projectionRepository.GetCurrentSeasonProjectionFilter(position.ToString(), _season.CurrentSeason);
+        public Task<bool> DeleteProjection(SeasonProjection projection) => projectionRepository.DeleteSeasonProjection(projection.PlayerId, projection.Season);
         public async Task<int> PostProjections(List<SeasonProjection> projections, List<string> filters) 
         {
             if (projections.Count == 0) return 0;
@@ -116,7 +111,7 @@ namespace Football.Projections.Services
             return await projectionRepository.PostSeasonProjectionConfiguration(config);
         }
 
-        public async Task<string?> GetCurrentProjectionConfigurationFilter(Position position) => await projectionRepository.GetCurrentSeasonProjectionFilter(position.ToString(), _season.CurrentSeason);
+
         private async Task<IEnumerable<SeasonProjection>> CalculateProjections<T1>(List<T1> model, Position position, Tunings tunings, int seasonGames, List<string>? filter = null)
         {
             List<SeasonProjection> projections = [];
@@ -144,7 +139,6 @@ namespace Football.Projections.Services
             }           
             return projections;
         }
-
         private async Task<Vector<double>> CalculateCoefficients<T>(List<T> model, Position position, int gameTrim, List<string>? filter = null)
         {
             var regressorMatrix = matrixCalculator.RegressorMatrix(model, filter);
@@ -207,7 +201,6 @@ namespace Football.Projections.Services
 
             }
         }
-
         private async Task<List<SeasonProjection>> RookieSeasonProjections(Position position, int seasonGames)
         {
             List<SeasonProjection> rookieProjections = [];

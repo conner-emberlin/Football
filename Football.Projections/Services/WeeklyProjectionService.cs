@@ -19,6 +19,8 @@ namespace Football.Projections.Services
     {
         private readonly Season _season = season.CurrentValue;
         private readonly WeeklyTunings _tunings = tunings.CurrentValue;
+
+        public Task<IEnumerable<WeekProjection>?> GetPlayerProjections(int playerId) => projectionRepository.GetWeeklyProjection(playerId);
         public async Task<bool> DeleteProjection(WeekProjection projection) 
         { 
             var recordDeleted = await projectionRepository.DeleteWeeklyProjection(projection.PlayerId, projection.Week, projection.Season);
@@ -26,7 +28,6 @@ namespace Football.Projections.Services
                 cache.Remove(projection.Position + Cache.WeeklyProjections.ToString());
             return recordDeleted;
         } 
-        public async Task<IEnumerable<WeekProjection>?> GetPlayerProjections(int playerId) => await projectionRepository.GetWeeklyProjection(playerId);
         public async Task<int> PostProjections(List<WeekProjection> projections, List<string> filters) 
         {
             if (projections.Count == 0) return 0;
@@ -163,7 +164,7 @@ namespace Football.Projections.Services
             return MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
         }
 
-        private async Task<List<WeeklyFantasy>> FantasyProjectionModel(Position position) => await fantasyService.GetAllWeeklyFantasyByPosition(position);
+        private Task<List<WeeklyFantasy>> FantasyProjectionModel(Position position) => fantasyService.GetAllWeeklyFantasyByPosition(position);
         private async Task<List<QBModelWeek>> QBProjectionModel() => mapper.Map<List<QBModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataQB>(Position.QB));
         private async Task<List<RBModelWeek>> RBProjectionModel() => mapper.Map<List<RBModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataRB>(Position.RB));
         private async Task<List<WRModelWeek>> WRProjectionModel() => mapper.Map<List<WRModelWeek>>(await statisticsService.GetAllWeeklyDataByPosition<AllWeeklyDataWR>(Position.WR));

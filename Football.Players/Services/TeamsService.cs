@@ -112,5 +112,34 @@ namespace Football.Players.Services
             var team = await GetPlayerTeam(_season.CurrentSeason, playerId);
             return team != null ? await teamsRepository.GetUpcomingGames(await GetTeamId(team.Team), _season.CurrentSeason, await playersService.GetCurrentWeek(_season.CurrentSeason)) : [];
         }
+
+        public async Task<IEnumerable<TeamDepthChart>> GetTeamDepthChart(int teamId, int season = 0)
+        {
+            var chartSeason = season > 0 ? season : _season.CurrentSeason;
+            var allTeams = (await GetAllTeams()).ToDictionary(t => t.TeamId);
+            if (!allTeams.TryGetValue(teamId, out var teamMap)) return [];
+
+            var players = await GetPlayersByTeam(teamMap.Team);
+            var snapCounts = await statisticsService.GetSnapCountsBySeason(players.Select(p => p.PlayerId), chartSeason);
+            List<TeamDepthChart> depthChart = [];
+            foreach (var player in players)
+            {
+                var playerSnaps = snapCounts.Where(s => s.PlayerId == player.PlayerId);
+                var games = playerSnaps.Count();
+                depthChart.Add(new TeamDepthChart
+                {
+                    TeamId = teamId,
+                    Team = player.Team,
+                    TeamDescription = teamMap.TeamDescription,
+                    PlayerId = player.PlayerId,
+                    Name = player.Name,
+                    Position = games > 0 ? playerSnaps.First().Position : (await playersService.GetPlayer(player.PlayerId)).Position,
+                    Games = games,
+                    TotalSnaps = games > 0 ? playerSnaps.Sum(s => s.Snaps) : 0,
+                    SnapsPerGame = games > 0 ? playerSnaps.Sum(s => s.Snaps)/games : 0
+                });
+            }
+            return depthChart.OrderBy(s => s.Position).ThenByDescending(s => s.TotalSnaps);
+        }
     }
 }

@@ -26,6 +26,7 @@ namespace Football.Players.Interfaces
         public Task<List<ScheduleDetails>> GetScheduleDetails(int season, int week);
         public Task<IEnumerable<Schedule>> GetWeeklySchedule(int season, int week);
         public Task<IEnumerable<Schedule>> GetByeWeeks(int season);
+        public Task<IEnumerable<TeamDepthChart>> GetTeamDepthChart(int teamId, int season = 0);
 
     }
 }

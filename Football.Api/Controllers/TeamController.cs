@@ -41,12 +41,12 @@ namespace Football.Api.Controllers
         [HttpGet("fantasy-performances/{teamId}")]
         [ProducesResponseType(typeof(List<FantasyPerformanceModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetFantasyPerformances([FromRoute] int teamId) => teamId > 0 ? Ok(mapper.Map<List<FantasyPerformanceModel>>(await fantasyAnalysisService.GetFantasyPerformances(teamId))) : BadRequest("Bad Request");
+        public async Task<IActionResult> GetFantasyPerformances([FromRoute] int teamId) => teamId > 0 ? Ok(mapper.Map<List<FantasyPerformanceModel>>(await fantasyAnalysisService.GetFantasyPerformances(teamId))) : BadRequest();
 
         [HttpGet("weekly-fantasy/{team}/{week}")]
         [ProducesResponseType(typeof(List<WeeklyFantasyModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetWeeklyTeamFantasy([FromRoute] string team, [FromRoute] int week) => week > 0 ? Ok(mapper.Map<List<WeeklyFantasyModel>>(await fantasyDataService.GetWeeklyTeamFantasy(team, week))) : BadRequest("Bad Request");
+        public async Task<IActionResult> GetWeeklyTeamFantasy([FromRoute] string team, [FromRoute] int week) => week > 0 ? Ok(mapper.Map<List<WeeklyFantasyModel>>(await fantasyDataService.GetWeeklyTeamFantasy(team, week))) : BadRequest();
 
         [HttpGet("totals/{teamId}")]
         [ProducesResponseType(typeof(List<TeamTotals>), StatusCodes.Status200OK)]
@@ -64,5 +64,9 @@ namespace Football.Api.Controllers
         [HttpGet("team-records/division/{teamId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<TeamRecordModel>>> GetTeamRecordInDivision([FromRoute] int teamId) => Ok(mapper.Map<TeamRecordModel>(await teamsService.GetTeamRecordInDivision(teamId)));
+        
+        [HttpGet("depth-chart/{teamId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<TeamDepthChartModel>>> GetTeamDepthChart([FromRoute] int teamId) => Ok(mapper.Map<List<TeamDepthChartModel>>(await teamsService.GetTeamDepthChart(teamId)));
     }
 }

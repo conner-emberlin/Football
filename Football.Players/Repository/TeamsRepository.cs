@@ -82,7 +82,7 @@ namespace Football.Players.Repository
         }
         public async Task<List<PlayerTeam>> GetPlayersByTeam(string team, int season)
         {
-            var query = $@"SELECT [PlayerId], [Name], [Season], [Team]
+            var query = $@"SELECT *
                         FROM [dbo].PlayerTeam
                         WHERE [Team] = @team
                             AND [Season] = @season";
