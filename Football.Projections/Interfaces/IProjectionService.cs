@@ -5,15 +5,15 @@ namespace Football.Projections.Interfaces
 {
     public interface IProjectionService<T>
     {
-        public Task<bool> DeleteProjection(T projection);
-        public bool GetProjectionsFromSQL(Position position, int season, out IEnumerable<T> projections);
-        public Task<IEnumerable<T>?> GetPlayerProjections(int playerId);
-        public Task<IEnumerable<T>> GetProjections(Position position, List<string>? filter = null);
-        public Task<int> PostProjections(List<T> projections, List<string> filters);
-        public Task<Vector<double>> GetCoefficients(Position position);
-        public IEnumerable<string> GetModelVariablesByPosition(Position position);
-        public Task<bool> PostProjectionConfiguration(Position position, string filter);
-        public Task<string?> GetCurrentProjectionConfigurationFilter(Position position);
+        Task<bool> DeleteProjection(T projection);
+        bool GetProjectionsFromSQL(Position position, int season, out IEnumerable<T> projections);
+        Task<IEnumerable<T>?> GetPlayerProjections(int playerId);
+        Task<IEnumerable<T>> GetProjections(Position position, List<string>? filter = null);
+        Task<int> PostProjections(List<T> projections, List<string> filters);
+        Task<Vector<double>> GetCoefficients(Position position);
+        IEnumerable<string> GetModelVariablesByPosition(Position position);
+        Task<bool> PostProjectionConfiguration(Position position, string filter);
+        Task<string?> GetCurrentProjectionConfigurationFilter(Position position);
     }
 
 }

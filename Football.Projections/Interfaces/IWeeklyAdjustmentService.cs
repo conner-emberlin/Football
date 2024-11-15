@@ -6,6 +6,6 @@ namespace Football.Projections.Interfaces
 {
     public interface IWeeklyAdjustmentService
     {
-        public Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections, WeeklyTunings tunings);
+        Task<List<WeekProjection>> AdjustmentEngine(List<WeekProjection> weekProjections, WeeklyTunings tunings);
     }
 }
