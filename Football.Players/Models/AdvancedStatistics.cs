@@ -15,6 +15,5 @@ namespace Football.Players.Models
         public TeamMap TeamMap { get; set; } = new();
         public int CurrentWeek { get; set; }
         public double StrengthBCS { get; set; }
-        public double StrengthTraditional { get; set; }
     }
 }
