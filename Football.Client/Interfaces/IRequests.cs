@@ -2,11 +2,11 @@
 {
     public interface IRequests
     {
-        public Task<T?> Get<T>(string path);
-        public Task<T?> Delete<T>(string path);
-        public Task<T?> Put<T>(string path);
-        public Task<T?> PutWithBody<T, T1>(string path, T1 body);
-        public Task<T?> PostWithoutBody<T>(string path);
-        public Task<T?> Post<T, T1>(string path, T1 model);
+        Task<T?> Get<T>(string path);
+        Task<T?> Delete<T>(string path);
+        Task<T?> Put<T>(string path);
+        Task<T?> PutWithBody<T, T1>(string path, T1 body);
+        Task<T?> PostWithoutBody<T>(string path);
+        Task<T?> Post<T, T1>(string path, T1 model);
     }
 }

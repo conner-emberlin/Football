@@ -4,14 +4,14 @@ namespace Football.Client.Interfaces
 {
     public interface IOperationsService
     {
-        public Task<int> PutSeasonAdpRequest(string position);
-        public Task<TuningsModel?> GetSeasonTuningsRequest();
-        public Task<bool> PostSeasonTuningsRequest(TuningsModel model);
-        public Task<SeasonAdjustmentsModel?> GetSeasonAdjustmentsRequest();
-        public Task<bool> PostSeasonAdjustmentsRequest(SeasonAdjustmentsModel model);
-        public Task<WeeklyTuningsModel?> GetWeeklyTuningsRequest();
-        public Task<bool> PostWeeklyTuningsRequest(WeeklyTuningsModel model);
-        public Task<int> PutSeasonConsensusProjectionsRequest(string position);
-        public Task<int> PutWeeklyConsensusProjectionsRequest(string position);
+        Task<int> PutSeasonAdpRequest(string position);
+        Task<TuningsModel?> GetSeasonTuningsRequest();
+        Task<bool> PostSeasonTuningsRequest(TuningsModel model);
+        Task<SeasonAdjustmentsModel?> GetSeasonAdjustmentsRequest();
+        Task<bool> PostSeasonAdjustmentsRequest(SeasonAdjustmentsModel model);
+        Task<WeeklyTuningsModel?> GetWeeklyTuningsRequest();
+        Task<bool> PostWeeklyTuningsRequest(WeeklyTuningsModel model);
+        Task<int> PutSeasonConsensusProjectionsRequest(string position);
+        Task<int> PutWeeklyConsensusProjectionsRequest(string position);
     }
 }

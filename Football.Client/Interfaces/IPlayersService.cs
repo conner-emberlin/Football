@@ -4,18 +4,18 @@ namespace Football.Client.Interfaces
 {
     public interface IPlayersService
     {
-        public Task<bool> CreateRookieRequest(RookiePlayerModel rookie);
-        public Task<PlayerDataModel?> GetPlayerDataRequest(int playerId);
-        public Task<List<TrendingPlayerModel>?> GetTrendingPlayersRequest();
-        public Task<List<SimplePlayerModel>?> GetSimplePlayersRequest(bool activeOnly = false, string position = "");
-        public Task<SimplePlayerModel?> GetSimplePlayerRequest(string playerId);
-        public Task<List<SnapCountModel>?> GetSnapCountsRequest(string id);
-        public Task<List<RookiePlayerModel>?> GetAllRookiesRequest();
-        public Task<int> InactivatePlayersRequest(List<int> playerIds);
-        public Task<int> PostInSeasonInjuryRequest(InSeasonInjuryModel injury);
-        public Task<List<PlayerInjuryModel>?> GetAllInSeasonInjuriesRequest();
-        public Task<bool> UpdateInSeasonInjuryRequest(InSeasonInjuryModel injury);
-        public Task<List<InSeasonTeamChangeModel>?> GetInSeasonTeamChangesRequest();
-        public Task<int> PostInSeasonTeamChangesRequest(InSeasonTeamChangeModel change);
+        Task<bool> CreateRookieRequest(RookiePlayerModel rookie);
+        Task<PlayerDataModel?> GetPlayerDataRequest(int playerId);
+        Task<List<TrendingPlayerModel>?> GetTrendingPlayersRequest();
+        Task<List<SimplePlayerModel>?> GetSimplePlayersRequest(bool activeOnly = false, string position = "");
+        Task<SimplePlayerModel?> GetSimplePlayerRequest(string playerId);
+        Task<List<SnapCountModel>?> GetSnapCountsRequest(string id);
+        Task<List<RookiePlayerModel>?> GetAllRookiesRequest();
+        Task<int> InactivatePlayersRequest(List<int> playerIds);
+        Task<int> PostInSeasonInjuryRequest(InSeasonInjuryModel injury);
+        Task<List<PlayerInjuryModel>?> GetAllInSeasonInjuriesRequest();
+        Task<bool> UpdateInSeasonInjuryRequest(InSeasonInjuryModel injury);
+        Task<List<InSeasonTeamChangeModel>?> GetInSeasonTeamChangesRequest();
+        Task<int> PostInSeasonTeamChangesRequest(InSeasonTeamChangeModel change);
     }
 }
