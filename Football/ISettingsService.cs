@@ -6,23 +6,23 @@ namespace Football
 {
     public interface ISettingsService
     {
-        public Task<bool> UploadSeasonTunings(Tunings tunings);
-        public Task<Tunings> GetSeasonTunings(int season);
-        public Task<bool> UploadWeeklyTunings(WeeklyTunings tunings);
-        public Task<WeeklyTunings> GetWeeklyTunings(int season, int week);
-        public Task<bool> UploadSeasonAdjustments(SeasonAdjustments seasonAdjustments);
-        public Task<SeasonAdjustments> GetSeasonAdjustments(int season);
-        public double GetBoomSetting(Position position);
-        public double GetBustSetting(Position position);
-        public double GoodWeek(Position position);
-        public double GetPlayerComparison(Position position);
-        public int GetReplacementLevel(Position position, Tunings tunings);
-        public double GetAverageProjectionByPosition(Position position, Tunings tunings);
-        public double GetValueFromModel<T>(T type, Model model);
-        public List<PropertyInfo> GetPropertiesFromModel<T>(List<string>? filter = null);
-        public IEnumerable<string> GetPropertyNamesFromModel<T>();
-        public bool GetFromCache<T>(Cache cache, out List<T> cachedValues);
-        public bool GetFromCache<T>(Position position, Cache cache, out List<T> cachedValues);
-        public bool GetFromCache<T>(int id, Cache cache, out T cachedValue);
+        Task<bool> UploadSeasonTunings(Tunings tunings);
+        Task<Tunings> GetSeasonTunings(int season);
+        Task<bool> UploadWeeklyTunings(WeeklyTunings tunings);
+        Task<WeeklyTunings> GetWeeklyTunings(int season, int week);
+        Task<bool> UploadSeasonAdjustments(SeasonAdjustments seasonAdjustments);
+        Task<SeasonAdjustments> GetSeasonAdjustments(int season);
+        double GetBoomSetting(Position position);
+        double GetBustSetting(Position position);
+        double GoodWeek(Position position);
+        double GetPlayerComparison(Position position);
+        int GetReplacementLevel(Position position, Tunings tunings);
+        double GetAverageProjectionByPosition(Position position, Tunings tunings);
+        double GetValueFromModel<T>(T type, Model model);
+        List<PropertyInfo> GetPropertiesFromModel<T>(List<string>? filter = null);
+        IEnumerable<string> GetPropertyNamesFromModel<T>();
+        bool GetFromCache<T>(Cache cache, out List<T> cachedValues);
+        bool GetFromCache<T>(Position position, Cache cache, out List<T> cachedValues);
+        bool GetFromCache<T>(int id, Cache cache, out T cachedValue);
     }
 }

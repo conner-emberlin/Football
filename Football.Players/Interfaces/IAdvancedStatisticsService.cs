@@ -5,14 +5,14 @@ namespace Football.Players.Interfaces
 {
     public interface IAdvancedStatisticsService
     {
-        public Task<List<AdvancedQBStatistics>> GetAdvancedQBStatistics();
-        public Task<double> FiveThirtyEightQBValue(int playerId);
-        public Task<double> PasserRating(int playerId);
-        public Task<double> QBYardsPerPlay(int playerId);
-        public Task<double> YardsAllowedPerGame(int teamId);
-        public Task<List<StrengthOfSchedule>> RemainingStrengthOfSchedule();
-        public Task<double> StrengthOfSchedule(int teamId, int atWeek);
-        public Task<IEnumerable<DivisionStanding>> GetStandingsByDivision(Division division);
+        Task<List<AdvancedQBStatistics>> GetAdvancedQBStatistics();
+        Task<double> FiveThirtyEightQBValue(int playerId);
+        Task<double> PasserRating(int playerId);
+        Task<double> QBYardsPerPlay(int playerId);
+        Task<double> YardsAllowedPerGame(int teamId);
+        Task<List<StrengthOfSchedule>> RemainingStrengthOfSchedule();
+        Task<double> StrengthOfSchedule(int teamId, int atWeek);
+        Task<IEnumerable<DivisionStanding>> GetStandingsByDivision(Division division);
 
     }
 }
