@@ -4,15 +4,15 @@ namespace Football.Data.Interfaces
 {
     public interface IUploadSeasonDataService
     {
-       public Task<int> UploadSeasonQBData(int season);
-       public Task<int> UploadSeasonRBData(int season);
-       public Task<int> UploadSeasonWRData(int season);
-       public Task<int> UploadSeasonTEData(int season);
-       public Task<int> UploadCurrentTeams(int season, Position position);
-       public Task<int> UploadSchedule(int season);
-       public Task<int> UploadScheduleDetails(int season);
-       public Task<int> UploadADP(int season, string position);
-        public Task<int> UploadConsensusProjections(string position);
+       Task<int> UploadSeasonQBData(int season);
+       Task<int> UploadSeasonRBData(int season);
+       Task<int> UploadSeasonWRData(int season);
+       Task<int> UploadSeasonTEData(int season);
+       Task<int> UploadCurrentTeams(int season, Position position);
+       Task<int> UploadSchedule(int season);
+       Task<int> UploadScheduleDetails(int season);
+       Task<int> UploadADP(int season, string position);
+       Task<int> UploadConsensusProjections(string position);
     }
 }
 
