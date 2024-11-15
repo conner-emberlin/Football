@@ -25,7 +25,6 @@ else
                 <tr>
                     <th>Position</th>
                     <th>Name</th>
-                    <th>Games</th>
                     <th>Snaps</th>
                     <th>SnapsPerGame</th>
                 </tr>
@@ -35,8 +34,12 @@ else
                 {
                     <tr>
                         <td style="color:@form.PositionColor(dc.Position)"><b>@dc.Position</b></td>
-                        <td><a class="page-links" href="Players/@dc.PlayerId"> @dc.Name</a></td>
-                        <td>@dc.Games</td>
+                        <td><a class="page-links" href="Players/@dc.PlayerId"> @dc.Name</a>
+                            @if (dc.ActiveInjury != null)
+                            {
+                                <small style="color:red"> (Out: @dc.ActiveInjury.Description) </small>
+                            }
+                        </td>
                         <td>@dc.TotalSnaps</td>
                         <td>@Math.Round(dc.SnapsPerGame)</td>
                     </tr>

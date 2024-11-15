@@ -7,6 +7,7 @@ using Football.Fantasy.Interfaces;
 using Football.Fantasy.Models;
 using AutoMapper;
 using Football.Shared.Models.Fantasy;
+using Football.Shared.Models.Players;
 using Football.Shared.Models.Teams;
 using Football.Enums;
 
@@ -71,8 +72,15 @@ namespace Football.Api.Controllers
         public async Task<ActionResult<List<TeamDepthChartModel>>> GetTeamDepthChart([FromRoute] int teamId, [FromQuery] bool includeSpecialTeams = false) 
         {
             var depthChart = await teamsService.GetTeamDepthChart(teamId);
-            return includeSpecialTeams ? Ok(mapper.Map<List<TeamDepthChartModel>>(depthChart))
-                                       : Ok(mapper.Map<List<TeamDepthChartModel>>(depthChart).Where(d => d.Position != Position.K.ToString() && d.Position != Position.DST.ToString()));
+            var model =  includeSpecialTeams ? mapper.Map<List<TeamDepthChartModel>>(depthChart)
+                                       : mapper.Map<List<TeamDepthChartModel>>(depthChart).Where(d => d.Position != Position.K.ToString() && d.Position != Position.DST.ToString());
+
+            var inSeasonInjuries = (await playersService.GetActiveInSeasonInjuries(_season.CurrentSeason)).ToDictionary(a => a.PlayerId);
+            foreach (var m in model)
+            {
+                if (inSeasonInjuries.TryGetValue(m.PlayerId, out var injury)) m.ActiveInjury = mapper.Map<InSeasonInjuryModel>(injury);
+            }
+            return Ok(model);
         } 
     }
 }

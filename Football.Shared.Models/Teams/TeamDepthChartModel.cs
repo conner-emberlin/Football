@@ -1,4 +1,6 @@
-﻿namespace Football.Shared.Models.Teams
+﻿using Football.Shared.Models.Players;
+
+namespace Football.Shared.Models.Teams
 {
     public class TeamDepthChartModel
     {
@@ -11,5 +13,6 @@
         public double Games { get; set; }
         public double TotalSnaps { get; set; }
         public double SnapsPerGame { get; set; }
+        public InSeasonInjuryModel? ActiveInjury { get; set; }
     }
 }
