@@ -1,0 +1,69 @@
+﻿@page "/depth-chart/{teamId}"
+<PageTitle>Depth Chart</PageTitle>
+
+@using Football.Client.Helpers;
+@using Football.Client.Interfaces;
+@using Football.Shared.Models.Teams;
+
+@inject ITeamsService teamsService;
+
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+else
+{
+    <h4>@GetHeader()</h4>
+}
+
+@if (depthChart.Any())
+{
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>Name</th>
+                    <th>Games</th>
+                    <th>Snaps</th>
+                    <th>SnapsPerGame</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dc in depthChart)
+                {
+                    <tr>
+                        <td style="color:@form.PositionColor(dc.Position)"><b>@dc.Position</b></td>
+                        <td><a class="page-links" href="Players/@dc.PlayerId"> @dc.Name</a></td>
+                        <td>@dc.Games</td>
+                        <td>@dc.TotalSnaps</td>
+                        <td>@Math.Round(dc.SnapsPerGame)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string teamId { get; set; } = "";
+
+    private bool shouldRender;
+    private bool loading = false;
+    private List<TeamDepthChartModel>? depthChart = [];
+    private Formatter form = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        depthChart = await teamsService.GetTeamDepthChartRequest(teamId);
+        loading = false;
+        shouldRender = true;
+    }
+
+    private string GetHeader() => string.Format("{0} Depth Chart", depthChart.First().TeamDescription);
+}

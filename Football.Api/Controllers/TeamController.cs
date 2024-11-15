@@ -8,6 +8,7 @@ using Football.Fantasy.Models;
 using AutoMapper;
 using Football.Shared.Models.Fantasy;
 using Football.Shared.Models.Teams;
+using Football.Enums;
 
 namespace Football.Api.Controllers
 {
@@ -64,9 +65,14 @@ namespace Football.Api.Controllers
         [HttpGet("team-records/division/{teamId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<TeamRecordModel>>> GetTeamRecordInDivision([FromRoute] int teamId) => Ok(mapper.Map<TeamRecordModel>(await teamsService.GetTeamRecordInDivision(teamId)));
-        
+
         [HttpGet("depth-chart/{teamId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<TeamDepthChartModel>>> GetTeamDepthChart([FromRoute] int teamId) => Ok(mapper.Map<List<TeamDepthChartModel>>(await teamsService.GetTeamDepthChart(teamId)));
+        public async Task<ActionResult<List<TeamDepthChartModel>>> GetTeamDepthChart([FromRoute] int teamId, [FromQuery] bool includeSpecialTeams = false) 
+        {
+            var depthChart = await teamsService.GetTeamDepthChart(teamId);
+            return includeSpecialTeams ? Ok(mapper.Map<List<TeamDepthChartModel>>(depthChart))
+                                       : Ok(mapper.Map<List<TeamDepthChartModel>>(depthChart).Where(d => d.Position != Position.K.ToString() && d.Position != Position.DST.ToString()));
+        } 
     }
 }

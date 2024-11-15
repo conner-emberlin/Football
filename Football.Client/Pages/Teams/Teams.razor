@@ -95,14 +95,14 @@ else if (badRequestError)
     </div>
     @if(teamRecord != null)
     {        
-        <p>Record: @FormatRecord(teamRecord.Wins, teamRecord.Losses, teamRecord.Ties)
+        <tr>Record: @FormatRecord(teamRecord.Wins, teamRecord.Losses, teamRecord.Ties)
             @if(leagueInfo != null && divisionalRecord != null)
             {
                 <text>&nbsp;(@leagueInfo.Division: @FormatRecord(divisionalRecord.Wins, divisionalRecord.Losses, divisionalRecord.Ties))</text>
             }
-
-        </p>
+        </tr>
     }
+    <a class="page-links" href="/depth-chart/@teamChosen.TeamId"> Depth Chart</a>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <h5>Team Leaders</h5>
 
