@@ -4,6 +4,6 @@ namespace Football.Fantasy.Interfaces
 {
     public interface IWaiverWireService
     {
-        public Task<List<WaiverWireCandidate>> GetWaiverWireCandidates(int season, int week);
+        Task<List<WaiverWireCandidate>> GetWaiverWireCandidates(int season, int week);
     }
 }

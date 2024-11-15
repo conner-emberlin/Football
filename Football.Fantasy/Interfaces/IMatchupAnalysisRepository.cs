@@ -5,7 +5,7 @@ namespace Football.Fantasy.Interfaces
 {
     public interface IMatchupAnalysisRepository
     {
-        public Task<int> PostMatchupRankings(List<MatchupRanking> rankings);
-        public Task<List<MatchupRanking>> GetPositionalMatchupRankingsFromSQL(string position, int season, int week);
+        Task<int> PostMatchupRankings(List<MatchupRanking> rankings);
+        Task<List<MatchupRanking>> GetPositionalMatchupRankingsFromSQL(string position, int season, int week);
     }
 }

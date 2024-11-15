@@ -5,15 +5,15 @@ namespace Football.Fantasy.Interfaces
 {
     public interface IFantasyCalculator
     {
-        public SeasonFantasy CalculateFantasy(SeasonDataQB stat);
-        public WeeklyFantasy CalculateFantasy(WeeklyDataQB stat);
-        public SeasonFantasy CalculateFantasy(SeasonDataRB stat);
-        public WeeklyFantasy CalculateFantasy(WeeklyDataRB stat);
-        public SeasonFantasy CalculateFantasy(SeasonDataWR stat);
-        public WeeklyFantasy CalculateFantasy(WeeklyDataWR stat);
-        public SeasonFantasy CalculateFantasy(SeasonDataTE stat);
-        public WeeklyFantasy CalculateFantasy(WeeklyDataTE stat);
-        public WeeklyFantasy CalculateFantasy(WeeklyDataDST stat, WeeklyDataDST opponentStat, GameResult result, int teamId);
-        public WeeklyFantasy CalculateFantasy(WeeklyDataK stat);
+        SeasonFantasy CalculateFantasy(SeasonDataQB stat);
+        WeeklyFantasy CalculateFantasy(WeeklyDataQB stat);
+        SeasonFantasy CalculateFantasy(SeasonDataRB stat);
+        WeeklyFantasy CalculateFantasy(WeeklyDataRB stat);
+        SeasonFantasy CalculateFantasy(SeasonDataWR stat);
+        WeeklyFantasy CalculateFantasy(WeeklyDataWR stat);
+        SeasonFantasy CalculateFantasy(SeasonDataTE stat);
+        WeeklyFantasy CalculateFantasy(WeeklyDataTE stat);
+        WeeklyFantasy CalculateFantasy(WeeklyDataDST stat, WeeklyDataDST opponentStat, GameResult result, int teamId);
+        WeeklyFantasy CalculateFantasy(WeeklyDataK stat);
     }
 }

@@ -5,10 +5,10 @@ namespace Football.Fantasy.Interfaces
 {
     public interface IMarketShareService
     {
-        public Task<List<MarketShare>> GetMarketShare(Position position);
-        public Task<List<TargetShare>> GetTargetShares();
-        public Task<List<TeamTotals>> GetTeamTotals();
-        public Task<TeamTotals> GetTeamTotals(int teamId);
+        Task<List<MarketShare>> GetMarketShare(Position position);
+        Task<List<TargetShare>> GetTargetShares();
+        Task<List<TeamTotals>> GetTeamTotals();
+        Task<TeamTotals> GetTeamTotals(int teamId);
 
     }
 }
