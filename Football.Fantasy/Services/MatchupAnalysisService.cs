@@ -71,16 +71,16 @@ namespace Football.Fantasy.Services
             return opponentFantasy;
         }
 
-        public async Task<Dictionary<string, List<MatchupRanking>>> GetRestOfSeasonMatchupRankingsByTeam(int teamId)
+        public async Task<IEnumerable<MatchupRanking>> GetRestOfSeasonMatchupRankingsByTeam(int teamId)
         {
-            Dictionary<string, List<MatchupRanking>> rosRankings = [];
-            rosRankings.Add(Position.QB.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.QB));
-            rosRankings.Add(Position.RB.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.RB));
-            rosRankings.Add(Position.WR.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.WR));
-            rosRankings.Add(Position.TE.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.TE));
-            rosRankings.Add(Position.K.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.K));
-            rosRankings.Add(Position.DST.ToString(), await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.DST));
-            return rosRankings;
+            List<MatchupRanking> rosRankings = [];
+            rosRankings.AddRange(await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.QB));
+            rosRankings.AddRange(await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.RB));
+            rosRankings.AddRange(await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.WR));
+            rosRankings.AddRange(await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.TE));
+            rosRankings.AddRange(await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.K));
+            rosRankings.AddRange(await GetRestOfSeasonMatchupRankingsByTeamAndPosition(teamId, Position.DST));
+            return rosRankings.OrderBy(r => r.Week);
         }
 
         private async Task<List<MatchupRanking>> GetRestOfSeasonMatchupRankingsByTeamAndPosition(int teamId, Position position)
@@ -92,7 +92,9 @@ namespace Football.Fantasy.Services
             List<MatchupRanking> rosRankings = [];
             foreach (var game in upcomingGames)
             {
-                rosRankings.Add(matchupRankingDictionary[game.OpposingTeamId]);
+                var matchup = matchupRankingDictionary[game.OpposingTeamId];
+                matchup.Week = game.Week;
+                rosRankings.Add(matchup);
             }
 
             return rosRankings;

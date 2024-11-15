@@ -14,7 +14,7 @@ namespace Football.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class TeamController(IPlayersService playersService, IStatisticsService statisticsService, IFantasyAnalysisService fantasyAnalysisService,
-        IOptionsMonitor<Season> season, IFantasyDataService fantasyDataService, ITeamsService teamsService, IMapper mapper) : ControllerBase
+        IOptionsMonitor<Season> season, IFantasyDataService fantasyDataService, ITeamsService teamsService, IMatchupAnalysisService matchupAnalysisService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -66,6 +66,20 @@ namespace Football.Api.Controllers
                 if (inSeasonInjuries.TryGetValue(m.PlayerId, out var injury)) m.ActiveInjury = mapper.Map<InSeasonInjuryModel>(injury);
             }
             return Ok(model);
-        } 
+        }
+
+        [HttpGet("ros-matchup-rankings/{teamId}")]
+        [ProducesResponseType(typeof(List<MatchupRankingModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetRestOfSeasonMatchupRankings([FromRoute] int teamId)
+        {
+            if (teamId <= 0) return BadRequest();
+
+            var models = mapper.Map<List<MatchupRankingModel>>(await matchupAnalysisService.GetRestOfSeasonMatchupRankingsByTeam(teamId));
+            var allTeamsDictionary = (await teamsService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
+            models.ForEach(m => m.TeamDescription = allTeamsDictionary[m.TeamId]);
+            return Ok(models);
+        }
+
     }
 }

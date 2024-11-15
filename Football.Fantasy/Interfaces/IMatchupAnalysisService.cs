@@ -9,7 +9,7 @@ namespace Football.Fantasy.Interfaces
         Task<int> PostMatchupRankings(Position position, int week = 0);
         Task<int> GetMatchupRanking(int playerId);
         Task<List<WeeklyFantasy>> GetTopOpponents(Position position, int teamId);
-        Task<Dictionary<string, List<MatchupRanking>>> GetRestOfSeasonMatchupRankingsByTeam(int teamId);
+        Task<IEnumerable<MatchupRanking>> GetRestOfSeasonMatchupRankingsByTeam(int teamId);
 
     }
 }
