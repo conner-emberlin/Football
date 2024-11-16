@@ -1,0 +1,133 @@
+﻿@page "/ros-rankings/{teamId}"
+<PageTitle>ROS Matchup Rankings</PageTitle>
+
+@using Football.Client.Helpers;
+@using Football.Client.Interfaces;
+@using Football.Shared.Models.Fantasy;
+@using ApexCharts;
+
+@inject ITeamsService teamsService;
+
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+else
+{
+    <h4>@GetHeader()</h4>
+}
+<div style="height:10px;font-size:1px;">&nbsp;</div>
+@if (rankings.Any())
+{
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Week</th>
+                    <th>AvgQB</th>
+                    <th>AvgRB</th>
+                    <th>AvgWR</th>
+                    <th>AvgTE</th>
+                    <th>AvgDST</th>
+                    <th>AvgK</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(int i = 0; i < qbRankings.Count; i++)
+                {
+                    <tr>
+                        <td>@qbRankings.ElementAt(i).TeamDescription</td>
+                        <td>@qbRankings.ElementAt(i).Week</td>
+                        <td>@qbRankings.ElementAt(i).AvgPointsAllowed <b><text style="@form.FormatMatchupRank(qbRankings.ElementAt(i).Ranking)">(@qbRankings.ElementAt(i).Ranking.ToString())</text></b></td>
+                        <td>@rbRankings.ElementAt(i).AvgPointsAllowed <b><text style="@form.FormatMatchupRank(rbRankings.ElementAt(i).Ranking)">(@rbRankings.ElementAt(i).Ranking.ToString())</text></b></td>
+                        <td>@wrRankings.ElementAt(i).AvgPointsAllowed <b><text style="@form.FormatMatchupRank(wrRankings.ElementAt(i).Ranking)">(@wrRankings.ElementAt(i).Ranking.ToString())</text></b></td>
+                        <td>@teRankings.ElementAt(i).AvgPointsAllowed <b><text style="@form.FormatMatchupRank(teRankings.ElementAt(i).Ranking)">(@teRankings.ElementAt(i).Ranking.ToString())</text></b></td>
+                        <td>@dstRankings.ElementAt(i).AvgPointsAllowed <b><text style="@form.FormatMatchupRank(dstRankings.ElementAt(i).Ranking)">(@dstRankings.ElementAt(i).Ranking.ToString())</text></b></td>
+                        <td>@kRankings.ElementAt(i).AvgPointsAllowed <b><text style="@form.FormatMatchupRank(kRankings.ElementAt(i).Ranking)">(@kRankings.ElementAt(i).Ranking.ToString())</text></b></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <ApexChart TItem="MatchupRankingModel"
+               Height="400">
+        <ApexPointSeries TItem="MatchupRankingModel"
+                         Items="qbRankings"
+                         Name="QBAvgPts"
+                         SeriesType="SeriesType.Line"
+                         XValue="e => e.Week"
+                         YValue="e=> (decimal)e.AvgPointsAllowed" />
+        <ApexPointSeries TItem="MatchupRankingModel"
+                         Items="rbRankings"
+                         Name="RBAvgPts"
+                         SeriesType="SeriesType.Line"
+                         XValue="e => e.Week"
+                         YValue="e=> (decimal)e.AvgPointsAllowed" />
+        <ApexPointSeries TItem="MatchupRankingModel"
+                         Items="wrRankings"
+                         Name="WRAvgPts"
+                         SeriesType="SeriesType.Line"
+                         XValue="e => e.Week"
+                         YValue="e=> (decimal)e.AvgPointsAllowed" />
+        <ApexPointSeries TItem="MatchupRankingModel"
+                         Items="teRankings"
+                         Name="TEAvgPts"
+                         SeriesType="SeriesType.Line"
+                         XValue="e => e.Week"
+                         YValue="e=> (decimal)e.AvgPointsAllowed" />
+        <ApexPointSeries TItem="MatchupRankingModel"
+                         Items="dstRankings"
+                         Name="DSTAvgPts"
+                         SeriesType="SeriesType.Line"
+                         XValue="e => e.Week"
+                         YValue="e=> (decimal)e.AvgPointsAllowed" />
+        <ApexPointSeries TItem="MatchupRankingModel"
+                         Items="kRankings"
+                         Name="KAvgPts"
+                         SeriesType="SeriesType.Line"
+                         XValue="e => e.Week"
+                         YValue="e=> (decimal)e.AvgPointsAllowed" />
+    </ApexChart>
+}
+
+@code {
+    [Parameter]
+    public string teamId { get; set; } = "";
+
+    private bool shouldRender;
+    private bool loading = false;
+    private List<MatchupRankingModel>? rankings = [];
+    private List<MatchupRankingModel> qbRankings = [];
+    private List<MatchupRankingModel> rbRankings = [];
+    private List<MatchupRankingModel> wrRankings = [];
+    private List<MatchupRankingModel> teRankings = [];
+    private List<MatchupRankingModel> dstRankings = [];
+    private List<MatchupRankingModel> kRankings = [];
+    private Formatter form = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        rankings = await teamsService.GetROSMatchupRankingsRequest(teamId);
+        SetRankings();
+        loading = false;
+        shouldRender = true;
+    }
+
+    private string GetHeader() => string.Format("{0} Rest of Season Matchups", rankings.First().RequestedTeamDescription);
+
+    private void SetRankings()
+    {
+        qbRankings = rankings.Where(r => r.Position == "QB").ToList();
+        rbRankings = rankings.Where(r => r.Position == "RB").ToList();
+        wrRankings = rankings.Where(r => r.Position == "WR").ToList();
+        teRankings = rankings.Where(r => r.Position == "TE").ToList();
+        dstRankings = rankings.Where(r => r.Position == "DST").ToList();
+        kRankings = rankings.Where(r => r.Position == "K").ToList();
+    }
+}

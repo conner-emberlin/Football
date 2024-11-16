@@ -73,14 +73,15 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetRestOfSeasonMatchupRankings([FromRoute] int teamId)
         {
-            if (teamId <= 0) return BadRequest();
+            var allTeamsDictionary = (await teamsService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
+            if (!allTeamsDictionary.TryGetValue(teamId, out var teamDescription)) return BadRequest();
 
             var models = mapper.Map<List<MatchupRankingModel>>(await matchupAnalysisService.GetRestOfSeasonMatchupRankingsByTeam(teamId));
-            var allTeamsDictionary = (await teamsService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
             var matchupRankings = await matchupAnalysisService.GetCurrentMatchupRankings();
 
             foreach (var model in models)
             {
+                model.RequestedTeamDescription = teamDescription;
                 model.TeamDescription = allTeamsDictionary[model.TeamId];
                 var positionalRankings = matchupRankings.Where(mr => mr.Position == model.Position).OrderBy(m => m.AvgPointsAllowed).ToList();
                 model.Ranking = positionalRankings.FindIndex(p => p.TeamId == model.TeamId) + 1;

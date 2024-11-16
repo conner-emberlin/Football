@@ -15,6 +15,7 @@ namespace Football.Client.Services
         public async Task<TeamLeagueInformationModel?> GetTeamLeagueInformationRequest(int teamId) => await requests.Get<TeamLeagueInformationModel?>("/team/league-information/" + teamId.ToString());
         public async Task<TeamRecordModel?> GetTeamRecordInDivisionRequest(int teamId) => await requests.Get<TeamRecordModel?>("/team/team-records/division/" + teamId.ToString());
         public async Task<List<TeamDepthChartModel>?> GetTeamDepthChartRequest(string teamId) => await requests.Get<List<TeamDepthChartModel>?>("/team/depth-chart/" + teamId);
+        public async Task<List<MatchupRankingModel>?> GetROSMatchupRankingsRequest(string teamId) => await requests.Get<List<MatchupRankingModel>?>("/team/ros-matchup-rankings/" + teamId);
 
     }
 }

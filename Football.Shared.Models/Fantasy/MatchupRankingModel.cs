@@ -4,6 +4,7 @@
     {
         public int Season { get; set; }
         public int Week { get; set; }
+        public string RequestedTeamDescription { get; set; } = "";
         public int TeamId { get; set; }
         public int Ranking { get; set; }
         public int GamesPlayed { get; set; }
