@@ -77,7 +77,14 @@ namespace Football.Api.Controllers
 
             var models = mapper.Map<List<MatchupRankingModel>>(await matchupAnalysisService.GetRestOfSeasonMatchupRankingsByTeam(teamId));
             var allTeamsDictionary = (await teamsService.GetAllTeams()).ToDictionary(t => t.TeamId, t => t.TeamDescription);
-            models.ForEach(m => m.TeamDescription = allTeamsDictionary[m.TeamId]);
+            var matchupRankings = await matchupAnalysisService.GetCurrentMatchupRankings();
+
+            foreach (var model in models)
+            {
+                model.TeamDescription = allTeamsDictionary[model.TeamId];
+                var positionalRankings = matchupRankings.Where(mr => mr.Position == model.Position).OrderBy(m => m.AvgPointsAllowed).ToList();
+                model.Ranking = positionalRankings.FindIndex(p => p.TeamId == model.TeamId) + 1;
+            }
             return Ok(models);
         }
 

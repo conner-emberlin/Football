@@ -24,5 +24,12 @@ namespace Football.Fantasy.Repository
                             AND [Week] = @week";
             return (await dbConnection.QueryAsync<MatchupRanking>(query, new { position, season, week })).ToList();
         }
+        public async Task<List<MatchupRanking>> GetCurrentMatchupRankings(int season)
+        {
+            var query = $@"SELECT * FROM [dbo].MatchupRanking 
+                        WHERE [Season] = @season
+                            AND [Week] = (SELECT MAX(Week) FROM [dbo].MatchupRanking WHERE [Season] = @season)";
+            return (await dbConnection.QueryAsync<MatchupRanking>(query, new { season})).ToList();
+        }
     }
 }

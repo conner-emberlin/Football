@@ -14,6 +14,7 @@ namespace Football.Fantasy.Services
         private readonly Season _season = season.CurrentValue;
 
         public Task<List<MatchupRanking>> GetPositionalMatchupRankingsFromSQL(Position position, int season, int week) => matchupAnalysisRepository.GetPositionalMatchupRankingsFromSQL(position.ToString(), season, week);
+        public Task<List<MatchupRanking>> GetCurrentMatchupRankings() => matchupAnalysisRepository.GetCurrentMatchupRankings(_season.CurrentSeason);
         public async Task<int> PostMatchupRankings(Position position, int week = 0)
         {
             logger.Information("Uploading Matchup Rankings for position {0} week {1}", position.ToString(), week);

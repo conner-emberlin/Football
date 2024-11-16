@@ -7,5 +7,6 @@ namespace Football.Fantasy.Interfaces
     {
         Task<int> PostMatchupRankings(List<MatchupRanking> rankings);
         Task<List<MatchupRanking>> GetPositionalMatchupRankingsFromSQL(string position, int season, int week);
+        Task<List<MatchupRanking>> GetCurrentMatchupRankings(int week);
     }
 }
