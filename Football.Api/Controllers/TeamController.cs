@@ -89,5 +89,13 @@ namespace Football.Api.Controllers
             return Ok(models);
         }
 
+        [HttpGet("upcoming-games/{teamPlayerId}")]
+        [ProducesResponseType(typeof(List<ScheduleModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetUpcomingGames(int teamPlayerId)
+        {
+            return Ok(mapper.Map<List<ScheduleModel>>(await teamsService.GetUpcomingGames(teamPlayerId)));
+        }
+
     }
 }

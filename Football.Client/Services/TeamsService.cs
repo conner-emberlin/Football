@@ -1,6 +1,7 @@
 ﻿using Football.Shared.Models.Fantasy;
 using Football.Shared.Models.Teams;
 using Football.Client.Interfaces;
+using Football.Shared.Models.Players;
 
 namespace Football.Client.Services
 {
@@ -16,6 +17,7 @@ namespace Football.Client.Services
         public async Task<TeamRecordModel?> GetTeamRecordInDivisionRequest(int teamId) => await requests.Get<TeamRecordModel?>("/team/team-records/division/" + teamId.ToString());
         public async Task<List<TeamDepthChartModel>?> GetTeamDepthChartRequest(string teamId) => await requests.Get<List<TeamDepthChartModel>?>("/team/depth-chart/" + teamId);
         public async Task<List<MatchupRankingModel>?> GetROSMatchupRankingsRequest(string teamId) => await requests.Get<List<MatchupRankingModel>?>("/team/ros-matchup-rankings/" + teamId);
+        public async Task<List<ScheduleModel>?> GetUpcomingGamesRequest(int teamPlayerId) => await requests.Get<List<ScheduleModel>?>("/team/upcoming-games/" + teamPlayerId.ToString());
 
     }
 }
