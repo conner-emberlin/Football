@@ -105,17 +105,18 @@ namespace Football.Projections.Services
             if (projectionsExist)
             {
                 var weeklyFantasy = (await fantasyService.GetWeeklyFantasy(_season.CurrentSeason, week)).Where(w => w.Position == position.ToString());
+                var fantasyDictionary = weeklyFantasy.ToDictionary(w => (w.Week, w.PlayerId), w => w.FantasyPoints);
                 return new WeeklyProjectionAnalysis
                 {
                     Season = _season.CurrentSeason,
                     Week = week,
                     Position = position.ToString(),
                     ProjectionCount = projections.Count(p => weeklyFantasy.Any(w => w.PlayerId == p.PlayerId)),
-                    MSE = GetMeanSquaredError(projections, weeklyFantasy),
-                    RSquared = GetRSquared(projections, weeklyFantasy),
-                    MAE = GetMeanAbsoluteError(projections, weeklyFantasy),
-                    MAPE = GetMeanAbsolutePercentageError(projections, weeklyFantasy),
-                    AvgError = GetAverageError(projections, weeklyFantasy),
+                    MSE = GetMeanSquaredError(projections, fantasyDictionary),
+                    RSquared = GetRSquared(projections, fantasyDictionary),
+                    MAE = GetMeanAbsoluteError(projections, fantasyDictionary),
+                    MAPE = GetMeanAbsolutePercentageError(projections, fantasyDictionary),
+                    AvgError = GetAverageError(projections, fantasyDictionary),
                     AvgRankError = GetAverageRankError(projections, weeklyFantasy),
                 };
             }
@@ -133,6 +134,7 @@ namespace Football.Projections.Services
         public async Task<WeeklyProjectionAnalysis> GetWeeklyProjectionAnalysis(int playerId)
         {
             var weeklyFantasy = await fantasyService.GetWeeklyFantasy(playerId);
+            var fantasyDictionary = weeklyFantasy.ToDictionary(w => (w.Week, w.PlayerId), w => w.FantasyPoints);
             List<WeekProjection> projections = [];
             foreach (var wf in weeklyFantasy)
             {
@@ -153,11 +155,11 @@ namespace Football.Projections.Services
                 return new WeeklyProjectionAnalysis
                 {
                     Season = _season.CurrentSeason,
-                    MSE = GetMeanSquaredError(projections, weeklyFantasy),
-                    RSquared = GetRSquared(projections, weeklyFantasy),
-                    MAE = GetMeanAbsoluteError(projections, weeklyFantasy),
-                    MAPE = GetMeanAbsolutePercentageError(projections, weeklyFantasy),
-                    AvgError = GetAverageError(projections, weeklyFantasy),
+                    MSE = GetMeanSquaredError(projections, fantasyDictionary),
+                    RSquared = GetRSquared(projections, fantasyDictionary),
+                    MAE = GetMeanAbsoluteError(projections, fantasyDictionary),
+                    MAPE = GetMeanAbsolutePercentageError(projections, fantasyDictionary),
+                    AvgError = GetAverageError(projections, fantasyDictionary),
                     AvgRankError = GetAverageRankError(projections, weeklyFantasy),
                     AdjAvgError = GetAdjustedAverageError(projections, weeklyFantasy)
                 };
@@ -298,32 +300,31 @@ namespace Football.Projections.Services
             }
             return matchupProjections;
         }
-        private static double GetMeanSquaredError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
+        private static double GetMeanSquaredError(IEnumerable<WeekProjection> projections, Dictionary<(int Week, int PlayerId), double> fantasyDictionary)
         {
             var sumOfSquares = 0.0;
             var count = 0;
             foreach (var projection in projections)
             {
-                var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
-                if (fantasy != null)
+                if (fantasyDictionary.TryGetValue((projection.Week, projection.PlayerId), out var fantasy))
                 {
-                    sumOfSquares += Math.Pow(fantasy.FantasyPoints - projection.ProjectedPoints, 2);
+                    sumOfSquares += Math.Pow(fantasy - projection.ProjectedPoints, 2);
                     count++;
                 }
             }
             return count > 0 ? Math.Round(sumOfSquares / count, 3) : 0;
         }
 
-        private static double GetAverageError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
+        private static double GetAverageError(IEnumerable<WeekProjection> projections, Dictionary<(int Week, int PlayerId), double> fantasyDictionary)
         {
+
             var count = 0;
             var totalError = 0.0;
             foreach (var projection in projections)
             {
-                var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
-                if (fantasy != null)
+                if (fantasyDictionary.TryGetValue((projection.Week, projection.PlayerId), out var fantasy))
                 {
-                    totalError += Math.Abs(projection.ProjectedPoints - fantasy.FantasyPoints);
+                    totalError += Math.Abs(projection.ProjectedPoints - fantasy);
                     count++;
                 }
             }
@@ -332,82 +333,87 @@ namespace Football.Projections.Services
 
         private static double GetAdjustedAverageError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
         {
+            
             var maxWeek = weeklyFantasy.OrderByDescending(w => w.FantasyPoints).First().Week;
             var minWeek = weeklyFantasy.OrderBy(w => w.FantasyPoints).First().Week;
             var adjustedProjections = projections.Where(p => p.Week != maxWeek && p.Week != minWeek);
-            var adjustedFantasy = weeklyFantasy.Where(p => p.Week != maxWeek && p.Week != minWeek);
-            return GetAverageError(adjustedProjections, adjustedFantasy);
+            var adjustedFantasyDictionary = weeklyFantasy.Where(p => p.Week != maxWeek && p.Week != minWeek).ToDictionary(w => (w.Week, w.PlayerId), w => w.FantasyPoints);
+            return GetAverageError(adjustedProjections, adjustedFantasyDictionary);
+
         }
-        private static double GetRSquared(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
+        private static double GetRSquared(IEnumerable<WeekProjection> projections, Dictionary<(int Week, int PlayerId), double> fantasyDictionary)
         {
-            List<double> observedFantasyPoints = [];
             var residualSumOfSquares = 0.0;
-            var totalSumOfSquares = 0.0;
+            var observedSum = 0.0;
+            var observedSumSquared = 0.0;
             var count = 0;
+
             foreach (var projection in projections)
             {
-                var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
-                if (fantasy != null)
+                
+                if (fantasyDictionary.TryGetValue((projection.Week, projection.PlayerId), out var observedPoints))
                 {
-                    observedFantasyPoints.Add(fantasy.FantasyPoints);
-                    residualSumOfSquares += Math.Pow(fantasy.FantasyPoints - projection.ProjectedPoints, 2);
+                    residualSumOfSquares += Math.Pow(observedPoints - projection.ProjectedPoints, 2);
+                    observedSum += observedPoints;
+                    observedSumSquared += Math.Pow(observedPoints, 2);
                     count++;
                 }
             }
-            foreach (var ofp in observedFantasyPoints)
-                totalSumOfSquares += Math.Pow(ofp - observedFantasyPoints.Average(), 2);
+
+            if (count == 0) return 0;
+            var totalSumOfSquares = observedSumSquared - (Math.Pow(observedSum, 2)/ count);
             return totalSumOfSquares > 0 ? 1 - (residualSumOfSquares / totalSumOfSquares) : 0;
         }
     
 
-        private static double GetMeanAbsoluteError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
+        private static double GetMeanAbsoluteError(IEnumerable<WeekProjection> projections, Dictionary<(int Week, int PlayerId), double> fantasyDictionary)
         {
             var sumOfAbsDifference = 0.0;
             var count = 0;
             foreach (var projection in projections)
             {
-                var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
-                if (fantasy != null)
+                if (fantasyDictionary.TryGetValue((projection.Week, projection.PlayerId), out var fantasyPoints))
                 {
-                    sumOfAbsDifference += Math.Abs(projection.ProjectedPoints - fantasy.FantasyPoints);
+                    sumOfAbsDifference += Math.Abs(projection.ProjectedPoints - fantasyPoints);
                     count++;
                 }
             }
             return count > 0 ? sumOfAbsDifference / count : 0;
         }
 
-        private static double GetMeanAbsolutePercentageError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
+        private static double GetMeanAbsolutePercentageError(IEnumerable<WeekProjection> projections, Dictionary<(int Week, int PlayerId), double> fantasyDictionary)
         {
             var sumOfError = 0.0;
             var count = 0;
             foreach (var projection in projections)
             {
-                var fantasy = weeklyFantasy.FirstOrDefault(w => w.Week == projection.Week && w.PlayerId == projection.PlayerId);
-                if (fantasy != null && fantasy.FantasyPoints > 0)
+                if (fantasyDictionary.TryGetValue((projection.Week, projection.PlayerId), out var fantasyPoints) && fantasyPoints > 0)
                 {
-                    sumOfError += Math.Abs((projection.ProjectedPoints - fantasy.FantasyPoints) / fantasy.FantasyPoints);
+                    sumOfError += Math.Abs((projection.ProjectedPoints - fantasyPoints) / fantasyPoints);
                     count++;
                 }
             }
-            return count > 0 ? (sumOfError/count)*100 : 0;
+            return count > 0 ? (sumOfError/count) * 100 : 0;
         }
 
         private static double GetAverageRankError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
         {
-            var orderedFantasy = weeklyFantasy.OrderByDescending(w => w.FantasyPoints);
-            var orderedProjections = projections.OrderByDescending(p => p.ProjectedPoints);
+            var orderedFantasy = weeklyFantasy.OrderByDescending(w => w.FantasyPoints)
+                                              .Select((w, index) => new { w.PlayerId, w.Week, Rank = index })
+                                              .ToDictionary(x => (x.Week, x.PlayerId), x => x.Rank);
+
+            var orderedProjections = projections.OrderByDescending(p => p.ProjectedPoints)
+                                                .Select((p, index) => new { p.PlayerId, p.Week, Rank = index });
             var error = 0.0;
             var count = 0;
-            foreach (var op in orderedProjections)
+
+            foreach(var projection in orderedProjections)
             {
-                var projectedRank = orderedProjections.ToList().IndexOf(op);
-                var fantasy = orderedFantasy.FirstOrDefault(of => of.PlayerId == op.PlayerId);
-                if (fantasy != null)
+                if (orderedFantasy.TryGetValue((projection.Week, projection.PlayerId), out var actualRank))
                 {
-                    var actualRank = orderedFantasy.ToList().IndexOf(fantasy);
-                    error += Math.Abs(projectedRank - actualRank);
-                    count++;
-                }                
+                    error += Math.Abs(projection.Rank - actualRank);
+                    count ++;
+                }
             }
             return count > 0 ? Math.Round(error / count, 2) : 0;
         }
@@ -529,7 +535,7 @@ namespace Football.Projections.Services
                 Position.RB => (await statisticsService.GetSeasonData<SeasonDataRB>(position, season, false)).ToDictionary(s => s.PlayerId, s => s.Games),
                 Position.WR => (await statisticsService.GetSeasonData<SeasonDataWR>(position, season, false)).ToDictionary(s => s.PlayerId, s => s.Games),
                 Position.TE => (await statisticsService.GetSeasonData<SeasonDataTE>(position, season, false)).ToDictionary(s => s.PlayerId, s => s.Games),
-                _ => new Dictionary<int, double>()
+                _ => []
             };
         }
 
