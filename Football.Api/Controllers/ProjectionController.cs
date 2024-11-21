@@ -365,5 +365,14 @@ namespace Football.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetSeasonAdjustmentDescriptions() => Ok(mapper.Map<List<AdjustmentDescriptionModel>>(await adjustmentService.GetAdjustmentDescriptions()));
 
+        [HttpGet("in-season-analysis/{position}")]
+        [ProducesResponseType(typeof(List<PlayerWeeklyProjectionAnalysisModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetBestProjectionAnalysesByPosition(string position) 
+        {
+            if (!Enum.TryParse(position, out Position positionEnum)) return BadRequest();
+            var topAnalyses = (await analysisService.GetInSeasonProjectionAnalysesByPosition(positionEnum)).Where(a => a.RSquared != 0);
+            return Ok(mapper.Map<List<PlayerWeeklyProjectionAnalysisModel>>(topAnalyses));
+        }
     }
 }

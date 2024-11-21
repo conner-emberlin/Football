@@ -17,6 +17,7 @@ namespace Football.Projections.Interfaces
         Task<List<SeasonProjectionAnalysis>> GetAllSeasonProjectionAnalyses(Position position);
         Task<List<WeekProjection>> GetSleeperLeagueProjections(string username);
         Task<List<MatchupProjections>> GetMatchupProjections(string username, int week);
+        Task<IEnumerable<PlayerWeeklyProjectionAnalysis>> GetInSeasonProjectionAnalysesByPosition(Position position);
 
     }
 }

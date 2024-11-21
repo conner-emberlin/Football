@@ -300,6 +300,39 @@ namespace Football.Projections.Services
             }
             return matchupProjections;
         }
+
+        public async Task<IEnumerable<PlayerWeeklyProjectionAnalysis>> GetInSeasonProjectionAnalysesByPosition(Position position)
+        {
+            var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
+            List<WeekProjection> allProjections = [];
+            for (int i = 1; i < currentWeek; i++)
+            {
+                if (weekProjection.GetProjectionsFromSQL(position, i, out var weeklyProjections))
+                {
+                    allProjections.AddRange(weeklyProjections);
+                }
+            }
+
+            var groupedProjections = allProjections.GroupBy(ap => ap.PlayerId, ap => ap, (key, p) => new { PlayerId = key, Projections = p});
+            var allFantasyDictionary = (await fantasyService.GetWeeklyFantasy(position, _season.CurrentSeason)).ToDictionary(f => (f.Week, f.PlayerId), f => f.FantasyPoints);
+            List<PlayerWeeklyProjectionAnalysis> analyses = [];
+            foreach (var grouping in groupedProjections)
+            {
+                analyses.Add(new PlayerWeeklyProjectionAnalysis
+                {
+                    Season = _season.CurrentSeason,
+                    PlayerId = grouping.PlayerId,
+                    Name = grouping.Projections.First().Name,
+                    ProjectionCount = grouping.Projections.Count(),
+                    MSE = GetMeanSquaredError(grouping.Projections, allFantasyDictionary),
+                    RSquared = GetRSquared(grouping.Projections, allFantasyDictionary),
+                    MAE = GetMeanAbsoluteError(grouping.Projections, allFantasyDictionary),
+                    MAPE = GetMeanAbsolutePercentageError(grouping.Projections, allFantasyDictionary),
+                    AvgError = GetAverageError(grouping.Projections, allFantasyDictionary),
+                });
+            }
+            return analyses.OrderByDescending(a => a.RSquared).ThenBy(a => a.AvgError);
+        }
         private static double GetMeanSquaredError(IEnumerable<WeekProjection> projections, Dictionary<(int Week, int PlayerId), double> fantasyDictionary)
         {
             var sumOfSquares = 0.0;
@@ -328,7 +361,7 @@ namespace Football.Projections.Services
                     count++;
                 }
             }
-            return count > 0 ? Math.Round(totalError / count) : 0;
+            return count > 0 ? Math.Round(totalError / count, 2) : 0;
         }
 
         private static double GetAdjustedAverageError(IEnumerable<WeekProjection> projections, IEnumerable<WeeklyFantasy> weeklyFantasy)
