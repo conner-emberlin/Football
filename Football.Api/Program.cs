@@ -78,6 +78,7 @@ builder.Services.AddScoped<ISnapCountService, SnapCountService>();
 builder.Services.AddScoped<IWeeklyAdjustmentService, WeeklyAdjustmentService>();
 builder.Services.AddScoped<ITeamsService, TeamsService>();
 builder.Services.AddScoped<ITeamsRepository, TeamsRepository>();
+builder.Services.AddScoped<IProjectionModelCalculator, ProjectionModelCalculator>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);

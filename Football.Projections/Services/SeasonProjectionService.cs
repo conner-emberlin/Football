@@ -15,8 +15,7 @@ using Microsoft.Extensions.Options;
 namespace Football.Projections.Services
 {
     public class SeasonProjectionService(IFantasyDataService fantasyService,
-    IMemoryCache cache, IMatrixCalculator matrixCalculator, IStatProjectionCalculator statCalculator,
-    IStatisticsService statisticsService, IOptionsMonitor<Season> season, IPlayersService playersService,
+    IMemoryCache cache, IMatrixCalculator matrixCalculator, IProjectionModelCalculator projectionModelCalculator, IOptionsMonitor<Season> season, IPlayersService playersService,
     IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService,
     IMapper mapper) : IProjectionService<SeasonProjection>
     {
@@ -59,10 +58,10 @@ namespace Football.Projections.Services
 
             var projections = position switch
             {
-                Position.QB => await CalculateProjections(await QBProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings, seasonGames, filter),
-                Position.RB => await CalculateProjections(await RBProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings, seasonGames, filter),
-                Position.WR => await CalculateProjections(await WRProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings, seasonGames, filter),
-                Position.TE => await CalculateProjections(await TEProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings, seasonGames, filter),
+                Position.QB => await CalculateProjections(await projectionModelCalculator.QBSeasonProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings, seasonGames, filter),
+                Position.RB => await CalculateProjections(await projectionModelCalculator.RBSeasonProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings, seasonGames, filter),
+                Position.WR => await CalculateProjections(await projectionModelCalculator.WRSeasonProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings, seasonGames, filter),
+                Position.TE => await CalculateProjections(await projectionModelCalculator.TESeasonProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings, seasonGames, filter),
                 _ => throw new NotImplementedException()
             };
             var adjustedProjections = await adjustmentService.AdjustmentEngine((await RookieSeasonProjections(position, seasonGames)).Union(projections), tunings, seasonGames, seasonAdjustments);
@@ -77,10 +76,10 @@ namespace Football.Projections.Services
  
             var coefficients = position switch
             {
-                Position.QB => await CalculateCoefficients(await QBProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings.SeasonDataTrimmingGames),
-                Position.RB => await CalculateCoefficients(await RBProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings.SeasonDataTrimmingGames),
-                Position.WR => await CalculateCoefficients(await WRProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings.SeasonDataTrimmingGames),
-                Position.TE => await CalculateCoefficients(await TEProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings.SeasonDataTrimmingGames),
+                Position.QB => await CalculateCoefficients(await projectionModelCalculator.QBSeasonProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings.SeasonDataTrimmingGames),
+                Position.RB => await CalculateCoefficients(await projectionModelCalculator.RBSeasonProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings.SeasonDataTrimmingGames),
+                Position.WR => await CalculateCoefficients(await projectionModelCalculator.WRSeasonProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings.SeasonDataTrimmingGames),
+                Position.TE => await CalculateCoefficients(await projectionModelCalculator.TESeasonProjectionModel(tunings.SeasonDataTrimmingGames), position, tunings.SeasonDataTrimmingGames),
                 _ => throw new NotImplementedException()
             };
 
@@ -122,7 +121,7 @@ namespace Football.Projections.Services
             foreach (var player in players)
             {
                 var gamesPlayedInjured = gamesInjuredDictionary.TryGetValue(player.PlayerId, out var inj) ? inj : 0;
-                var weightedVector = await GetWeightedAverageVector(player, gamesPlayedInjured, tunings, seasonGames, filter);
+                var weightedVector = await projectionModelCalculator.GetSeasonWeightedAverageVector(player, gamesPlayedInjured, tunings, seasonGames, filter);
                 var projectedPoints = weightedVector * coefficients;
 
                 if (projectedPoints > 0)
@@ -142,64 +141,9 @@ namespace Football.Projections.Services
         private async Task<Vector<double>> CalculateCoefficients<T>(List<T> model, Position position, int gameTrim, List<string>? filter = null)
         {
             var regressorMatrix = matrixCalculator.RegressorMatrix(model, filter);
-            var fantasyModel = await FantasyProjectionModel(position, gameTrim);
+            var fantasyModel = await projectionModelCalculator.SeasonFantasyProjectionModel(position, gameTrim);
             var dependentVector = matrixCalculator.DependentVector(fantasyModel, Model.FantasyPoints);
             return MultipleRegression.NormalEquations(regressorMatrix, dependentVector);
-        }
-        private async Task<List<SeasonFantasy>> FantasyProjectionModel(Position position, int gameTrim) 
-        {
-            var seasonFantasy = await fantasyService.GetAllSeasonFantasyByPosition(position, gameTrim);            
-            return seasonFantasy;
-        } 
-
-        private async Task<List<QBModelSeason>> QBProjectionModel(int gameTrim) 
-        {
-            var seasonData = await statisticsService.GetAllSeasonDataByPosition<AllSeasonDataQB>(Position.QB);
-            return mapper.Map<List<QBModelSeason>>(seasonData.Where(s => s.Games >= gameTrim));
-        }
-
-        private async Task<List<RBModelSeason>> RBProjectionModel(int gameTrim) 
-        {
-            var seasonData = await statisticsService.GetAllSeasonDataByPosition<AllSeasonDataRB>(Position.RB);
-            return mapper.Map<List<RBModelSeason>>(seasonData.Where(s => s.Games >= gameTrim));
-        }
-
-        private async Task<List<WRModelSeason>> WRProjectionModel(int gameTrim) 
-        {
-            var seasonData = await statisticsService.GetAllSeasonDataByPosition<AllSeasonDataWR>(Position.WR);
-            return mapper.Map<List<WRModelSeason>>(seasonData.Where(s => s.Games >= gameTrim));
-        }
-
-        private async Task<List<TEModelSeason>> TEProjectionModel(int gameTrim) 
-        {
-            var seasonData = await statisticsService.GetAllSeasonDataByPosition<AllSeasonDataTE>(Position.TE);
-            return mapper.Map<List<TEModelSeason>>(seasonData.Where(s => s.Games >= gameTrim));
-        } 
-        private async Task<Vector<double>> GetWeightedAverageVector(Player player, double gamesPlayedInjured, Tunings tunings, int seasonGames, List<string>? filter = null)
-        {
-            _ = Enum.TryParse(player.Position, out Position position);
-
-            switch (position)
-            {
-                case Position.QB:
-                    var modelQB = mapper.Map<QBModelSeason>(statCalculator.CalculateStatProjection(await statisticsService.GetSeasonData<SeasonDataQB>(Position.QB, player.PlayerId, true), gamesPlayedInjured, tunings, seasonGames));
-                    modelQB.YearsExperience = await statisticsService.GetYearsExperience(player.PlayerId, Position.QB);
-                    return matrixCalculator.TransformModel(modelQB, filter);
-                case Position.RB:
-                    var modelRB = mapper.Map<RBModelSeason>(statCalculator.CalculateStatProjection(await statisticsService.GetSeasonData<SeasonDataRB>(Position.RB, player.PlayerId, true), gamesPlayedInjured, tunings, seasonGames));
-                    modelRB.YearsExperience = await statisticsService.GetYearsExperience(player.PlayerId, Position.RB);
-                    return matrixCalculator.TransformModel(modelRB, filter);
-                case Position.WR:
-                    var modelWR = mapper.Map<WRModelSeason>(statCalculator.CalculateStatProjection(await statisticsService.GetSeasonData<SeasonDataWR>(Position.WR, player.PlayerId, true), gamesPlayedInjured, tunings, seasonGames));
-                    modelWR.YearsExperience = await statisticsService.GetYearsExperience(player.PlayerId, Position.WR);
-                    return matrixCalculator.TransformModel(modelWR, filter);
-                case Position.TE:
-                    var modelTE = mapper.Map<TEModelSeason>(statCalculator.CalculateStatProjection(await statisticsService.GetSeasonData<SeasonDataTE>(Position.TE, player.PlayerId, true), gamesPlayedInjured, tunings, seasonGames));
-                    modelTE.YearsExperience = await statisticsService.GetYearsExperience(player.PlayerId, Position.TE);
-                    return matrixCalculator.TransformModel(modelTE, filter);
-                default: return Vector<double>.Build.Dense(0);
-
-            }
         }
         private async Task<List<SeasonProjection>> RookieSeasonProjections(Position position, int seasonGames)
         {
