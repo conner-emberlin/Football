@@ -79,6 +79,7 @@ builder.Services.AddScoped<IWeeklyAdjustmentService, WeeklyAdjustmentService>();
 builder.Services.AddScoped<ITeamsService, TeamsService>();
 builder.Services.AddScoped<ITeamsRepository, TeamsRepository>();
 builder.Services.AddScoped<IProjectionModelCalculator, ProjectionModelCalculator>();
+builder.Services.AddScoped(typeof(IArtificialNeuralNetworkService<>), typeof(ArtificialNeuralNetwork<>));
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);
@@ -95,6 +96,7 @@ builder.Services.Configure<FiveThirtyEightValueSettings>(builder.Configuration.G
 builder.Services.Configure<StartOrSitSettings>(builder.Configuration.GetSection("StartOrSitSettings"));
 builder.Services.Configure<NFLOddsAPI>(builder.Configuration.GetSection("NFLOddsAPI"));
 builder.Services.Configure<WeatherAPI>(builder.Configuration.GetSection("WeatherAPI"));
+builder.Services.Configure<ANNConfiguration>(builder.Configuration.GetSection("ANNConfiguration"));
 
 builder.Services.AddAutoMapper(
     typeof(ApiModelAutomapperProfile), 

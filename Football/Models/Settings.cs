@@ -207,5 +207,11 @@ namespace Football.Models
             };
         }
     }
+
+    public class ANNConfiguration
+    {
+        public int HiddenLayerSize { get; set; }
+        public int OutputLayerSize { get; set; }
+    }
        
 }

@@ -6,6 +6,8 @@ namespace Football.Projections.Services
 {
     public class MatrixCalculator(ISettingsService settings) : IMatrixCalculator
     {
+        public Vector<double> ReLU(Vector<double> x) => x.Map(value => Math.Max(0, value));
+        public Vector<double> ReLUDerivative(Vector<double> x) => x.Map(value => value > 0.0 ? 1.0 : 0.0);
         public Matrix<double> RegressorMatrix<T>(List<T> model, List<string>? filter = null)
         {
             var rows = new List<Vector<double>>();

@@ -113,7 +113,6 @@ namespace Football
                                             ).ToList();
             return filter != null ? props.Where(p => filter.Select(f => f.Replace(" ", "").ToLower()).Contains(p.Name.ToLower())).ToList() : props;
         }
-
         public IEnumerable<string> GetPropertyNamesFromModel<T>()
         {
             var props = GetPropertiesFromModel<T>();
