@@ -74,7 +74,7 @@ namespace Football.Projections.Services
                         _biases1 -= learningRate * biases1Gradient;
                     }
 
-                    _logger.Information("Epoch {epoch + 1}/{epochs}, Loss: {totalLoss / inputs.RowCount:F4}");
+                    _logger.Information("Epoch {epoch + 1}/{epochs}, Loss: {totalLoss / inputs.RowCount}");
                 }
             });
         }
