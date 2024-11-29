@@ -80,6 +80,7 @@ builder.Services.AddScoped<ITeamsService, TeamsService>();
 builder.Services.AddScoped<ITeamsRepository, TeamsRepository>();
 builder.Services.AddScoped<IProjectionModelCalculator, ProjectionModelCalculator>();
 builder.Services.AddScoped(typeof(IArtificialNeuralNetworkService<>), typeof(ArtificialNeuralNetwork<>));
+builder.Services.AddScoped<IANNWeeklyProjectionService, ANNWeeklyProjectionService>();
 builder.Services.AddScoped<IDbConnection>((sp => new SqlConnection(dboFoootballConnectionString)));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<Serilog.ILogger>(log);

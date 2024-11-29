@@ -17,7 +17,7 @@ namespace Football.Projections.Interfaces
         Task<List<TEModelWeek>> TEWeeklyProjectionModel();
         Task<List<KModelWeek>> KWeeklyProjectionModel();
         Task<List<DSTModelWeek>> DSTWeeklyProjectionModel();
-        Task<Vector<double>> GetWeeklyWeightedAverageVector(Player player, int currentWeek, WeeklyTunings tunings, List<string>? filter = null);
+        Task<Vector<double>> GetWeeklyWeightedAverageVector(Player player, int currentWeek, WeeklyTunings tunings, List<string>? filter = null, bool neuralNetwork = false);
         Task<List<SeasonFantasy>> SeasonFantasyProjectionModel(Position position, int gameTrim);
         Task<List<QBModelSeason>> QBSeasonProjectionModel(int gameTrim);
         Task<List<RBModelSeason>> RBSeasonProjectionModel(int gameTrim);

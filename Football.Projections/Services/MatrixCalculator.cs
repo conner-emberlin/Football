@@ -15,6 +15,13 @@ namespace Football.Projections.Services
                 rows.Add(TransformModel(m, filter));
             return CreateMatrix(rows, model.Count, settings.GetPropertiesFromModel<T>(filter).Count + 1);
         }
+        public Matrix<double> NeuralNetworkMatrix<T>(List<T> model)
+        {
+            var rows = new List<Vector<double>>();
+            foreach (var m in model)
+                rows.Add(TransformNeuralNetworkModel(m));
+            return CreateMatrix(rows, model.Count, settings.GetPropertiesFromModel<T>().Count);
+        }
         public Vector<double> DependentVector<T>(List<T> dependents, Model value)
         {
             var prop = settings.GetPropertiesFromModel<T>().First(p => p.ToString()!.Contains(value.ToString()));
@@ -36,6 +43,19 @@ namespace Football.Projections.Services
             }
             return vec;
         }
+        public Vector<double> TransformNeuralNetworkModel<T>(T modelItem)
+        {
+            var properties = settings.GetPropertiesFromModel<T>();
+            var vec = Vector<double>.Build.Dense(properties.Count);
+            var index = 0;
+            foreach (var property in properties)
+            {
+                vec[index] = Convert.ToDouble(property.GetValue(modelItem));
+                index++;
+            }
+            return vec;
+        }
+
         private static Matrix<double> CreateMatrix(List<Vector<double>> rows, int rowCount, int columnCount)
         {
             var matrix = Matrix<double>.Build.Dense(rowCount, columnCount);

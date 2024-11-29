@@ -2,7 +2,6 @@
 using Football.Projections.Interfaces;
 using MathNet.Numerics.LinearAlgebra;
 using Microsoft.Extensions.Options;
-using Serilog;
 
 namespace Football.Projections.Services
 {
@@ -18,22 +17,20 @@ namespace Football.Projections.Services
 
         private readonly ISettingsService _settingsService;
         private readonly IMatrixCalculator _matrixCalculator;
-        private readonly ILogger _logger;
         private readonly ANNConfiguration _config;
-        public ArtificialNeuralNetwork(IOptionsMonitor<ANNConfiguration> config, ISettingsService settingsService, IMatrixCalculator matrixCalculator, ILogger logger)
+        public ArtificialNeuralNetwork(IOptionsMonitor<ANNConfiguration> config, ISettingsService settingsService, IMatrixCalculator matrixCalculator)
         {
             _config = config.CurrentValue;
             _settingsService = settingsService;
             _matrixCalculator = matrixCalculator;
-            _logger = logger;
 
             _inputSize = (_settingsService.GetPropertiesFromModel<T>()).Count;
             _hiddenSize = _config.HiddenLayerSize;
             _outputSize = _config.OutputLayerSize;
-            _weights1 = Matrix<double>.Build.Random(_hiddenSize, _inputSize);
-            _biases1 = Vector<double>.Build.Random(_hiddenSize);
-            _weights2 = Matrix<double>.Build.Random(_outputSize, _hiddenSize);
-            _biases2 = Vector<double>.Build.Random(_outputSize);
+            _weights1 = Matrix<double>.Build.Random(_hiddenSize, _inputSize) * .01;
+            _biases1 = Vector<double>.Build.Random(_hiddenSize, 0);
+            _weights2 = Matrix<double>.Build.Random(_outputSize, _hiddenSize) * .01;
+            _biases2 = Vector<double>.Build.Random(_outputSize, 0);
         }
         public async Task<Vector<double>> CalculateForwardPass(Vector<double> input) 
         { 
@@ -42,8 +39,6 @@ namespace Football.Projections.Services
         } 
         public async Task TrainArtificialNeuralNetwork(Matrix<double> inputs, Vector<double> targets, int epochs, double learningRate)
         {
-            await Task.Run(() =>
-            {
                 for (int epoch = 0; epoch < epochs; epoch++)
                 {
                     double totalLoss = 0;
@@ -73,10 +68,11 @@ namespace Football.Projections.Services
                         _weights1 -= learningRate * weights1Gradient;
                         _biases1 -= learningRate * biases1Gradient;
                     }
-
-                    _logger.Information("Epoch {epoch + 1}/{epochs}, Loss: {totalLoss / inputs.RowCount}");
                 }
-            });
+            var t1 = _weights1;
+            var t2 = _weights2;
+            var v3 = _biases1;
+            var v4 = _biases2;
         }
     }
 }

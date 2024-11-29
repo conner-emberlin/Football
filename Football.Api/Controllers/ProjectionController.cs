@@ -18,7 +18,8 @@ namespace Football.Api.Controllers
     public class ProjectionController(IPlayersService playersService, IStatisticsService statisticsService,
         IProjectionAnalysisService analysisService, IOptionsMonitor<Season> season, IFantasyAnalysisService fantasyAnalysisService, ISnapCountService snapCountService,
         IProjectionService<WeekProjection> weekProjectionService, IProjectionService<SeasonProjection> seasonProjectionService, 
-        IAdjustmentService adjustmentService, IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, ITeamsService teamsService, IMapper mapper) : ControllerBase
+        IAdjustmentService adjustmentService, IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IANNWeeklyProjectionService annWeeklyService,
+        ITeamsService teamsService, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -374,5 +375,10 @@ namespace Football.Api.Controllers
             var topAnalyses = (await analysisService.GetInSeasonProjectionAnalysesByPosition(positionEnum)).Where(a => a.RSquared != 0);
             return Ok(mapper.Map<List<PlayerWeeklyProjectionAnalysisModel>>(topAnalyses));
         }
+
+        [HttpGet("ann")]
+        [ProducesResponseType(typeof(List<double>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetANN() => Ok((await annWeeklyService.CalculateProjections(Position.QB)));
     }
 }
