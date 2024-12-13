@@ -213,5 +213,10 @@ namespace Football.Models
         public int HiddenLayerSize { get; set; }
         public int OutputLayerSize { get; set; }
     }
+
+    public class FantasyAnalysisSettings
+    {
+        public int TopFantasyPerformers { get; set; }
+    }
        
 }

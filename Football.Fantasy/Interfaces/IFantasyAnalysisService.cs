@@ -18,6 +18,6 @@ namespace Football.Fantasy.Interfaces
         Task<List<FantasySplit>?> GetFantasySplits(Position position, int season);
         Task<List<WeeklyFantasyTrend>> GetWeeklyFantasyTrendsByPosition(Position position, int season);
         Task<IEnumerable<WeeklyFantasyTrend>> GetPlayerWeeklyFantasyTrends(int playerId, int season);
-        
+        Task<IEnumerable<WeeklyFantasy>> GetTopWeekFantasyPerformances(int season);
     }
 }

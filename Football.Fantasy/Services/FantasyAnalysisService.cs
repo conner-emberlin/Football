@@ -332,6 +332,10 @@ namespace Football.Fantasy.Services
             return allPlayersTrends.Where(p => p.PlayerId == playerId).OrderBy(p => p.Week);
         }
 
+        public async Task<IEnumerable<WeeklyFantasy>> GetTopWeekFantasyPerformances(int season)
+        {
+            return [];
+        }
         private IEnumerable<WeeklyFantasyTrend> GetWeeklyFantasyTrend(List<WeeklyFantasy> weeklyFantasy)
         {
             return weeklyFantasy.Select(w => new WeeklyFantasyTrend

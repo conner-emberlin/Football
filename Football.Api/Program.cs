@@ -98,6 +98,7 @@ builder.Services.Configure<StartOrSitSettings>(builder.Configuration.GetSection(
 builder.Services.Configure<NFLOddsAPI>(builder.Configuration.GetSection("NFLOddsAPI"));
 builder.Services.Configure<WeatherAPI>(builder.Configuration.GetSection("WeatherAPI"));
 builder.Services.Configure<ANNConfiguration>(builder.Configuration.GetSection("ANNConfiguration"));
+builder.Services.Configure<FantasyAnalysisSettings>(builder.Configuration.GetSection("FantasyAnalysisSettings"));
 
 builder.Services.AddAutoMapper(
     typeof(ApiModelAutomapperProfile), 

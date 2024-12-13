@@ -20,7 +20,7 @@ namespace Football.Projections.Services
             var currentWeek = await playersService.GetCurrentWeek(_season.CurrentSeason);
             var weightedVector = await projectionModelCalculator.GetWeeklyWeightedAverageVector(player, currentWeek, _weeklyTunings, neuralNetwork: true);
 
-            await annService.TrainArtificialNeuralNetwork(trainingData, results, 1, .01);
+            await annService.TrainArtificialNeuralNetwork(trainingData, results, 100, .01);
             var temp = (await annService.CalculateForwardPass(weightedVector));
             return [.. temp];
 

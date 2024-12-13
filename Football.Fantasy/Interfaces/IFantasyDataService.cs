@@ -20,6 +20,6 @@ namespace Football.Fantasy.Interfaces
         Task<List<SeasonFantasy>> GetCurrentFantasyTotals(int season);
         Task<double> GetAverageSeasonFantasyTotal(int playerId);
         Task<double> GetRecentSeasonFantasyTotal(int playerId);
-        Task<Dictionary<int, double>> GetAverageWeeklyFantasyPoints(IEnumerable<int> playerIds, int season);
+        Task<Dictionary<int, double>> GetAverageWeeklyFantasyPoints(IEnumerable<int> playerIds, int season);       
     }
 }

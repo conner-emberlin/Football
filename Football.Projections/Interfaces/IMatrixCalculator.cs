@@ -12,5 +12,7 @@ namespace Football.Projections.Interfaces
         Vector<double> TransformNeuralNetworkModel<T>(T modelItem);
         Vector<double> ReLU(Vector<double> x);
         Vector<double> ReLUDerivative(Vector<double> x);
+        public Vector<double> Sigmoid(Vector<double> v);
+        public Vector<double> SigmoidDerivative(Vector<double> v);
     }
 }
