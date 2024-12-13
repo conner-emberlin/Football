@@ -6,8 +6,6 @@ using Football.Shared.Models.Fantasy;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Football.Shared.Models.Teams;
-
 
 namespace Football.Api.Controllers
 {
@@ -215,6 +213,15 @@ namespace Football.Api.Controllers
                 qs.Team = playerTeams.TryGetValue(qs.PlayerId, out var team) ? team.Team : "";
             }
             return Ok(qualityStarts);
-        } 
+        }
+
+        [HttpGet("top-weekly-performances")]
+        [ProducesResponseType(typeof(List<WeeklyFantasyModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetTopWeeklyPerformances([FromQuery] string position = "")
+        {
+            var fantasyResults = await fantasyAnalysisService.GetTopWeekFantasyPerformances(_season.CurrentSeason);
+            if (position != string.Empty) fantasyResults = fantasyResults.Where(f => f.Position == position);
+            return Ok(mapper.Map<List<WeeklyFantasyModel>>(fantasyResults));
+        }
     }
 }

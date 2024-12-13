@@ -23,6 +23,7 @@ namespace Football.Fantasy.Services
         public Task<List<WeeklyFantasy>> GetWeeklyFantasy(int season, int week) => fantasyData.GetWeeklyFantasy(season, week);
         public Task<List<WeeklyFantasy>> GetAllWeeklyFantasyByPosition(Position position) => fantasyData.GetAllWeeklyFantasyByPosition(position.ToString());
         public Task<Dictionary<int, double>> GetAverageWeeklyFantasyPoints(IEnumerable<int> playerIds, int season) => fantasyData.GetAverageWeeklyFantasyPoints(playerIds, season);
+        public Task<IEnumerable<WeeklyFantasy>> GetAllWeeklyFantasy(int season) => fantasyData.GetAllWeeklyFantasy(season);
         public async Task<int> PostSeasonFantasy(int season, Position position)
         {
             List<SeasonFantasy> seasonFantasy = [];

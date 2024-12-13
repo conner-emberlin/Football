@@ -15,6 +15,7 @@ namespace Football.Fantasy.Interfaces
         Task<List<WeeklyFantasy>> GetWeeklyFantasy(Position position, int season = 0);
         Task<List<WeeklyFantasy>> GetWeeklyFantasyBySeason(int playerId, int season);
         Task<List<WeeklyFantasy>> GetAllWeeklyFantasyByPosition(Position position);
+        Task<IEnumerable<WeeklyFantasy>> GetAllWeeklyFantasy(int season);
         Task<List<SeasonFantasy>> GetAllSeasonFantasyByPosition(Position position, int minGames);
         Task<List<WeeklyFantasy>> GetWeeklyTeamFantasy(string team, int week);
         Task<List<SeasonFantasy>> GetCurrentFantasyTotals(int season);
