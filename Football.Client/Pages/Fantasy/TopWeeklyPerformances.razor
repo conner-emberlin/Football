@@ -1,0 +1,73 @@
+﻿@page "/top-fantasy-performances/{position?}"
+<PageTitle>Top Weekly Fantasy</PageTitle>
+
+@using Football.Client.Interfaces;
+@using Football.Shared.Models.Fantasy;
+
+@inject IFantasyService fantasyService;
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+else
+{
+    <h4>@GetHeader()</h4>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+}
+
+@if (performances != null && performances.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                     <th>Name</th>
+                     <th>Week</th>
+                     <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in performances)
+                {
+                    <tr>
+                        <td><a class="page-links" href="Players/@p.PlayerId"> @p.Name</a></td>
+                        <td>@p.Week</td>
+                        <td>@Math.Round(p.FantasyPoints, 2)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string position { get; set; } = "";
+
+    private bool shouldRender;
+    private bool loading = false;
+
+    private List<WeeklyFantasyModel>? performances = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;       
+        performances = await fantasyService.GetTopWeeklyPerformancesRequest(position);
+        loading = false;
+        shouldRender = true;
+    }
+
+    private string GetHeader() {
+
+        if (position == "FLEX" && performances != null && performances.Any()) return string.Format("Top Weekly Performances of {0}", performances.First().Season);
+
+        else if (performances != null && performances.Any()) return string.Format("Top Weekly {0} Performances of {1}", position.ToUpper(), performances.First().Season);
+
+        else return string.Empty;
+    }
+}

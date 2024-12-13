@@ -11,12 +11,10 @@ namespace Football.Fantasy.Services
 {
     public class FantasyAnalysisService(IOptionsMonitor<Season> season,
         IPlayersService playersService, ITeamsService teamsService, IFantasyDataService fantasyDataService, ISettingsService settingsService,
-        IStatisticsService statsService, IOptionsMonitor<FantasyScoring> scoring, IOptionsMonitor<FantasyAnalysisSettings> settings,IMemoryCache cache) : IFantasyAnalysisService
+        IStatisticsService statsService, IOptionsMonitor<FantasyScoring> scoring, IMemoryCache cache) : IFantasyAnalysisService
     {
         private readonly Season _season = season.CurrentValue;
         private readonly FantasyScoring _scoring = scoring.CurrentValue;
-        private readonly FantasyAnalysisSettings _settings = settings.CurrentValue;
-
         public async Task<List<QualityStarts>> GetQualityStartsByPosition(Position position)
         {
             List<QualityStarts> qualityStarts = [];
@@ -336,7 +334,7 @@ namespace Football.Fantasy.Services
         public async Task<IEnumerable<WeeklyFantasy>> GetTopWeekFantasyPerformances(int season)
         {
             var allFantasy = await fantasyDataService.GetAllWeeklyFantasy(season);
-            return allFantasy.OrderByDescending(a => a.FantasyPoints).Take(_settings.TopFantasyPerformers);
+            return allFantasy.OrderByDescending(a => a.FantasyPoints);
         }
         private IEnumerable<WeeklyFantasyTrend> GetWeeklyFantasyTrend(List<WeeklyFantasy> weeklyFantasy)
         {

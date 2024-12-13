@@ -16,6 +16,12 @@ namespace Football.Client.Services
         public async Task<List<WeeklyFantasyModel>?> GetWeeklyFantasyByPlayerRequest(string id) => await requests.Get<List<WeeklyFantasyModel>?>("/fantasy/data/weekly/" + id);
         public async Task<List<TopOpponentsModel>?> GetTopOpponentsRequest(string teamId, string position) => await requests.Get<List<TopOpponentsModel>?>(string.Format("{0}/{1}/{2}", "/fantasy/top-opponents", teamId, position));
         public async Task<List<QualityStartsModel>?> GetQualityStartsRequest(string position) => await requests.Get<List<QualityStartsModel>?>("/fantasy/quality-starts/" + position);
+        public async Task<List<WeeklyFantasyModel>?> GetTopWeeklyPerformancesRequest(string position = "")
+        {
+            var path = "/fantasy/top-weekly-performances";
+            if (!string.IsNullOrEmpty(position)) path += string.Format("?position={0}", position.ToUpper());
+            return await requests.Get<List<WeeklyFantasyModel>?>(path);
+        }
 
         public async Task<List<SeasonFantasyModel>?> GetSeasonTotalsRequest(string season = "")
         {

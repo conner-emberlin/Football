@@ -13,9 +13,10 @@ namespace Football.Api.Controllers
     [ApiController]
     public class FantasyController(IFantasyDataService fantasyDataService, IMatchupAnalysisService matchupAnalysisService, IMarketShareService marketShareService,
         IOptionsMonitor<Season> season, IStartOrSitService startOrSitService, IWaiverWireService waiverWireService, ITeamsService teamsService,
-        IPlayersService playersService, IFantasyAnalysisService fantasyAnalysisService, ISnapCountService snapCountService, IMapper mapper) : ControllerBase
+        IPlayersService playersService, IFantasyAnalysisService fantasyAnalysisService, ISnapCountService snapCountService, IOptionsMonitor<FantasyAnalysisSettings> analysisSettings, IMapper mapper) : ControllerBase
     {
         private readonly Season _season = season.CurrentValue;
+        private readonly FantasyAnalysisSettings _analysisSettings = analysisSettings.CurrentValue; 
 
         [HttpPost("data/{position}/{season}")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
@@ -220,8 +221,8 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetTopWeeklyPerformances([FromQuery] string position = "")
         {
             var fantasyResults = await fantasyAnalysisService.GetTopWeekFantasyPerformances(_season.CurrentSeason);
-            if (position != string.Empty) fantasyResults = fantasyResults.Where(f => f.Position == position);
-            return Ok(mapper.Map<List<WeeklyFantasyModel>>(fantasyResults));
+            if (position != string.Empty && position != Position.FLEX.ToString()) fantasyResults = fantasyResults.Where(f => f.Position == position);
+            return Ok(mapper.Map<List<WeeklyFantasyModel>>(fantasyResults.Take(_analysisSettings.TopFantasyPerformers)));
         }
     }
 }
