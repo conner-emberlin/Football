@@ -22,7 +22,8 @@
 
 @if (currentLeaders != null && (!youTried || showAll) && !loading)
 {
-    <a class="page-links" href="/top-fantasy-performances/FLEX"> Top Weekly Performances</a>
+    var link = string.Format("/top-fantasy-performances/flex/{0}", currentLeaders.First().Season.ToString());
+    <a class="page-links" href=@link> Top Weekly Performances</a>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
         <table class="base_table">
@@ -56,7 +57,7 @@
 }
 else if(youTried && filterRunning && filteredLeaders != null && filteredLeaders.Any() && !loading)
 {
-    var link = string.Format("/top-fantasy-performances/{0}", position);
+    var link = string.Format("/top-fantasy-performances/{0}/{1}", position, filteredLeaders.First().Season);
     <a class="page-links" href=@link> Top Weekly Performances</a>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">

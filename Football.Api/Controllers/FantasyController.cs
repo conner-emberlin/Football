@@ -218,9 +218,10 @@ namespace Football.Api.Controllers
 
         [HttpGet("top-weekly-performances")]
         [ProducesResponseType(typeof(List<WeeklyFantasyModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetTopWeeklyPerformances([FromQuery] string position = "")
+        public async Task<IActionResult> GetTopWeeklyPerformances([FromQuery] string position = "", [FromQuery] int season = 0)
         {
-            var fantasyResults = await fantasyAnalysisService.GetTopWeekFantasyPerformances(_season.CurrentSeason);
+            var fantasySeason = season > 0 ? season : _season.CurrentSeason;
+            var fantasyResults = await fantasyAnalysisService.GetTopWeekFantasyPerformances(fantasySeason);
             if (position != string.Empty && position != Position.FLEX.ToString()) fantasyResults = fantasyResults.Where(f => f.Position == position);
             return Ok(mapper.Map<List<WeeklyFantasyModel>>(fantasyResults.Take(_analysisSettings.TopFantasyPerformers)));
         }

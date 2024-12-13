@@ -17,6 +17,6 @@ namespace Football.Client.Interfaces
         Task<List<WeeklyFantasyModel>?> GetWeeklyFantasyByPlayerRequest(string playerId);
         Task<List<TopOpponentsModel>?> GetTopOpponentsRequest(string teamId, string position);
         Task<List<QualityStartsModel>?> GetQualityStartsRequest(string position);
-        Task<List<WeeklyFantasyModel>?> GetTopWeeklyPerformancesRequest(string position = "");
+        Task<List<WeeklyFantasyModel>?> GetTopWeeklyPerformancesRequest(string position = "", string season = "");
     }
 }

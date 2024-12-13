@@ -1,4 +1,4 @@
-﻿@page "/top-fantasy-performances/{position?}"
+﻿@page "/top-fantasy-performances/{position}/{season?}"
 <PageTitle>Top Weekly Fantasy</PageTitle>
 
 @using Football.Client.Interfaces;
@@ -45,7 +45,10 @@ else
 
 @code {
     [Parameter]
-    public string position { get; set; } = "";
+    public string position { get; set; } = "FLEX";
+
+    [Parameter]
+    public string? season { get; set; }
 
     private bool shouldRender;
     private bool loading = false;
@@ -57,14 +60,14 @@ else
     protected override async Task OnInitializedAsync()
     {
         loading = true;       
-        performances = await fantasyService.GetTopWeeklyPerformancesRequest(position);
+        performances = await fantasyService.GetTopWeeklyPerformancesRequest(position, season);
         loading = false;
         shouldRender = true;
     }
 
     private string GetHeader() {
 
-        if (position == "FLEX" && performances != null && performances.Any()) return string.Format("Top Weekly Performances of {0}", performances.First().Season);
+        if (position != null && position.ToUpper() == "FLEX" && performances != null && performances.Any()) return string.Format("Top Weekly Performances of {0}", performances.First().Season);
 
         else if (performances != null && performances.Any()) return string.Format("Top Weekly {0} Performances of {1}", position.ToUpper(), performances.First().Season);
 
