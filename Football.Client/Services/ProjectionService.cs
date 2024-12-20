@@ -21,5 +21,6 @@ namespace Football.Client.Services
         public async Task<List<string>?> GetWeeklyModelVariablesRequest(string position) => await requests.Get<List<string>?>("/projection/weekly-model-variables/" + position);
         public async Task<WeeklyProjectionsExistModel?> GetWeeklyProjectionsExistRequest(string position) => await requests.Get<WeeklyProjectionsExistModel?>("/projection/weekly/projections-exist/" + position);
         public async Task<List<AdjustmentDescriptionModel>?> GetSeasonAdjustmentDescriptionsRequest() => await requests.Get<List<AdjustmentDescriptionModel>?>("/projection/season-adjustment-descriptions");
+        public async Task<List<PlayerWeeklyProjectionAnalysisModel>?> GetPlayerWeeklyProjectionAnalysisRequest(string position) => await requests.Get<List<PlayerWeeklyProjectionAnalysisModel>?>("/projection/weekly-player-analysis/" + position);
     }
 }

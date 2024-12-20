@@ -81,6 +81,9 @@
 }
 @if (ProjectionAnalyses.Any())
 {
+    var link = string.Format("/weekly-player-analysis/{0}", PositionEnum);
+    var title = string.Format("{0} Player Analysis", ProjectionAnalyses.First().Season);
+    <a class="page-links" href=@link> @title</a>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
         <table class="base_table">

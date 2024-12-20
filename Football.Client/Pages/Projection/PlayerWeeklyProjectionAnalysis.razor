@@ -1,0 +1,75 @@
+﻿@page "/weekly-player-analysis/{position}"
+<PageTitle>Player Projection Analysis</PageTitle>
+
+@using Football.Client.Interfaces;
+@using Football.Shared.Models.Projection;
+
+@inject IProjectionService projectionService;
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+else
+{
+    <h4>@GetHeader()
+    </h4>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+}
+
+@if (analyses != null && analyses.Any())
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Count</th>
+                    <th>RSqrd</th>
+                    <th>MSE</th>
+                    <th>MAE</th>
+                    <th>MAPE</th>
+                    <th>AvgError</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in analyses)
+                {
+                    <tr>
+                        <td><a class="page-links" href="Players/@a.PlayerId"> @a.Name</a></td>
+                        <td>@a.ProjectionCount</td>
+                        <td>@Math.Round(a.RSquared,4)</td>
+                        <td>@Math.Round(a.MSE, 2)</td>
+                        <td>@Math.Round(a.MAE, 2)</td>
+                        <td>@Math.Round(a.MAPE, 2)</td>
+                        <td>@Math.Round(a.AvgError,2)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string position { get; set; } = "QB";
+
+    private bool shouldRender;
+    private bool loading = false;
+
+    private List<PlayerWeeklyProjectionAnalysisModel>? analyses = new();
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        analyses = await projectionService.GetPlayerWeeklyProjectionAnalysisRequest(position);
+        loading = false;
+        shouldRender = true;
+    }
+
+    private string GetHeader() => string.Format("{0} {1} Player Analysis", analyses.First().Season, position);
+}
