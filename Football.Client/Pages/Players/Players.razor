@@ -269,7 +269,14 @@ else if (!loading && !playerSelected)
                             @foreach (var stat in playerData.SeasonData)
                             {
                                 <tr>
-                                    <td>@stat.Season</td>
+                                    @if (weeklyDataSeasons.Contains(stat.Season))
+                                    {
+                                        <td><a class="page-links" href=""> @stat.Season</a></td>
+                                    }
+                                    else
+                                    {
+                                        <td>@stat.Season</td>
+                                    }
                                     <td>@stat.Games</td>
                                     <td>@stat.Completions</td>
                                     <td>@stat.Attempts</td>
@@ -876,7 +883,7 @@ else if (!loading && !playerSelected)
     private List<SimplePlayerModel>? filteredPlayers { get; set; }     
     private PlayerDataModel? playerData = new();   
     private List<TrendingPlayerModel>? trendingPlayers { get; set; } = new();
-
+    private List<int>? weeklyDataSeasons = [];
     private Formatter form = new();
 
     protected override bool ShouldRender() => shouldRender;
@@ -913,7 +920,7 @@ else if (!loading && !playerSelected)
         playerSelected = false;
         selectedPlayer = "";
         playerId = pid;
-
+        weeklyDataSeasons = await playersService.GetWeeklyDataSeasonsRequest();
         playerData = await playersService.GetPlayerDataRequest(playerId);
         if (playerData != null) playerData.SeasonData = playerData.SeasonData.OrderByDescending(s => s.Season).ToList();
         playerSelected = true;

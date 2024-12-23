@@ -189,9 +189,11 @@ namespace Football.Api.Controllers
             var models = mapper.Map<List<TrendingPlayerModel>>(trendingPlayers);
             models.ForEach(m => m.Team = playerTeams.TryGetValue(m.PlayerId, out var team) ? team.Team : "");
             return Ok(models);
-        } 
+        }
 
-
+        [HttpGet("weekly-data-seasons")]
+        [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSeasonsWithWeeklyData() => Ok(await statisticsService.GetSeasonsWithWeeklyData());
         private async Task<List<SeasonDataModel>> GetSeasonDataModel(Position position, int playerId, int season)
         {
             return position switch

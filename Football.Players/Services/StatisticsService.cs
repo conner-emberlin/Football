@@ -23,6 +23,7 @@ namespace Football.Players.Services
         public Task<List<T>> GetSeasonDataByTeamIdAndPosition<T>(int teamId, Position position, int season) => statisticsRepository.GetSeasonDataByTeamIdAndPosition<T>(teamId, position, season);
         public Task<double> GetYearsExperience(int playerId, Position position) => statisticsRepository.GetYearsExperience(playerId, position);
         public Task<IEnumerable<StarterMissedGames>> GetCurrentStartersThatMissedGamesLastSeason(int currentSeason, int previousSeason, int maxGames, double avgProjection) => statisticsRepository.GetCurrentStartersThatMissedGamesLastSeason(currentSeason, previousSeason, maxGames, avgProjection);
+        public Task<IEnumerable<int>> GetSeasonsWithWeeklyData() => statisticsRepository.GetSeasonsWithWeeklyData();
         public async Task<IEnumerable<SeasonADP>> GetAdpByPosition(int season, Position position)
         {
             if (position == Position.FLEX) return await statisticsRepository.GetAdpByPosition(season);

@@ -165,6 +165,12 @@ namespace Football.Players.Repository
             if (!string.IsNullOrEmpty(position)) query += " AND [Position] = @position";
             return await dbConnection.ExecuteAsync(query, new { season, week, position }) > 0;
         }
+
+        public async Task<IEnumerable<int>> GetSeasonsWithWeeklyData()
+        {
+            var query = $@"SELECT [Season] FROM [dbo].WeeklyQBData GROUP BY [Season]";
+            return await dbConnection.QueryAsync<int>(query);
+        }
         private static string GetWeeklyTable(Position position) => string.Format("Weekly{0}Data", position.ToString());
         private static string GetSeasonTable(Position position) => string.Format("Season{0}Data", position.ToString());
         private static string GetSeasonQueryWhere(bool isPlayer) => isPlayer ? "[PlayerId] = @queryParam" : "[Season] = @queryParam";

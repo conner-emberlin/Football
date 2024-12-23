@@ -17,6 +17,7 @@ namespace Football.Client.Services
         public async Task<bool> UpdateInSeasonInjuryRequest(InSeasonInjuryModel injury) => await requests.PutWithBody<bool, InSeasonInjuryModel>("/player/update-injury", injury);
         public async Task<List<InSeasonTeamChangeModel>?> GetInSeasonTeamChangesRequest() => await requests.Get<List<InSeasonTeamChangeModel>?>("/player/team-changes");
         public async Task<int> PostInSeasonTeamChangesRequest(InSeasonTeamChangeModel change) => await requests.Post<int, InSeasonTeamChangeModel>("/player/team-change/in-season", change);
+        public async Task<List<int>?> GetWeeklyDataSeasonsRequest() => await requests.Get<List<int>?>("/player/weekly-data-seasons");
         public async Task<List<SimplePlayerModel>?> GetSimplePlayersRequest(bool activeOnly = false, string position = "")
         {
             var path = "/player/data/players";
