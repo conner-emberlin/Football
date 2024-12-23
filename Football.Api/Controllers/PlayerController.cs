@@ -8,6 +8,7 @@ using Football.Shared.Models.Fantasy;
 using Football.Shared.Models.Players;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Runtime.InteropServices;
 
 namespace Football.Api.Controllers
 {
@@ -207,6 +208,14 @@ namespace Football.Api.Controllers
             };
         }
 
+        [HttpGet("weekly-data/{position}/{playerId}/{season}")]
+        [ProducesResponseType(typeof(List<WeeklyDataModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetWeeklyDataModelByPlayer([FromRoute] string position, [FromRoute] int playerId, [FromRoute] int season)
+        {
+            if (!Enum.TryParse<Position>(position, out var positionEnum)) return BadRequest();
+
+            return Ok((await GetWeeklyDataModel(positionEnum, playerId, season)).OrderByDescending(w => w.Week).ToList());
+        }
         private async Task<List<WeeklyDataModel>> GetWeeklyDataModel(Position position, int playerId, int season)
         {
             var data = position switch

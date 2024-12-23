@@ -18,5 +18,6 @@ namespace Football.Client.Interfaces
         Task<List<InSeasonTeamChangeModel>?> GetInSeasonTeamChangesRequest();
         Task<int> PostInSeasonTeamChangesRequest(InSeasonTeamChangeModel change);
         Task<List<int>?> GetWeeklyDataSeasonsRequest();
+        Task<List<WeeklyDataModel>?> GetWeeklyDataByPlayerRequest(string position, int playerId, int season);
     }
 }

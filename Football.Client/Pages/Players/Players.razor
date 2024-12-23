@@ -416,7 +416,14 @@ else if (!loading && !playerSelected)
                             @foreach (var stat in playerData.SeasonData)
                             {
                                 <tr>
-                                    <td>@stat.Season</td>
+                                    @if (weeklyDataSeasons.Contains(stat.Season))
+                                    {
+                                        <td><a class="page-links" href=""> @stat.Season</a></td>
+                                    }
+                                    else
+                                    {
+                                        <td>@stat.Season</td>
+                                    }
                                     <td>@stat.Games</td>
                                     <td>@stat.RushingAttempts</td>
                                     <td>@stat.RushingYards</td>
@@ -560,7 +567,14 @@ else if (!loading && !playerSelected)
                             @foreach (var stat in playerData.SeasonData)
                             {
                                 <tr>
-                                    <td>@stat.Season</td>
+                                    @if (weeklyDataSeasons.Contains(stat.Season))
+                                    {
+                                        <td><a class="page-links" href=""> @stat.Season</a></td>
+                                    }
+                                    else
+                                    {
+                                        <td>@stat.Season</td>
+                                    }
                                     <td>@stat.Games</td>
                                     <td>@stat.Receptions</td>
                                     <td>@stat.Targets</td>
@@ -705,7 +719,14 @@ else if (!loading && !playerSelected)
                             @foreach (var stat in playerData.SeasonData)
                             {
                                 <tr>
-                                    <td>@stat.Season</td>
+                                    @if (weeklyDataSeasons.Contains(stat.Season))
+                                    {
+                                        <td><a class="page-links" href=""> @stat.Season</a></td>
+                                    }
+                                    else
+                                    {
+                                        <td>@stat.Season</td>
+                                    }
                                     <td>@stat.Games</td>
                                     <td>@stat.Receptions</td>
                                     <td>@stat.Targets</td>
@@ -795,7 +816,14 @@ else if (!loading && !playerSelected)
                             @foreach (var stat in playerData.SeasonData)
                             {
                                 <tr>
-                                    <td>@stat.Season</td>
+                                    @if (weeklyDataSeasons.Contains(stat.Season))
+                                    {
+                                        <td><a class="page-links" href=""> @stat.Season</a></td>
+                                    }
+                                    else
+                                    {
+                                        <td>@stat.Season</td>
+                                    }
                                     <td>@stat.Games</td>
                                     <td>@stat.Sacks</td>
                                     <td>@stat.DefensiveInterceptions</td>
