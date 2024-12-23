@@ -157,6 +157,7 @@ namespace Football.Fantasy.Services
                             PlayerId = player.PlayerId,
                             Name = player.Name,
                             Position = player.Position,
+                            TotalPoints = fantasy.Sum(f => f.FantasyPoints),
                             PassYDShare = Math.Round((stats.Sum(s => s.Yards) * _scoring.PointsPerPassingYard) /totalFantasy , 4),
                             PassTDShare = Math.Round((stats.Sum(s => s.TD) * _scoring.PointsPerPassingTouchdown) /totalFantasy, 4),
                             RushYDShare = Math.Round(stats.Sum(s => s.RushingYards) * _scoring.PointsPerYard/totalFantasy , 4),

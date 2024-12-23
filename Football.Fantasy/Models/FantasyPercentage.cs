@@ -6,6 +6,7 @@
         public int Season { get; set; }
         public string Name { get; set; } = "";
         public string Position { get; set; } ="";
+        public double TotalPoints { get; set; }
         public double PassYDShare { get; set; }
         public double PassTDShare { get; set; }
         public double RushYDShare { get; set; }

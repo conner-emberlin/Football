@@ -44,6 +44,10 @@
                     <tr>
                         <th>Name</th>
                         <th>
+                            <span class="sort-link" onclick="@(() => SetTable("TotalPoints"))">Total</span>
+                            <span class="oi @(tableSort.GetSortStyle("TotalPoints"))"></span>
+                        </th>
+                        <th>
                             <span class="sort-link" onclick="@(() => SetTable("PassYDShare"))">PassYD%</span>
                             <span class="oi @(tableSort.GetSortStyle("PassYDShare"))"></span>
                         </th>
@@ -70,6 +74,7 @@
                                 <a class="page-links" href="Players/@f.PlayerId"> @f.Name</a> &nbsp;
                                 
                             </td>
+                            <td>@Math.Round(f.TotalPoints,2)</td>
                             <td>@Math.Round(f.PassYDShare * 100)</td>
                             <td>@Math.Round(f.PassTDShare * 100)</td>
                             <td>@Math.Round(f.RushYDShare * 100)</td>
@@ -88,6 +93,10 @@
                 <thead>
                     <tr>
                         <th>Name</th>
+                        <th>
+                            <span class="sort-link" onclick="@(() => SetTable("TotalPoints"))">Total</span>
+                            <span class="oi @(tableSort.GetSortStyle("TotalPoints"))"></span>
+                        </th>
                         <th>
                             <span class="sort-link" onclick="@(() => SetTable("RecShare"))">Rec%</span>
                             <span class="oi @(tableSort.GetSortStyle("RecShare"))"></span>
@@ -118,6 +127,7 @@
                                 <a class="page-links" href="Players/@f.PlayerId"> @f.Name</a>&nbsp;
                                 <a href="dist-graph/@f.Position/@f.PlayerId"> <i class="oi oi-pie-chart" /></a>
                             </td>
+                            <td>@Math.Round(f.TotalPoints,2)</td>
                             <td>@Math.Round(f.RecShare * 100)</td>
                             <td>@Math.Round(f.RecYDShare * 100)</td>
                             <td>@Math.Round(f.RecTDShare * 100)</td>
