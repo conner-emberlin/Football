@@ -1,4 +1,5 @@
 ﻿using Football.Shared.Models.Players;
+using Football.Shared.Models.Fantasy;
 
 namespace Football.Client.Interfaces
 {
@@ -18,6 +19,7 @@ namespace Football.Client.Interfaces
         Task<List<InSeasonTeamChangeModel>?> GetInSeasonTeamChangesRequest();
         Task<int> PostInSeasonTeamChangesRequest(InSeasonTeamChangeModel change);
         Task<List<int>?> GetWeeklyDataSeasonsRequest();
-        Task<List<WeeklyDataModel>?> GetWeeklyDataByPlayerRequest(string position, int playerId, int season);
+        Task<List<WeeklyDataModel>?> GetWeeklyDataByPlayerRequest(string position, string playerId, string season);
+        Task<List<WeeklyFantasyModel>?> GetWeeklyFantasyByPlayerRequest(string playerId, string season);
     }
 }

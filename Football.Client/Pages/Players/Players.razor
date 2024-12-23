@@ -271,7 +271,8 @@ else if (!loading && !playerSelected)
                                 <tr>
                                     @if (weeklyDataSeasons.Contains(stat.Season))
                                     {
-                                        <td><a class="page-links" href=""> @stat.Season</a></td>
+                                        var link = string.Format("/player-weekly-data/{0}/{1}/{2}", stat.Position, stat.PlayerId, stat.Season);
+                                        <td><a class="page-links" href=@link> @stat.Season</a></td>
                                     }
                                     else
                                     {
@@ -418,7 +419,8 @@ else if (!loading && !playerSelected)
                                 <tr>
                                     @if (weeklyDataSeasons.Contains(stat.Season))
                                     {
-                                        <td><a class="page-links" href=""> @stat.Season</a></td>
+                                        var link = string.Format("/player-weekly-data/{0}/{1}/{2}", stat.Position, stat.PlayerId, stat.Season);
+                                        <td><a class="page-links" href=@link> @stat.Season</a></td>
                                     }
                                     else
                                     {
@@ -569,7 +571,8 @@ else if (!loading && !playerSelected)
                                 <tr>
                                     @if (weeklyDataSeasons.Contains(stat.Season))
                                     {
-                                        <td><a class="page-links" href=""> @stat.Season</a></td>
+                                        var link = string.Format("/player-weekly-data/{0}/{1}/{2}", stat.Position, stat.PlayerId, stat.Season);
+                                        <td><a class="page-links" href=@link> @stat.Season</a></td>
                                     }
                                     else
                                     {
@@ -721,7 +724,8 @@ else if (!loading && !playerSelected)
                                 <tr>
                                     @if (weeklyDataSeasons.Contains(stat.Season))
                                     {
-                                        <td><a class="page-links" href=""> @stat.Season</a></td>
+                                        var link = string.Format("/player-weekly-data/{0}/{1}/{2}", stat.Position, stat.PlayerId, stat.Season);
+                                        <td><a class="page-links" href=@link> @stat.Season</a></td>
                                     }
                                     else
                                     {
@@ -818,7 +822,8 @@ else if (!loading && !playerSelected)
                                 <tr>
                                     @if (weeklyDataSeasons.Contains(stat.Season))
                                     {
-                                        <td><a class="page-links" href=""> @stat.Season</a></td>
+                                        var link = string.Format("/player-weekly-data/{0}/{1}/{2}", stat.Position, stat.PlayerId, stat.Season);
+                                        <td><a class="page-links" href=@link> @stat.Season</a></td>
                                     }
                                     else
                                     {

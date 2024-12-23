@@ -1,0 +1,148 @@
+﻿@page "/player-weekly-data/{position}/{playerId}/{season}"
+<PageTitle>Weekly Data</PageTitle>
+
+@using Football.Client.Interfaces;
+@using Football.Shared.Models.Fantasy;
+@using Football.Shared.Models.Players;
+
+@inject IPlayersService playersService;
+
+@if (loading)
+{
+    <div class="spinner"></div>
+}
+
+else
+{
+    <h4>@GetHeader()</h4>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+}
+
+@if (data != null && data.Any())
+{
+    var pos = data.First().Position;
+
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Week</th>
+                    <th>Fpts</th>
+                    @if (pos == "QB")
+                    {
+                        <th>Comp</th>
+                        <th>PAtt</th>
+                        <th>PYd</th>
+                        <th>PTD</th>
+                        <th>Int</th>
+                        <th>Sck</th>                       
+                    }
+                    @if (pos != "DST" && pos != "K")
+                    {
+                        <th>RAtt</th>
+                        <th>RYd</th>
+                        <th>RTD</th>
+                        <th>Fum</th>
+                    }
+                    @if (pos != "QB" && pos != "DST" && pos != "K")
+                    {
+                        <th>Rec</th>
+                        <th>RecYd</th>
+                        <th>Tgts</th>
+                        <th>RecTD</th>
+                    }
+                    @if (pos == "DST")
+                    {
+                        <th>Sacks</th>
+                        <th>Ints</th>
+                        <th>FumRecvd</th>
+                        <th>ForcedFum</th>
+                        <th>DefTD</th>
+                        <th>Safety</th>
+                        <th>SpecTD</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in data)
+                {
+                    <tr>
+                        <td>@d.Week</td>
+                        <td>@fantasy[d.Week]</td>
+                        @if (pos == "QB")
+                        {
+                            <td>@d.Completions</td>
+                            <td>@d.Attempts</td>
+                            <td>@d.PassingYards</td>
+                            <td>@d.PassingTouchdowns</td>
+                            <td>@d.Interceptions</td>
+                            <td>@d.Sacks</td>
+                        }
+                        @if (pos != "DST" && pos != "K")
+                        {
+                            <td>@d.RushingAttempts</td>
+                            <td>@d.RushingYards</td>
+                            <td>@d.RushingTouchdowns</td>
+                            <td>@d.Fumbles</td>
+                        }
+                        @if (pos != "QB" && pos != "DST" && pos != "K")
+                        {
+                            <td>@d.Receptions</td>
+                            <td>@d.ReceivingYards</td>
+                            <td>@d.Targets</td>
+                            <td>@d.ReceivingTouchdowns</td>
+                        }
+                        @if (pos == "DST")
+                        {
+                            <td>@d.DefensiveSacks</td>
+                            <td>@d.DefensiveInterceptions</td>
+                            <td>@d.FumblesRecovered</td>
+                            <td>@d.ForcedFumbles</td>
+                            <td>@d.DefensiveTouchdowns</td>
+                            <td>@d.DefensiveSafties</td>
+                            <td>@d.SpecialTeamsTouchdowns</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string position { get; set; } = "";
+
+    [Parameter]
+    public string season { get; set; } = "";
+
+    [Parameter]
+    public string playerId { get; set; } = "";
+
+    private bool shouldRender;
+    private bool loading = false;
+
+    private List<WeeklyDataModel>? data = [];
+    private Dictionary<int, double> fantasy = [];
+
+    protected override bool ShouldRender() => shouldRender;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        data = (await playersService.GetWeeklyDataByPlayerRequest(position, playerId, season)).OrderBy(w => w.Week).ToList();
+        fantasy = (await playersService.GetWeeklyFantasyByPlayerRequest(playerId, season)).ToDictionary(f => f.Week, f => Math.Round(f.FantasyPoints, 2));
+        loading = false;
+        shouldRender = true;
+    }
+
+    private string GetHeader()
+    {
+        if (data != null && data.Any())
+        {
+            return string.Format("{0} Weekly Data {1}", data.First().Name, data.First().Season);
+        }
+        return "Weekly Data";
+    }
+}
