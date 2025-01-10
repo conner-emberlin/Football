@@ -85,6 +85,33 @@ else if (badRequestError)
     </div>
 }
 
+else if(!teamSelected && teamRecords != null && teamRecords.Any())
+{
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Record</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in teamRecords.OrderByDescending(t => t.Wins))
+                {
+                    var team = GetTeamName(t.TeamId);
+                    var record = FormatRecord(t.Wins, t.Losses, t.Ties);
+                    <tr>
+                    <td>@team</td>
+                    <td>@record</td>
+                    </tr>
+                    
+                }
+
+            </tbody>
+        </table>
+    </div>
+}
+
 @if (teamSelected && teamChosen != null)
 {
     var photoPath = "https://localhost:7237/Logos/" + teamChosen.Team + ".png";
@@ -102,12 +129,12 @@ else if (badRequestError)
                 <text>&nbsp;(@leagueInfo.Division: @FormatRecord(divisionalRecord.Wins, divisionalRecord.Losses, divisionalRecord.Ties))</text>
             }
         </tr>
-    }
-    <tr>
-        <td><a class="page-links" href="/depth-chart/@teamChosen.TeamId"> Depth Chart</a> &#9675; <a class="page-links" href="/ros-rankings/@teamChosen.TeamId"> ROS Rankings</a> </td>
-    </tr>    
+    }  
     @if (upcomingGames != null && upcomingGames.Any())
     {
+        <tr>
+            <td><a class="page-links" href="/depth-chart/@teamChosen.TeamId"> Depth Chart</a> &#9675; <a class="page-links" href="/ros-rankings/@teamChosen.TeamId"> ROS Rankings</a> </td>
+        </tr>
         <div class="parent">
             @foreach (var s in upcomingGames.Take(10))
             {
