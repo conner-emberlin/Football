@@ -16,6 +16,7 @@ namespace Football.Players.Interfaces
         Task<int> ActivatePlayer(int playerId);
         Task<List<InjuryConcerns>> GetPlayerInjuries(int season);
         Task<List<PlayerInjury>> GetPlayerInjuries();
+        Task<List<PlayerInjury>> GetPlayerInjuryHistory(int playerId);
         Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season);
         Task<Dictionary<int, double>> GetGamesPlayedInjuredBySeason(int season);
         Task<int> PostInSeasonInjury(InSeasonInjury injury);

@@ -13,6 +13,7 @@ namespace Football.Players.Interfaces
         Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position);
         Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position);
         Task<List<InjuryConcerns>> GetPlayerInjuries(int season);
+        Task<List<PlayerInjury>> GetPlayerInjuryHistory(int playerId);
         Task<List<Suspensions>> GetPlayerSuspensions(int season);
         Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season);
         Task<double> GetWeeklyProjection(int season, int week, int playerId);

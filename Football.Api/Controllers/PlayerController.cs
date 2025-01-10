@@ -220,6 +220,10 @@ namespace Football.Api.Controllers
         [HttpGet("weekly-fantasy/{playerId}/{season}")]
         [ProducesResponseType(typeof(List<WeeklyFantasyModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetWeeklyFantasyByPlayer([FromRoute] int playerId, [FromRoute] int season) => Ok(mapper.Map<List<WeeklyFantasyModel>>(await fantasyDataService.GetWeeklyFantasyBySeason(playerId, season)));
+
+        [HttpGet("injury-history/{playerId}")]
+        [ProducesResponseType(typeof(List<PlayerInjuryModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPlayerInjuryHistory([FromRoute] int playerId) => Ok(mapper.Map<List<PlayerInjuryModel>>(await playersService.GetPlayerInjuryHistory(playerId)));
         private async Task<List<WeeklyDataModel>> GetWeeklyDataModel(Position position, int playerId, int season)
         {
             var data = position switch

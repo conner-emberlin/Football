@@ -79,6 +79,13 @@ namespace Football.Players.Repository
                         WHERE [Season] = @season";
             return (await dbConnection.QueryAsync<InjuryConcerns>(query, new { season })).ToList();
         }
+
+        public async Task<List<PlayerInjury>> GetPlayerInjuryHistory(int playerId)
+        {
+            var query = $@"SELECT * FROM [dbo].InSeasonInjuries
+                            WHERE [PlayerId] = @playerId";
+            return (await dbConnection.QueryAsync<PlayerInjury>(query, new { playerId })).ToList();
+        }
         public async Task<List<Suspensions>> GetPlayerSuspensions(int season)
         {
             var query = $@"SELECT * FROM [dbo].Suspensions

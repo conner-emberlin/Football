@@ -55,6 +55,7 @@ namespace Football.Players.Services
         public Task<List<int>> GetIgnoreList() => playersRepository.GetIgnoreList();
         public Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season) => playersRepository.GetActiveInSeasonInjuries(season);
         public Task<Dictionary<int, double>> GetGamesPlayedInjuredBySeason(int season) => playersRepository.GetGamesPlayedInjuredBySeason(season);
+        public Task<List<PlayerInjury>> GetPlayerInjuryHistory(int playerId) => playersRepository.GetPlayerInjuryHistory(playerId);
         public Task<int> PostInSeasonInjury(InSeasonInjury injury) => playersRepository.PostInSeasonInjury(injury);
         public Task<bool> UpdateInjury(InSeasonInjury injury) => playersRepository.UpdateInjury(injury);
         public Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges() => playersRepository.GetInSeasonTeamChanges(_season.CurrentSeason);
