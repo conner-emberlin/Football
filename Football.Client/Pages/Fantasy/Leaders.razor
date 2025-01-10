@@ -4,6 +4,7 @@
 @using Football.Shared.Models.Fantasy;
 
 @inject IFantasyService fantasyService;
+@inject IPlayersService playersService;
 @page "/Leaders/"
 
 <h4>Fantasy Leaders</h4>
@@ -22,9 +23,14 @@
 
 @if (currentLeaders != null && (!youTried || showAll) && !loading)
 {
-    var link = string.Format("/top-fantasy-performances/flex/{0}", currentLeaders.First().Season.ToString());
-    <a class="page-links" href=@link> Top Weekly Performances</a>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    var searchSeason = currentLeaders.First().Season;
+    if (weeklyDataSeasons != null && weeklyDataSeasons.Contains(searchSeason))
+    {
+        var link = string.Format("/top-fantasy-performances/flex/{0}", searchSeason);
+        <a class="page-links" href=@link> Top Weekly Performances</a>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+    }
+
     <div class="table_container">
         <table class="base_table">
             <thead>
@@ -57,9 +63,14 @@
 }
 else if(youTried && filterRunning && filteredLeaders != null && filteredLeaders.Any() && !loading)
 {
-    var link = string.Format("/top-fantasy-performances/{0}/{1}", position, filteredLeaders.First().Season);
-    <a class="page-links" href=@link> Top Weekly Performances</a>
-    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    var searchSeason = filteredLeaders.First().Season;
+    if (weeklyDataSeasons != null && weeklyDataSeasons.Contains(searchSeason))
+    {
+        var link = string.Format("/top-fantasy-performances/{0}/{1}", position, searchSeason);
+        <a class="page-links" href=@link> Top Weekly Performances</a>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+    }
+
     <div class="table_container">
         <table class="base_table">
             <thead>
@@ -127,6 +138,7 @@ else if(youTried && filterWeekly && weeklyResults != null && weeklyResults.Any()
     public List<WeeklyFantasyModel>? weeklyResults = new();
     public List<SeasonFantasyModel>? currentLeaders = new();
     public List<SeasonFantasyModel> filteredLeaders = new();
+    public List<int>? weeklyDataSeasons = [];
 
     public bool youTried = false;
     private bool shouldRender;
@@ -143,6 +155,7 @@ else if(youTried && filterWeekly && weeklyResults != null && weeklyResults.Any()
     {
         loading = true;
         currentLeaders = await fantasyService.GetSeasonTotalsRequest();
+        weeklyDataSeasons = await playersService.GetWeeklyDataSeasonsRequest();
         loading = false;
         shouldRender = true;
     }
