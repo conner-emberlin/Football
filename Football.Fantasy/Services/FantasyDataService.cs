@@ -47,7 +47,7 @@ namespace Football.Fantasy.Services
                     break;
                 case Position.DST:
                 case Position.K:
-                    var seasonGames = await playersService.GetGamesBySeason(_season.CurrentSeason - 1);
+                    var seasonGames = await playersService.GetGamesBySeason(season);
                     var weeklyFantasy = (await fantasyData.GetWeeklyFantasy(season, 0)).Where(w => w.Position == position.ToString())
                                         .GroupBy(f => f.PlayerId, f => f, (key, f) => new { PlayerId = key, Fantasy = f.ToList() });
                     foreach (var group in weeklyFantasy)
@@ -57,7 +57,7 @@ namespace Football.Fantasy.Services
                         seasonFantasy.Add(new SeasonFantasy
                         {
                             PlayerId = group.PlayerId,
-                            Season = _season.CurrentSeason - 1,
+                            Season = season,
                             Games = seasonGames,
                             FantasyPoints = total,
                             Name = group.Fantasy.First().Name,
