@@ -36,5 +36,6 @@ namespace Football.Players.Interfaces
         Task<List<SleeperPlayerMap>> GetSleeperPlayerMaps();
         Task<IEnumerable<TeamChange>> GetAllTeamChanges(int currentSeason, int previousSeason);
         Task<SeasonInfo> GetSeasonInfo(int season);
+        Task<bool> PostSeasonInfo(SeasonInfo season);
     }
 }

@@ -24,6 +24,7 @@ namespace Football.Players.Services
         public Task<List<Player>> GetPlayersByPosition(Position position, bool activeOnly = false) => playersRepository.GetPlayersByPosition(position.ToString(), activeOnly);
         public Task<Player> GetPlayer(int playerId) => playersRepository.GetPlayer(playerId);
         public Task<Player?> GetPlayerByName(string name) => playersRepository.GetPlayerByName(name);
+        public Task<bool> PostSeasonInfo(SeasonInfo season) => playersRepository.PostSeasonInfo(season);
         public async Task<Player> RetrievePlayer(string name, Position position, bool activatePlayer = false)
         {
             var player = await GetPlayerByName(name);

@@ -207,7 +207,7 @@ namespace Football.Projections.Services
             foreach (var player in players)
             {
                 if (seasonProjectionDictionary.TryGetValue(player.PlayerId, out var seasonProjection)
-                    && gamesPlayedDictionary.TryGetValue(player.PlayerId, out var games) && games > 14)
+                    && gamesPlayedDictionary.TryGetValue(player.PlayerId, out var games))
                 {
                     var weeklyFantasy = await fantasyService.GetWeeklyFantasyBySeason(player.PlayerId, season);
                     analyses.Add(new SeasonProjectionError

@@ -3,6 +3,7 @@ using Football.Models;
 using Football.Data.Interfaces;
 using Football.Fantasy.Interfaces;
 using Football.Players.Interfaces;
+using Football.Players.Models;
 using Football.Shared.Models.Operations;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -218,6 +219,10 @@ namespace Football.Api.Controllers
         [HttpPost("sleeper-map")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> UploadSleeperPlayerMap() => Ok(await playersService.UploadSleeperPlayerMap());
+
+        [HttpPost("season-info")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> PostSeasonInfo([FromBody] SeasonInfoModel season) => Ok(await playersService.PostSeasonInfo(mapper.Map<SeasonInfo>(season)));
     }
  
 

@@ -193,6 +193,7 @@ namespace Football.Api
                 .ForMember(qm => qm.QualityPercentage, o => o.MapFrom(q => Math.Round(((double)(q.GoodStarts + q.GreatStarts) / (double)q.GamesPlayed) * 100, 1)));
             CreateMap<TeamDepthChart, TeamDepthChartModel>();
             CreateMap<PlayerWeeklyProjectionAnalysis, PlayerWeeklyProjectionAnalysisModel>();
+            CreateMap<SeasonInfo, SeasonInfoModel>().ReverseMap();
         }
 
     }

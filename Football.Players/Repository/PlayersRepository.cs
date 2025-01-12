@@ -267,6 +267,12 @@ namespace Football.Players.Repository
                             WHERE Season = @season";
             return (await dbConnection.QueryAsync<SeasonInfo>(query, new { season })).First();
         }
+
+        public async Task<bool> PostSeasonInfo(SeasonInfo season)
+        {
+            var query = $@"INSERT INTO dbo.[SeasonInfo] (Season, Games, Weeks) VALUES (@Season, @Games, @Weeks)";
+            return (await dbConnection.ExecuteAsync(query, season) > 0);
+        }
             
     }
 }
