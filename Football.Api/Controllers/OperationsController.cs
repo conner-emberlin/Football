@@ -160,8 +160,15 @@ namespace Football.Api.Controllers
         {
             var season = seasonParam > 0 ? seasonParam : _season.CurrentSeason;
             var week = weekParam > 0 ? weekParam : await playersService.GetCurrentWeek(season);
-
-            return Ok(mapper.Map<WeeklyTuningsModel>(await settingsService.GetWeeklyTunings(season, week)));
+            var weeklyTunings = await settingsService.GetWeeklyTunings(season, week);
+            if (weeklyTunings != null) return Ok(mapper.Map<WeeklyTuningsModel>(weeklyTunings));
+            else
+            {
+                var previousSeasonWeeks = await playersService.GetWeeksBySeason(season - 1);
+                var previousSeasonWeeklyTuningsModel = mapper.Map<WeeklyTuningsModel>(await settingsService.GetWeeklyTunings(season - 1, previousSeasonWeeks));
+                previousSeasonWeeklyTuningsModel.PreviousSeasonWeeklyTunings = true;
+                return Ok(previousSeasonWeeklyTuningsModel);
+            }
         }
 
         [HttpPut("refresh-adp/{position}")]

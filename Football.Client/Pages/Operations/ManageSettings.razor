@@ -412,7 +412,11 @@
 
 else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
 {
-
+    @if (weeklyTunings.PreviousSeasonWeeklyTunings)
+    {
+        <text>The settings below are from the previous season.</text>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+    }
     <div class="table_container">
         <table class="base_table">
             <thead>
@@ -522,7 +526,7 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
         </table>
     </div>
     <button class="button-22" role="button" @onclick="HandleWeeklyTuningsUpdate">
-        Update
+        @GetButtonName(weeklyTunings.PreviousSeasonWeeklyTunings)
     </button>
 }
 

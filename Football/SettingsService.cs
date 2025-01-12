@@ -19,7 +19,7 @@ namespace Football
         public async Task<bool> UploadSeasonTunings(Tunings tunings) => await settingsRepository.UploadSeasonTunings(tunings);
         public async Task<Tunings?> GetSeasonTunings(int season) => await settingsRepository.GetSeasonTunings(season);
         public async Task<bool> UploadWeeklyTunings(WeeklyTunings tunings) => await settingsRepository.UploadWeeklyTunings(tunings);
-        public async Task<WeeklyTunings> GetWeeklyTunings(int season, int week) => await settingsRepository.GetWeeklyTunings(season, week);
+        public async Task<WeeklyTunings?> GetWeeklyTunings(int season, int week) => await settingsRepository.GetWeeklyTunings(season, week);
         public async Task<bool> UploadSeasonAdjustments(SeasonAdjustments seasonAdjustments) => await settingsRepository.UploadSeasonAdjustments(seasonAdjustments);
         public async Task<SeasonAdjustments?> GetSeasonAdjustments(int season) => await settingsRepository.GetSeasonAdjustments(season);
         public double GetBoomSetting(Position position) => position switch

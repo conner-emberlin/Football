@@ -44,11 +44,11 @@ namespace Football
             return (await dbConnection.QueryAsync<Tunings>(query, new { season })).FirstOrDefault();
         }
 
-        public async Task<WeeklyTunings> GetWeeklyTunings(int season, int week)
+        public async Task<WeeklyTunings?> GetWeeklyTunings(int season, int week)
         {
             var query = $@"SELECT * FROM [dbo].WeeklyTunings WHERE [Season] = @season AND [Week] <= @week
                         ORDER BY [Week] DESC";
-            return (await dbConnection.QueryAsync<WeeklyTunings>(query, new { season, week })).First();
+            return (await dbConnection.QueryAsync<WeeklyTunings>(query, new { season, week })).FirstOrDefault();
         }
 
         public async Task<bool> UploadSeasonAdjustments(SeasonAdjustments adjustments)

@@ -2,6 +2,7 @@
 {
     public class WeeklyTuningsModel
     {
+        public bool PreviousSeasonWeeklyTunings { get; set; }
         public double RecentWeekWeight { get; set; }
         public double ProjectionWeight { get; set; }
         public double TamperedMin { get; set; }
