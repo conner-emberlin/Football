@@ -412,6 +412,7 @@
 
 else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
 {
+
     <div class="table_container">
         <table class="base_table">
             <thead>
@@ -527,6 +528,12 @@ else if (weeklyTunings != null && !loading && weeklyTuningsSetting)
 
 else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
 {
+    @if (seasonAdjustments.PreviousSeasonAdjustments)
+    {
+        <text>The adjustments below are from the previous season.</text>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+    }
+
     <div class="table_container">
         <table class="base_table">
             <thead>
@@ -620,7 +627,7 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
         </table>
     </div>
     <button class="button-22" role="button" @onclick="HandleSeasonAdjustmentsUpdate">
-        Update
+        @GetButtonName(seasonAdjustments.PreviousSeasonAdjustments)
     </button>
 }
 

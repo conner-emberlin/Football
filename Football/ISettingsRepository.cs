@@ -9,6 +9,6 @@ namespace Football
         Task<bool> UploadWeeklyTunings(WeeklyTunings tunings);
         Task<WeeklyTunings> GetWeeklyTunings(int season, int week);
         Task<bool> UploadSeasonAdjustments(SeasonAdjustments seasonAdjustments);
-        Task<SeasonAdjustments> GetSeasonAdjustments(int season);
+        Task<SeasonAdjustments?> GetSeasonAdjustments(int season);
     }
 }

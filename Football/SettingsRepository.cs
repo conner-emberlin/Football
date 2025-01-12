@@ -11,8 +11,8 @@ namespace Football
             if ((await GetSeasonTunings(tunings.Season) != null))
             {
                 _ = await DeleteSeasonTunings(tunings.Season);
-
-                var query = $@"INSERT INTO [dbo].Tunings (Season,	
+            }
+            var query = $@"INSERT INTO [dbo].Tunings (Season,	
                             RBFloor, LeadRBFactor, QBWeight, Weight, SecondYearWRLeap, SecondYearRBLeap, SecondYearQBLeap, SecondYearTELeap, NewQBFloor, NewQBCeiling, SeasonDataTrimmingGames,
                             AverageQBProjection, AverageRBProjection, AverageWRProjection, AverageTEProjection, AverageDSTProjection, AverageKProjection, NewWRMinPoints, NewWRAdjustmentFactor, ExistingWRAdjustmentFactor, NewRBMinPoints, NewRBAdjustmentFactor, ExistingRBAdjustmentFactor, RushingQBThreshold,
                             ReceivingRBThreshold, BackupQBAdjustmentMax, VetQBNewTeamYears, VetQBNewTeamFactor, EliteWRDraftPositionMax, EliteWRRookieTopReceiverFactor, WR1MinPoints, RB1MinPoints,  
@@ -25,9 +25,7 @@ namespace Football
                             @RBPromotionMinYardsPerCarry, @RBPromotionFactor, @NewQBCeilingForRB, @MinGamesForMissedAverage, @ReplacementLevelQB, @ReplacementLevel2QB, @ReplacementLevelRB, @ReplacementLevelWR, @ReplacementLevelTE,
                             @QBProjectionCount, @RBProjectionCount, @WRProjectionCount, @TEProjectionCount 
                             )";
-                return (await dbConnection.ExecuteAsync(query, tunings)) > 0;
-            }
-            return false;   
+            return (await dbConnection.ExecuteAsync(query, tunings)) > 0; 
         }
         public async Task<bool> UploadWeeklyTunings(WeeklyTunings tunings)
         {
@@ -84,10 +82,10 @@ namespace Football
             return await dbConnection.ExecuteAsync(query, adjustments) > 0;
         }
 
-        public async Task<SeasonAdjustments> GetSeasonAdjustments(int season)
+        public async Task<SeasonAdjustments?> GetSeasonAdjustments(int season)
         {
             var query = $@"SELECT * FROM [dbo].SeasonAdjustments WHERE [Season] = @season";
-            return (await dbConnection.QueryAsync<SeasonAdjustments>(query, new { season })).First();
+            return (await dbConnection.QueryAsync<SeasonAdjustments>(query, new { season })).FirstOrDefault();
         }
         private async Task<int> DeleteSeasonTunings(int season)
         {

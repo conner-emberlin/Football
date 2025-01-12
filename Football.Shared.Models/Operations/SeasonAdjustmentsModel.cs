@@ -2,6 +2,7 @@
 {
     public class SeasonAdjustmentsModel
     {
+        public bool PreviousSeasonAdjustments { get; set; }
         public bool InjuryAdjustment { get; set; }
         public bool SuspensionAdjustment { get; set; }
         public bool VeteranQBonNewTeamAdjustment { get; set; }

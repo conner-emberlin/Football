@@ -130,11 +130,18 @@ namespace Football.Api.Controllers
         }
 
         [HttpGet("season-adjustments")]
-        [ProducesResponseType(typeof(TuningsModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SeasonAdjustmentsModel), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSeasonAdjustments([FromQuery] int seasonParam)
         {
             var season = seasonParam > 0 ? seasonParam : _season.CurrentSeason;
-            return Ok(mapper.Map<SeasonAdjustmentsModel>(await settingsService.GetSeasonAdjustments(season)));
+            var adjustments = await settingsService.GetSeasonAdjustments(season);
+            if (adjustments != null) return Ok(mapper.Map<SeasonAdjustmentsModel>(adjustments));
+            else
+            {
+                var previousSeasonAdjustmentsModel = mapper.Map<SeasonAdjustmentsModel>(await settingsService.GetSeasonAdjustments(season - 1));
+                previousSeasonAdjustmentsModel.PreviousSeasonAdjustments = true;
+                return Ok(previousSeasonAdjustmentsModel);
+            }
         }
 
         [HttpPost("weekly-tunings")]
