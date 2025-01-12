@@ -49,9 +49,14 @@
     <div class="spinner"></div>
 }
 
-<div style="height:10px;font-size:1px;">&nbsp;</div>
 @if (tunings!= null && !loading && seasonTuningsSetting)
-{
+{    
+    @if (tunings.PreviousSeasonTunings)
+    {
+        <text>The settings below are from the previous season.</text>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+    }
+
     <div class="table_container">
         <table class="base_table">
             <thead>
@@ -399,8 +404,9 @@
     </div>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
 
+    
     <button class="button-22" role="button" @onclick="HandleSeasonTuningsUpdate">
-        Update
+        @GetButtonName(tunings.PreviousSeasonTunings)
     </button>
 }
 
@@ -702,7 +708,7 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
         shouldRender = true;
     }
 
-    public void SetSetting(ChangeEventArgs args)
+    private void SetSetting(ChangeEventArgs args)
     {
         Setting = args.Value.ToString();
         tuningsUpdated = false;
@@ -712,4 +718,7 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
         weeklyTuningsSetting = false;
         weeklyTuningsUpdated = false;
     }
+
+    private string GetButtonName(bool previous) => previous ? "Upload" : "Update";
+
 }

@@ -7,7 +7,7 @@ namespace Football
     public interface ISettingsService
     {
         Task<bool> UploadSeasonTunings(Tunings tunings);
-        Task<Tunings> GetSeasonTunings(int season);
+        Task<Tunings?> GetSeasonTunings(int season);
         Task<bool> UploadWeeklyTunings(WeeklyTunings tunings);
         Task<WeeklyTunings> GetWeeklyTunings(int season, int week);
         Task<bool> UploadSeasonAdjustments(SeasonAdjustments seasonAdjustments);

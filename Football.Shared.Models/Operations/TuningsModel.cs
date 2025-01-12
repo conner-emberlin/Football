@@ -2,6 +2,7 @@
 {
     public class TuningsModel
     {
+        public bool PreviousSeasonTunings { get; set; }
         public int RBFloor { get; set; }
         public double LeadRBFactor { get; set; }
         public double QBWeight { get; set; }

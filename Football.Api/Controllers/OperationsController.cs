@@ -107,7 +107,17 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> GetSeasonTunings([FromQuery] int seasonParam)
         {
             var season = seasonParam > 0 ? seasonParam : _season.CurrentSeason;
-            return Ok(mapper.Map<TuningsModel>(await settingsService.GetSeasonTunings(season)));
+            var tunings = await settingsService.GetSeasonTunings(season);
+            if (tunings != null) 
+            { 
+                return Ok(mapper.Map<TuningsModel>(tunings));
+            }
+            else
+            {
+                var previousSeasonTuningsModel = mapper.Map<TuningsModel>(await settingsService.GetSeasonTunings(season - 1));
+                previousSeasonTuningsModel.PreviousSeasonTunings = true;
+                return Ok(mapper.Map<TuningsModel>(previousSeasonTuningsModel));
+            }                       
         }
 
         [HttpPost("season-adjustments")]
