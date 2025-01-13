@@ -11,13 +11,12 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearRegression;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-
+using Serilog;
 namespace Football.Projections.Services
 {
     public class SeasonProjectionService(IFantasyDataService fantasyService,
     IMemoryCache cache, IMatrixCalculator matrixCalculator, IProjectionModelCalculator projectionModelCalculator, IOptionsMonitor<Season> season, IPlayersService playersService,
-    IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService,
-    IMapper mapper) : IProjectionService<SeasonProjection>
+    IAdjustmentService adjustmentService, IProjectionRepository projectionRepository, ISettingsService settingsService, ILogger logger) : IProjectionService<SeasonProjection>
     {
         private readonly Season _season = season.CurrentValue;
 
@@ -174,13 +173,18 @@ namespace Football.Projections.Services
         private async Task<Vector<double>> HistoricalRookieRegression(List<Rookie> historicalRookies, int seasonGames)
         {
             List<SeasonFantasy> rookieSeasons = [];
+            List<Rookie> rookies = [];
             foreach (var rookie in historicalRookies)
             {
-                var rookieFantasy = (await fantasyService.GetSeasonFantasy(rookie.PlayerId)).First(rf => rf.Season == rookie.RookieSeason);
-                rookieFantasy.FantasyPoints = (rookieFantasy.FantasyPoints / rookieFantasy.Games) * seasonGames;
-                rookieSeasons.Add(rookieFantasy);
+                var rookieFantasy = (await fantasyService.GetSeasonFantasy(rookie.PlayerId)).FirstOrDefault(rf => rf.Season == rookie.RookieSeason);
+                if (rookieFantasy != null)
+                {
+                    rookieFantasy.FantasyPoints = (rookieFantasy.FantasyPoints / rookieFantasy.Games) * seasonGames;
+                    rookieSeasons.Add(rookieFantasy);
+                    rookies.Add(rookie);
+                }
             }
-            return MultipleRegression.NormalEquations(matrixCalculator.RegressorMatrix(historicalRookies), matrixCalculator.DependentVector(rookieSeasons, Model.FantasyPoints));
+            return MultipleRegression.NormalEquations(matrixCalculator.RegressorMatrix(rookies), matrixCalculator.DependentVector(rookieSeasons, Model.FantasyPoints));
         }
 
         private int GetProjectionsCount(Position position, Tunings tunings)

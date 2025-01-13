@@ -15,5 +15,6 @@ namespace Football.Client.Interfaces
         Task<int> PutWeeklyConsensusProjectionsRequest(string position);
         Task<bool> PostSeasonInfoRequest(SeasonInfoModel seasonInfo);
         Task<SeasonInfoModel?> GetSeasonInfoRequest();
+        Task<bool> ActiveSeasonRequest();
     }
 }

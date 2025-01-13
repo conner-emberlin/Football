@@ -262,6 +262,13 @@ namespace Football.Api.Controllers
                 return Ok(previousSeasonInfoModel);
             }
         }
+
+        [HttpGet("active-season")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> SeasonActive()
+        {
+            return Ok((await playersService.GetCurrentWeek(_season.CurrentSeason)) > 1);
+        }
     }
  
 
