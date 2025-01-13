@@ -33,13 +33,20 @@
 
 @if (Rankings.Any())
 {
+    @if (Games == 0)
+    {
+        <text>Rankings are from the previous season.</text>
+    }
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
         <table class="base_table">
             <thead>
                 <tr>
                     <th>Team</th>
-                    <th>Games</th>
+                    @if (Games > 0)
+                    {
+                        <th>Games</th>
+                    }
                     <th>
                         <span class="sort-link" onclick="@(() => SetTable("PointsAllowed"))">Total Pts</span>
                         <span class="oi @(tableSort.GetSortStyle("PointsAllowed"))"></span>
@@ -56,7 +63,10 @@
                 {
                     <tr>
                         <td><a class="page-links" href="Teams/@Rankings.ElementAt(i-1).TeamId"> @Rankings.ElementAt(i-1).TeamDescription</a></td>
-                        <td>@Rankings.ElementAt(i-1).GamesPlayed</td>
+                        @if (Games > 0)
+                        {
+                            <td>@Rankings.ElementAt(i-1).GamesPlayed</td>
+                        }
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).PointsAllowed,2)</td>
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).AvgPointsAllowed,2)</td>
                         <td>
@@ -69,15 +79,13 @@
     </div>
 }
 
-
-
-
 @code {
-    public string Position { get; set; } = "Quarterback";
-    public string positionEnum { get; set; } = "QB";
-    public List<MatchupRankingModel>? Rankings = new();
+    private string Position { get; set; } = "Quarterback";
+    private string positionEnum { get; set; } = "QB";
+    private List<MatchupRankingModel>? Rankings = new();
+    private int Games { get; set; }
 
-    public bool loading { get; set; } = false;
+    private bool loading { get; set; } = false;
     private bool shouldRender;
 
     private TableSort tableSort = new();
@@ -88,6 +96,7 @@
     public void SetPosition(ChangeEventArgs args)
     {
         Rankings?.Clear();
+        Games = 0;
         tableSort = new();
         positionEnum = format.SetPosition(args);
     }
@@ -97,6 +106,7 @@
         Rankings?.Clear();
         shouldRender = true;
         Rankings = await fantasyService.GetMatchupRankingsRequest(positionEnum);
+        Games = Rankings != null && Rankings.Any() ? Rankings.First().GamesPlayed : 0;
         loading = false;
         shouldRender = true;
     }
