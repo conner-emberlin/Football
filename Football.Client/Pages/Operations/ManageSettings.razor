@@ -28,8 +28,14 @@
     <text>Weekly Tunings updated</text>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
 }
-
+@if (seasonInfoUpdated)
+{
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <text>Season Info updated</text>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+}
 <div style="height:10px;font-size:1px;">&nbsp;</div>
+
 @foreach (var setting in settings)
 {
 
@@ -635,6 +641,54 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
     </button>
 }
 
+else if (seasonInfo != null && !loading && seasonInfoSetting)
+{
+    @if (seasonInfo.PreviousSeasonInfo)
+    {
+        <text>The settings below are from the previous season.</text>
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+    }
+    <div class="table_container">
+        <table class="base_table">
+            <thead>
+                <tr>
+                    <th>Tuning</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        Season
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@seasonInfo.Season" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Weeks
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@seasonInfo.Weeks" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Games
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" @bind="@seasonInfo.Games" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <button class="button-22" role="button" @onclick="HandleSeasonInfoUpdate">
+        @GetButtonName(seasonInfo.PreviousSeasonInfo)
+    </button>
+}
+
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
@@ -649,18 +703,21 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
     private bool tuningsUpdated { get; set; } = false;
     private bool seasonAdjustmentsUpdated { get; set; } = false;
     private bool weeklyTuningsUpdated { get; set; } = false;
+    private bool seasonInfoUpdated { get; set; } = false;
 
     private string Setting { get; set; } = "Season Settings";
 
-    private List<string> settings = ["Season Settings", "Season Adjustments", "Weekly Settings"];
+    private List<string> settings = ["Season Settings", "Season Adjustments", "Season Info", "Weekly Settings"];
 
     private bool seasonTuningsSetting { get; set; }
     private bool seasonAdjustmentsSetting { get; set; }
     private bool weeklyTuningsSetting { get; set; }
+    private bool seasonInfoSetting { get; set; }
 
     private TuningsModel? tunings { get; set; } = new();
     private WeeklyTuningsModel? weeklyTunings { get; set; } = new();
     private SeasonAdjustmentsModel? seasonAdjustments { get; set; } = new();
+    private SeasonInfoModel? seasonInfo { get; set; } = new();
 
     private Formatter format = new();
 
@@ -687,13 +744,22 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
 
     private async Task HandleWeeklyTuningsUpdate()
     {
-
         loading = true;
         weeklyTuningsUpdated = await operationsService.PostWeeklyTuningsRequest(weeklyTunings);
         weeklyTunings = await operationsService.GetWeeklyTuningsRequest();
         loading = false;
         shouldRender = true;
     }
+
+    private async Task HandleSeasonInfoUpdate()
+    {
+        loading = true;
+        seasonInfoUpdated = await operationsService.PostSeasonInfoRequest(seasonInfo);
+        seasonInfo = await operationsService.GetSeasonInfoRequest();
+        loading = false;
+        shouldRender = true;
+    }
+
     private async Task HandleInput()
     {
         loading = true;
@@ -714,7 +780,11 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
             weeklyTunings = await operationsService.GetWeeklyTuningsRequest();
             weeklyTuningsSetting = true;          
         }
-
+        else if (Setting == "Season Info")
+        {
+            seasonInfo = await operationsService.GetSeasonInfoRequest();
+            seasonInfoSetting = true;
+        }
         loading = false;
         shouldRender = true;
     }
@@ -728,6 +798,8 @@ else if (seasonAdjustments != null && !loading && seasonAdjustmentsSetting)
         seasonAdjustmentsSetting = false;
         weeklyTuningsSetting = false;
         weeklyTuningsUpdated = false;
+        seasonInfoSetting = false;
+        seasonInfoUpdated = false;
     }
 
     private string GetButtonName(bool previous) => previous ? "Upload" : "Update";

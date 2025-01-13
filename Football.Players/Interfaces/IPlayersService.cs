@@ -42,5 +42,6 @@ namespace Football.Players.Interfaces
         Task<int> GetWeeksBySeason(int season);
         Task<IEnumerable<TeamChange>> GetAllTeamChanges(int currentSeason);
         Task<bool> PostSeasonInfo(SeasonInfo season);
+        Task<SeasonInfo?> GetSeasonInfo(int season);
     }
 }

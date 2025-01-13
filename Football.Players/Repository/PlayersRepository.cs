@@ -261,11 +261,11 @@ namespace Football.Players.Repository
             return await dbConnection.QueryAsync<TeamChange>(query, new { currentSeason, previousSeason });
         }
 
-        public async Task<SeasonInfo> GetSeasonInfo(int season)
+        public async Task<SeasonInfo?> GetSeasonInfo(int season)
         {
             var query = $@"SELECT * FROM SeasonInfo 
                             WHERE Season = @season";
-            return (await dbConnection.QueryAsync<SeasonInfo>(query, new { season })).First();
+            return (await dbConnection.QueryAsync<SeasonInfo>(query, new { season })).FirstOrDefault();
         }
 
         public async Task<bool> PostSeasonInfo(SeasonInfo season)

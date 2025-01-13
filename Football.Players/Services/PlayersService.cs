@@ -64,10 +64,19 @@ namespace Football.Players.Services
         public Task<bool> CreateRookie(Rookie rookie) => playersRepository.CreateRookie(rookie);
         public Task<List<Rookie>> GetAllRookies() => playersRepository.GetAllRookies();
         public Task<SleeperPlayerMap?> GetSleeperPlayerMap(int sleeperId) => playersRepository.GetSleeperPlayerMap(sleeperId);
+        public Task<SeasonInfo?> GetSeasonInfo(int season) => playersRepository.GetSeasonInfo(season);
         public Task<int> GetCurrentSeasonGames() => GetGamesBySeason(_season.CurrentSeason);
         public Task<int> GetCurrentSeasonWeeks() => GetWeeksBySeason(_season.CurrentSeason);
-        public async Task<int> GetGamesBySeason(int season) => (await playersRepository.GetSeasonInfo(season)).Games;
-        public async Task<int> GetWeeksBySeason(int season) => (await playersRepository.GetSeasonInfo(season)).Weeks;
+        public async Task<int> GetGamesBySeason(int season) 
+        {
+            var seasonInfo = await playersRepository.GetSeasonInfo(season);
+            return seasonInfo != null ? seasonInfo.Games : 0;
+        }
+        public async Task<int> GetWeeksBySeason(int season)
+        {
+            var seasonInfo = await playersRepository.GetSeasonInfo(season);
+            return seasonInfo != null ? seasonInfo.Weeks : 0;
+        }
         public async Task<int> InactivatePlayers(List<int> playerIds)
         {
             var updated = await playersRepository.InactivatePlayers(playerIds);

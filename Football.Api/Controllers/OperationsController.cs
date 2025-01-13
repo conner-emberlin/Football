@@ -247,6 +247,21 @@ namespace Football.Api.Controllers
         [HttpPost("season-info")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> PostSeasonInfo([FromBody] SeasonInfoModel season) => Ok(await playersService.PostSeasonInfo(mapper.Map<SeasonInfo>(season)));
+
+        [HttpGet("season-info")]
+        [ProducesResponseType(typeof(SeasonInfoModel), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetSeasonInfo()
+        {
+            var season = _season.CurrentSeason;
+            var info = await playersService.GetSeasonInfo(season);
+            if (info != null) return Ok(mapper.Map<SeasonInfoModel>(info));
+            else
+            {
+                var previousSeasonInfoModel = mapper.Map<SeasonInfoModel>(await playersService.GetSeasonInfo(season - 1));
+                previousSeasonInfoModel.PreviousSeasonInfo = true;
+                return Ok(previousSeasonInfoModel);
+            }
+        }
     }
  
 
