@@ -273,6 +273,12 @@ namespace Football.Players.Repository
             var query = $@"INSERT INTO dbo.[SeasonInfo] (Season, Games, Weeks) VALUES (@Season, @Games, @Weeks)";
             return (await dbConnection.ExecuteAsync(query, season) > 0);
         }
+
+        public async Task<IEnumerable<BackupQuarterback>> GetBackupQuarterbacks(int season)
+        {
+            var query = "SELECT * FROM [dbo].BackupQuarterback WHERE [Season] = @season";
+            return await dbConnection.QueryAsync<BackupQuarterback>(query, new { season });
+        }
             
     }
 }

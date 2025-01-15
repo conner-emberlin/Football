@@ -20,7 +20,7 @@ namespace Football.Projections.Services
             if (seasons.Count > 1)
             {
                 var recentSeasonData = seasons.OrderByDescending(s => s.Season).First();
-                var backupSeasons = seasons.Where(s => s.Attempts > 0 && s.Attempts / s.Games <= 0.5 * recentSeasonData.Attempts / recentSeasonData.Games).Select(s => s.Season);
+                var backupSeasons = seasons.Where(s => s.Attempts > 0 && s.Games < 4 && s.Attempts / s.Games <= 0.5 * recentSeasonData.Attempts / recentSeasonData.Games).Select(s => s.Season);
                 secondYearLeap = !backupSeasons.Any();
                 seasons = seasons.Where(s => !backupSeasons.Contains(s.Season)).ToList();
             }

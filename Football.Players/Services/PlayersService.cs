@@ -67,6 +67,7 @@ namespace Football.Players.Services
         public Task<SeasonInfo?> GetSeasonInfo(int season) => playersRepository.GetSeasonInfo(season);
         public Task<int> GetCurrentSeasonGames() => GetGamesBySeason(_season.CurrentSeason);
         public Task<int> GetCurrentSeasonWeeks() => GetWeeksBySeason(_season.CurrentSeason);
+        public Task<IEnumerable<BackupQuarterback>> GetBackupQuaterbacks(int season) => playersRepository.GetBackupQuarterbacks(season);
         public async Task<int> GetGamesBySeason(int season) 
         {
             var seasonInfo = await playersRepository.GetSeasonInfo(season);
