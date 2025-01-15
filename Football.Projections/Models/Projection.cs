@@ -68,6 +68,8 @@ namespace Football.Projections.Models
         public double TotalFantasy { get; set; }
         public int WeeksPlayed { get; set; }
         public double SeasonFantasyProjection { get; set; }
+        public double SeasonFantasyPPGProjection { get; set; }
+        public double FantasyPPG { get; set; }
     }
 
     public class SeasonProjectionAnalysis
@@ -79,6 +81,7 @@ namespace Football.Projections.Models
         public double AvgError { get; set; }
         public double AvgErrorPerGame { get; set; }
         public double ProjectionCount { get; set; }
+        public double PPGRSquared { get; set; }
     }
 }
 

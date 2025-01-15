@@ -200,6 +200,7 @@ namespace Football.Projections.Services
         {
             var players = await playersService.GetPlayersByPosition(position);
             var season = priorSeason > 0 ? priorSeason : _season.CurrentSeason;
+            var seasonGames = await playersService.GetGamesBySeason(season);
             var seasonProjectionDictionary = await playersService.GetSeasonProjections(players.Select(p => p.PlayerId), season);
             var gamesPlayedDictionary = await GamesPlayedDictionary(position, season);
 
@@ -210,12 +211,17 @@ namespace Football.Projections.Services
                     && gamesPlayedDictionary.TryGetValue(player.PlayerId, out var games))
                 {
                     var weeklyFantasy = await fantasyService.GetWeeklyFantasyBySeason(player.PlayerId, season);
+                    var weeksPlayed = weeklyFantasy.Count;
+                    var totalFantasy = weeklyFantasy.Sum(w => w.FantasyPoints);
+
                     analyses.Add(new SeasonProjectionError
                     {
                         Player = player,
-                        TotalFantasy = weeklyFantasy.Sum(w => w.FantasyPoints),
-                        WeeksPlayed = weeklyFantasy.Count,
-                        SeasonFantasyProjection = seasonProjection
+                        TotalFantasy = totalFantasy,
+                        WeeksPlayed = weeksPlayed,
+                        SeasonFantasyProjection = seasonProjection,
+                        SeasonFantasyPPGProjection = seasonProjection / seasonGames,
+                        FantasyPPG = weeksPlayed > 0 ? totalFantasy / weeksPlayed : 0
                     });
                 }
             }
@@ -232,12 +238,19 @@ namespace Football.Projections.Services
                 var sumOfSquares = projectionErrors.Sum(p => Math.Pow(p.TotalFantasy - p.SeasonFantasyProjection, 2));
                 var observedPoints = projectionErrors.Select(p => p.TotalFantasy);
                 var totalSumOfSquares = observedPoints.Sum(p => Math.Pow(p - observedPoints.Average(), 2));
+
+                var totalPPGError = projectionErrors.Sum(p => Math.Abs(p.FantasyPPG - p.SeasonFantasyPPGProjection));
+                var ppgSumOfSquares = projectionErrors.Sum(p => Math.Pow(p.FantasyPPG - p.SeasonFantasyPPGProjection, 2));
+                var observedPPG = projectionErrors.Select(p => p.FantasyPPG);
+                var ppgTotalSumOfSquares = observedPPG.Sum(p => Math.Pow(p - observedPPG.Average(), 2));
+
                 return new SeasonProjectionAnalysis
                 {
                     Season = season > 0 ? season : _season.CurrentSeason,
                     Position = position.ToString(),
                     MSE = count > 0 ? Math.Round(sumOfSquares / count, 3) : 0,
                     RSquared = totalSumOfSquares > 0 ? 1 - (sumOfSquares / totalSumOfSquares) : 0,
+                    PPGRSquared = ppgTotalSumOfSquares > 0 ? 1 - (ppgSumOfSquares/ppgTotalSumOfSquares) : 0,
                     AvgError = count > 0 ? Math.Round(totalError / count) : 0,
                     AvgErrorPerGame = count > 0 ? Math.Round(totalError / count / seasonGames, 2) : 0,
                     ProjectionCount = count

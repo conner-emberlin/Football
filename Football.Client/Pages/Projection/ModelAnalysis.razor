@@ -42,12 +42,12 @@
                 <tr>
                     <th>Season </th>
                     <th>
-                        <span class="sort-link" onclick="@(() => SetTable("MSE"))">MSE</span>
-                        <span class="oi @(tableSort.GetSortStyle("MSE"))"></span>
-                    </th>
-                    <th>
                         <span class="sort-link" onclick="@(() => SetTable("RSquared"))">RSqrd</span>
                         <span class="oi @(tableSort.GetSortStyle("RSquared"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("PPGRSquared"))">PPGRSqrd</span>
+                        <span class="oi @(tableSort.GetSortStyle("PPGRSquared"))"></span>
                     </th>
                     <th>
                         <span class="sort-link" onclick="@(() => SetTable("AvgError"))">AvgError</span>
@@ -56,6 +56,10 @@
                     <th>
                         <span class="sort-link" onclick="@(() => SetTable("AvgErrorPerGame"))">AvgErrorPerGame</span>
                         <span class="oi @(tableSort.GetSortStyle("AvgErrorPerGame"))"></span>
+                    </th>
+                    <th>
+                        <span class="sort-link" onclick="@(() => SetTable("MSE"))">MSE</span>
+                        <span class="oi @(tableSort.GetSortStyle("MSE"))"></span>
                     </th>
                     <th>
                         <span class="sort-link" onclick="@(() => SetTable("ProjectionCount"))">Count</span>
@@ -68,10 +72,11 @@
                 {
                     <tr>
                         <td>@p.Season</td>
-                        <td>@Math.Round(p.MSE, 2)</td>
                         <td>@Math.Round(p.RSquared, 4)</td>
+                        <td>@Math.Round(p.PPGRSquared, 4)</td>
                         <td>@p.AvgError</td>
                         <td>@p.AvgErrorPerGame</td>
+                        <td>@Math.Round(p.MSE, 2)</td>
                         <td>@p.ProjectionCount</td>
                     </tr>
                 }
