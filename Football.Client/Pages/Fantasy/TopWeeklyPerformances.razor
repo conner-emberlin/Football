@@ -69,7 +69,7 @@ else
 
         if (position != null && position.ToUpper() == "FLEX" && performances != null && performances.Any()) return string.Format("Top Weekly Performances of {0}", performances.First().Season);
 
-        else if (performances != null && performances.Any()) return string.Format("Top Weekly {0} Performances of {1}", position.ToUpper(), performances.First().Season);
+        else if (position != null && performances != null && performances.Any()) return string.Format("Top Weekly {0} Performances of {1}", position.ToUpper(), performances.First().Season);
 
         else return string.Empty;
     }

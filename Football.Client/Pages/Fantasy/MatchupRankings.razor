@@ -6,6 +6,7 @@
 @using Football.Shared.Models.Fantasy;
 
 @inject IFantasyService fantasyService;
+@inject IOperationsService operationsService;
 
 <h4>Matchup Rankings</h4>
 
@@ -55,7 +56,10 @@
                         <span class="sort-link" onclick="@(() => SetTable("AvgPointsAllowed"))">Avg Pts</span>
                         <span class="oi @(tableSort.GetSortStyle("AvgPointsAllowed"))"></span>
                     </th>
-                    <th></th>
+                    @if (activeSeason)
+                    {
+                        <th></th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -69,9 +73,12 @@
                         }
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).PointsAllowed,2)</td>
                         <td>@Math.Round((double)Rankings.ElementAt(i-1).AvgPointsAllowed,2)</td>
-                        <td>
-                            <a href="top-opponents/@Rankings.ElementAt(i-1).TeamId/@Rankings.ElementAt(i-1).Position"> <i class="oi oi-magnifying-glass" /></a>
-                        </td>
+                        @if (activeSeason)
+                        {
+                            <td>
+                                <a href="top-opponents/@Rankings.ElementAt(i-1).TeamId/@Rankings.ElementAt(i-1).Position"> <i class="oi oi-magnifying-glass" /></a>
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
@@ -87,11 +94,16 @@
 
     private bool loading { get; set; } = false;
     private bool shouldRender;
+    private bool activeSeason = false;
 
     private TableSort tableSort = new();
     private Formatter format = new();
 
     protected override bool ShouldRender() => shouldRender;
+    protected override async Task OnInitializedAsync()
+    {
+        activeSeason = await operationsService.ActiveSeasonRequest();
+    }
 
     public void SetPosition(ChangeEventArgs args)
     {
