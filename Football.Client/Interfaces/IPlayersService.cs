@@ -21,5 +21,7 @@ namespace Football.Client.Interfaces
         Task<List<int>?> GetWeeklyDataSeasonsRequest();
         Task<List<WeeklyDataModel>?> GetWeeklyDataByPlayerRequest(string position, string playerId, string season);
         Task<List<WeeklyFantasyModel>?> GetWeeklyFantasyByPlayerRequest(string playerId, string season);
+        Task<List<BackupQuarterbackModel>?> GetCurrentBackupQuarterbacksRequest();
+        Task<int> UpdateCurrentBackupQuarterbacksRequest(List<int> playerIds);
     }
 }

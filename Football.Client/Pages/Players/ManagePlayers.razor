@@ -27,7 +27,7 @@
 @if (players.Any() && Position != "Rookies")
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
-    <button class="button-22" role="button" @onclick="PlayersInactivated">
+    <button class="button-22" role="button" @onclick="UpdatePlayers">
         Update
     </button>
 }
@@ -122,6 +122,10 @@ else if (players.Any())
                 <tr>
                     <th>Name</th>
                     <th>Inactivate</th>
+                    @if (PositionEnum == "QB")
+                    {
+                        <th>Backup</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -138,6 +142,18 @@ else if (players.Any())
                             <input type="checkbox" checked=@Checked
                                    @onchange="eventArgs => { CheckboxClicked(p.PlayerId); }" />
                         </td>
+                        @if (PositionEnum == "QB")
+                        {
+                            bool backupChecked = false;
+                            if (updatedBackups.Contains(p.PlayerId))
+                            {
+                                backupChecked = false;
+                            }
+                            <td>
+                                <input type="checkbox" checked=@backupChecked
+                                       @onchange="eventArgs => { BackupsCheckboxClicked(p.PlayerId); }" />
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
@@ -181,13 +197,16 @@ else if (rookies.Any())
     private bool badRequestError;
     private bool loading { get; set; }
     private int count = 0;
-    int playersUpdated { get; set; }
+    private int playersUpdated { get; set; }
+    private int backupsUpdated { get; set; }
 
     private List<SimplePlayerModel>? players = new();
+    private List<BackupQuarterbackModel>? backups;
+
     public string Position { get; set; } = "Quarterback";
     public string PositionEnum { get; set; } = "QB";
-    List<int> inactivePlayers = [];   
-
+    List<int> inactivePlayers = [];
+    List<int> updatedBackups = [];
     bool addRookie { get; set; } = false;
     bool rookieAdded { get; set; } = false;
     bool youTriedToAddRookie { get; set; } = false;
@@ -204,7 +223,10 @@ else if (rookies.Any())
         players?.Clear();
         rookies?.Clear();
         inactivePlayers.Clear();
+        backups?.Clear();
+        updatedBackups.Clear();
         playersUpdated = 0;
+        backupsUpdated = 0;
         addRookie = false;
         rookieAdded = false;
         youTriedToAddRookie = false;
@@ -216,29 +238,39 @@ else if (rookies.Any())
         shouldRender = true;
         players?.Clear();            
         inactivePlayers.Clear();
+        backups?.Clear();
+        updatedBackups.Clear();
+        playersUpdated = 0;
+        backupsUpdated = 0;
 
         if (Position.ToLower() != "rookies")
         {
             PositionEnum = form.SetPosition(Position);
             players = await playerService.GetSimplePlayersRequest(activeOnly: true, position: PositionEnum);
+            backups = PositionEnum == "QB" ? await playerService.GetCurrentBackupQuarterbacksRequest() : null;
+            if (backups != null) updatedBackups.AddRange(backups.Select(b => b.PlayerId));
             loading = false;
             shouldRender = true;
         }
         else
         {
+            backups = null;
             await GetRookies();
             loading = false;
             shouldRender = true;
         }
     }
 
-    public async Task PlayersInactivated()
+    public async Task UpdatePlayers()
     {
         loading = true;
         playersUpdated = 0;
+        backupsUpdated = 0;
         playersUpdated = await playerService.InactivatePlayersRequest(inactivePlayers);
+        backupsUpdated = backups != null ? await playerService.UpdateCurrentBackupQuarterbacksRequest(updatedBackups) : 0;
         loading = false;
         players?.Clear();
+        backups?.Clear();
         await GetPlayers();
         shouldRender = true;
     }
@@ -260,6 +292,11 @@ else if (rookies.Any())
         else inactivePlayers.Add(playerId);
     }
 
+    private void BackupsCheckboxClicked(int playerId)
+    {
+        if (updatedBackups.Contains(playerId)) updatedBackups.Remove(playerId);
+        else updatedBackups.Add(playerId);
+    }
     private void AddRookie()
     {
         addRookie = !addRookie;

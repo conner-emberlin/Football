@@ -276,8 +276,21 @@ namespace Football.Players.Repository
 
         public async Task<IEnumerable<BackupQuarterback>> GetBackupQuarterbacks(int season)
         {
-            var query = "SELECT * FROM [dbo].BackupQuarterback WHERE [Season] = @season";
+            var query = $@"SELECT * FROM [dbo].BackupQuarterback WHERE [Season] = @season";
             return await dbConnection.QueryAsync<BackupQuarterback>(query, new { season });
+        }
+
+        public async Task<int> PostBackupQuarterbacks(List<BackupQuarterback> backups)
+        {
+            var query = $@"INSERT INTO [dbo].BackupQuarterback (Season, PlayerId) VALUES (@Season, @PlayerId)";
+            return await dbConnection.ExecuteAsync(query, backups);
+        }
+
+        public async Task<int> DeleteAllBackupQuarterbacks(int season)
+        {
+            var query = $@"DELETE FROM [dbo].BackupQuarterback 
+                            WHERE [Season] = @season";                            
+            return await dbConnection.ExecuteAsync(query, new { season });
         }
             
     }
