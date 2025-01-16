@@ -9,12 +9,14 @@ External APIs
 3. ESPN: https://gist.github.com/akeaswaran/b48b02f1c94f873c6655e7129910fc3b
 4. Sleeper: https://docs.sleeper.com/
 
+
 Adding new Season Adjustment
 1. Add enum value to Football.Enums.Adjustment.cs
 2. Add record to AdjustmentDescription SQL table
-3. Alter SeasonAdjustments SQL table - Add new INT column NameAdjustment default to 0
+3. Alter SeasonAdjustments SQL table - Add new bit column NameAdjustment default to 0
 4. Add new column name to Football.Models.SeasonAdjustment class
-5. Add column to UploadSeasonAdjustments method in SettingsRepository 
-6. Add method to AdjustmentService.cs to calculate adjustment
-7. Add if statement to PositionSeasonProjectionAdjustments method in AdjustmentService
-8. Alter SeasonAdjustments table in ManageSettings.razor
+5. Add new column name to Football.Shared.Models.Operations.SeasonAdjustmentModel class
+6. Add column to UploadSeasonAdjustments method in SettingsRepository. 
+7. Add method to AdjustmentService.cs to calculate adjustment
+8. Add if statement to XXSeasonProjectionAdjustments method in AdjustmentService where XX is the position related to the adjustment
+9. Alter SeasonAdjustments table in ManageSettings.razor
