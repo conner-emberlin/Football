@@ -64,6 +64,21 @@ namespace Football.Projections.Services
             }
             return adjustments;
         }
+
+        private async Task<Dictionary<int, double>> BackupQuarterbackAdjustment(IEnumerable<SeasonProjection> seasonProjections, List<(int, string)> adjustmentTracker)
+        {
+            Dictionary<int, double> adjustments = [];
+            var backupQuarterbacks = await playerService.GetBackupQuarterbacks(_season.CurrentSeason);
+            foreach (var s in seasonProjections)
+            {
+                if (backupQuarterbacks.Any(b => b.PlayerId == s.PlayerId))
+                {
+                    adjustments.Add(s.PlayerId, -s.ProjectedPoints);
+                    adjustmentTracker.Add((s.PlayerId, Adjustment.BackupQuarterback.ToString()));
+                }
+            }
+            return adjustments;
+        }
         private async Task<Dictionary<int, double>> QuarterbackChangeAdjustment(IEnumerable<SeasonProjection> seasonProjections, Dictionary<int, QuarterbackChange> qbChanges, Tunings tunings, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
@@ -448,6 +463,7 @@ namespace Football.Projections.Services
             List<(int, string)> adjustmentTracker = []; 
 
             if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames, adjustmentTracker));
+            if (seasonAdjustments.BackupQuarterbackAdjustment) adjustments.Add(await BackupQuarterbackAdjustment(seasonProjections, adjustmentTracker));
             if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames, adjustmentTracker));
             if (seasonAdjustments.VeteranQBonNewTeamAdjustment) adjustments.Add(await VeteranQBOnNewTeamAdjustment(seasonProjections, allTeamChanges.Where(t => t.Position == Position.QB), tunings, adjustmentTracker));
 

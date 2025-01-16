@@ -66,7 +66,8 @@ namespace Football
                             LeadRBPromotionAdjustment, 
                             EliteRookieWRTopTargetAdjustment, 
                             PreviousSeasonBackupQuarterbackAdjustment,
-                            SharedReceivingDutiesAdjustment)
+                            SharedReceivingDutiesAdjustment,
+                            BackupQuarterbackAdjustment)
                         VALUES (
                             @Season,
                             @InjuryAdjustment,
@@ -78,7 +79,8 @@ namespace Football
                             @LeadRBPromotionAdjustment, 
                             @EliteRookieWRTopTargetAdjustment, 
                             @PreviousSeasonBackupQuarterbackAdjustment,
-                            @SharedReceivingDutiesAdjustment)";
+                            @SharedReceivingDutiesAdjustment
+                            @BackupQuarterbackAdjustment)";
             return await dbConnection.ExecuteAsync(query, adjustments) > 0;
         }
 

@@ -47,6 +47,7 @@ namespace Football.Models
         public bool EliteRookieWRTopTargetAdjustment { get; set; }
         public bool PreviousSeasonBackupQuarterbackAdjustment { get; set; }
         public bool SharedReceivingDutiesAdjustment { get; set; }
+        public bool BackupQuarterbackAdjustment { get; set; }
     }
     public class Tunings
     {

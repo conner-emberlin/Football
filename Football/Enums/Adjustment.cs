@@ -12,6 +12,7 @@ namespace Football.Enums
         LeadRBPromotion,
         EliteRookieWRTopTarget,
         PreviousSeasonBackupQuarterback,
-        SharedReceivingDuties
+        SharedReceivingDuties,
+        BackupQuarterback
     }
 }
