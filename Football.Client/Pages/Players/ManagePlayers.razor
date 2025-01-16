@@ -24,7 +24,7 @@
 <button class="button-22" role="button" @onclick="GetPlayers">
     Submit
 </button>
-@if (players.Any() && Position != "Rookies")
+@if (filteredPlayers.Any() && Position != "Rookies")
 {
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <button class="button-22" role="button" @onclick="UpdatePlayers">
@@ -108,9 +108,13 @@ else if(Position== "Rookies")
     <div class="spinner"></div>
 }
 
-else if (players.Any())
+else if (players.Count > 0)
 {
-
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
+    <EditForm model="this" OnSubmit="HandleSearch">
+        <TextBoxName @bind-Value="this.Value" />
+    </EditForm>
     <div style="height:10px;font-size:1px;">&nbsp;</div>
     <div class="table_container">
         <table class="base_table">
@@ -125,7 +129,7 @@ else if (players.Any())
                 </tr>
             </thead>
             <tbody>
-                @foreach (var p in players)
+                @foreach (var p in filteredPlayers)
                 {                    
                     bool Checked = false;
                     if (inactivePlayers.Contains(p.PlayerId))
@@ -195,8 +199,11 @@ else if (rookies.Any())
     private int count = 0;
     private int playersUpdated { get; set; }
     private int backupsUpdated { get; set; }
+    private string Value { get; set; } = "";
 
     private List<SimplePlayerModel>? players = new();
+    private List<SimplePlayerModel> filteredPlayers = [];
+
     private List<BackupQuarterbackModel>? backups;
 
     public string Position { get; set; } = "Quarterback";
@@ -217,6 +224,8 @@ else if (rookies.Any())
     {
         Position = args.Value.ToString();
         players?.Clear();
+        filteredPlayers.Clear();
+        Value = "";
         rookies?.Clear();
         inactivePlayers.Clear();
         backups?.Clear();
@@ -232,7 +241,8 @@ else if (rookies.Any())
     {
         loading = true;
         shouldRender = true;
-        players?.Clear();            
+        players?.Clear();
+        filteredPlayers.Clear();
         inactivePlayers.Clear();
         backups?.Clear();
         updatedBackups.Clear();
@@ -241,6 +251,7 @@ else if (rookies.Any())
         {
             PositionEnum = form.SetPosition(Position);
             players = await playerService.GetSimplePlayersRequest(activeOnly: true, position: PositionEnum);
+            filteredPlayers.AddRange(players);
             backups = PositionEnum == "QB" ? await playerService.GetCurrentBackupQuarterbacksRequest() : null;
             if (backups != null) updatedBackups.AddRange(backups.Select(b => b.PlayerId));
             loading = false;
@@ -265,6 +276,7 @@ else if (rookies.Any())
         backupsUpdated = backups != null ? await playerService.UpdateCurrentBackupQuarterbacksRequest(updatedBackups) : 0;
         loading = false;
         players?.Clear();
+        filteredPlayers.Clear();
         backups?.Clear();
         await GetPlayers();
         shouldRender = true;
@@ -305,6 +317,22 @@ else if (rookies.Any())
         youTriedToAddRookie = false;
         shouldRender = true;
     }
+
+    private void HandleSearch()
+    {
+        filteredPlayers.Clear();
+
+        if (!string.IsNullOrEmpty(Value))
+        {
+            filteredPlayers = players.Where(m => m.Name.ToLower().Contains(Value.ToLower())).ToList();
+            shouldRender = true;
+        }
+        else
+        {
+            filteredPlayers.AddRange(players);
+        }
+    }
+
 }
 
 
