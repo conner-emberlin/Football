@@ -79,7 +79,7 @@ namespace Football
                             @LeadRBPromotionAdjustment, 
                             @EliteRookieWRTopTargetAdjustment, 
                             @PreviousSeasonBackupQuarterbackAdjustment,
-                            @SharedReceivingDutiesAdjustment
+                            @SharedReceivingDutiesAdjustment,
                             @BackupQuarterbackAdjustment)";
             return await dbConnection.ExecuteAsync(query, adjustments) > 0;
         }

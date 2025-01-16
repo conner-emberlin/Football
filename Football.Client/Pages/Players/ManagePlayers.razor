@@ -100,16 +100,12 @@ else if(Position== "Rookies")
 @if (playersUpdated > 0)
 {
     <text> @playersUpdated players inactivated</text>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
 }
-<div style="height:10px;font-size:1px;">&nbsp;</div>
 
 @if (loading)
 {
     <div class="spinner"></div>
-}
-@if (badRequestError)
-{
-    <p>Unexpected Error. Please try again.</p>
 }
 
 else if (players.Any())
@@ -147,7 +143,7 @@ else if (players.Any())
                             bool backupChecked = false;
                             if (updatedBackups.Contains(p.PlayerId))
                             {
-                                backupChecked = false;
+                                backupChecked = true;
                             }
                             <td>
                                 <input type="checkbox" checked=@backupChecked
@@ -240,8 +236,6 @@ else if (rookies.Any())
         inactivePlayers.Clear();
         backups?.Clear();
         updatedBackups.Clear();
-        playersUpdated = 0;
-        backupsUpdated = 0;
 
         if (Position.ToLower() != "rookies")
         {
@@ -264,6 +258,7 @@ else if (rookies.Any())
     public async Task UpdatePlayers()
     {
         loading = true;
+        shouldRender = true;
         playersUpdated = 0;
         backupsUpdated = 0;
         playersUpdated = await playerService.InactivatePlayersRequest(inactivePlayers);
