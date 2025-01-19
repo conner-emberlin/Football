@@ -212,6 +212,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(List<PlayerInjuryModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPlayerInjuryHistory([FromRoute] int playerId) => Ok(mapper.Map<List<PlayerInjuryModel>>(await playersService.GetPlayerInjuryHistory(playerId)));
 
+        [HttpGet("injury-concerns")]
+        [ProducesResponseType(typeof(List<InjuryConcernsModel>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetInjuryConcerns() => Ok(mapper.Map<List<InjuryConcernsModel>>(await playersService.GetInjuryConcerns(_season.CurrentSeason)));
+
         [HttpGet("backup-quarterbacks")]
         [ProducesResponseType(typeof(List<BackupQuarterbackModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetBackupQuarterbacks() => Ok(mapper.Map<List<BackupQuarterbackModel>>(await playersService.GetBackupQuarterbacks(_season.CurrentSeason)));

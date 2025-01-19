@@ -24,6 +24,7 @@ namespace Football.Client.Services
         public async Task<List<WeeklyFantasyModel>?> GetWeeklyFantasyByPlayerRequest(string playerId, string season) => await requests.Get<List<WeeklyFantasyModel>?>(string.Format("/player/weekly-fantasy/{0}/{1}", playerId, season));
         public async Task<List<BackupQuarterbackModel>?> GetCurrentBackupQuarterbacksRequest() => await requests.Get<List<BackupQuarterbackModel>?>("/player/backup-quarterbacks");
         public async Task<int> UpdateCurrentBackupQuarterbacksRequest(List<int> playerIds) => await requests.PutWithBody<int, List<int>>("/player/backup-quarterbacks", playerIds);
+        public async Task<List<InjuryConcernsModel>?> GetInjuryConcernsRequest() => await requests.Get<List<InjuryConcernsModel>?>("/player/injury-concerns");
         public async Task<List<SimplePlayerModel>?> GetSimplePlayersRequest(bool activeOnly = false, string position = "")
         {
             var path = "/player/data/players";

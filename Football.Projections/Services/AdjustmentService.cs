@@ -35,7 +35,7 @@ namespace Football.Projections.Services
         private async Task<Dictionary<int, double>> InjuryAdjustment(IEnumerable<SeasonProjection> seasonProjections, int seasonGames, List<(int, string)> adjustmentTracker)
         {
             Dictionary<int, double> adjustments = [];
-            var playerInjuries = (await playerService.GetPlayerInjuries(_season.CurrentSeason)).ToDictionary(i => i.PlayerId, i => i.Games);
+            var playerInjuries = (await playerService.GetInjuryConcerns(_season.CurrentSeason)).ToDictionary(i => i.PlayerId, i => i.Games);
             foreach(var s in seasonProjections)
             {
                 if (playerInjuries.TryGetValue(s.PlayerId, out var games))

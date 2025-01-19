@@ -195,6 +195,7 @@ namespace Football.Api
             CreateMap<PlayerWeeklyProjectionAnalysis, PlayerWeeklyProjectionAnalysisModel>();
             CreateMap<SeasonInfo, SeasonInfoModel>().ReverseMap();
             CreateMap<BackupQuarterback, BackupQuarterbackModel>();
+            CreateMap<InSeasonInjury, InSeasonInjuryModel>().ReverseMap();
         }
 
     }

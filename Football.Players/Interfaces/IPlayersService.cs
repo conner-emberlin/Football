@@ -14,7 +14,7 @@ namespace Football.Players.Interfaces
         Task<Player> RetrievePlayer(string name, Position position, bool activatePlayer = false);
         Task<int> InactivatePlayers(List<int> playerIds);
         Task<int> ActivatePlayer(int playerId);
-        Task<List<InjuryConcerns>> GetPlayerInjuries(int season);
+        Task<List<InjuryConcerns>> GetInjuryConcerns(int season);
         Task<List<PlayerInjury>> GetPlayerInjuries();
         Task<List<PlayerInjury>> GetPlayerInjuryHistory(int playerId);
         Task<List<InSeasonInjury>> GetActiveInSeasonInjuries(int season);

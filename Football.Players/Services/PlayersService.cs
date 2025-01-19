@@ -47,7 +47,7 @@ namespace Football.Players.Services
         }
         public Task<List<Rookie>> GetHistoricalRookies(int currentSeason, string position) => playersRepository.GetHistoricalRookies(currentSeason, position);
         public Task<List<Rookie>> GetCurrentRookies(int currentSeason, string position) => playersRepository.GetCurrentRookies(currentSeason, position);
-        public Task<List<InjuryConcerns>> GetPlayerInjuries(int season) => playersRepository.GetPlayerInjuries(season);
+        public Task<List<InjuryConcerns>> GetInjuryConcerns(int season) => playersRepository.GetPlayerInjuries(season);
         public Task<List<Suspensions>> GetPlayerSuspensions(int season) => playersRepository.GetPlayerSuspensions(season);
         public Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season) => playersRepository.GetSeasonProjections(playerIds, season);
         public Task<double> GetWeeklyProjection(int season, int week, int playerId) => playersRepository.GetWeeklyProjection(season, week, playerId);

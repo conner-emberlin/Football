@@ -3,7 +3,6 @@ using Football.Models;
 using Football.Players.Models;
 using Football.Projections.Interfaces;
 using Microsoft.Extensions.Options;
-using Serilog;
 
 namespace Football.Projections.Services
 {
