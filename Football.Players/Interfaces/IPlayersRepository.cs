@@ -16,6 +16,7 @@ namespace Football.Players.Interfaces
         Task<bool> DeleteInjuryConcern(int season, int playerId);
         Task<List<PlayerInjury>> GetPlayerInjuryHistory(int playerId);
         Task<List<Suspensions>> GetPlayerSuspensions(int season);
+        Task<bool> DeletePlayerSuspension(int season, int playerId);
         Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season);
         Task<double> GetWeeklyProjection(int season, int week, int playerId);
         Task<int> GetCurrentWeek(int season);

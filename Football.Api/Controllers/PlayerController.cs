@@ -214,7 +214,7 @@ namespace Football.Api.Controllers
 
         [HttpGet("injury-concerns")]
         [ProducesResponseType(typeof(List<InjuryConcernsModel>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetInjuryConcerns() 
+        public async Task<IActionResult> GetInjuryConcernsAndSuspensions() 
         {
             var injuryConcerns = mapper.Map<List<InjuryConcernsModel>>(await playersService.GetInjuryConcerns(_season.CurrentSeason));
             var suspensions = mapper.Map<List<InjuryConcernsModel>>(await playersService.GetPlayerSuspensions(_season.CurrentSeason));
@@ -238,8 +238,8 @@ namespace Football.Api.Controllers
         public async Task<IActionResult> DeleteInjuryConcern([FromRoute] int playerId, [FromQuery] bool isSuspension = false) 
         {
             if (!isSuspension) return Ok(await playersService.DeleteInjuryConcern(_season.CurrentSeason, playerId));
-            else return Ok(false);
-
+            
+            return Ok(playersService.DeletePlayerSuspension(_season.CurrentSeason, playerId));
         } 
 
         [HttpGet("backup-quarterbacks")]

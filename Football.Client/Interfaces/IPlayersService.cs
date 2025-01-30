@@ -24,6 +24,6 @@ namespace Football.Client.Interfaces
         Task<List<BackupQuarterbackModel>?> GetCurrentBackupQuarterbacksRequest();
         Task<int> UpdateCurrentBackupQuarterbacksRequest(List<int> playerIds);
         Task<List<InjuryConcernsModel>?> GetInjuryConcernsRequest();
-        Task<bool> DeleteInjuryConcernRequest(int playerId);
+        Task<bool> DeleteInjuryConcernRequest(int playerId, bool isSuspension = false);
     }
 }

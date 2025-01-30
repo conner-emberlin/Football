@@ -99,7 +99,13 @@ namespace Football.Players.Repository
                             WHERE [Season] = @season";                            
             return (await dbConnection.QueryAsync<Suspensions>(query, new { season })).ToList();
         }
-
+        public async Task<bool> DeletePlayerSuspension(int season, int playerId)
+        {
+            var query = $@"DELETE FROM [dbo].Suspensions
+                            WHERE [Season] = @season
+                                    AND [PlayerId] = @playerId";
+            return (await dbConnection.ExecuteAsync(query, new { season, playerId })) > 0;
+        }
         public async Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season)
         {
             var query = $@"SELECT [PlayerId], [ProjectedPoints]

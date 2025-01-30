@@ -23,6 +23,7 @@ namespace Football.Players.Interfaces
         Task<int> PostInSeasonInjury(InSeasonInjury injury);
         Task<bool> UpdateInjury(InSeasonInjury injury);
         Task<List<Suspensions>> GetPlayerSuspensions(int season);
+        Task<bool> DeletePlayerSuspension(int season, int playerId);
         Task<List<InSeasonTeamChange>> GetInSeasonTeamChanges();
         Task<int> PostInSeasonTeamChange(InSeasonTeamChange teamChange);
         Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season);
