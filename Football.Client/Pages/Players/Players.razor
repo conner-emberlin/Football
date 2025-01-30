@@ -6,6 +6,7 @@
 @using Football.Shared.Models.Players;
 
 @inject IPlayersService playersService;
+@inject IOperationsService operationsService;
 @inject NavigationManager NavigationManager
 
 @if (players.Any())
@@ -51,18 +52,29 @@ else if (!loading && !playerSelected)
     </button>
     </td>
     <td>&nbsp;</td>
+    @if (activeSeason)
+    {
     <td>
     <button class="button-22" role="button" @onclick="@(()=>NavigationManager.NavigateTo("/Injuries"))">
         Manage Injuries
     </button>
-        </td>
+    </td>
     <td>&nbsp;</td>
     <td>
-            <button class="button-22" role="button" @onclick="@(()=>NavigationManager.NavigateTo("/TeamChanges"))">
+        <button class="button-22" role="button" @onclick="@(()=>NavigationManager.NavigateTo("/TeamChanges"))">
         Manage Team Changes
     </button>
-        </td>
-    </tr>
+    </td>
+    }
+    else
+    {
+     <td>
+    <button class="button-22" role="button" @onclick="@(()=>NavigationManager.NavigateTo("/InjuryConcerns"))">
+        Manage Injury Concerns
+    </button>
+    </td>       
+    }
+        </tr>
 }
 @if(!playerSelected && showTrending && trendingPlayers != null)
 {
@@ -722,7 +734,7 @@ else if (!loading && !playerSelected)
                             @foreach (var stat in playerData.SeasonData)
                             {
                                 <tr>
-                                    @if (weeklyDataSeasons.Contains(stat.Season))
+                                    @if (weeklyDataSeasons != null && weeklyDataSeasons.Contains(stat.Season))
                                     {
                                         var link = string.Format("/player-weekly-data/{0}/{1}/{2}", stat.Position, stat.PlayerId, stat.Season);
                                         <td><a class="page-links" href=@link> @stat.Season</a></td>
@@ -820,7 +832,7 @@ else if (!loading && !playerSelected)
                             @foreach (var stat in playerData.SeasonData)
                             {
                                 <tr>
-                                    @if (weeklyDataSeasons.Contains(stat.Season))
+                                    @if (weeklyDataSeasons != null && weeklyDataSeasons.Contains(stat.Season))
                                     {
                                         var link = string.Format("/player-weekly-data/{0}/{1}/{2}", stat.Position, stat.PlayerId, stat.Season);
                                         <td><a class="page-links" href=@link> @stat.Season</a></td>
@@ -911,6 +923,7 @@ else if (!loading && !playerSelected)
     private bool showTrending { get; set; } = false;
     private bool showWeekly { get; set; } = true;
     private bool showSeason { get; set; } = true;
+    private bool activeSeason = false;
 
     private List<SimplePlayerModel>? players { get; set; } = new();
     private List<SimplePlayerModel>? filteredPlayers { get; set; }     
@@ -925,6 +938,7 @@ else if (!loading && !playerSelected)
     {
         loading = true;
         shouldRender = true;
+        activeSeason = await operationsService.ActiveSeasonRequest();
         players = (await playersService.GetSimplePlayersRequest()).OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
         if (!String.IsNullOrEmpty(id))
         {

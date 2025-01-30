@@ -73,11 +73,18 @@ namespace Football.Players.Repository
                         AND [Position] = @position";
             return (await dbConnection.QueryAsync<Rookie>(query, new { currentSeason, position })).ToList();
         }
-        public async Task<List<InjuryConcerns>> GetPlayerInjuries(int season)
+        public async Task<List<InjuryConcerns>> GetInjuryConcerns(int season)
         {
             var query = $@"SELECT * FROM [dbo].InjuryConcerns
                         WHERE [Season] = @season";
             return (await dbConnection.QueryAsync<InjuryConcerns>(query, new { season })).ToList();
+        }
+        public async Task<bool> DeleteInjuryConcern(int season, int playerId)
+        {
+            var query = $@"DELETE FROM [dbo].InjuryConcerns
+                            WHERE [Season] = @Season
+                                AND [PlayerId] = @PlayerId";
+            return (await dbConnection.ExecuteAsync(query, new { season, playerId })) > 0;
         }
 
         public async Task<List<PlayerInjury>> GetPlayerInjuryHistory(int playerId)

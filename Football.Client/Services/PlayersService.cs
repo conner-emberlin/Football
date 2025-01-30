@@ -25,6 +25,7 @@ namespace Football.Client.Services
         public async Task<List<BackupQuarterbackModel>?> GetCurrentBackupQuarterbacksRequest() => await requests.Get<List<BackupQuarterbackModel>?>("/player/backup-quarterbacks");
         public async Task<int> UpdateCurrentBackupQuarterbacksRequest(List<int> playerIds) => await requests.PutWithBody<int, List<int>>("/player/backup-quarterbacks", playerIds);
         public async Task<List<InjuryConcernsModel>?> GetInjuryConcernsRequest() => await requests.Get<List<InjuryConcernsModel>?>("/player/injury-concerns");
+        public async Task<bool> DeleteInjuryConcernRequest(int playerId) => await requests.Delete<bool>(string.Format("/player/injury-concern/{0}", playerId));
         public async Task<List<SimplePlayerModel>?> GetSimplePlayersRequest(bool activeOnly = false, string position = "")
         {
             var path = "/player/data/players";
