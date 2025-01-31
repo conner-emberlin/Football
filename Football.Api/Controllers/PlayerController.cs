@@ -236,7 +236,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteInjuryConcern([FromRoute] int playerId, [FromQuery] bool isSuspension = false) 
         {
-            return isSuspension ? Ok(playersService.DeletePlayerSuspension(_season.CurrentSeason, playerId))
+            return isSuspension ? Ok(await playersService.DeletePlayerSuspension(_season.CurrentSeason, playerId))
                                 : Ok(await playersService.DeleteInjuryConcern(_season.CurrentSeason, playerId));
         }
 
