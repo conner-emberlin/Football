@@ -86,7 +86,12 @@ namespace Football.Players.Repository
                                 AND [PlayerId] = @PlayerId";
             return (await dbConnection.ExecuteAsync(query, new { season, playerId })) > 0;
         }
-
+        public async Task<bool> PostInjuryConcern(InjuryConcerns concern)
+        {
+            var query = $@"INSERT INTO [dbo].InjuryConcerns (PlayerId, Season, Games)
+                            VALUES (@PlayerId, @Season, @Games)";
+            return (await dbConnection.ExecuteAsync(query, concern)) > 0;
+        }
         public async Task<List<PlayerInjury>> GetPlayerInjuryHistory(int playerId)
         {
             var query = $@"SELECT * FROM [dbo].InSeasonInjuries
@@ -105,6 +110,12 @@ namespace Football.Players.Repository
                             WHERE [Season] = @season
                                     AND [PlayerId] = @playerId";
             return (await dbConnection.ExecuteAsync(query, new { season, playerId })) > 0;
+        }
+        public async Task<bool> PostPlayerSuspension(Suspensions suspension)
+        {
+            var query = $@"INSERT INTO [dbo].Suspensions (PlayerId, Season, Length)
+                            VALUES (@PlayerId, @Season, @Length)";
+            return (await dbConnection.ExecuteAsync(query, suspension)) > 0;
         }
         public async Task<Dictionary<int, double>> GetSeasonProjections(IEnumerable<int> playerIds, int season)
         {

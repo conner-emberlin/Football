@@ -196,6 +196,11 @@ namespace Football.Api
             CreateMap<SeasonInfo, SeasonInfoModel>().ReverseMap();
             CreateMap<BackupQuarterback, BackupQuarterbackModel>();
             CreateMap<InSeasonInjury, InSeasonInjuryModel>().ReverseMap();
+            CreateMap<InjuryConcerns, InjuryConcernsModel>().ReverseMap();
+            CreateMap<Suspensions, InjuryConcernsModel>()
+                .ForMember(i => i.Suspension, o => o.MapFrom(s => true));
+            CreateMap<InjuryConcernsModel, Suspensions>()
+                .ForMember(i => i.Length, o => o.MapFrom(i => i.Games));
         }
 
     }
