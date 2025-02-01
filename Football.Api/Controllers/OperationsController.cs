@@ -269,8 +269,13 @@ namespace Football.Api.Controllers
         {
             return Ok((await playersService.GetCurrentWeek(_season.CurrentSeason)) > 1);
         }
+
+        [HttpGet("current-season")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        public IActionResult GetCurrentSeason() => Ok(_season.CurrentSeason);
+
     }
- 
+
 
 
 

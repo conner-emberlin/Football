@@ -4,12 +4,13 @@
 @using Football.Client.Interfaces;
 
 @inject IPlayersService playersService;
+@inject IOperationsService operationsService;
 
-<h3>Injury Concerns</h3>
+<h3>Manage Injury Concerns</h3>
 
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 <button class="button-22" role="button" @onclick="Add">
-    New Injury
+    New Injury Concern
 </button>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
 @if (loading)
@@ -51,29 +52,32 @@
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Week Effective</th>
-                        <th>Prior Team</th>
-                        <th>Current Team</th>
+                        <th>Position</th>
+                        <th>Season</th>
+                        <th>Games</th>
+                        <th>Suspension</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>@playerName</td>
+                        <td>@playerPosition</td>
+                        <td>@currentSeason</td>
                         <td>
-                            <input type="text" class="form-control" @bind="@newTeamChange.WeekEffective" />
+                            <input type="text" class="form-control" @bind="@newConcern.Games" />
                         </td>
                         <td>
-                            <input type="text" class="form-control" @bind="@newTeamChange.PreviousTeam" />
-                        </td>
-                        <td>
-                            <input type="text" class="form-control" @bind="@newTeamChange.NewTeam" />
+                            <div class="checkbox-wrapper-23">
+                            <input type="checkbox" id="check-23" checked=@newConcern.Suspension
+                                   @onchange="eventArgs => { CheckboxClicked(newConcern); }" />
+                             </div>
                         </td>
                         <td>
                             <button type="button" class="btn btn-link" @onclick="() => CancellAdd()">
                                 <i class="oi oi-circle-x" />
                             </button>
-                            <button type="button" class="btn btn-link" @onclick="() => AddTeamChange(newTeamChange)">
+                            <button type="button" class="btn btn-link" @onclick="() => AddInjuryConcern(newConcern)">
                                 <i class="oi oi-circle-check" />
                             </button>
                         </td>
@@ -85,26 +89,26 @@
 
 }
 
-else if (teamChanges != null && teamChanges.Count > 0)
+else if (injuryConcerns != null && injuryConcerns.Count > 0)
 {
     <div class="table_container">
         <table class="base_table">
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Week Effective</th>
-                    <th>Prior Team</th>
-                    <th>Current Team</th>
+                    <th>Season</th>
+                    <th>Position</th>
+                    <th>Games</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var tc in teamChanges)
+                @foreach (var c in injuryConcerns)
                 {
                     <tr>
-                        <td>@tc.Name</td>
-                        <td>@tc.WeekEffective</td>
-                        <td>@tc.PreviousTeam</td>
-                        <td>@tc.NewTeam</td>
+                        <td>@c.Name</td>
+                        <td>@c.Season</td>
+                        <td>@c.Position</td>
+                        <td>@FormatGamesColumn(c)</td>
                     </tr>
                 }
             </tbody>
@@ -123,28 +127,31 @@ else if (teamChanges != null && teamChanges.Count > 0)
     private List<SimplePlayerModel>? filteredPlayers { get; set; }
     private string selectedPlayer { get; set; } = "";
     private string playerName { get; set; } = "";
+    private string playerPosition { get; set; } = "";
     private SimplePlayerModel playerSelected { get; set; } = new();
     private bool playerChosen { get; set; } = false;
     private bool adding = false;
 
-    private InSeasonTeamChangeModel newTeamChange = new();
-    private int teamChangeAdded { get; set; }
+    private InjuryConcernsModel newConcern = new();
+    private bool concernAdded { get; set; }
+    private int currentSeason { get; set; }
 
     protected override bool ShouldRender() => shouldRender;
 
     protected override async Task OnInitializedAsync()
     {
         loading = true;
+        currentSeason = await operationsService.GetCurrentSeasonRequest();
         await GetPlayers();
-        await GetTeamChanges();
+        await GetInjuryConcerns();
         loading = false;
         shouldRender = true;
     }
 
-    private async Task GetTeamChanges()
+    private async Task GetInjuryConcerns()
     {
-        teamChanges?.Clear();
-        teamChanges = await playersService.GetInSeasonTeamChangesRequest();
+        injuryConcerns?.Clear();
+        injuryConcerns = await playersService.GetInjuryConcernsRequest();
     }
 
     private void SelectPlayer(SimplePlayerModel player)
@@ -153,9 +160,9 @@ else if (teamChanges != null && teamChanges.Count > 0)
         playerChosen = true;
         playerSelected = player;
         playerName = player.Name;
-
-        newTeamChange.PlayerId = player.PlayerId;
-        newTeamChange.Name = player.Name;
+        playerPosition = player.Position;
+        newConcern.PlayerId = player.PlayerId;
+        newConcern.Season = currentSeason;
         filteredPlayers = null;
         selectedPlayer = playerName;
         StateHasChanged();
@@ -178,7 +185,7 @@ else if (teamChanges != null && teamChanges.Count > 0)
     {
         adding = true;
         selectedPlayer = string.Empty;
-        newTeamChange = new InSeasonTeamChangeModel();
+        newConcern = new InjuryConcernsModel();
         await GetPlayers();
         shouldRender = true;
     }
@@ -186,22 +193,26 @@ else if (teamChanges != null && teamChanges.Count > 0)
     private void CancellAdd()
     {
         adding = false;
-        newTeamChange = new InSeasonTeamChangeModel();
+        newConcern = new InjuryConcernsModel();
         playerChosen = false;
         playerSelected = new SimplePlayerModel();
         playerName = string.Empty;
+        playerPosition = string.Empty;
         shouldRender = true;
     }
 
-    private async Task AddTeamChange(InSeasonTeamChangeModel change)
+    private async Task AddInjuryConcern(InjuryConcernsModel concern)
     {
         adding = false;
         playerChosen = false;
         playerSelected = new SimplePlayerModel();
         playerName = string.Empty;
-        teamChangeAdded = await playersService.PostInSeasonTeamChangesRequest(change);
-        await GetTeamChanges();
+        playerPosition = string.Empty;
+        concernAdded = await playersService.PostInjuryConcernRequest(concern);
+        await GetInjuryConcerns();
     }
 
     private async Task GetPlayers() => allPlayers = (await playersService.GetSimplePlayersRequest(activeOnly: true)).OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
+    private string FormatGamesColumn(InjuryConcernsModel concern) => concern.Suspension ? string.Format("{0} (Suspension)", concern.Games) : concern.Games.ToString();
+    private void CheckboxClicked(InjuryConcernsModel concern) => concern.Suspension = !concern.Suspension;
 }

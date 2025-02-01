@@ -16,5 +16,6 @@ namespace Football.Client.Interfaces
         Task<bool> PostSeasonInfoRequest(SeasonInfoModel seasonInfo);
         Task<SeasonInfoModel?> GetSeasonInfoRequest();
         Task<bool> ActiveSeasonRequest();
+        Task<int> GetCurrentSeasonRequest();
     }
 }
