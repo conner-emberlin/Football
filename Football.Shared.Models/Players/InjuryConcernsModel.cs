@@ -8,5 +8,6 @@
         public int Season { get; set; }
         public double Games { get; set; }
         public bool Suspension { get; set; }
+        public string Detail { get; set; } = "";
     }
 }

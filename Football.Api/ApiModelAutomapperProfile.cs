@@ -199,7 +199,8 @@ namespace Football.Api
             CreateMap<InjuryConcerns, InjuryConcernsModel>().ReverseMap();
             CreateMap<Suspensions, InjuryConcernsModel>()
                 .ForMember(i => i.Suspension, o => o.MapFrom(s => true))
-                .ForMember(i => i.Games, o => o.MapFrom(s => s.Length));
+                .ForMember(i => i.Games, o => o.MapFrom(s => s.Length))
+                .ForMember(i => i.Detail, o => o.MapFrom(s => "Suspension"));
             CreateMap<InjuryConcernsModel, Suspensions>()
                 .ForMember(i => i.Length, o => o.MapFrom(i => i.Games));
         }

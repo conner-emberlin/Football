@@ -5,5 +5,6 @@
         public int PlayerId { get; set; }
         public int Season { get; set; }
         public double Games { get; set; }
+        public string Detail { get; set; } = "";
     }
 }

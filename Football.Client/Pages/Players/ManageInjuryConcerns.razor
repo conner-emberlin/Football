@@ -61,6 +61,7 @@
                         <th>Position</th>
                         <th>Season</th>
                         <th>Games</th>
+                        <th>Detail</th>
                         <th>Suspension</th>
                         <th></th>
                     </tr>
@@ -72,6 +73,9 @@
                         <td>@currentSeason</td>
                         <td>
                             <input type="text" class="form-control" @bind="@newConcern.Games" />
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" @bind="@newConcern.Detail" />
                         </td>
                         <td>
                             <div class="checkbox-wrapper-23">
@@ -105,6 +109,7 @@ else if (injuryConcerns != null && injuryConcerns.Count > 0)
                     <th>Season</th>
                     <th>Position</th>
                     <th>Games</th>
+                    <th>Detail</th>
                     <th></th>
                 </tr>
             </thead>
@@ -115,7 +120,8 @@ else if (injuryConcerns != null && injuryConcerns.Count > 0)
                         <td>@c.Name</td>
                         <td>@c.Season</td>
                         <td>@c.Position</td>
-                        <td>@FormatGamesColumn(c)</td>
+                        <td>@c.Games</td>
+                        <td>@c.Detail</td>
                         <td>
                             <button type="button" style="color:red" class="btn btn-link" @onclick="() => HandleDelete(c.PlayerId, c.Suspension)"> <i sytle="color:red" class="oi oi-x" /></button>
                         </td>
@@ -236,6 +242,5 @@ else if (injuryConcerns != null && injuryConcerns.Count > 0)
     }
 
     private async Task GetPlayers() => allPlayers = (await playersService.GetSimplePlayersRequest(activeOnly: true)).OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
-    private string FormatGamesColumn(InjuryConcernsModel concern) => concern.Suspension ? string.Format("{0} (Suspension)", concern.Games) : concern.Games.ToString();
     private void CheckboxClicked(InjuryConcernsModel concern) => concern.Suspension = !concern.Suspension;
 }

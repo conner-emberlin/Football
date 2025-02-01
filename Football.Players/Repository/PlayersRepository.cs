@@ -88,8 +88,8 @@ namespace Football.Players.Repository
         }
         public async Task<bool> PostInjuryConcern(InjuryConcerns concern)
         {
-            var query = $@"INSERT INTO [dbo].InjuryConcerns (PlayerId, Season, Games)
-                            VALUES (@PlayerId, @Season, @Games)";
+            var query = $@"INSERT INTO [dbo].InjuryConcerns (PlayerId, Season, Games, Detail)
+                            VALUES (@PlayerId, @Season, @Games, @Detail)";
             return (await dbConnection.ExecuteAsync(query, concern)) > 0;
         }
         public async Task<List<PlayerInjury>> GetPlayerInjuryHistory(int playerId)
