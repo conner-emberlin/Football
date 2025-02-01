@@ -13,9 +13,15 @@
     New Injury Concern
 </button>
 <div style="height:10px;font-size:1px;">&nbsp;</div>
+
 @if (loading)
 {
     <div class="spinner"></div>
+}
+@if (recordDeleted)
+{
+    <text>Record deleted.</text>
+    <div style="height:10px;font-size:1px;">&nbsp;</div>
 }
 
 @if (adding)
@@ -99,6 +105,7 @@ else if (injuryConcerns != null && injuryConcerns.Count > 0)
                     <th>Season</th>
                     <th>Position</th>
                     <th>Games</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -109,6 +116,9 @@ else if (injuryConcerns != null && injuryConcerns.Count > 0)
                         <td>@c.Season</td>
                         <td>@c.Position</td>
                         <td>@FormatGamesColumn(c)</td>
+                        <td>
+                            <button type="button" style="color:red" class="btn btn-link" @onclick="() => HandleDelete(c.PlayerId, c.Suspension)"> <i sytle="color:red" class="oi oi-x" /></button>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -131,7 +141,7 @@ else if (injuryConcerns != null && injuryConcerns.Count > 0)
     private SimplePlayerModel playerSelected { get; set; } = new();
     private bool playerChosen { get; set; } = false;
     private bool adding = false;
-
+    private bool recordDeleted;
     private InjuryConcernsModel newConcern = new();
     private bool concernAdded { get; set; }
     private int currentSeason { get; set; }
@@ -156,6 +166,7 @@ else if (injuryConcerns != null && injuryConcerns.Count > 0)
 
     private void SelectPlayer(SimplePlayerModel player)
     {
+        recordDeleted = false;
         selectedPlayer = "";
         playerChosen = true;
         playerSelected = player;
@@ -181,8 +192,20 @@ else if (injuryConcerns != null && injuryConcerns.Count > 0)
         }
     }
 
+    private async Task HandleDelete(int playerId, bool suspension)
+    {
+        recordDeleted = false;
+        loading = true;
+        shouldRender = true;
+        recordDeleted = await playersService.DeleteInjuryConcernRequest(playerId, suspension);
+        await GetInjuryConcerns();
+        loading = false;
+        shouldRender = true;
+    }
+
     private async void Add()
     {
+        recordDeleted = false;
         adding = true;
         selectedPlayer = string.Empty;
         newConcern = new InjuryConcernsModel();
