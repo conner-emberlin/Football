@@ -242,5 +242,18 @@ else if (injuryConcerns != null && injuryConcerns.Count > 0)
     }
 
     private async Task GetPlayers() => allPlayers = (await playersService.GetSimplePlayersRequest(activeOnly: true)).OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
-    private void CheckboxClicked(InjuryConcernsModel concern) => concern.Suspension = !concern.Suspension;
+    private void CheckboxClicked(InjuryConcernsModel concern)
+    {
+        if (concern.Suspension)
+        {
+            concern.Detail = "";
+            concern.Suspension = false;
+        }
+        else
+        {
+            concern.Detail = "Suspension";
+            concern.Suspension = true;
+        }
+        shouldRender = true;
+    }
 }
