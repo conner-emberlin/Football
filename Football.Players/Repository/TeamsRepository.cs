@@ -72,7 +72,16 @@ namespace Football.Players.Repository
 
             return (await dbConnection.QueryAsync<PlayerTeam>(query, new { season, playerId })).FirstOrDefault();
         }
-
+        public async Task<IEnumerable<Player>> GetPlayersWithoutTeams(int season, string position)
+        {
+            var query = $@"SELECT * FROM [dbo].Players p
+                            WHERE [Active] = 1
+                                    AND [Position] = @position
+                                    AND NOT EXISTS (SELECT 1 FROM [dbo].PlayerTeam pt
+                                                      WHERE pt.PlayerId = p.PlayerId
+                                                             AND pt.Season = @season)";
+            return await dbConnection.QueryAsync<Player>(query, new { season, position });
+        }
         public async Task<IEnumerable<PlayerTeam>> GetPlayerTeams(int season, IEnumerable<int> playerIds)
         {
             var query = $@"SELECT * FROM [dbo].PlayerTeam

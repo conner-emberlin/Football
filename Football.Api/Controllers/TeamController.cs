@@ -97,5 +97,15 @@ namespace Football.Api.Controllers
             return Ok(mapper.Map<List<ScheduleModel>>(await teamsService.GetUpcomingGames(teamPlayerId)));
         }
 
+        [HttpGet("players-without-teams/{season}/{position}")]
+        [ProducesResponseType(typeof(List<SimplePlayerModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetPlayersWithoutTeams(int season, string position)
+        {
+            if (!Enum.TryParse(position, out Position posEnum)) return BadRequest();
+
+            return Ok(mapper.Map<List<SimplePlayerModel>>(await teamsService.GetPlayersWithoutTeams(season, posEnum.ToString())));
+        }
+
     }
 }

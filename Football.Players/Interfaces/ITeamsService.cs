@@ -17,6 +17,7 @@ namespace Football.Players.Interfaces
         Task<TeamRecord> GetTeamRecordInDivision(int teamId);
         Task<List<TeamRecord>> GetTeamRecords(int season);
         Task<PlayerTeam?> GetPlayerTeam(int season, int playerId);
+        Task<IEnumerable<Player>> GetPlayersWithoutTeams(int season, string position);
         Task<IEnumerable<PlayerTeam>> GetPlayerTeams(int season, IEnumerable<int> playerIds);
         Task<List<PlayerTeam>> GetPlayersByTeam(string team);
         Task<IEnumerable<PlayerTeam>> GetPlayersByTeamIdAndPosition(int teamId, Position position, int season, bool activeOnly = false);
