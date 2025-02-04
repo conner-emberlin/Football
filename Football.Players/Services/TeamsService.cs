@@ -17,6 +17,7 @@ namespace Football.Players.Services
         public Task<int> GetTeamId(string teamName) => teamsRepository.GetTeamId(teamName);
         public Task<int> GetTeamId(int playerId) => teamsRepository.GetTeamId(playerId);
         public Task<IEnumerable<PlayerTeam>> GetPlayerTeams(int season, IEnumerable<int> playerIds) => teamsRepository.GetPlayerTeams(season, playerIds);
+        public Task<int> PostPlayerTeams(List<PlayerTeam> playerTeams) => teamsRepository.PostPlayerTeams(playerTeams);
         public Task<IEnumerable<Player>> GetPlayersWithoutTeams(int season, string position) => teamsRepository.GetPlayersWithoutTeams(season, position);
         public Task<int> GetTeamIdFromDescription(string teamDescription) => teamsRepository.GetTeamIdFromDescription(teamDescription);
         public Task<List<Schedule>> GetTeamGames(int teamId) => teamsRepository.GetTeamGames(teamId, _season.CurrentSeason);

@@ -89,6 +89,12 @@ namespace Football.Players.Repository
                                 AND [Season] = @season";
             return await dbConnection.QueryAsync<PlayerTeam>(query, new { playerIds, season });
         }
+        public async Task<int> PostPlayerTeams(List<PlayerTeam> playerTeams)
+        {
+            var query = $@"INSERT INTO [dbo].PlayerTeam (PlayerId, Name, Season, Team, TeamId)
+                           VALUES (@PlayerId, @Name, @Season, @Team, @TeamId)";
+            return await dbConnection.ExecuteAsync(query, playerTeams);
+        }
         public async Task<List<PlayerTeam>> GetPlayersByTeam(string team, int season)
         {
             var query = $@"SELECT *

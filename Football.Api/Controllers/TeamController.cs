@@ -3,6 +3,7 @@ using Football.Enums;
 using Football.Fantasy.Interfaces;
 using Football.Models;
 using Football.Players.Interfaces;
+using Football.Players.Models;
 using Football.Shared.Models.Fantasy;
 using Football.Shared.Models.Players;
 using Football.Shared.Models.Teams;
@@ -107,5 +108,11 @@ namespace Football.Api.Controllers
             return Ok(mapper.Map<List<SimplePlayerModel>>(await teamsService.GetPlayersWithoutTeams(season, posEnum.ToString())));
         }
 
+        [HttpPost("player-teams")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        public async Task<IActionResult> PostPlayerTeams([FromBody] List<PlayerTeamModel> playerTeams)
+        {
+            return Ok(await teamsService.PostPlayerTeams(mapper.Map<List<PlayerTeam>>(playerTeams)));
+        }
     }
 }
