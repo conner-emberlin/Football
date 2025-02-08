@@ -7,6 +7,7 @@ namespace Football.Shared.Models.Players
         public int PlayerId { get; set; }
         public string Position { get; set; } = "";
         public string Name { get; set; } = "";   
+        public int Active { get; set; }
         public InSeasonInjuryModel? ActiveInjury { get; set; }
         public List<SeasonDataModel> SeasonData { get; set; } = [];
         public List<WeeklyDataModel> WeeklyData { get; set; } = [];

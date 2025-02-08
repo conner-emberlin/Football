@@ -124,6 +124,10 @@ else if (!loading && !playerSelected)
         {
             <small style="color:red"> (Out: @playerData.ActiveInjury.Description) </small>
         }
+        else if(playerData.Active == 0)
+        {
+            <small style="color:red"> (Inactive) </small>
+        }
     </div>
     @if(!string.IsNullOrEmpty(playerData.Team))
     {
@@ -136,6 +140,12 @@ else if (!loading && !playerSelected)
 
     var season = playerData.WeeklyDataFromPastSeason && playerData.WeeklyData.Count > 0 ? string.Format("({0})", playerData.WeeklyData.First().Season) : string.Empty;
     <div> <b style="color:@form.PositionColor(playerData.Position)">@playerData.Position</b> #@playerData.PositionRank <b>&#x2022;</b> #@playerData.OverallRank Overall <b>&#x2022;</b> Fpts: @playerData.RunningFantasyTotal <b>@season </b></div>
+    @if (playerData.Active == 0)
+    {
+        <div style="height:10px;font-size:1px;">&nbsp;</div>
+        <button class="button-22" role="button" @onclick="HandleActivate"> Activate </button>                       
+    }
+
     @if (playerData.Schedule.Any())
     {
         <div class="parent">
@@ -281,7 +291,7 @@ else if (!loading && !playerSelected)
                             @foreach (var stat in playerData.SeasonData)
                             {
                                 <tr>
-                                    @if (weeklyDataSeasons.Contains(stat.Season))
+                                    @if (weeklyDataSeasons != null && weeklyDataSeasons.Contains(stat.Season))
                                     {
                                         var link = string.Format("/player-weekly-data/{0}/{1}/{2}", stat.Position, stat.PlayerId, stat.Season);
                                         <td><a class="page-links" href=@link> @stat.Season</a></td>
@@ -429,7 +439,7 @@ else if (!loading && !playerSelected)
                             @foreach (var stat in playerData.SeasonData)
                             {
                                 <tr>
-                                    @if (weeklyDataSeasons.Contains(stat.Season))
+                                    @if (weeklyDataSeasons != null && weeklyDataSeasons.Contains(stat.Season))
                                     {
                                         var link = string.Format("/player-weekly-data/{0}/{1}/{2}", stat.Position, stat.PlayerId, stat.Season);
                                         <td><a class="page-links" href=@link> @stat.Season</a></td>
@@ -581,7 +591,7 @@ else if (!loading && !playerSelected)
                             @foreach (var stat in playerData.SeasonData)
                             {
                                 <tr>
-                                    @if (weeklyDataSeasons.Contains(stat.Season))
+                                    @if (weeklyDataSeasons != null && weeklyDataSeasons.Contains(stat.Season))
                                     {
                                         var link = string.Format("/player-weekly-data/{0}/{1}/{2}", stat.Position, stat.PlayerId, stat.Season);
                                         <td><a class="page-links" href=@link> @stat.Season</a></td>
@@ -924,6 +934,7 @@ else if (!loading && !playerSelected)
     private bool showWeekly { get; set; } = true;
     private bool showSeason { get; set; } = true;
     private bool activeSeason = false;
+    private int activated {get; set;}
 
     private List<SimplePlayerModel>? players { get; set; } = new();
     private List<SimplePlayerModel>? filteredPlayers { get; set; }     
@@ -942,7 +953,7 @@ else if (!loading && !playerSelected)
         players = (await playersService.GetSimplePlayersRequest()).OrderByDescending(p => p.Active).ThenBy(p => p.Name).ToList();
         if (!String.IsNullOrEmpty(id))
         {
-            SelectPlayer(int.Parse(id));
+            await SelectPlayer(int.Parse(id));
             id = "";
         }
         else
@@ -960,7 +971,7 @@ else if (!loading && !playerSelected)
         else filteredPlayers = null;
     }
 
-    private async void SelectPlayer(int pid)
+    private async Task SelectPlayer(int pid)
     {
         loading = true;
         showTrending = false;
@@ -977,7 +988,16 @@ else if (!loading && !playerSelected)
 
         StateHasChanged();
     }
-
+    private async Task HandleActivate()
+    {
+        loading = true;
+        var playerId = playerData != null ? playerData.PlayerId : 0;
+        playerData = null;
+        activated = playerId > 0 ? await playersService.ActivatePlayerRequest(playerId.ToString()) : 0;
+        await SelectPlayer(playerId);
+        loading = false;
+        StateHasChanged();
+    }
     private void ShowWeekly() => showWeekly = !showWeekly;
     private void ShowSeason() => showSeason = !showSeason;
 }

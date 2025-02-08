@@ -127,6 +127,10 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         public async Task<IActionResult> InactivatePlayers([FromBody] List<int> playerIds) => Ok(await playersService.InactivatePlayers(playerIds));
 
+        [HttpPost("activate/{playerId}")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ActivatePlayer(int playerId) => Ok(await playersService.ActivatePlayer(playerId));
+
         [HttpPost("add-rookie")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

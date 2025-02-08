@@ -13,6 +13,7 @@ namespace Football.Client.Interfaces
         Task<List<SnapCountModel>?> GetSnapCountsRequest(string id);
         Task<List<RookiePlayerModel>?> GetAllRookiesRequest();
         Task<int> InactivatePlayersRequest(List<int> playerIds);
+        Task<int> ActivatePlayerRequest(string playerId);
         Task<int> PostInSeasonInjuryRequest(InSeasonInjuryModel injury);
         Task<List<PlayerInjuryModel>?> GetAllInSeasonInjuriesRequest();
         Task<bool> UpdateInSeasonInjuryRequest(InSeasonInjuryModel injury);
