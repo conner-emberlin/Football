@@ -17,5 +17,7 @@ namespace Football.Client.Interfaces
         Task<List<TeamDepthChartModel>?> GetTeamDepthChartRequest(string teamId);
         Task<List<MatchupRankingModel>?> GetROSMatchupRankingsRequest(string teamId);
         Task<List<ScheduleModel>?> GetUpcomingGamesRequest(int teamPlayerId);
+        Task<List<SimplePlayerModel>?> GetPlayersWithoutTeamsRequest(int season, string position);
+        Task<int> PostPlayerTeamsRequest(List<PlayerTeamModel> playerTeams);
     }
 }

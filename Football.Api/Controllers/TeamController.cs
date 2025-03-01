@@ -112,7 +112,7 @@ namespace Football.Api.Controllers
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PostPlayerTeams([FromBody] List<PlayerTeamModel> playerTeams)
-        {
+        {      
             return Ok(await teamsService.PostPlayerTeams(mapper.Map<List<PlayerTeam>>(playerTeams)));
         }
     }
