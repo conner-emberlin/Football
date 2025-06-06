@@ -50,7 +50,7 @@ namespace Football.Data.Services
         }
         public async Task<int> UploadCurrentTeams(int season, Position position)
         {
-            var url = string.Format("https://www.fantasypros.com/nfl/projections/{0}.php?week=draft", position);
+            var url = string.Format("https://www.fantasypros.com/nfl/projections/{0}.php?week=1&scoring=PPR", position.ToString().ToLower());
             var str = scraperService.ScrapeData(url, _scraping.FantasyProsXPath);
             var players = await playerService.GetPlayersByPosition(position, true);
             var playerTeams = await scraperService.ParseFantasyProsPlayerTeam(str, position.ToString());

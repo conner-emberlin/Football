@@ -352,6 +352,7 @@ namespace Football.Projections.Services
                 var previousQB = (await statisticsService.GetSeasonDataByTeamIdAndPosition<SeasonDataQB>(pc.Value.PreviousTeamId, Position.QB, _season.CurrentSeason - 1))
                                       .OrderByDescending(s => s.Games).First().PlayerId;
                 var newQBs = await teamsService.GetPlayersByTeamIdAndPosition(pc.Value.CurrentTeamId, Position.QB, _season.CurrentSeason, true);
+                if (!newQBs.Any()) continue;
                 var newQB = (await playerService.GetSeasonProjections(newQBs.Select(n => n.PlayerId), _season.CurrentSeason)).OrderByDescending(q => q.Value).First().Key;
 
                 distinctQuarterbackChanges.Add(new QuarterbackChange
@@ -369,8 +370,10 @@ namespace Football.Projections.Services
         private async Task<IEnumerable<QuarterbackChange>> GetChangeRecordsForCurrentTeam(TeamChange change, List<Rookie> currentRookies, Tunings tunings)
         {
             var QBsOnNewTeam = (await teamsService.GetPlayersByTeamIdAndPosition(change.CurrentTeamId, Position.QB, _season.CurrentSeason, true)).Select(p => p.PlayerId);
-            var qbProjection = (await playerService.GetSeasonProjections(QBsOnNewTeam, _season.CurrentSeason)).OrderByDescending(q => q.Value).First();
-            if (qbProjection.Key == change.PlayerId)
+            var qbProjections = await playerService.GetSeasonProjections(QBsOnNewTeam, _season.CurrentSeason);
+            if (qbProjections.Count == 0) return [];
+            var topQbProjection = qbProjections.OrderByDescending(q => q.Value).First();
+            if (topQbProjection.Key == change.PlayerId)
             {
                 var newPassCatchers = await GetPassCatchers(change.CurrentTeamId, tunings);
                 if (newPassCatchers.Any())

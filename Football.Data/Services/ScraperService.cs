@@ -447,13 +447,13 @@ namespace Football.Data.Services
                             Week = int.Parse(split[0]),
                             Day = split[1],
                             Date = FormatDate(split[2]),
-                            Time = split[3],
-                            Winner = split[4],
+                            Time = split[8],
+                            Winner = split[3],
                             HomeIndicator = split[5],
                             Loser = split[6],
-                            WinnerPoints = gameScores ? int.TryParse(split[8], out var wp) ? wp : 0 : 0,
-                            LoserPoints =  gameScores  ? int.TryParse(split[9], out var lp) ? lp : 0 : 0,
-                            WinnerYards =  gameScores  ? int.TryParse(split[10], out var wy) ? wy : 0 : 0,
+                            WinnerPoints = gameScores ? int.TryParse(split[9], out var wp) ? wp : 0 : 0,
+                            LoserPoints =  gameScores  ? int.TryParse(split[10], out var lp) ? lp : 0 : 0,
+                            WinnerYards =  gameScores  ? int.TryParse(split[11], out var wy) ? wy : 0 : 0,
                             LoserYards = gameScores ? int.TryParse(split[12], out var ly) ? ly : 0 : 0
                         });
                     }
