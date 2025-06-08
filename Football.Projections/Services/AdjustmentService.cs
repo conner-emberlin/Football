@@ -478,7 +478,7 @@ namespace Football.Projections.Services
             List<Dictionary<int, double>> adjustments = [];
             List<(int, string)> adjustmentTracker = [];
 
-            var qbChanges = (await GetQuarterbackChanges(allTeamChanges, tunings)).ToDictionary(q => q.PlayerId);
+            var qbChanges = seasonAdjustments.QuarterbackChangeAdjustment ? (await GetQuarterbackChanges(allTeamChanges, tunings)).ToDictionary(q => q.PlayerId) : [];
 
             if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames, adjustmentTracker));
             if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames, adjustmentTracker));
@@ -495,7 +495,7 @@ namespace Football.Projections.Services
             List<Dictionary<int, double>> adjustments = [];
             List<(int, string)> adjustmentTracker = [];
 
-            var qbChanges = (await GetQuarterbackChanges(allTeamChanges, tunings)).ToDictionary(q => q.PlayerId);
+            var qbChanges = seasonAdjustments.QuarterbackChangeAdjustment ? (await GetQuarterbackChanges(allTeamChanges, tunings)).ToDictionary(q => q.PlayerId) : [];
 
             if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames, adjustmentTracker));
             if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames, adjustmentTracker));
@@ -512,7 +512,7 @@ namespace Football.Projections.Services
             List<Dictionary<int, double>> adjustments = [];
             List<(int, string)> adjustmentTracker = [];
 
-            var qbChanges = (await GetQuarterbackChanges(allTeamChanges, tunings)).ToDictionary(q => q.PlayerId);
+            var qbChanges = seasonAdjustments.QuarterbackChangeAdjustment ? (await GetQuarterbackChanges(allTeamChanges, tunings)).ToDictionary(q => q.PlayerId) : [];
 
             if (seasonAdjustments.InjuryAdjustment) adjustments.Add(await InjuryAdjustment(seasonProjections, seasonGames, adjustmentTracker));
             if (seasonAdjustments.SuspensionAdjustment) adjustments.Add(await SuspensionAdjustment(seasonProjections, seasonGames, adjustmentTracker));
